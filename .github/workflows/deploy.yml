@@ -1,0 +1,18 @@
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4         # récupère ton code
+      - uses: docker/setup-buildx-action@v3 # prépare Docker builder
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # clé auto fournie
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .                      # dossier racine
+          push: true                      # push l’image vers GHCR
+          platforms: linux/amd64
+          tags: ghcr.io/ludov-garneau/reservation-ludov:latest
