@@ -4,7 +4,7 @@ on:
     branches: [ main ]
 
 env:
-  REGISTRY: 72.60.124.92:5000
+  REGISTRY: 72-60-124-92.sslip.io
   IMAGE_NAME: web
   IMAGE_TAG: ${{ github.sha }}
 
