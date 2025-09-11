@@ -4,7 +4,7 @@ on:
     branches: [ main ]
 
 env:
-  REGISTRY: 72-60-124-92.sslip.io
+  REGISTRY: registry.72-60-124-92.sslip.io
   IMAGE_NAME: web
   IMAGE_TAG: ${{ github.sha }}
 
@@ -65,7 +65,7 @@ jobs:
             set -e
             export REGISTRY=${{ env.REGISTRY }}
             export IMAGE_TAG=${{ env.IMAGE_TAG }}
-            cd /root/app
+            cd /opt/ludoReservation
             # login (utile si le serveur a besoin d’auth pour pull)
             docker login $REGISTRY -u '${{ secrets.REGISTRY_USERNAME }}' -p '${{ secrets.REGISTRY_PASSWORD }}'
             IMAGE_TAG=$IMAGE_TAG docker compose pull web
