@@ -1,26 +1,110 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-primary: #02dcde;
+  --color-secondary: #e6e6e6;
+  --color-black: #1f2124;
+  --color-white: #f1f2f3;
+
+  --radius-lg: 16px;
+  --radius-sm: 10px;
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, .12);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-black: var(--color-black);
+  --color-white: var(--color-white);
+
+  --font-body: var(--font-body);
+  --font-titles: var(--font-titles);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--color-white);
+  color: var(--color-black);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-titles);
+  line-height: 1.15;
+  letter-spacing: .2px;
+  color: var(--color-black);
+}
+
+h1 {
+  font-weight: 700;
+}
+
+h2,
+h3 {
+  font-weight: 600;
+}
+
+.container-page {
+  width: min(1200px, 92vw);
+  margin-inline: auto;
+}
+
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+:where(.p-button) {
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  border: none;
+  color: var(--color-black);
+}
+
+:where(.p-button:hover) {
+  filter: brightness(0.95);
+}
+
+:where(.p-inputtext) {
+  border-radius: var(--radius-sm);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.bg-primary {
+  background: var(--color-primary);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-muted {
+  color: color-mix(in srgb, var(--color-black) 70%, white 30%);
 }
