@@ -11,17 +11,6 @@
   --shadow-card: 0 10px 30px rgba(0, 0, 0, .12);
 }
 
-@theme inline {
-  --color-primary: var(--color-primary);
-  --color-secondary: var(--color-secondary);
-  --color-black: var(--color-black);
-  --color-white: var(--color-white);
-
-  --font-body: var(--font-body);
-  --font-titles: var(--font-titles);
-}
-
-
 *,
 *::before,
 *::after {
@@ -107,4 +96,22 @@ html {
 
 .text-muted {
   color: color-mix(in srgb, var(--color-black) 70%, white 30%);
+}
+
+.background-white {
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+.background-black {
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-secondary {
+  color: var(--color-secondary);
 }
