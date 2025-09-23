@@ -22,7 +22,7 @@ jobs:
         run: npm run lint
 
       - name: Run Vitest tests with coverage
-        run: npm test -- --ci
+        run: npx vitest run
 
       - name: Build check
         env:
