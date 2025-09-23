@@ -17,8 +17,8 @@ export default function Footer() {
             <Image
               src="/images/LUDOV-logo-texte.png"
               alt="LUDOV"
-              width={1526}
-              height={742}
+              width={1010}
+              height={247}
               className="w-[128px] h-auto"
             />
           </h1>

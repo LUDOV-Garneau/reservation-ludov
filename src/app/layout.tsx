@@ -29,9 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${inter.variable} ${nunito.variable}`}>
-      <body className="background-black font-body">
-        {/* <Header /> */}
-        {children}
+      <body className="background-white font-body flex flex-col min-h-screen">
+        <Header />
+        <div className="bg-[#e5e3e3] grow">{children}</div>
         <Footer />
       </body>
     </html>
