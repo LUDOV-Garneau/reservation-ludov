@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Nunito } from "next/font/google";
 import "./globals.css";
-import PrimeSSRProvider from "../../prime-ssr-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${nunito.variable}`}>
       <body className="bg-background min-h-screen font-body">
-        <PrimeSSRProvider>{children}</PrimeSSRProvider>
+        {children}
       </body>
     </html>
   );
