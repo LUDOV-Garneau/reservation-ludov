@@ -1,7 +1,7 @@
 name: PR CI
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   ci:
@@ -13,16 +13,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: "npm"
 
-      - name: Install
+      - name: Install dependencies
         run: npm ci
 
-      - name: Lint
+      - name: Lint code
         run: npm run lint
 
-      - name: Test
-        run: npm test -- --ci
+      - name: Run Vitest tests with coverage
+        run: npx vitest run
 
       - name: Build check
         env:
