@@ -10,9 +10,13 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.23.21",
+    "input-otp": "^1.4.2",
+    "ldrs": "^1.1.7",
     "lucide-react": "^0.544.0",
     "mysql2": "^3.15.0",
     "next": "15.5.2",
