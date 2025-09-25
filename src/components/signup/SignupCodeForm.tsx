@@ -1,6 +1,5 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import {
@@ -45,7 +44,7 @@ export default function SignupCodeForm({ onNext, onBack }: { onNext: () => void;
 
         </div>
 
-        <Button type="submit" className="w-full bg-cyan-300 hover:bg-cyan-500 disabled:bg-cyan-900" disabled={code.length !== 6}>
+        <Button type="submit" className="w-full bg-cyan-300 hover:bg-cyan-500 disabled:bg-cyan-900" disabled={code.length !== 6 || /[^0-9]/.test(code)}>
           Vérifier le code
         </Button>
       </form>
