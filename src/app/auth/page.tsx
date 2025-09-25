@@ -20,7 +20,7 @@ export default function AuthPage() {
 
   return (
     <div className="my-20 fixed inset-0 overflow-hidden">
-      <div className="bg-[white] w-fit mx-auto md:px-40 sm:px-20 px-6 py-10 text-center flex flex-col justify-center rounded-4xl border-2 border-gray-300 shadow-lg">
+      <div className="bg-[white] w-fit mx-auto md:px-40 sm:px-20 px-6 py-10 text-center flex flex-col justify-center rounded-4xl shadow-lg">
         <AnimatePresence mode="wait">
           {mode === "login" && (
             <motion.div

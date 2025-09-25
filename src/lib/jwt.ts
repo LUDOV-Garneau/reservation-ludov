@@ -8,7 +8,7 @@ if (!process.env.JWT_SECRET) {
 const SECRET_KEY = process.env.JWT_SECRET;
 
 export function signToken(payload: object): string {
-  return jwt.sign(payload, SECRET_KEY, { expiresIn: "1d" });
+  return jwt.sign(payload, SECRET_KEY, { expiresIn: "7d" });
 }
 
 export function verifyToken(token: string): JwtPayload | null {

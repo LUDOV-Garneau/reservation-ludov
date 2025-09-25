@@ -6,11 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm({ onSignup }: { onSignup: () => void }) {
+  const router = useRouter();
+
   const [isLoading, setIsLoading] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertErrorMessage, setAlertErrorMessage] = useState("");
+  const [globalError, setGlobalError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     email: "",
@@ -56,6 +60,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setGlobalError(null);
 
     const newErrors = {
       email: validateField("email", formData.email),
@@ -72,9 +77,25 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
 
     try {
       setIsLoading(true);
-      // appel backend ex: await auth.login(formData.email, formData.password)
-      console.log("Tentative connexion :", formData);
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
       setIsLoading(false);
+      if (response.status === 401) {
+        setGlobalError("Votre courriel ou votre mot de passe est invalide.");
+        return;
+      } else if (response.status != 200) {
+        setGlobalError("Une erreur s'est produite.");
+        return;
+      }
+      router.push("/");
     } catch (e) {
       setIsLoading(false);
       setShowErrorAlert(true);
@@ -100,7 +121,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         noValidate
         method="POST"
         onSubmit={handleSubmit}
-        className="mt-10 space-y-10"
+        className="mt-10 space-y-8"
       >
         <div className="flex flex-col gap-3">
           <Label htmlFor="email">Courriel</Label>
@@ -134,6 +155,10 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
           )}
         </div>
 
+        {globalError != null && (
+          <p className="text-red-500 text-sm">{globalError}</p>
+        )}
+
         <Button
           type="submit"
           disabled={!formData.email || !formData.password || isLoading}
@@ -147,7 +172,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         variant={"black"}
         type="button"
         onClick={onSignup}
-        className="mt-10 inline-block text-sm w-full"
+        className="mt-4 inline-block text-sm w-full"
       >
         Première connexion ?
       </Button>

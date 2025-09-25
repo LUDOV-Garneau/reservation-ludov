@@ -1,21 +1,18 @@
-"use client";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { User } from "@/types/user";
 import { UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useState } from "react";
+import { User } from "@/types";
+import Cookies from "js-cookie";
 
 export default function Header() {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    async function getConnectedUser() {
-      const activeSession = localStorage.getItem("SESSION");
-
-      if (!activeSession) {
+    async function fetchUser() {
+      const token = Cookies.get("SESSION");
+      if (!token) {
         setUser(null);
-        router.push("/auth");
         return;
       }
 
@@ -23,7 +20,7 @@ export default function Header() {
         const res = await fetch("/api/user", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${activeSession}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -33,12 +30,12 @@ export default function Header() {
         } else {
           setUser(null);
         }
-      } catch (error) {
+      } catch {
         setUser(null);
       }
     }
 
-    getConnectedUser();
+    fetchUser();
   }, []);
 
   return (
@@ -51,19 +48,10 @@ export default function Header() {
           height={247}
           className="w-[128px] h-auto"
         />
-        {user ? (
-          <div className="flex items-center gap-4">
-            <UserIcon color="black" size={24} fill="black" />
-            <p>{user.name}</p>
-          </div>
-        ) : (
-          <a
-            href="#"
-            className="border-2 border-black rounded-4xl px-4 py-2 hover:bg-[#02dcde] transition-all duration-300"
-          >
-            Connexion
-          </a>
-        )}
+        <div className="flex items-center gap-4">
+          <UserIcon color="black" size={24} fill="black" />
+          <p>{user?.name || "user"}</p>
+        </div>
       </header>
     </div>
   );
