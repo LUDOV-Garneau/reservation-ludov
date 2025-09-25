@@ -1,11 +1,12 @@
 "use client";
-
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { User } from "@/types/user";
 import { UserIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -14,6 +15,7 @@ export default function Header() {
 
       if (!activeSession) {
         setUser(null);
+        router.push("/auth");
         return;
       }
 
@@ -40,7 +42,7 @@ export default function Header() {
   }, []);
 
   return (
-    <div className="background-white">
+    <div className="bg-[white]">
       <header className="md:px-[60px] px-6 py-[30px] mx-auto w-full max-w-7xl flex justify-between items-center">
         <Image
           src="/images/LUDOV-logo-texte.png"

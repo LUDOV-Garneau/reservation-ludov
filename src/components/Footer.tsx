@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export default function Footer() {
   return (
-    <div className="background-white overflow-x-clip overflow-y-hidden">
+    <div className="bg-[white] overflow-x-clip overflow-y-hidden">
       <footer className="relative md:px-[60px] px-6 py-[30px] mx-auto w-full max-w-7xl">
         <Image
           src="/images/LUDOV-logo.png"

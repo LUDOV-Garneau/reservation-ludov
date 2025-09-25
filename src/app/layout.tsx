@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Nunito } from "next/font/google";
-import "./globals.css";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import "@/app/globals.css";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,11 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${inter.variable} ${nunito.variable}`}>
-      <body className="background-white font-body flex flex-col min-h-screen">
-        <Header />
-        <div className="bg-[#e5e3e3] grow">{children}</div>
-        <Footer />
-      </body>
+      <body className="font-body">{children}</body>
     </html>
   );
 }
