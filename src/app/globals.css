@@ -130,6 +130,12 @@ h3 {
 
 .container-page {
   width: min(1200px, 92vw);
+  margin: 0 auto;
+  width: 90%;
+}
+
+.container-page-reservation {
+  max-width: 1500px;
   margin-inline: auto;
 }
 
@@ -221,13 +227,4 @@ html {
 
 button:hover {
   cursor: pointer;
-}
-
-
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-  &::-webkit-scrollbar {
-    display: none;  /* Chrome, Safari, Opera*/
-  }
 }

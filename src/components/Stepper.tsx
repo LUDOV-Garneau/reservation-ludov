@@ -25,9 +25,8 @@ export default function Stepper({ currentStep = 1, onStepChange }: StepperProps)
     
     return (
         <div className="w-full py-4 sm:py-8">
-            <div className="overflow-x-auto px-4">
+            <div className="overflow-x-auto px-4 py-3">
                 <div className="flex items-center justify-between relative min-w-max" style={{ minWidth: '800px' }}>
-                    {/* Ligne de progression */}
                     <div className="absolute top-6 left-0 right-0 h-1 bg-gray-200 -z-10">
                         <div 
                             className="h-full bg-cyan-400 transition-all duration-300 ease-in-out"
@@ -43,7 +42,6 @@ export default function Stepper({ currentStep = 1, onStepChange }: StepperProps)
 
                         return (
                             <div key={index} className="flex flex-col items-center relative">
-                                {/* Cercle de l'étape */}
                                 <button
                                     onClick={() => handleStepClick(index)}
                                     disabled={stepNumber > activeStep && !isCompleted}
@@ -68,7 +66,6 @@ export default function Stepper({ currentStep = 1, onStepChange }: StepperProps)
                                     )}
                                 </button>
                                 
-                                {/* Label de l'étape */}
                                 <span className={`
                                     mt-2 text-xs text-center max-w-32 leading-tight px-2
                                     ${isActive ? 'text-cyan-600 font-medium' : 

@@ -28,10 +28,14 @@ export default function Home() {
           </BreadcrumbList>
         </Breadcrumb>
       </div>
-      <div className="m-10">
+      <div className="mx-5 text-3xl decoration-cyan-400 underline underline-offset-8 md:hidden">
+        <h1>Nouvelle réservation</h1>
+      </div>
+      <div className="mb-10">
         <Stepper/>
       </div>
       <div className="container-page">
+        <h1 className="hidden md:inline-block text-4xl md:text-5xl underline underline-offset-8 decoration-3 decoration-cyan-400">Nouvelle réservation</h1>
       </div>
     </div>
   )
