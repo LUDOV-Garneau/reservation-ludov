@@ -15,6 +15,7 @@ export default function SignupEmailForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
     console.log("Envoyer code à :", email);
     onNext();
   };
