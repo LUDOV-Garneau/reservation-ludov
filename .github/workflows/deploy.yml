@@ -28,7 +28,7 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
         run: |
           npm run lint
-          npm test -- --ci
+          npx vitest run
           npm run build
 
       - name: Set up Buildx

@@ -3,7 +3,6 @@ import { Inter, Nunito } from "next/font/google";
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
-import PrimeSSRProvider from "../../prime-ssr-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,11 +30,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${inter.variable} ${nunito.variable}`}>
       <body className="background-white font-body flex flex-col min-h-screen">
-        <PrimeSSRProvider>
-          <Header />
-          <div className="bg-[#e5e3e3] grow">{children}</div>
-          <Footer />
-        </PrimeSSRProvider>
+        <Header />
+        <div className="bg-[#e5e3e3] grow">{children}</div>
+        <Footer />
       </body>
     </html>
   );
