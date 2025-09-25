@@ -21,7 +21,7 @@ export default function SignupCodeForm({ onNext, onBack }: { onNext: () => void;
   return (
     <div className="md:mx-auto md:w-[50%]">
       <h1 className="text-6xl font-semibold">Code unique</h1>
-      <h2 className="mt-5">Veuillez entrer le code unique qui vous à été envoyé par courriel</h2>
+      <h2 className="mt-5">Veuillez entrer le code unique qui vous a été envoyé par courriel</h2>
 
       <form onSubmit={handleSubmit} className="mt-10 space-y-10">
         <div className="flex flex-col gap-3">
