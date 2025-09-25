@@ -1,21 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import Image from "next/image"
-import { Search } from "lucide-react"
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import Image from "next/image";
+import { Search } from "lucide-react";
 
 interface Console {
-  id: string
-  name: string
-  image: string
+  id: number;
+  name: string;
+  available: number;
+  image: string;
 }
 
 interface ConsoleSelectionGridProps {
-  consoles: Console[]
-  selectedId: string | null
-  onSelect: (c: Console) => void
+  consoles: Console[];
+  selectedId: number | null;
+  onSelect: (c: Console) => void;
 }
 
 export default function ConsoleSelectionGrid({
@@ -23,11 +24,11 @@ export default function ConsoleSelectionGrid({
   selectedId,
   onSelect,
 }: ConsoleSelectionGridProps) {
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState("");
 
   const filtered = consoles.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())
-  )
+  );
 
   return (
     <div className="space-y-4">
@@ -67,5 +68,5 @@ export default function ConsoleSelectionGrid({
         ))}
       </div>
     </div>
-  )
+  );
 }

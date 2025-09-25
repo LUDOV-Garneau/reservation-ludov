@@ -1,21 +1,26 @@
-"use client"
+"use client";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import Image from "next/image"
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface SelectedConsoleCardProps {
-  console: { id: string; name: string; image: string } | null
-  onClear: () => void
+  console: { id: number; name: string; image: string } | null;
+  onClear: () => void;
+  postSelectedConsole: (consoleId: number) => void;
 }
 
-export default function SelectedConsoleCard({ console, onClear }: SelectedConsoleCardProps) {
+export default function SelectedConsoleCard({
+  console,
+  onClear,
+  postSelectedConsole,
+}: SelectedConsoleCardProps) {
   if (!console) {
     return (
       <Card className="p-6 w-full flex items-center justify-center">
         <p>Aucune console sélectionnée</p>
       </Card>
-    )
+    );
   }
 
   return (
@@ -36,8 +41,13 @@ export default function SelectedConsoleCard({ console, onClear }: SelectedConsol
           </button>
         </div>
         <h2 className="text-lg font-semibold text-center">{console.name}</h2>
-        <Button className="w-full">Continuer</Button>
+        <Button
+          onClick={() => postSelectedConsole(console.id)}
+          className="w-full"
+        >
+          Continuer
+        </Button>
       </CardContent>
     </Card>
-  )
+  );
 }
