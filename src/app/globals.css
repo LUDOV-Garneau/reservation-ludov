@@ -171,24 +171,6 @@ html {
   color: color-mix(in srgb, var(--color-black) 70%, white 30%);
 }
 
-.background-white {
-  background-color: var(--color-white);
-  color: var(--color-black);
-}
-
-.background-black {
-  background-color: var(--color-black);
-  color: var(--color-white);
-}
-
-.text-primary {
-  color: var(--color-primary);
-}
-
-.text-secondary {
-  color: var(--color-secondary);
-}
-
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
