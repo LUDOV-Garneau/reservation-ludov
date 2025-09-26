@@ -1,8 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import bcrypt from "bcrypt";
-import { signToken } from "@/lib/jwt";
+import { signToken, verifyToken } from "@/lib/jwt";
 import type { User } from "@/types";
+
+export async function GET(request: NextRequest) {
+  try {
+    const token = request.cookies.get("SESSION")?.value;
+
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = verifyToken(token);
+
+    return NextResponse.json({ user });
+  } catch {
+    return NextResponse.json({ message: "Invalid token" }, { status: 401 });
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     if (!Array.isArray(rows) || rows.length === 0) {
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Identifiants invalides." },
         { status: 401 }
       );
     }
@@ -25,7 +41,7 @@ export async function POST(request: NextRequest) {
     const passwordMatch = await bcrypt.compare(password, user.password_hash);
     if (!passwordMatch) {
       return NextResponse.json(
-        { message: "Invalid credentials" },
+        { message: "Identifiants invalides." },
         { status: 401 }
       );
     }
@@ -38,12 +54,7 @@ export async function POST(request: NextRequest) {
     });
 
     const response = NextResponse.json({
-      user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        isAdmin: user.isAdmin,
-      },
+      message: "Utilisateur connecté avec succès!",
     });
 
     response.cookies.set({
@@ -58,6 +69,9 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Une erreur s'est produite." },
+      { status: 500 }
+    );
   }
 }

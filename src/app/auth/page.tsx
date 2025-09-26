@@ -2,15 +2,16 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import LoginForm from "@/components/signup/LoginForm";
-import SignupEmailForm from "@/components/signup/SignupEmailForm";
-import SignupCodeForm from "@/components/signup/SignupCodeForm";
-import SignupPasswordForm from "@/components/signup/SignupPasswordForm";
+import LoginForm from "@/components/auth/LoginForm";
+import SignupEmailForm from "@/components/auth/SignupEmailForm";
+import SignupCodeForm from "@/components/auth/SignupCodeForm";
+import SignupPasswordForm from "@/components/auth/SignupPasswordForm";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<
     "login" | "signup-step1" | "signup-step2" | "signup-step3"
   >("login");
+  const [email, setEmail] = useState<string>("");
 
   const variants = {
     initial: { opacity: 0, x: 50 },
@@ -39,7 +40,10 @@ export default function AuthPage() {
               transition={{ duration: 0.4 }}
             >
               <SignupEmailForm
-                onNext={() => setMode("signup-step2")}
+                onNext={(email: string) => {
+                  setEmail(email);
+                  setMode("signup-step2");
+                }}
                 onBack={() => setMode("login")}
               />
             </motion.div>
@@ -52,6 +56,7 @@ export default function AuthPage() {
               transition={{ duration: 0.4 }}
             >
               <SignupCodeForm
+                email={email}
                 onNext={() => setMode("signup-step3")}
                 onBack={() => setMode("signup-step1")}
               />
@@ -65,6 +70,7 @@ export default function AuthPage() {
               transition={{ duration: 0.4 }}
             >
               <SignupPasswordForm
+                email={email}
                 onDone={() => setMode("login")}
                 onBack={() => setMode("signup-step2")}
               />

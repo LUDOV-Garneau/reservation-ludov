@@ -1,42 +1,22 @@
 import Image from "next/image";
 import { UserIcon } from "lucide-react";
-import { useEffect } from "react";
-import { useState } from "react";
-import { User } from "@/types";
-import Cookies from "js-cookie";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
+import LogoutButton from "./auth/LogoutButton";
 
-export default function Header() {
-  const [user, setUser] = useState<User | null>(null);
+export default async function Header() {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("SESSION");
 
-  useEffect(() => {
-    async function fetchUser() {
-      const token = Cookies.get("SESSION");
-      if (!token) {
-        setUser(null);
-        return;
-      }
-
-      try {
-        const res = await fetch("/api/user", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (res.ok) {
-          const userData = await res.json();
-          setUser(userData);
-        } else {
-          setUser(null);
-        }
-      } catch {
-        setUser(null);
-      }
+  let user = null;
+  try {
+    const token = sessionCookie?.value;
+    if (token != undefined) {
+      user = verifyToken(token);
     }
-
-    fetchUser();
-  }, []);
+  } catch (e) {}
 
   return (
     <div className="bg-[white]">
@@ -48,10 +28,7 @@ export default function Header() {
           height={247}
           className="w-[128px] h-auto"
         />
-        <div className="flex items-center gap-4">
-          <UserIcon color="black" size={24} fill="black" />
-          <p>{user?.name || "user"}</p>
-        </div>
+        <LogoutButton name={user?.name} />
       </header>
     </div>
   );

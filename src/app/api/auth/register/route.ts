@@ -1,32 +1,73 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import bcrypt from "bcrypt";
+import { RowDataPacket } from "mysql2";
 
-export async function POST(request: NextRequest) {
+type ValidEmailRow = RowDataPacket & { validEmail: number };
+
+export async function GET(request: NextRequest) {
   try {
-    const { email, password, name } = await request.json();
+    const { searchParams } = new URL(request.url);
+    const email = searchParams.get("email");
 
-    const [existingUser] = await pool.query(
-      "SELECT id FROM users WHERE email = ?",
+    const [rows] = await pool.query<ValidEmailRow[]>(
+      "SELECT COUNT(*) as valid_email FROM users WHERE email = ? AND password = ''",
       [email]
     );
 
-    if (Array.isArray(existingUser) && existingUser.length > 0) {
+    if (rows[0].valid_email == 0) {
       return NextResponse.json(
-        { message: "User already exists" },
-        { status: 409 }
+        { message: "Courriel invalide." },
+        { status: 401 }
+      );
+    } else {
+      return NextResponse.json(
+        { message: "Courriel valide." },
+        { status: 200 }
+      );
+    }
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Une erreur s'est produite." },
+      { status: 500 }
+    );
+  }
+}
+
+type PwdRow = RowDataPacket & { hasPassword: boolean };
+
+export async function POST(request: NextRequest) {
+  try {
+    const { email, password } = await request.json();
+
+    const [rows] = await pool.query<PwdRow[]>(
+      "SELECT password != '' AS has_password FROM users WHERE email = ?",
+      [email]
+    );
+
+    const hasPassword = rows[0]?.has_password === 1;
+    if (hasPassword) {
+      return NextResponse.json(
+        { message: "Cet utilisateur est déjà enregistré." },
+        { status: 400 }
       );
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    await pool.query(
-      "INSERT INTO users (email, password_hash, name) VALUES (?, ?, ?)",
-      [email, passwordHash, name]
-    );
+    await pool.query("UPDATE users SET password = ? WHERE email = ?", [
+      passwordHash,
+      email,
+    ]);
 
-    return NextResponse.json({ message: "User registered" }, { status: 201 });
+    return NextResponse.json(
+      { message: "Mot de passe créé avec succès!" },
+      { status: 201 }
+    );
   } catch (error) {
-    return NextResponse.json({ message: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Une erreur s'est produite." },
+      { status: 500 }
+    );
   }
 }

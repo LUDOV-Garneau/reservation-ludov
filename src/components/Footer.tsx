@@ -42,7 +42,7 @@ export default function Footer() {
 
         <div className="relative z-10 md:text-center mx-auto">
           <a
-            href="https://www.dukelon.com/"
+            href="https://www.cegepgarneau.ca/programmes/tous-les-programmes/informatique/"
             target="_blank"
             className="opacity-70 hover:opacity-100 transition-all duration-300"
           >

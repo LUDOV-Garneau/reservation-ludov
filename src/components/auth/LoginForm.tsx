@@ -3,8 +3,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -12,8 +10,6 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
   const router = useRouter();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
-  const [alertErrorMessage, setAlertErrorMessage] = useState("");
   const [globalError, setGlobalError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
@@ -70,8 +66,6 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
     setErrors(newErrors);
 
     if (Object.values(newErrors).some((error) => error)) {
-      setShowErrorAlert(true);
-      setAlertErrorMessage("Veuillez corriger les erreurs du formulaire.");
       return;
     }
 
@@ -91,15 +85,18 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
       if (response.status === 401) {
         setGlobalError("Votre courriel ou votre mot de passe est invalide.");
         return;
-      } else if (response.status != 200) {
-        setGlobalError("Une erreur s'est produite.");
+      } else if (!response.ok) {
+        setGlobalError(
+          "Une erreur s'est produite lors de la connexion. Veuillez réessayer ultérieurement."
+        );
         return;
       }
       router.push("/");
     } catch (e) {
       setIsLoading(false);
-      setShowErrorAlert(true);
-      setAlertErrorMessage((e as Error).message);
+      setGlobalError(
+        "Une erreur s'est produite lors de la connexion. Veuillez réessayer ultérieurement."
+      );
     }
   };
 
@@ -107,22 +104,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
     <div>
       <h1 className="text-6xl font-semibold">Connexion</h1>
 
-      {showErrorAlert && (
-        <Alert variant="destructive" className="text-left my-5">
-          <AlertCircleIcon />
-          <AlertTitle>Erreur</AlertTitle>
-          <AlertDescription>
-            <p>{alertErrorMessage}</p>
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <form
-        noValidate
-        method="POST"
-        onSubmit={handleSubmit}
-        className="mt-10 space-y-8"
-      >
+      <form noValidate onSubmit={handleSubmit} className="mt-10 space-y-4">
         <div className="flex flex-col gap-3">
           <Label htmlFor="email">Courriel</Label>
           <Input
@@ -135,7 +117,9 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
             required
           />
           {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email}</p>
+            <p className="text-red-500 text-sm max-w-80 text-left">
+              {errors.email}
+            </p>
           )}
         </div>
 
@@ -151,12 +135,16 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
             required
           />
           {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password}</p>
+            <p className="text-red-500 text-sm max-w-80 text-left">
+              {errors.password}
+            </p>
           )}
         </div>
 
         {globalError != null && (
-          <p className="text-red-500 text-sm">{globalError}</p>
+          <p className="text-red-500 text-sm max-w-80 text-left">
+            {globalError}
+          </p>
         )}
 
         <Button
