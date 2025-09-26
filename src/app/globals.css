@@ -128,11 +128,6 @@ h3 {
   font-weight: 600;
 }
 
-.container-page {
-  width: min(1200px, 92vw);
-  margin-inline: auto;
-}
-
 .card {
   background: var(--color-white);
   border-radius: var(--radius-lg);
@@ -214,6 +209,7 @@ html {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
