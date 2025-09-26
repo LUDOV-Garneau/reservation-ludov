@@ -1,9 +1,6 @@
 import Image from "next/image";
-import { UserIcon } from "lucide-react";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
 import LogoutButton from "./auth/LogoutButton";
 
 export default async function Header() {
@@ -28,7 +25,7 @@ export default async function Header() {
           height={247}
           className="w-[128px] h-auto"
         />
-        <LogoutButton name={user?.name} />
+        <LogoutButton name={user?.name || ""} />
       </header>
     </div>
   );
