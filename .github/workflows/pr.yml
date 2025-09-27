@@ -27,4 +27,5 @@ jobs:
       - name: Build check
         env:
           NEXT_TELEMETRY_DISABLED: 1
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: npm run build
