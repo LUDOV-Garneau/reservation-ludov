@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { routing } from "@/i18n/routing";
 
 const publicRoutes = ["/auth"];
 
-export function middleware(request: NextRequest) {
+const i18nMiddleware = createMiddleware(routing);
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  const i18nResponse = await i18nMiddleware(request);
+  if (i18nResponse) {
+    return i18nResponse;
+  }
 
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();

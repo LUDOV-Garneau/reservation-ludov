@@ -3,12 +3,14 @@ import { UserIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 interface LogoutButtonProps {
   name: string;
 }
 
 export default function LogoutButton({ name }: LogoutButtonProps) {
+  const t = useTranslations();
   const [isLoading, setIsLoading] = useState(false);
 
   async function logout() {
@@ -44,7 +46,7 @@ export default function LogoutButton({ name }: LogoutButtonProps) {
           disabled={isLoading}
           className="w-fit text-white font-bold bg-red-400 hover:bg-red-300 border-2 border-black"
         >
-          {isLoading ? "Déconnexion..." : "Se déconnecter"}
+          {isLoading ? "Déconnexion..." : t("header.logout")}
         </Button>
       </PopoverContent>
     </Popover>
