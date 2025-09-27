@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${inter.variable} ${nunito.variable}`}>
-      <body className="font-body">{children}</body>
+      <body className="font-body flex flex-col min-h-screen ">{children}</body>
     </html>
   );
 }
