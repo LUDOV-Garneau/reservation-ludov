@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
@@ -14,17 +14,34 @@ interface Console {
 }
 
 interface ConsoleSelectionGridProps {
-  consoles: Console[];
   selectedId: number | null;
   onSelect: (c: Console) => void;
 }
 
 export default function ConsoleSelectionGrid({
-  consoles,
   selectedId,
   onSelect,
 }: ConsoleSelectionGridProps) {
+  const [consoles, setConsoles] = useState<Console[]>([]);
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/consoles");
+        const data = await res.json();
+        const withImages: Console[] = data.map((c: Console) => ({
+          ...c,
+          id: String(c.id),
+          image: "/placeholder_consoles.jpg",
+        }));
+        setConsoles(withImages);
+      } catch (err) {
+        console.error("Erreur fetch consoles :", err);
+      }
+    };
+    load();
+  }, []);
 
   const filtered = consoles.filter((c) =>
     c.name.toLowerCase().includes(search.toLowerCase())

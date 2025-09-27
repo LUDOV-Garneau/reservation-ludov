@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -7,14 +8,15 @@ import Image from "next/image";
 interface SelectedConsoleCardProps {
   console: { id: number; name: string; image: string } | null;
   onClear: () => void;
-  postSelectedConsole: (consoleId: number) => void;
 }
 
 export default function SelectedConsoleCard({
   console,
   onClear,
-  postSelectedConsole,
 }: SelectedConsoleCardProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   if (!console) {
     return (
       <Card className="p-6 w-full flex items-center justify-center">
@@ -22,6 +24,30 @@ export default function SelectedConsoleCard({
       </Card>
     );
   }
+
+    const handlePost = async () => {
+    setIsLoading(true);
+    setError(null);
+
+      try {
+      const res = await fetch("/api/consoles/select-console", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ consoleId: console.id }),
+      });
+
+      setIsLoading(false);
+
+      if (!res.ok) {
+        setError("Impossible d'enregistrer la console sélectionnée.");
+        return;
+      }
+
+    } catch (e) {
+      setIsLoading(false);
+      setError("Erreur réseau, réessayez. " + e);
+    }
+  };
 
   return (
     <Card className="w-full">
@@ -41,11 +67,9 @@ export default function SelectedConsoleCard({
           </button>
         </div>
         <h2 className="text-lg font-semibold text-center">{console.name}</h2>
-        <Button
-          onClick={() => postSelectedConsole(console.id)}
-          className="w-full"
-        >
-          Continuer
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+        <Button onClick={handlePost} disabled={isLoading} className="w-full">
+          {isLoading ? "Envoi..." : "Continuer"}
         </Button>
       </CardContent>
     </Card>

@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const [result] = await pool.query(
-      "UPDATE consoles SET available = 0 WHERE id = ? AND available = 0",
+      "UPDATE consoles SET available = 0 WHERE id = ? AND available = 1",
       [consoleId]
     );
     const updateResult = result as { affectedRows: number };
