@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
-import LogoutButton from "./auth/LogoutButton";
+import HeaderMenu from "@/components/layout/HeaderMenu";
 
 export default async function Header() {
   const cookieStore = await cookies();
@@ -13,7 +13,7 @@ export default async function Header() {
     if (token != undefined) {
       user = verifyToken(token);
     }
-  } catch (e) {}
+  } catch {}
 
   return (
     <div className="bg-[white]">
@@ -25,7 +25,7 @@ export default async function Header() {
           height={247}
           className="w-[128px] h-auto"
         />
-        <LogoutButton name={user?.name || ""} />
+        <HeaderMenu username={user?.name || ""} />
       </header>
     </div>
   );

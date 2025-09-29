@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 export default function SignupPasswordForm({
@@ -13,6 +14,8 @@ export default function SignupPasswordForm({
   onDone: () => void;
   onBack: () => void;
 }) {
+  const t = useTranslations();
+
   const [isLoading, setIsLoading] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
 
@@ -30,15 +33,14 @@ export default function SignupPasswordForm({
     switch (name) {
       case "password":
         if (value === "") {
-          errorMsg = "Veuillez entrer un mot de passe.";
+          errorMsg = t("auth.emptyPassword");
         } else if (value.length < 6) {
-          errorMsg = "Le mot de passe doit contenir au moins 6 caractères.";
+          errorMsg = t("auth.createPassword.invalidPassword");
         }
         break;
       case "confirm-password":
         if (value != password) {
-          errorMsg =
-            "La confirmation de mot de passe doit être identique au mot de passe.";
+          errorMsg = t("auth.createPassword.invalidPasswordConfirmation");
         }
         break;
     }
@@ -81,23 +83,25 @@ export default function SignupPasswordForm({
       });
       setIsLoading(false);
       if (!response.ok) {
-        setGlobalError("Cet utilisateur a déjà un mot de passe.");
+        setGlobalError(t("auth.createPassword.errorAlreadySet"));
         return;
       }
       onDone();
-    } catch (e) {
+    } catch {
       setIsLoading(false);
-      setGlobalError(
-        "Une erreur s'est produite lors de la création de votre mot de passe. Veuillez réessayer ultérieurement."
-      );
+      setGlobalError(t("auth.createPassword.error"));
     }
   };
 
   return (
     <div>
-      <form onSubmit={handleSubmit} className="mt-10 space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className="mt-10 space-y-4 md:w-100"
+      >
         <div className="flex flex-col gap-3">
-          <Label htmlFor="password">Définir un mot de passe</Label>
+          <Label htmlFor="password">{t("auth.createPassword.password")}</Label>
           <Input
             id="password"
             name="password"
@@ -115,7 +119,9 @@ export default function SignupPasswordForm({
         </div>
 
         <div className="flex flex-col gap-3">
-          <Label htmlFor="confirm-password">Confirmer votre mot de passe</Label>
+          <Label htmlFor="confirm-password">
+            {t("auth.createPassword.confirmPassword")}
+          </Label>
           <Input
             id="confirm-password"
             name="confirm-password"
@@ -144,8 +150,8 @@ export default function SignupPasswordForm({
           disabled={!password || !confirmPassword || isLoading}
         >
           {isLoading
-            ? "Enregistrement du mot de passe en cours..."
-            : "Terminer"}
+            ? t("auth.createPassword.finishBtnLoading")
+            : t("auth.createPassword.finishBtn")}
         </Button>
       </form>
 
@@ -154,7 +160,7 @@ export default function SignupPasswordForm({
         onClick={onBack}
         className="mt-4 inline-block text-sm w-full"
       >
-        Retour
+        {t("auth.back")}
       </Button>
     </div>
   );

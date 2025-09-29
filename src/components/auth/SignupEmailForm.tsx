@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function SignupEmailForm({
   onNext,
@@ -11,6 +12,8 @@ export default function SignupEmailForm({
   onNext: (email: string) => void;
   onBack: () => void;
 }) {
+  const t = useTranslations();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -22,7 +25,7 @@ export default function SignupEmailForm({
     switch (name) {
       case "email":
         if (!value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-          errorMsg = "Adresse courriel invalide.";
+          errorMsg = t("auth.invalidEmail");
         }
         break;
     }
@@ -55,15 +58,11 @@ export default function SignupEmailForm({
       );
       if (responseCheckEmail.status == 401) {
         setIsLoading(false);
-        setError(
-          "Cette adresse courriel n'a pas été approuvée par un administrateur ou elle est déjà associée à un compte."
-        );
+        setError(t("auth.signup.invalidCredentials"));
         return;
       } else if (!responseCheckEmail.ok) {
         setIsLoading(false);
-        setError(
-          "Une erreur s'est produite lors de la validation du courriel. Veuillez réessayer ultérieurement."
-        );
+        setError(t("auth.signup.error"));
         return;
       }
 
@@ -79,32 +78,31 @@ export default function SignupEmailForm({
 
       setIsLoading(false);
       if (!response.ok) {
-        setError(
-          "Une erreur s'est produite lors de l'envoi du courriel. Veuillez réessayer ultérieurement."
-        );
+        setError(t("auth.signup.errorSend"));
         return;
       }
 
       onNext(email);
-    } catch (e) {
+    } catch {
       setIsLoading(false);
-      setError(
-        "Une erreur s'est produite lors de l'envoi du courriel. Veuillez réessayer ultérieurement."
-      );
+      setError(t("auth.signup.errorSend"));
     }
   };
 
   return (
     <div>
-      <h1 className="text-6xl font-semibold">Inscription</h1>
+      <h1 className="text-6xl font-semibold">{t("auth.signup.title")}</h1>
       <h2 className="mt-10">
-        Veuillez entrer votre courriel institutionnel <br />
-        afin de recevoir un code unique
+        {t("auth.signup.subTitle1")} <br /> {t("auth.signup.subTitle2")}
       </h2>
 
-      <form onSubmit={handleSubmit} noValidate className="mt-10 space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className="mt-10 space-y-4 md:w-100"
+      >
         <div className="flex flex-col gap-3">
-          <Label htmlFor="email">Courriel</Label>
+          <Label htmlFor="email">{t("auth.email")}</Label>
           <Input
             id="email"
             type="email"
@@ -123,7 +121,9 @@ export default function SignupEmailForm({
           className="w-full bg-cyan-300 hover:bg-cyan-500 disabled:bg-cyan-900"
           disabled={!email || isLoading}
         >
-          {isLoading ? "Envoi du code en cours..." : "Envoyer le code"}
+          {isLoading
+            ? t("auth.signup.sendCodeBtnLoading")
+            : t("auth.signup.sendCodeBtn")}
         </Button>
       </form>
 
@@ -133,7 +133,7 @@ export default function SignupEmailForm({
         onClick={onBack}
         className="mt-4 inline-block text-sm w-full"
       >
-        Se connecter
+        {t("auth.signup.login")}
       </Button>
     </div>
   );

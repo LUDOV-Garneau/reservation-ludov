@@ -23,7 +23,7 @@ export default function LogoutButton({ name }: LogoutButtonProps) {
         console.error("Déconnexion échouée");
       }
       setIsLoading(false);
-    } catch (e) {
+    } catch {
       console.error("Erreur lors de la déconnexion");
       setIsLoading(false);
     }
@@ -46,7 +46,7 @@ export default function LogoutButton({ name }: LogoutButtonProps) {
           disabled={isLoading}
           className="w-fit text-white font-bold bg-red-400 hover:bg-red-300 border-2 border-black"
         >
-          {isLoading ? "Déconnexion..." : t("header.logout")}
+          {isLoading ? t("header.logoutLoading") : t("header.logout")}
         </Button>
       </PopoverContent>
     </Popover>

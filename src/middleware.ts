@@ -1,34 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "@/i18n/routing";
-
-const publicRoutes = ["/auth"];
+import { verifyToken } from "./lib/jwt";
 
 const i18nMiddleware = createMiddleware(routing);
 
-export async function middleware(request: NextRequest) {
+const publicRoutes = ["/auth"];
+
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const i18nResponse = await i18nMiddleware(request);
-  if (i18nResponse) {
-    return i18nResponse;
+  const pathWithoutLocale = pathname.replace(/^\/(fr|en)(?=\/|$)/, "");
+
+  if (publicRoutes.some((route) => pathWithoutLocale.startsWith(route))) {
+    return i18nMiddleware(request);
   }
 
-  if (publicRoutes.some((route) => pathname.startsWith(route))) {
-    return NextResponse.next();
-  }
+  const token = request.cookies.get("SESSION")?.value;
+  const session = verifyToken(token || "");
 
-  const token = request.cookies.get("SESSION");
+  if (!session) {
+    const response = i18nMiddleware(request);
 
-  if (!token) {
+    const locale =
+      response.headers.get("x-middleware-request-params-locale") ??
+      routing.defaultLocale;
+
     const url = request.nextUrl.clone();
-    url.pathname = "/auth";
+    url.pathname = `/${locale}/auth`;
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  return i18nMiddleware(request);
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next|.*\\..*|favicon.ico|robots.txt|images).*)"],
+  runtime: "nodejs",
 };
