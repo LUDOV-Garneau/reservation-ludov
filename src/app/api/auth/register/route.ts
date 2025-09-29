@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const email = searchParams.get("email");
 
     const [rows] = await pool.query<ValidEmailRow[]>(
-      "SELECT COUNT(*) as valid_email FROM users WHERE email = ? AND password = ''",
+      "SELECT COUNT(*) as valid_email FROM users WHERE email = ? AND password IS NULL",
       [email]
     );
 

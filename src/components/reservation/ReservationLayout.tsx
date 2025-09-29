@@ -83,7 +83,7 @@ export default function ReservationLayout() {
   }
 
   return(
-    <div className="min-h-screen">
+    <div className="min-h-screen mt-5">
       <div className="m-5">
         <Breadcrumb>
           <BreadcrumbList>

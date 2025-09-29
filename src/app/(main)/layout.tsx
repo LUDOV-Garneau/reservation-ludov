@@ -9,7 +9,7 @@ export default function MainLayout({
   return (
     <>
       <Header />
-      <main className="bg-[#e5e3e3]">{children}</main>
+      <main>{children}</main>
       <Footer />
     </>
   );
