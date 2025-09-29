@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock9 } from "lucide-react";
+import CarteElement from "./CarteElement";
 
 type Jeu = { nom: string };
 type Console = { nom: string };
@@ -13,7 +14,7 @@ type ConfirmerReservationProps = {
     accessoires?: Accessoire[];
     cours: string;
     date: string;
-    heure: string
+    heure: string;
     onConfirmer: () => void;
 };
 
@@ -26,11 +27,10 @@ export default function ConfirmerReservation({
     heure,
     onConfirmer,
 }: ConfirmerReservationProps) {
-
     return (
         <div className="mx-auto max-w-6xl p-4 md:p-6">
             <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-                <h2 className="text-3xl font-semibold">Sélection du cours</h2>
+                <h2 className="text-3xl font-semibold">Votre réservation</h2>
 
                 <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
                     <div className="flex flex-1 flex-wrap items-center gap-2 sm:flex-none">
@@ -53,78 +53,57 @@ export default function ConfirmerReservation({
                         <Button
                             type="button"
                             onClick={onConfirmer}
-                            className="flex-1 sm:flex-none h-11 w-full bg-cyan-300 text-black hover:bg-cyan-500">
+                            className="flex-1 sm:flex-none h-11 w-full bg-cyan-300 text-black hover:bg-cyan-500"
+                        >
                             Confirmer ma réservation
                         </Button>
                     </div>
                 </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-                <div className="rounded-2xl border bg-white shadow-sm">
-                    <div className="grid grid-cols-1 gap-0 p-4 sm:grid-cols-[260px_1fr] sm:p-6">
-                        <div className="mx-auto w-full max-w-[260px]">
-                            <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gradient-to-b from-neutral-200 to-neutral-300" />
-                        </div>
+            <div className="mb-3 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6">
+                <h3 className="text-xl font-medium">Jeux sélectionnés</h3>
+                <h3 className="text-xl font-medium hidden md:block">Console</h3>
+            </div>
 
-                        <div className="mt-4 sm:mt-0 sm:pl-6">
-                            <h2 className="text-lg font-semibold">
-                                {jeux[0]?.nom ?? "Jeu sélectionné"}
-                            </h2>
-
-                            <div className="mt-4 space-y-4 text-sm leading-6">
-                                <div>
-                                    <p className="font-medium">Description :</p>
-                                    <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
-                                        {jeux.map((j) => (
-                                            <li key={j.nom}>{j.nom}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-
-                                {!!accessoires?.length && (
-                                    <div>
-                                        <p className="font-medium">Matériel requis :</p>
-                                        <ul className="mt-1 list-disc space-y-1 pl-5 text-muted-foreground">
-                                            {accessoires.map((a) => (
-                                                <li key={a.nom}>{a.nom}</li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-
-                                <div>
-                                    <p className="font-medium">Cours :</p>
-                                    <p className="text-muted-foreground">{cours}</p>
-                                </div>
-
-                                <div>
-                                    <Button variant="link" className="px-0">
-                                        Plus de détails sur le jeu
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div className="mb-8 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6 items-start">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    {jeux.map((jeu) => (
+                        <CarteElement
+                            key={jeu.nom}
+                            nom={jeu.nom}
+                        />
+                    ))}
                 </div>
 
-                <div className="rounded-2xl border bg-white shadow-sm">
-                    <div className="grid grid-cols-1 gap-0 p-4 sm:grid-cols-[1fr] sm:p-6">
-                        <div className="mx-auto w-full max-w-[360px]">
-                            <div className="aspect-[3/4] w-full overflow-hidden rounded-xl bg-gradient-to-b from-neutral-200 to-neutral-300" />
-                        </div>
+                <div className="md:hidden mb-4">
+                    <h3 className="text-xl font-medium mb-3">Console</h3>
+                </div>
+                <CarteElement nom={console.nom} />
+            </div>
 
-                        <div className="mt-4">
-                            <h3 className="text-lg font-semibold">{console.nom}</h3>
-                            <p className="mt-1 text-sm text-muted-foreground">
-                                Télévision 4k
+            {!!accessoires?.length && (
+                <div className="mb-6">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-xl font-medium">Accessoires :</h3>
+                        {accessoires.map((acc, index) => (
+                            <p key={acc.nom}>
+                                {acc.nom}
+                                {index < accessoires.length - 1 && ", "}
                             </p>
-                        </div>
+                        ))}
                     </div>
+                </div>
+            )}
+
+            <div className="mb-8">
+                <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-xl font-medium">Cours :</h3>
+                    <p>{cours}</p>
                 </div>
             </div>
 
-            <div className="mt-6">
+            <div>
                 <Button
                     type="button"
                     onClick={onConfirmer}
