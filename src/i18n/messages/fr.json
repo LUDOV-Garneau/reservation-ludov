@@ -1,0 +1,60 @@
+{
+  "header": {
+    "logout": "Se déconnecter",
+    "logoutLoading": "Déconnexion...",
+    "language": "🇺🇸 EN"
+  },
+  "footer": {
+    "contact": "Contact",
+    "policy": "Politique",
+    "developedBy": "Développé par des étudiants du Cégep Garneau",
+    "copyright": "© Copyright 2025 LUDOV (Laboratoire universitaire de documentation et d'observation vidéoludiques) - Tous droits réservés"
+  },
+  "auth": {
+    "email": "Courriel",
+    "invalidEmail": "Adresse courriel invalide.",
+    "emptyPassword": "Veuillez entrer un mot de passe.",
+    "back": "Retour",
+    "login": {
+      "title": "Connexion",
+      "password": "Mot de passe",
+      "loginBtn": "Se connecter",
+      "loginBtnLoading": "Connexion en cours...",
+      "newUser": "Première connexion ?",
+      "invalidCredentials": "Votre courriel ou votre mot de passe est invalide.",
+      "error": "Une erreur s'est produite lors de la connexion. Veuillez réessayer ultérieurement."
+    },
+    "signup": {
+      "title": "Inscription",
+      "subTitle1": "Veuillez entrer votre courriel institutionnel",
+      "subTitle2": "afin de recevoir un code unique",
+      "login": "Se connecter",
+      "sendCodeBtn": "Envoyer le code",
+      "sendCodeBtnLoading": "Envoi du code en cours...",
+      "invalidCredentials": "Cette adresse courriel n'a pas été approuvée par un administrateur ou elle est déjà associée à un compte.",
+      "errorValidation": "Une erreur s'est produite lors de la validation du courriel. Veuillez réessayer ultérieurement.",
+      "errorSend": "Une erreur s'est produite lors de l'envoi du courriel. Veuillez réessayer ultérieurement."
+    },
+    "OTP": {
+      "title": "Code unique",
+      "subTitle1": "Veuillez entrer le code unique",
+      "subTitle2": "qui vous a été envoyé par courriel",
+      "codeEmail": "Code reçu par courriel",
+      "OTPBtn": "Vérifier le code",
+      "OTPBtnLoading": "Vérification du code en cours...",
+      "invalidOTP": "Ce code OTP est invalide.",
+      "expiredOTP": "Ce code OTP est invalide ou est expiré.",
+      "error": "Une erreur s'est produite lors de la validation du code OTP."
+    },
+    "createPassword": {
+      "password": "Définir un mot de passe",
+      "confirmPassword": "Confirmation du mot de passe",
+      "invalidPassword": "Le mot de passe doit contenir au moins 6 caractères.",
+      "invalidPasswordConfirmation": "La confirmation de mot de passe doit être identique au mot de passe.",
+      "finishBtn": "Terminer",
+      "finishBtnLoading": "Enregistrement du mot de passe en cours...",
+      "errorAlreadySet": "Cet utilisateur a déjà un mot de passe.",
+      "error": "Une erreur s'est produite lors de la création de votre mot de passe. Veuillez réessayer ultérieurement."
+    }
+  }
+}

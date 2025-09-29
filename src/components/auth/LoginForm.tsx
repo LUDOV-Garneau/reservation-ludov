@@ -4,10 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 
 export default function LoginForm({ onSignup }: { onSignup: () => void }) {
-  const router = useRouter();
+  const locale = useLocale();
+  const t = useTranslations();
 
   const [isLoading, setIsLoading] = useState(false);
   const [globalError, setGlobalError] = useState<string | null>(null);
@@ -33,14 +35,12 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
     switch (name) {
       case "email":
         if (!value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-          errorMsg = "Adresse courriel invalide.";
+          errorMsg = t("auth.invalidEmail");
         }
         break;
       case "password":
         if (value === "") {
-          errorMsg = "Veuillez entrer un mot de passe.";
-        } else if (value.length < 6) {
-          errorMsg = "Le mot de passe doit contenir au moins 6 caractères.";
+          errorMsg = t("auth.emptyPassword");
         }
         break;
     }
@@ -71,7 +71,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
 
     try {
       setIsLoading(true);
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch("/api/auth/login.login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,33 +80,34 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
           email: formData.email,
           password: formData.password,
         }),
+        credentials: "include",
       });
       setIsLoading(false);
       if (response.status === 401) {
-        setGlobalError("Votre courriel ou votre mot de passe est invalide.");
+        setGlobalError(t("auth.login.invalidCredentials"));
         return;
       } else if (!response.ok) {
-        setGlobalError(
-          "Une erreur s'est produite lors de la connexion. Veuillez réessayer ultérieurement."
-        );
+        setGlobalError(t("auth.login.error"));
         return;
       }
-      router.push("/");
-    } catch (e) {
+      window.location.assign(`/${locale}`);
+    } catch {
       setIsLoading(false);
-      setGlobalError(
-        "Une erreur s'est produite lors de la connexion. Veuillez réessayer ultérieurement."
-      );
+      setGlobalError(t("auth.login.error"));
     }
   };
 
   return (
     <div>
-      <h1 className="text-6xl font-semibold">Connexion</h1>
+      <h1 className="text-6xl font-semibold">{t("auth.login.title")}</h1>
 
-      <form noValidate onSubmit={handleSubmit} className="mt-10 space-y-4">
+      <form
+        noValidate
+        onSubmit={handleSubmit}
+        className="mt-10 space-y-4 md:w-100"
+      >
         <div className="flex flex-col gap-3">
-          <Label htmlFor="email">Courriel</Label>
+          <Label htmlFor="email">{t("auth.email")}</Label>
           <Input
             id="email"
             name="email"
@@ -124,7 +125,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         </div>
 
         <div className="flex flex-col gap-3">
-          <Label htmlFor="password">Mot de passe</Label>
+          <Label htmlFor="password">{t("auth.login.password")}</Label>
           <Input
             id="password"
             name="password"
@@ -152,7 +153,9 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
           disabled={!formData.email || !formData.password || isLoading}
           className="w-full bg-cyan-300 hover:bg-cyan-500 disabled:bg-cyan-900"
         >
-          {isLoading ? "Connexion en cours..." : "Se connecter"}
+          {isLoading
+            ? t("auth.login.loginBtnLoading")
+            : t("auth.login.loginBtn")}
         </Button>
       </form>
 
@@ -162,7 +165,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         onClick={onSignup}
         className="mt-4 inline-block text-sm w-full"
       >
-        Première connexion ?
+        {t("auth.login.newUser")}
       </Button>
     </div>
   );
