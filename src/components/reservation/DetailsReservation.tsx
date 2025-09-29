@@ -67,6 +67,47 @@ export default function ConfirmerReservation({
                 </div>
             </div>
 
+            <div className="mb-3 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6">
+                <h3 className="text-xl font-medium">Jeux sélectionnés</h3>
+                <h3 className="text-xl font-medium hidden md:block">Console</h3>
+            </div>
+
+            <div className="mb-8 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6 items-start">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                    {jeux.map((jeu) => (
+                        <CarteElement
+                            key={jeu.nom}
+                            nom={jeu.nom}
+                        />
+                    ))}
+                </div>
+
+                <div className="md:hidden mb-4">
+                    <h3 className="text-xl font-medium mb-3">Console</h3>
+                </div>
+                <CarteElement nom={console.nom} />
+            </div>
+
+            {!!accessoires?.length && (
+                <div className="mb-6">
+                    <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-xl font-medium">Accessoires :</h3>
+                        {accessoires.map((acc, index) => (
+                            <p key={acc.nom}>
+                                {acc.nom}
+                                {index < accessoires.length - 1 && ", "}
+                            </p>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div className="mb-8">
+                <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-xl font-medium">Cours :</h3>
+                    <p>{cours}</p>
+                </div>
+            </div>
         </div>
     );
 }
