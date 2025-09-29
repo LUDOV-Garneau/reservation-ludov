@@ -1,8 +1,12 @@
 // import type { Metadata } from "next";
 import { Inter, Nunito } from "next/font/google";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import LocaleProvider from "@/components/layout/LocaleProvider";
+import messagesFr from "@/i18n/messages/fr.json";
+import messagesEn from "@/i18n/messages/en.json";
+import type { Messages } from "next-intl";
 import "@/app/globals.css";
 
 const inter = Inter({
@@ -36,31 +40,22 @@ export default function RootLayout({
 }) {
   const { locale } = params;
 
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
+  if (!hasLocale(routing.locales, locale)) notFound();
+
+  const messagesMap: Record<string, Messages> = {
+    fr: messagesFr,
+    en: messagesEn,
+  };
+
+  const messages = messagesMap[locale];
 
   return (
     <html lang={locale} className={`${inter.variable} ${nunito.variable}`}>
       <body className="font-body">
-        <IntlWrapper locale={locale}>{children}</IntlWrapper>
+        <LocaleProvider locale={locale} messages={messages}>
+          {children}
+        </LocaleProvider>
       </body>
     </html>
-  );
-}
-
-async function IntlWrapper({
-  children,
-  locale,
-}: {
-  children: React.ReactNode;
-  locale: string;
-}) {
-  const messages = (await import(`../../i18n/messages/${locale}.json`)).default;
-
-  return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
-    </NextIntlClientProvider>
   );
 }
