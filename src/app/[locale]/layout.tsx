@@ -27,7 +27,7 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
   params,
 }: {
@@ -40,15 +40,27 @@ export default async function RootLayout({
     notFound();
   }
 
-  const messages = (await import(`../../i18n/messages/${locale}.json`)).default;
-
   return (
     <html lang={locale} className={`${inter.variable} ${nunito.variable}`}>
       <body className="font-body">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
-        </NextIntlClientProvider>
+        <IntlWrapper locale={locale}>{children}</IntlWrapper>
       </body>
     </html>
+  );
+}
+
+async function IntlWrapper({
+  children,
+  locale,
+}: {
+  children: React.ReactNode;
+  locale: string;
+}) {
+  const messages = (await import(`../../i18n/messages/${locale}.json`)).default;
+
+  return (
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      {children}
+    </NextIntlClientProvider>
   );
 }
