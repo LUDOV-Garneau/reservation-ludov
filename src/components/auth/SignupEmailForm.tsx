@@ -62,7 +62,7 @@ export default function SignupEmailForm({
         return;
       } else if (!responseCheckEmail.ok) {
         setIsLoading(false);
-        setError(t("auth.signup.error"));
+        setError(t("auth.signup.errorValidation"));
         return;
       }
 
