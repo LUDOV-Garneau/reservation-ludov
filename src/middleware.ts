@@ -1,25 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
+import createMiddleware from "next-intl/middleware";
+import { routing } from "@/i18n/routing";
+import { verifyToken } from "./lib/jwt";
+
+const i18nMiddleware = createMiddleware(routing);
 
 const publicRoutes = ["/auth"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (publicRoutes.some((route) => pathname.startsWith(route))) {
-    return NextResponse.next();
+  const pathWithoutLocale = pathname.replace(/^\/(fr|en)(?=\/|$)/, "");
+
+  if (publicRoutes.some((route) => pathWithoutLocale.startsWith(route))) {
+    return i18nMiddleware(request);
   }
 
-  const token = request.cookies.get("SESSION");
+  const token = request.cookies.get("SESSION")?.value;
+  const session = verifyToken(token || "");
 
-  if (!token) {
+  if (!session) {
+    const response = i18nMiddleware(request);
+
+    const locale =
+      response.headers.get("x-middleware-request-params-locale") ??
+      routing.defaultLocale;
+
     const url = request.nextUrl.clone();
-    url.pathname = "/auth";
+    url.pathname = `/${locale}/auth`;
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  return i18nMiddleware(request);
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!api|_next|.*\\..*|favicon.ico|robots.txt|images).*)"],
+  runtime: "nodejs",
 };

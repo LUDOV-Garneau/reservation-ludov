@@ -1,0 +1,59 @@
+{
+  "header": {
+    "logout": "Logout",
+    "logoutLoading": "Logging out...",
+    "language": "🇫🇷 FR"
+  },
+  "footer": {
+    "contact": "Contact",
+    "policy": "Policy",
+    "developedBy": "Developed by students from Cégep Garneau",
+    "copyright": "© Copyright 2025 LUDOV (University Laboratory for Video Game Documentation and Observation) - All rights reserved"
+  },
+  "auth": {
+    "email": "Email",
+    "invalidEmail": "Invalid email address.",
+    "emptyPassword": "Please enter a password.",
+    "back": "Back",
+    "login": {
+      "title": "Login",
+      "password": "Password",
+      "loginBtn": "Log in",
+      "loginBtnLoading": "Logging in...",
+      "newUser": "First time logging in?",
+      "invalidCredentials": "Your email or password is invalid.",
+      "error": "An error occurred during login. Please try again later."
+    },
+    "signup": {
+      "title": "Sign Up",
+      "subTitle1": "Please enter your institutional email",
+      "subTitle2": "to receive a unique code",
+      "login": "Log in",
+      "sendCodeBtn": "Send code",
+      "sendCodeBtnLoading": "Sending code...",
+      "invalidCredentials": "This email address has not been approved by an administrator or is already associated with an account.",
+      "errorValidation": "An error occurred while validating the email. Please try again later.",
+      "errorSend": "An error occurred while sending the email. Please try again later."
+    },
+    "OTP": {
+      "title": "One-Time Code",
+      "subTitle": "Please enter the one-time code <br /> that was sent to your email",
+      "codeEmail": "Code received by email",
+      "OTPBtn": "Verify code",
+      "OTPBtnLoading": "Verifying code...",
+      "invalidOTP": "This OTP code is invalid.",
+      "expiredOTP": "This OTP code is invalid or has expired.",
+      "error": "An error occurred while validating the OTP code."
+    },
+    "createPassword": {
+      "password": "Set a password",
+      "confirmPassword": "Confirm password",
+      "invalidPassword": "The password must contain at least 6 characters.",
+      "invalidPasswordConfirmation": "Password confirmation must match the password.",
+      "finishBtn": "Finish",
+      "finishBtnLoading": "Saving password...",
+      "errorAlreadySet": "This user already has a password.",
+      "error": "An error occurred while creating your password. Please try again later."
+    }
+  }
+}
