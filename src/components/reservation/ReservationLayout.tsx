@@ -14,7 +14,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
-import ConsoleSelection from "@/components/reservation/ConsoleSelection"
 import ConfirmerReservation from "@/components/reservation/ConfirmerReservation"
 
 export default function ReservationLayout() {
@@ -42,10 +41,6 @@ export default function ReservationLayout() {
     const steps = [
       {
         id: 1,
-        component: <ConsoleSelection />
-      },
-      {
-        id: 2,
         component: <ConfirmerReservation />
       }
     ];
