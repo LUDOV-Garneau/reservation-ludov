@@ -160,7 +160,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
       </form>
 
       <Button
-        variant={"black"}
+        variant={"outline"}
         type="button"
         onClick={onSignup}
         className="mt-4 inline-block text-sm w-full"

@@ -16,7 +16,6 @@ export default function LocaleSwitcher() {
     const segments = pathname.split("/");
     segments[1] = newLocale;
     const newPath = segments.join("/") || "/";
-    console.log(segments);
 
     router.push(newPath);
   }
