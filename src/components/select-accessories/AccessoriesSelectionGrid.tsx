@@ -12,12 +12,12 @@ interface Accessory {
 }
 
 interface AccessorySelectionGridProps {
-  selectedId: number | null;
+  selectedIds: number[];
   onSelect: (a: Accessory) => void;
 }
 
 export default function AccessorySelectionGrid({
-  selectedId,
+  selectedIds,
   onSelect,
 }: AccessorySelectionGridProps) {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
@@ -63,7 +63,7 @@ export default function AccessorySelectionGrid({
             key={a.id}
             onClick={() => onSelect(a)}
             className={`cursor-pointer transition ${
-              selectedId === a.id
+              selectedIds.includes(a.id)
                 ? "ring-2 ring-green-500"
                 : "hover:ring-2 hover:ring-gray-300"
             }`}
