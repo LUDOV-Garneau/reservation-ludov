@@ -4,7 +4,7 @@ import pool from "@/lib/db";
 export async function GET() {
   try {
     const [rows] = await pool.query(
-      "SELECT id, name, available FROM consoles WHERE available = 1"
+      "SELECT id, name FROM consoles WHERE nombre > 0 "
     );
     return NextResponse.json(rows);
   } catch (err) {
