@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -11,6 +12,7 @@ type Game = {
   titre: string;
   picture: string;
   available: number;
+  biblio_id: number;
 };
 
 interface GameSelectionGridProps {
@@ -106,6 +108,15 @@ export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelecti
                 />
               </div>
               <p className="mt-2 font-semibold">{game.titre}</p>
+              <a
+                href={`https://ludov.inlibro.net/cgi-bin/koha/opac-detail.pl?biblionumber=${game.biblio_id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="mt-2 inline-block bg-blue-800 text-white text-sm px-3 py-1 rounded-md hover:bg-blue-900 transition"
+              >
+                Plus de détails
+              </a>
             </CardContent>
           </Card>
         ))}

@@ -5,7 +5,7 @@ import { verifyToken } from "./lib/jwt";
 
 const i18nMiddleware = createMiddleware(routing);
 
-const publicRoutes = ["/auth"];
+const publicRoutes = ["/auth", "/games"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;

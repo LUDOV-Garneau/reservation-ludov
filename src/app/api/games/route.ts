@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     const offset = (page - 1) * limit;
 
     const [rows] = await pool.query(
-      "SELECT SQL_CALC_FOUND_ROWS id, titre, author, picture, available FROM games WHERE available = 1 LIMIT ? OFFSET ?",
+      "SELECT SQL_CALC_FOUND_ROWS id, titre, author, picture, available, biblio_id FROM games WHERE available = 1 LIMIT ? OFFSET ?",
       [limit, offset]
     );
 
