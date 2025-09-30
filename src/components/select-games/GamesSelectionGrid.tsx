@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -21,29 +21,57 @@ interface GameSelectionGridProps {
 export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelectionGridProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const totalRef = useRef(0);
+
+  const observerRef = useRef<HTMLDivElement | null>(null);
+
+  const fetchGames = useCallback(async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/games?page=${page}&limit=12`);
+      if (!res.ok) throw new Error("Erreur serveur");
+
+      const { data, total } = await res.json();
+      totalRef.current = total;
+
+      setGames((prev) => [...prev, ...data]);
+      setHasMore(games.length + data.length < total);
+      setPage((prev) => prev + 1);
+    } catch (err) {
+      console.error("Erreur fetch games :", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, hasMore, loading, games.length]);
 
   useEffect(() => {
-    const load = async () => {
-      try {
-      const res = await fetch("/api/games");
-        if (!res.ok) {
-          throw new Error(`Erreur serveur : ${res.status} ${res.statusText}`);
-        }
-        const data: Game[] = await res.json();
-        setGames(data);
-        setLoading(false);
-        } catch (err) {
-          console.error("Erreur fetch games :", err);
-          setLoading(false);
-          }
-    };
-    load();
+    fetchGames();
   }, []);
 
-  const filtered = games.filter(g => (g.titre ?? "").toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    if (!observerRef.current) return;
 
-  if (loading) return <p>Chargement des jeux...</p>;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loading && hasMore) {
+          fetchGames();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [fetchGames, hasMore, loading]);
+
+  const filtered = games.filter((g) =>
+    (g.titre ?? "").toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-4">
@@ -58,11 +86,15 @@ export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelecti
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {filtered.map(game => (
+        {filtered.map((game) => (
           <Card
             key={game.id}
             onClick={() => onSelect(game)}
-            className={`cursor-pointer transition ${selectedIds.includes(game.id) ? "ring-2 ring-blue-500" : "hover:ring-2 hover:ring-gray-300"}`}
+            className={`cursor-pointer transition ${
+              selectedIds.includes(game.id)
+                ? "ring-2 ring-blue-500"
+                : "hover:ring-2 hover:ring-gray-300"
+            }`}
           >
             <CardContent className="p-2 flex flex-col items-center">
               <div className="relative w-full aspect-video">
@@ -77,6 +109,11 @@ export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelecti
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div ref={observerRef} className="h-10 flex items-center justify-center">
+        {loading && <p>Chargement...</p>}
+        {!hasMore && <p>Fin des jeux</p>}
       </div>
     </div>
   );
