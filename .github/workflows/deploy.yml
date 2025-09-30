@@ -51,6 +51,8 @@ jobs:
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          build-args: |
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
 
   deploy:
     needs: build-and-push

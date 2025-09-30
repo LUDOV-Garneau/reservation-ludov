@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
       );
     }
   } catch (error) {
+    console.error("🔴 ERREUR INSCRIPTION:", error);
     return NextResponse.json(
       { message: "Une erreur s'est produite." },
       { status: 500 }
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    console.error("🔴 ERREUR INSCRIPTION:", error);
     return NextResponse.json(
       { message: "Une erreur s'est produite." },
       { status: 500 }
