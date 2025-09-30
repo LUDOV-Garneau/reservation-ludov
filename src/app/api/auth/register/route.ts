@@ -21,9 +21,6 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     } else {
-      console.error('🔴 ERREUR INSCRIPTION:', error);
-      console.error('🔴 Message:', error.message);
-      console.error('🔴 Stack:', error.stack);
       return NextResponse.json(
         { message: "Courriel valide." },
         { status: 200 }
