@@ -7,10 +7,16 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get("page") ?? "1", 10);
     const limit = parseInt(searchParams.get("limit") ?? "12", 10);
     const offset = (page - 1) * limit;
+    const search = searchParams.get("search") ?? "";
+
+        const like = `%${search}%`;
 
     const [rows] = await pool.query(
-      "SELECT SQL_CALC_FOUND_ROWS id, titre, author, picture, available, biblio_id FROM games WHERE available = 1 LIMIT ? OFFSET ?",
-      [limit, offset]
+      `SELECT SQL_CALC_FOUND_ROWS id, titre, author, picture, available, biblio_id
+       FROM games
+       WHERE available = 1 AND titre LIKE ?
+       LIMIT ? OFFSET ?`,
+      [like, limit, offset]
     );
 
     const [countRows] = await pool.query("SELECT FOUND_ROWS() as total") as [Array<{ total: number }>, unknown];

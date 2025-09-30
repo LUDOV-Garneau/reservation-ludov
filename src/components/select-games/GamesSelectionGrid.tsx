@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import {Button} from "@/components/ui/button";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -35,7 +34,7 @@ export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelecti
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/games?page=${page}&limit=12`);
+      const res = await fetch(`/api/games?page=${page}&limit=12&search=${encodeURIComponent(search)}`);
       if (!res.ok) throw new Error("Erreur serveur");
 
       const { data, total } = await res.json();
@@ -49,11 +48,13 @@ export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelecti
     } finally {
       setLoading(false);
     }
-  }, [page, hasMore, loading, games.length]);
+  }, [page, hasMore, loading, games.length, search]);
 
   useEffect(() => {
-    fetchGames();
-  }, []);
+  setGames([]);
+  setPage(1);
+  setHasMore(true);
+}, [search]);
 
   useEffect(() => {
     if (!observerRef.current) return;
