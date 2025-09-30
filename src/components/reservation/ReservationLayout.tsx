@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/breadcrumb"
 
 import ConsoleSelection from "@/components/reservation/ConsoleSelection"
+import ConfirmerReservation from "@/components/reservation/ConfirmerReservation"
 
 export default function ReservationLayout() {
 
@@ -39,26 +40,14 @@ export default function ReservationLayout() {
     };
 
     const steps = [
-    {
+      {
         id: 1,
         component: <ConsoleSelection />
-    },
-    {
+      },
+      {
         id: 2,
-        component: <div>Sélection des jeux (placeholder)</div>
-    },
-    {
-        id: 3,
-        component: <div>Sélection de la date (placeholder)</div>
-    },
-    {
-        id: 4,
-        component: <div>Sélection du cours (placeholder)</div>
-    },
-    {
-        id: 5,
-        component: <div>Confirmation finale (placeholder)</div>
-    }
+        component: <ConfirmerReservation />
+      }
     ];
 
 
