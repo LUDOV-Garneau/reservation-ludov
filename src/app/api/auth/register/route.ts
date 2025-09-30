@@ -21,12 +21,18 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     } else {
+      console.error('🔴 ERREUR INSCRIPTION:', error);
+      console.error('🔴 Message:', error.message);
+      console.error('🔴 Stack:', error.stack);
       return NextResponse.json(
         { message: "Courriel valide." },
         { status: 200 }
       );
     }
   } catch (error) {
+      console.error('🔴 ERREUR INSCRIPTION:', error);
+      console.error('🔴 Message:', error.message);
+      console.error('🔴 Stack:', error.stack);
     return NextResponse.json(
       { message: "Une erreur s'est produite." },
       { status: 500 }
@@ -65,6 +71,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+      console.error('🔴 ERREUR INSCRIPTION:', error);
+      console.error('🔴 Message:', error.message);
+      console.error('🔴 Stack:', error.stack);
     return NextResponse.json(
       { message: "Une erreur s'est produite." },
       { status: 500 }
