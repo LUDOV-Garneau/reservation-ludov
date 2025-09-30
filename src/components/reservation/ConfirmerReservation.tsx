@@ -74,7 +74,6 @@ export default function ConfirmerReservation() {
    */
   const handleConfirm = async () => {
     if (!reservationId) {
-      toast.error("Aucune réservation active.");
       return;
     }
 
