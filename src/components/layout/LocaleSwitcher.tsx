@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -22,9 +23,16 @@ export default function LocaleSwitcher() {
 
   return (
     <div
-      className="hover:underline hover:cursor-pointer"
+      className="hover:opacity-70 hover:cursor-pointer flex flex-row items-center justify-center-safe gap-1"
       onClick={switchLocale}
     >
+      <Image
+        src={locale === "fr" ? "/icons/us-flag.png" : "/icons/fr-flag.png"}
+        alt=""
+        width={512}
+        height={512}
+        className="w-4 h-full"
+      />
       {t("header.language")}
     </div>
   );

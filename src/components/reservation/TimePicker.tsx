@@ -8,14 +8,14 @@ type TimePickerProps = {
 
 const defaultTimes = [
   "08:00",
-  "08:30",
-  "09:00",
-  "09:30",
+  "9:00",
   "10:00",
-  "10:30",
   "11:00",
-  "11:30",
   "12:00",
+  "13:00",
+  "14:00",
+  "15:00",
+  "16:00",
 ];
 
 export function TimePicker({
@@ -24,12 +24,12 @@ export function TimePicker({
   times = defaultTimes,
 }: TimePickerProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="grid grid-flow-col gap-2 justify-center grid-rows-[repeat(7,auto)]">
       {times.map((time) => (
         <Button
           key={time}
           variant={selectedTime === time ? "default" : "outline"}
-          className="w-full"
+          className="w-full px-8"
           onClick={() => onSelect(time)}
         >
           {time}

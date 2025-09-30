@@ -9,7 +9,9 @@ export default function MainLayout({
   return (
     <>
       <Header />
-      <main className="flex-1 bg-[#e5e3e3] py-10 px-20">{children}</main>
+      <main className="flex-1 bg-[#e5e3e3] py-10 px-6 md:px-20">
+        {children}
+      </main>
       <Footer />
     </>
   );
