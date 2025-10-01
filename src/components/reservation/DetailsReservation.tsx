@@ -8,14 +8,13 @@ type Jeu = { nom: string, description?: string, materielRequis?: string };
 type Console = { nom: string };
 type Accessoire = { nom: string };
 
-type ConfirmerReservationProps = {
+type DetailsReservationProps = {
     jeux: Jeu[];
     console: Console;
     accessoires?: Accessoire[];
     station: string;
     date: string;
     heure: string;
-    // onConfirmer: () => void;
 };
 
 export default function ConfirmerReservation({
@@ -25,7 +24,7 @@ export default function ConfirmerReservation({
     station,
     date,
     heure,
-}: ConfirmerReservationProps) {
+}: DetailsReservationProps) {
     return (
         <div className="mx-auto max-w-6xl p-4 md:p-6">
             <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
@@ -77,6 +76,7 @@ export default function ConfirmerReservation({
                             nom={jeu.nom}
                             description={jeu.description}
                             materielRequis={jeu.materielRequis}
+                            type="jeu"
                         />
                     ))}
                 </div>
@@ -86,7 +86,7 @@ export default function ConfirmerReservation({
                 </div>
                 <CarteElement
                     nom={console.nom}
-                    description="."
+                    type="console"
                 />
             </div>
 
