@@ -19,7 +19,10 @@ interface GameSelectionGridProps {
   onSelect: (g: Game) => void;
 }
 
-export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelectionGridProps) {
+export default function GameSelectionGrid({
+  selectedIds,
+  onSelect,
+}: GameSelectionGridProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +37,11 @@ export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelecti
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/games?page=${page}&limit=12&search=${encodeURIComponent(search)}`);
+      const res = await fetch(
+        `/api/reservation/games?page=${page}&limit=12&search=${encodeURIComponent(
+          search
+        )}`
+      );
       if (!res.ok) throw new Error("Erreur serveur");
 
       const { data, total } = await res.json();
@@ -51,10 +58,10 @@ export default function GameSelectionGrid({ selectedIds, onSelect }: GameSelecti
   }, [page, hasMore, loading, games.length, search]);
 
   useEffect(() => {
-  setGames([]);
-  setPage(1);
-  setHasMore(true);
-}, [search]);
+    setGames([]);
+    setPage(1);
+    setHasMore(true);
+  }, [search]);
 
   useEffect(() => {
     if (!observerRef.current) return;

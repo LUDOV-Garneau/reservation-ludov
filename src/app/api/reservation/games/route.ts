@@ -1,15 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 
-export async function GET(req: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") ?? "1", 10);
     const limit = parseInt(searchParams.get("limit") ?? "12", 10);
     const offset = (page - 1) * limit;
     const search = searchParams.get("search") ?? "";
-
-        const like = `%${search}%`;
+    const like = `%${search}%`;
 
     const [rows] = await pool.query(
       `SELECT SQL_CALC_FOUND_ROWS id, titre, author, picture, available, biblio_id
@@ -19,7 +18,10 @@ export async function GET(req: Request) {
       [like, limit, offset]
     );
 
-    const [countRows] = await pool.query("SELECT FOUND_ROWS() as total") as [Array<{ total: number }>, unknown];
+    const [countRows] = (await pool.query("SELECT FOUND_ROWS() as total")) as [
+      Array<{ total: number }>,
+      unknown
+    ];
     const total = countRows[0].total;
 
     return NextResponse.json({ data: rows, total });
@@ -27,4 +29,9 @@ export async function GET(req: Request) {
     console.error(err);
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
+}
+
+export async function POST(request: NextRequest) {
+  // TODO
+  // Implémenter la logique pour gérer la sélection d'un ou des jeux
 }
