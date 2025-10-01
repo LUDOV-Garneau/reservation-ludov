@@ -14,6 +14,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 
+import Calendrier from "@/components/reservation/Calendrier"
 import ConfirmerReservation from "@/components/reservation/ConfirmerReservation"
 
 export default function ReservationLayout() {
@@ -41,7 +42,7 @@ export default function ReservationLayout() {
     const steps = [
       {
         id: 1,
-        component: <ConfirmerReservation />
+        component: <Calendrier />
       }
     ];
 
@@ -110,7 +111,7 @@ export default function ReservationLayout() {
           )}
         </div>
         
-        <div className="bg-white rounded-lg shadow-sm border p-6 md:p-8 my-8">
+        <div className="bg-white rounded-lg my-8">
           {currentStepConfig ? currentStepConfig.component : (
             <div className="text-center py-12">
               <p className="text-gray-500">Étape non trouvée</p>
