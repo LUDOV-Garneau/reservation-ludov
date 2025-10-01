@@ -100,7 +100,7 @@ export default function SignupCodeForm({
       </form>
 
       <Button
-        variant={"black"}
+        variant={"outline"}
         onClick={onBack}
         className="mt-10 inline-block text-sm w-full"
       >
