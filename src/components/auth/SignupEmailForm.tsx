@@ -128,7 +128,7 @@ export default function SignupEmailForm({
       </form>
 
       <Button
-        variant={"black"}
+        variant={"outline"}
         type="button"
         onClick={onBack}
         className="mt-4 inline-block text-sm w-full"

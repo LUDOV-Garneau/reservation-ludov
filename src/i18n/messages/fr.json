@@ -2,13 +2,19 @@
   "header": {
     "logout": "Se déconnecter",
     "logoutLoading": "Déconnexion...",
-    "language": "🇺🇸 EN"
+    "language": "EN"
   },
   "footer": {
     "contact": "Contact",
     "policy": "Politique",
     "developedBy": "Développé par des étudiants du Cégep Garneau",
     "copyright": "© Copyright 2025 LUDOV (Laboratoire universitaire de documentation et d'observation vidéoludiques) - Tous droits réservés"
+  },
+  "reservation": {
+    "calendar": {
+      "title": "Sélection de la date",
+      "continueBtn": "Continuer"
+    }
   },
   "auth": {
     "email": "Courriel",
