@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock9 } from "lucide-react";
-import CarteElement from "./CarteElement";
+import CarteElement from "@/components/reservation/components/CarteElement";
 import { useReservation } from "@/context/ReservationContext";
 import { useRouter } from "next/navigation";
 
