@@ -35,7 +35,7 @@ export default function SelectedAccessoryCard({
     setError(null);
 
     try {
-      const res = await fetch("/api/accessories/select-accessory", {
+      const res = await fetch("/api/reservation/accessories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ accessoryId: accessory.id }),

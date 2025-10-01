@@ -63,3 +63,8 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+export async function POST(request: NextRequest) {
+  // TODO
+  // Implémenter la logique pour gérer la sélection d'un accessoire
+}

@@ -26,7 +26,7 @@ export default function AccessorySelectionGrid({
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("/api/accessories");
+        const res = await fetch("/api/reservation/accessories");
         const data = await res.json();
 
         if (Array.isArray(data)) {
