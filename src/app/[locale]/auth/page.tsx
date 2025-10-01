@@ -6,6 +6,7 @@ import LoginForm from "@/components/auth/LoginForm";
 import SignupEmailForm from "@/components/auth/SignupEmailForm";
 import SignupCodeForm from "@/components/auth/SignupCodeForm";
 import SignupPasswordForm from "@/components/auth/SignupPasswordForm";
+import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<
@@ -22,6 +23,8 @@ export default function AuthPage() {
   return (
     <div className="my-20 fixed inset-0 overflow-hidden">
       <div className="bg-[white] w-fit mx-auto md:px-40 sm:px-20 px-6 py-10 text-center flex flex-col justify-center rounded-4xl shadow-lg">
+        <LocaleSwitcher />
+
         <AnimatePresence mode="wait">
           {mode === "login" && (
             <motion.div

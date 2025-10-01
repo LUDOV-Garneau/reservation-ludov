@@ -6,6 +6,10 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+
+ARG JWT_SECRET
+ENV JWT_SECRET=$JWT_SECRET
+
 RUN npm run build
 
 FROM node:20-alpine AS runner

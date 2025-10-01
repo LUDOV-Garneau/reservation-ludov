@@ -8,6 +8,7 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { useTranslations } from "next-intl";
 
 export default function SignupCodeForm({
   email,
@@ -18,6 +19,8 @@ export default function SignupCodeForm({
   onNext: () => void;
   onBack: () => void;
 }) {
+  const t = useTranslations();
+
   const [isLoading, setIsLoading] = useState(false);
 
   const [code, setCode] = useState("");
@@ -27,7 +30,7 @@ export default function SignupCodeForm({
     e.preventDefault();
 
     if (code.length != 6 || !/^\d+$/.test(code)) {
-      setError("Ce code OTP est invalide.");
+      setError(t("auth.OTP.invalidOTP"));
       return;
     }
 
@@ -42,29 +45,32 @@ export default function SignupCodeForm({
 
       setIsLoading(false);
       if (!response.ok) {
-        setError("Ce code OTP est invalide ou est expiré.");
+        setError(t("auth.OTP.expiredOTP"));
         return;
       }
 
       onNext();
-    } catch (e) {
+    } catch {
       setIsLoading(false);
-      setError("Une erreur s'est produite lors de la validation du code OTP.");
+      setError(t("auth.OTP.error"));
     }
   };
 
   return (
     <div>
-      <h1 className="text-6xl font-semibold">Code unique</h1>
+      <h1 className="text-6xl font-semibold">{t("auth.OTP.title")}</h1>
       <h2 className="mt-5">
-        Veuillez entrer le code unique <br />
-        qui vous a été envoyé par courriel
+        {t("auth.OTP.subTitle1")} <br /> {t("auth.OTP.subTitle2")}
       </h2>
 
-      <form onSubmit={handleSubmit} className="mt-10 space-y-10">
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className="mt-10 space-y-10 md:w-100"
+      >
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-3 justify-center mx-auto">
-            <Label htmlFor="code">Code reçu par courriel</Label>
+            <Label htmlFor="code">{t("auth.OTP.codeEmail")}</Label>
             <InputOTP maxLength={6} onChange={setCode}>
               <InputOTPGroup>
                 <InputOTPSlot index={0} />
@@ -89,7 +95,7 @@ export default function SignupCodeForm({
           className="w-full bg-cyan-300 hover:bg-cyan-500 disabled:bg-cyan-900"
           disabled={code.length !== 6 || /[^0-9]/.test(code) || isLoading}
         >
-          {isLoading ? "Vérification du code en cours..." : "Vérifier le code"}
+          {isLoading ? t("auth.OTP.OTPBtnLoading") : t("auth.OTP.OTPBtn")}
         </Button>
       </form>
 
@@ -98,7 +104,7 @@ export default function SignupCodeForm({
         onClick={onBack}
         className="mt-10 inline-block text-sm w-full"
       >
-        Retour
+        {t("auth.back")}
       </Button>
     </div>
   );
