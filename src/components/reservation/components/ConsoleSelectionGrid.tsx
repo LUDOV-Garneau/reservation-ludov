@@ -28,7 +28,7 @@ export default function ConsoleSelectionGrid({
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch("/api/consoles");
+        const res = await fetch("/api/reservation/consoles");
         const data = await res.json();
         const withImages: Console[] = data.map((c: Console) => ({
           ...c,
