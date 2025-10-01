@@ -3,6 +3,7 @@ import pool from "@/lib/db";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import { RowDataPacket } from "mysql2";
+import { Reservation } from "@/types/reservation";
 
 interface ReservationRow extends RowDataPacket {
   id: string;
@@ -13,9 +14,9 @@ interface ReservationRow extends RowDataPacket {
   game3_id: number | null;
   station_id: number | null;
   accessoir_id: number | null;
-  expireAt: string;
-  date: string | null;
-  createdAt: string;
+  expireAt: Date;
+  date: Date | null;
+  createdAt: Date;
 }
 
 interface GameRow extends RowDataPacket {
@@ -150,11 +151,20 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Format the response to match what the frontend expects
-    // Auto-detect the name column from the fetched data
-    const getNameField = (obj: any): string => {
-      return obj?.nom || obj?.name || obj?.titre || obj?.title || obj?.label || 'Unknown';
+    const getNameField = (obj: GameRow | ConsoleRow | AccessoireRow): string => {
+      return obj?.nom || 'Unknown';
     };
+
+    const now = new Date();
+    if (new Date(reservation.expireAt) < now) {
+      return NextResponse.json(
+        { 
+          success: false,
+          message: "Reservation has expired"
+        },
+        { status: 410 }
+      );
+    }
 
     const responseData = {
       jeux: games.map(game => ({ nom: getNameField(game) })),
@@ -164,11 +174,14 @@ export async function GET(request: NextRequest) {
       } : null,
       accessoires: accessoires.map(acc => ({ nom: getNameField(acc) })),
       cours: "", // Not used in hold reservations
-      date: reservation.date || "",
-      heure: "", // Not stored separately in reservation_hold
+      date: reservation.date ? new Date(reservation.date).toISOString().split('T')[0] : null,
+      heure: reservation.date ? new Date(reservation.date).toLocaleTimeString('fr-FR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      }) : "",
       status: "hold",
       reservationId: reservation.id,
-      expiresAt: reservation.expireAt,
+      expiresAt: new Date(reservation.expireAt).toISOString(),
       stationId: reservation.station_id
     };
 
@@ -176,15 +189,17 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(responseData, { status: 200 });
 
-  } catch (err: unknown) {
-    console.error("Erreur SQL:", err);
-    return NextResponse.json(
-      { 
-        success: false,
-        message: "Erreur lors de la récupération de la réservation",
-        error: err instanceof Error ? err.message : "Unknown error"
-      },
-      { status: 500 }
-    );
+    } catch (err: unknown) {
+      console.error("Erreur SQL:", err);
+      return NextResponse.json(
+        { 
+          success: false,
+          message: "Erreur lors de la récupération de la réservation",
+          error: process.env.NODE_ENV === 'development' && err instanceof Error 
+            ? err.message 
+            : undefined
+        },
+        { status: 500 }
+      );
+    }
   }
-}

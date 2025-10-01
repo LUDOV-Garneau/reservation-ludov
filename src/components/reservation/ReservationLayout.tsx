@@ -100,7 +100,7 @@ export default function ReservationLayout() {
             <div className="flex items-center gap-4 sticky md:mx-0 mx-auto">
               <div className="bg-gray-50/45 shadow-xl py-3 px-8 rounded-full flex items-center gap-2 sticky">
                 <HourglassIcon 
-                  className={timeRemaining < 300 ? "animate-pulse sp text-red-500" : "text-gray-600"} 
+                  className={timeRemaining < 300 ? "animate-pulse text-red-500" : "text-gray-600"} 
                 />
                 <p className={`text-2xl ${timeRemaining < 300 ? "text-red-500 font-bold" : ""}`}>
                   {formatTimeRemaining(timeRemaining)}
