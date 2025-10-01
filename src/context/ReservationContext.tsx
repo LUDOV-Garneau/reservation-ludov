@@ -1,4 +1,3 @@
-"use client";
 
 import React, {
   createContext,
@@ -224,7 +223,10 @@ export function ReservationProvider({
 
   /** Crée une réservation temporaire */
   const startTimer = async () => {
+    const
     if (!userId || !selectedConsole) {
+      console.log("Console sélectionnée:", selectedConsole, "UserId:", userId);
+      console.error("Informations manquantes pour démarrer la réservation");
       setError("Informations manquantes pour démarrer la réservation");
       return;
     }

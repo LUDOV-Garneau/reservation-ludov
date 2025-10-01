@@ -1,37 +1,73 @@
 "use client";
 
+import { Console } from "@/types/console";
 import { useState } from "react";
+import { useReservation } from "@/context/ReservationContext";
 import SelectedConsoleCard from "@/components/reservation/components/SelectedConsoleCard";
 import ConsoleSelectionGrid from "@/components/reservation/components/ConsoleSelectionGrid";
-
-type Console = {
-  id: number;
-  name: string;
-  available: number;
-  image: string;
-};
 
 export default function ConsolesSelection() {
   const [selected, setSelected] = useState<Console | null>(null);
 
+  const { 
+    setSelectedConsole, 
+    selectedConsole,
+    startTimer,
+    isTimerActive,
+    setCurrentStep,
+  } = useReservation();
+
+  const handleConsoleSelect = (console: Console) => {
+    setSelected(console);
+    setSelectedConsole(console.id);
+  }
+
+  const handleContinue = async () => {
+    if (!selected) {
+      return;
+    }
+
+    try {
+      if (!isTimerActive) {
+        await startTimer();
+      }
+
+      setCurrentStep(2);
+    } catch(error) {
+      console.error("Erreur lors de la continuation:", error);
+    }
+  }
+
+  const handleClear = () => {
+    setSelected(null);
+    setSelectedConsole(null);
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="md:col-span-1 bg-[white] rounded-2xl p-6 m-6">
-        <div className="sticky top-4">
-          <h2 className="text-xl font-bold mb-2">Console sélectionnée</h2>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="lg:col-span-1">
+        <div className="bg-[white] sticky top-10 rounded-2xl p-6 shadow-lg">
+          <h2 className="text-3xl font-bold mb-4 text-center">
+            Console sélectionnée
+          </h2>
           <SelectedConsoleCard
             console={selected}
             onClear={() => setSelected(null)}
+            onSuccess={handleContinue}
           />
         </div>
       </div>
 
-      <div className="md:col-span-2 bg-[white] rounded-2xl p-6 m-6">
-        <h2 className="text-xl font-bold mb-2">Sélection de la console</h2>
-        <ConsoleSelectionGrid
-          selectedId={selected?.id ?? null}
-          onSelect={setSelected}
-        />
+      <div className="lg:col-span-3">
+        <div className="bg-[white] rounded-2xl p-6 shadow-lg">
+          <h2 className="text-3xl font-bold mb-4">
+            Sélection de la console
+          </h2>
+          <ConsoleSelectionGrid
+            selectedId={selected?.id ?? null}
+            onSelect={handleConsoleSelect}
+          />
+        </div>
       </div>
     </div>
   );
