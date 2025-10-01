@@ -156,7 +156,7 @@ export default function SignupPasswordForm({
       </form>
 
       <Button
-        variant={"black"}
+        variant={"outline"}
         onClick={onBack}
         className="mt-4 inline-block text-sm w-full"
       >
