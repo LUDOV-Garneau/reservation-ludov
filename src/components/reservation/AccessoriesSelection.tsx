@@ -77,7 +77,7 @@ export default function AccessoriesSelection() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Panneau gauche */}
-      <div className="md:col-span-1 bg-white rounded-2xl p-6 m-6 shadow">
+      <div className="md:col-span-1 bg-[white] rounded-2xl p-6 m-6 shadow">
         <div className="sticky top-4 space-y-4">
           <h2 className="text-xl font-bold">Accessoire sélectionné</h2>
 
@@ -117,7 +117,7 @@ export default function AccessoriesSelection() {
       </div>
 
       {/* Panneau droit */}
-      <div className="md:col-span-2 bg-white rounded-2xl p-6 m-6 shadow">
+      <div className="md:col-span-2 bg-[white] rounded-2xl p-6 m-6 shadow">
         <h2 className="text-xl font-bold mb-2">Sélection des accessoires</h2>
         <AccessorySelectionGrid
           accessories={allAccessories}
