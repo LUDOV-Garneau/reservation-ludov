@@ -3,7 +3,15 @@ import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
 
 export async function POST(req: Request) {
-  const { reservationId, game1Id, game2Id, game3Id, newConsoleId, accessories } = await req.json();
+  const { 
+    reservationId, 
+    game1Id, 
+    game2Id, 
+    game3Id, 
+    newConsoleId, 
+    accessories, 
+    coursId 
+  } = await req.json();
 
   if (!reservationId) {
     return NextResponse.json(
@@ -32,15 +40,38 @@ export async function POST(req: Request) {
 
     const currentConsoleId = rows[0].console_id;
 
-    // Vérifier si la console doit être changée
+    // --- Construction dynamique des updates ---
+    const updates: string[] = [];
+    const values: unknown[] = [];
+
+    if (game1Id !== undefined) {
+      updates.push("game1_id = ?");
+      values.push(game1Id); // null explicite seulement si tu veux reset
+    }
+    if (game2Id !== undefined) {
+      updates.push("game2_id = ?");
+      values.push(game2Id);
+    }
+    if (game3Id !== undefined) {
+      updates.push("game3_id = ?");
+      values.push(game3Id);
+    }
+    if (accessories !== undefined) {
+      updates.push("accessoir_id = ?");
+      values.push(accessories?.[0] || null);
+    }
+    if (coursId !== undefined) {
+      updates.push("cours = ?");
+      values.push(coursId || null);
+    }
+
+    // --- Changement de console ---
     if (newConsoleId && newConsoleId !== currentConsoleId) {
-      // Libérer l'ancienne
       await conn.query(
         `UPDATE consoles SET nombre = nombre + 1 WHERE id = ?`,
         [currentConsoleId]
       );
 
-      // Vérifier la dispo de la nouvelle
       const [checkNew] = await conn.query<RowDataPacket[]>(
         `SELECT nombre FROM consoles WHERE id = ? FOR UPDATE`,
         [newConsoleId]
@@ -54,40 +85,20 @@ export async function POST(req: Request) {
         );
       }
 
-      // Décrémenter le stock de la nouvelle console
       await conn.query(
         `UPDATE consoles SET nombre = nombre - 1 WHERE id = ?`,
         [newConsoleId]
       );
 
-      // Mettre à jour la réservation
-      await conn.query(
-        `UPDATE reservation_hold 
-         SET console_id = ?, game1_id = ?, game2_id = ?, game3_id = ?, accessoir_id = ?
-         WHERE id = ?`,
-        [
-          newConsoleId,
-          game1Id || null,
-          game2Id || null,
-          game3Id || null,
-          accessories?.[0] || null, // 1 accessoire max
-          reservationId,
-        ]
-      );
-    } else {
-      // Mise à jour simple (jeux + accessoire)
-      await conn.query(
-        `UPDATE reservation_hold 
-         SET game1_id = ?, game2_id = ?, game3_id = ?, accessoir_id = ?
-         WHERE id = ?`,
-        [
-          game1Id || null,
-          game2Id || null,
-          game3Id || null,
-          accessories?.[0] || null, // 1 accessoire max
-          reservationId,
-        ]
-      );
+      updates.push("console_id = ?");
+      values.push(newConsoleId);
+    }
+
+    // --- Mise à jour en DB seulement si nécessaire ---
+    if (updates.length > 0) {
+      const sql = `UPDATE reservation_hold SET ${updates.join(", ")} WHERE id = ?`;
+      values.push(reservationId);
+      await conn.query(sql, values);
     }
 
     await conn.commit();
@@ -97,6 +108,7 @@ export async function POST(req: Request) {
       reservationId,
       consoleId: newConsoleId || currentConsoleId,
       accessories: accessories || [],
+      coursId: coursId || null,
     });
   } catch (err) {
     await conn.rollback();
