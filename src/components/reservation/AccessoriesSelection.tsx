@@ -43,7 +43,7 @@ export default function AccessoriesSelection() {
     if (selectedAccessories.includes(accessory.id)) {
       setSelectedAccessories([]); // désélection
     } else {
-      setSelectedAccessories([accessory.id]); // un seul accessoire
+      setSelectedAccessories([accessory.id]); // un seul accessoire max
     }
   };
 
@@ -51,6 +51,7 @@ export default function AccessoriesSelection() {
     setSelectedAccessories([]);
   };
 
+  // 🔹 Sauvegarde uniquement au clic sur "Continuer"
   const handleSave = async () => {
     if (selectedAccessories.length === 0) {
       setError("Sélectionnez au moins un accessoire");
@@ -61,41 +62,13 @@ export default function AccessoriesSelection() {
     setError(null);
 
     try {
-      // 🔹 Mise à jour côté serveur
       await updateReservationAccessories(selectedAccessories);
       console.log("Accessoires sauvegardés ✅");
 
-      // 🔹 Passer à l’étape suivante
+      // Passer à l’étape suivante
       setCurrentStep(4);
     } catch (err) {
       setError("Impossible de sauvegarder les accessoires.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleSave = async () => {
-    if (selected.length === 0) {
-      setError("Sélectionnez au moins un accessoire");
-      return;
-    }
-
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      const res = await fetch("/api/reservation/accessories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessoryIds: selected.map((a) => a.id) }),
-      });
-
-      if (!res.ok) throw new Error("Erreur de sauvegarde");
-
-      console.log("Accessoires sauvegardés ✅");
-    } catch (err) {
-      setError("Impossible de sauvegarder les accessoires.");
-      console.error(err);
     } finally {
       setIsSaving(false);
     }
