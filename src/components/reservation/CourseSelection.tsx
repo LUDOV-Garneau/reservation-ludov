@@ -72,8 +72,6 @@ export default function CourseSelection() {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || "Erreur sauvegarde");
 
-      console.log("Cours sauvegardé ✅", data);
-
       // Étape suivante
       setCurrentStep(5);
     } catch (err) {
