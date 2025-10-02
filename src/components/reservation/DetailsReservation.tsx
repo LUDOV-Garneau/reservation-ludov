@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock9 } from "lucide-react";
-import CarteElement from "./CarteElement";
+import CarteElement from "@/components/reservation/components/CarteElement";
 
 type Jeu = { nom: string, description?: string, materielRequis?: string };
 type Console = { nom: string };
