@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db"; // ton utilitaire MySQL
+import { RowDataPacket } from "mysql2";
 
 export async function POST(req: Request) {
   const { reservationId } = await req.json();
@@ -16,7 +17,7 @@ export async function POST(req: Request) {
     await conn.beginTransaction();
 
     // Récupérer la console
-    const [rows]: any = await conn.query(
+    const [rows] = await conn.query<RowDataPacket[]>(
       `SELECT console_id FROM reservation_hold WHERE id = ? FOR UPDATE`,
       [reservationId]
     );

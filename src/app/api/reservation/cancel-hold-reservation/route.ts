@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { RowDataPacket, ResultSetHeader } from "mysql2";
 
 export async function POST(req: Request) {
   try {
@@ -13,22 +14,22 @@ export async function POST(req: Request) {
     }
 
     // Récupérer l’ancienne console pour la libérer
-    const [rows]: any = await pool.query(
+    const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT console_id FROM reservation_hold WHERE id = ?`,
       [reservationId]
     );
 
-    if (!rows || rows.length === 0) {
+    if (rows.length === 0) {
       return NextResponse.json(
         { success: false, message: "Réservation introuvable" },
         { status: 404 }
       );
     }
 
-    const consoleId = rows[0].console_id;
+    const consoleId = rows[0].console_id as number | null;
 
     // Supprimer la réservation
-    await pool.query(`DELETE FROM reservation_hold WHERE id = ?`, [
+    await pool.query<ResultSetHeader>(`DELETE FROM reservation_hold WHERE id = ?`, [
       reservationId,
     ]);
 
