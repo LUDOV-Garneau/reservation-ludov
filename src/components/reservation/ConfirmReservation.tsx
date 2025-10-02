@@ -9,7 +9,6 @@ import {
   Package, 
   AlertCircle,
   CheckCircle2,
-  ChevronRight,
   Loader2
 } from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
@@ -32,13 +31,23 @@ interface Console {
   image?: string;
 }
 
+interface Accessoire {
+  id: number;
+  nom: string;
+}
+
+interface Station {
+  id: number;
+  nom: string;
+}
+
 interface ReservationData {
   jeux: Game[];
   console: Console | null;
-  accessoires: any[];
+  accessoires: Accessoire[];
   date: string;
   heure: string;
-  station?: any;
+  station?: Station | null;
 }
 
 export default function ConfirmReservation() {
@@ -70,13 +79,14 @@ export default function ConfirmReservation() {
         if (!res.ok) throw new Error("Erreur chargement");
         
         const json = await res.json();
+
         setData({
-          jeux: json.jeux || [],
-          console: json.console || selectedConsole || null,
-          accessoires: json.accessoires || [],
-          date: json.date || new Date().toLocaleDateString('fr-CA'),
-          heure: json.heure || "À déterminer",
-          station: json.station
+          jeux: (json.jeux || []) as Game[],
+          console: (json.console || selectedConsole || null) as Console | null,
+          accessoires: (json.accessoires || []) as Accessoire[],
+          date: (json.date || new Date().toLocaleDateString("fr-CA")) as string,
+          heure: (json.heure || "À déterminer") as string,
+          station: (json.station || null) as Station | null,
         });
       } catch (err) {
         console.error("Erreur:", err);
@@ -100,10 +110,13 @@ export default function ConfirmReservation() {
       await completeReservation();
       
       // Sauvegarder les détails pour la page de succès
-      sessionStorage.setItem('last_reservation', JSON.stringify({
-        ...data,
-        reservationId
-      }));
+      sessionStorage.setItem(
+        "last_reservation", 
+        JSON.stringify({
+          ...data,
+          reservationId,
+        })
+      );
       
       router.push("/reservation/success");
     } catch (err) {
@@ -162,11 +175,12 @@ export default function ConfirmReservation() {
             {timeRemaining > 0 && (
               <div className={`px-4 py-2 rounded-full ${
                 timeRemaining < 120 
-                  ? 'bg-red-50 text-red-700 animate-pulse' 
-                  : 'bg-gray-100 text-gray-700'
+                  ? "bg-red-50 text-red-700 animate-pulse" 
+                  : "bg-gray-100 text-gray-700"
               }`}>
                 <Clock className="inline h-4 w-4 mr-1" />
-                {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                {Math.floor(timeRemaining / 60)}:
+                {(timeRemaining % 60).toString().padStart(2, "0")}
               </div>
             )}
             
@@ -181,9 +195,9 @@ export default function ConfirmReservation() {
         </div>
       </div>
 
-      {/* Contenu principal en grille */}
+      {/* Grille principale */}
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Colonne principale - 2/3 */}
+        {/* Colonne gauche */}
         <div className="lg:col-span-2 space-y-6">
           
           {/* Console */}
@@ -219,8 +233,8 @@ export default function ConfirmReservation() {
             
             {data.jeux.length > 0 ? (
               <div className="grid sm:grid-cols-2 gap-4">
-                {data.jeux.map((jeu, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                {data.jeux.map((jeu) => (
+                  <div key={jeu.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     <div className="relative w-16 h-16 rounded bg-gray-200 flex-shrink-0">
                       {jeu.picture ? (
                         <Image
@@ -249,15 +263,13 @@ export default function ConfirmReservation() {
             )}
           </div>
 
-          {/* Accessoires si présents */}
+          {/* Accessoires */}
           {data.accessoires.length > 0 && (
             <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-lg font-semibold mb-4">
-                Accessoires
-              </h2>
+              <h2 className="text-lg font-semibold mb-4">Accessoires</h2>
               <div className="flex flex-wrap gap-2">
-                {data.accessoires.map((acc, i) => (
-                  <span key={i} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                {data.accessoires.map((acc) => (
+                  <span key={acc.id} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
                     {acc.nom}
                   </span>
                 ))}
@@ -266,7 +278,7 @@ export default function ConfirmReservation() {
           )}
         </div>
 
-        {/* Colonne latérale - Récapitulatif */}
+        {/* Colonne droite */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
             <h2 className="text-lg font-semibold mb-4">Récapitulatif</h2>
@@ -301,14 +313,14 @@ export default function ConfirmReservation() {
               </div>
             </div>
 
-            {/* Messages d'erreur */}
+            {/* Messages */}
             {error && (
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p>Réservation effectuée avec succès</p>
+                <p>Réservation confirmer</p>
               </div>
             )}
 
-            {/* Boutons d'action */}
+            {/* Boutons */}
             <div className="space-y-3">
               <Button
                 onClick={handleConfirm}
@@ -332,12 +344,12 @@ export default function ConfirmReservation() {
                 variant="outline"
                 className="w-full h-12"
                 disabled={isProcessing}
+                onClick={() => router.push("/reservation")}
               >
                 Retour
               </Button>
             </div>
 
-            {/* Note */}
             <p className="text-xs text-gray-500 mt-4 text-center">
               En confirmant, vous acceptez nos conditions d'utilisation
             </p>
