@@ -11,7 +11,7 @@ export default function Stepper() {
     t("reservation.steps.consoleSelection"),
     t("reservation.steps.gamesSelection"),
     t("reservation.steps.accessoriesSelection"),
-    t("reservation.steps.dateSelection"),
+    // t("reservation.steps.dateSelection"),
     t("reservation.steps.courseSelection"),
     t("reservation.steps.confirm"),
   ];

@@ -152,12 +152,9 @@ export default function ReservationLayout() {
           )}
         </div>
 
-        {currentStep > 1 && (
-          <div
-            onClick={() => setCurrentStep(currentStep - 1)}
-            className="cursor-pointer flex flex-row items-center mt-5"
-          >
-            <MoveLeft className="h-6 w-6 mr-2" />
+        { currentStep > 1 && (
+          <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mt-5 w-fit">
+            <MoveLeft className="h-6 w-6 mr-2"/>
             <p>{t("reservation.layout.previousStep")}</p>
           </div>
         )}

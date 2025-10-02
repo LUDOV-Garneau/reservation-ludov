@@ -11,6 +11,7 @@ interface ReservationRow extends RowDataPacket {
   game1_id: number | null;
   game2_id: number | null;
   game3_id: number | null;
+  accessoir_id: number | null;
   expireAt: string;
   createdAt: string;
 
@@ -97,10 +98,12 @@ export async function GET(request: NextRequest) {
     }
 
     const gameIds = [reservation.game1_id, reservation.game2_id, reservation.game3_id].filter(Boolean);
+    const accessories = reservation.accessoir_id ? [reservation.accessoir_id] : [];
 
     let currentStep = 1;
     if (reservation.console_id) currentStep = 2;
     if (gameIds.length > 0) currentStep = 3;
+    if (accessories.length > 0) currentStep = 4;
 
     const responseData = {
       success: true,
@@ -114,6 +117,7 @@ export async function GET(request: NextRequest) {
         image: reservation.console_image || "/placeholder_consoles.jpg",
       },
       games: gameIds,
+      accessories,
       expiresAt: expiry.toISOString(),
       createdAt: new Date(reservation.createdAt).toISOString(),
       currentStep,
@@ -130,7 +134,11 @@ export async function GET(request: NextRequest) {
   } catch (err: unknown) {
     console.error("Error fetching active reservation:", err);
     return NextResponse.json(
-      { success: false, message: "Error fetching reservation", error: err instanceof Error ? err.message : "Unknown error" },
+      {
+        success: false,
+        message: "Error fetching reservation",
+        error: err instanceof Error ? err.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

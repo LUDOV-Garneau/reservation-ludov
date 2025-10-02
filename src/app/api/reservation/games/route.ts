@@ -98,7 +98,7 @@ export async function GET(req: Request) {
         totalPages,
         hasMore,
       },
-      hasMore, // 👈 champ racine requis par ton lazy loader
+      hasMore,
     });
   } catch (err: unknown) {
     console.error("Erreur SQL:", err);
