@@ -26,7 +26,8 @@ export default function ReservationLayout() {
         isReservationCancelled,
         currentStep,
         setCurrentStep,
-        resetTimer
+        resetTimer,
+        cancelReservation
     } = useReservation();
 
     const formatTimeRemaining = (seconds: number): string => {
@@ -44,6 +45,14 @@ export default function ReservationLayout() {
       {
         id: 1,
         component: <ConsoleSelection />
+      },
+      {
+        id: 2,
+        component: <Calendrier />
+      },
+      {
+        id: 3,
+        component: <ConfirmerReservation />
       }
     ];
 
@@ -100,13 +109,18 @@ export default function ReservationLayout() {
           
           {isTimerActive && (
             <div className="flex items-center gap-4 sticky md:mx-0 mx-auto">
-              <div className="bg-gray-50/45 shadow-xl py-3 px-8 rounded-full flex items-center gap-2 sticky">
-                <HourglassIcon 
-                  className={timeRemaining < 300 ? "animate-pulse text-red-500" : "text-gray-600"} 
-                />
-                <p className={`text-2xl ${timeRemaining < 300 ? "text-red-500 font-bold" : ""}`}>
-                  {formatTimeRemaining(timeRemaining)}
-                </p>
+              <div className="bg-gray-50/45 shadow-xl py-3 px-8 rounded-full flex items-center gap-5 sticky">
+                <div className="flex gap-2 items-center">
+                  <HourglassIcon 
+                    className={timeRemaining < 300 ? "animate-pulse text-red-500" : "text-gray-600"} 
+                  />
+                  <p className={`text-2xl ${timeRemaining < 300 ? "text-red-500 font-bold" : ""}`}>
+                    {formatTimeRemaining(timeRemaining)}
+                  </p>
+                </div>
+                <Button variant={"destructive"} className="rounded-full hover:bg-red-900" onClick={() => {
+                  cancelReservation();
+                }}>Annuler</Button>
               </div>
             </div>
           )}

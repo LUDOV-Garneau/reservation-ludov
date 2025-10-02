@@ -1,87 +1,78 @@
 "use client";
 
+// Composants et hooks importés
+import { Console } from "@/types/console";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Search, Loader2, AlertCircle, Check, RefreshCw, Gamepad2 } from "lucide-react";
 
-interface Console {
-  id: number;
-  name: string;
-  nombre: number;
-  image: string;
-}
-
+// Contexte de réservation
 interface ConsoleSelectionGridProps {
-  selectedId: number | null;
-  onSelect: (console: Console) => void;
+  selectedId: number | null; // ID de la console sélectionnée
+  reservedId?: number | null; // ID de la console en cours (optionnel)
+  onSelect: (console: Console) => void; // Fonction pour gérer la sélection d'une console
 }
 
+// État de chargement
 type LoadingState = "idle" | "loading" | "success" | "error";
 
-export default function ConsoleSelectionGrid({
-  selectedId,
-  onSelect,
-}: ConsoleSelectionGridProps) {
-  const [consoles, setConsoles] = useState<Console[]>([]);
-  const [search, setSearch] = useState("");
-  const [loadingState, setLoadingState] = useState<LoadingState>("idle");
-  const [error, setError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
+export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}: ConsoleSelectionGridProps) {
 
+  // États locaux
+  const [consoles, setConsoles] = useState<Console[]>([]); // Liste des consoles
+  const [search, setSearch] = useState(""); // Terme de recherche 
+  const [loadingState, setLoadingState] = useState<LoadingState>("idle"); // État de chargement
+  const [error, setError] = useState<string | null>(null); // Message d'erreur
+  const [retryCount, setRetryCount] = useState(0); // Compteur de tentatives de rechargement
+  const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(selectedId || null); // ID de la console sélectionnée
+
+  // Fonction pour récupérer les consoles depuis l'API
   const fetchConsoles = useCallback(async () => {
+    // Timeout pour la requête
+    const controller = new AbortController();
+    // Timeout de 10 secondes
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+
     try {
-      setLoadingState("loading");
-      setError(null);
+      setLoadingState("loading"); // Début du chargement
+      setError(null); // Réinitialise les erreurs
 
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
-
+      // Requête fetch avec signal d'abandon
       const res = await fetch("/api/reservation/consoles", {
-        signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        signal: controller.signal, // Utilise le signal d'abandon
+        headers: { "Content-Type": "application/json" }, // En-têtes
       });
 
-      clearTimeout(timeoutId);
-      
+      // Parse une seule fois
+      const data = await res.json().catch(() => null);
+
+      // Gestion des erreurs HTTP
       if (!res.ok) {
-        const errorData = await res.json().catch(() => null);
-        throw new Error(
-          errorData?.message || `Erreur ${res.status}: ${res.statusText}`
-        );
+        throw new Error(data?.message || `Erreur ${res.status}: ${res.statusText}`);
       }
-      
-      const data = await res.json();
-      
+
+      // Validation des données
       if (!Array.isArray(data)) {
         throw new Error("Format de données invalide");
       }
 
-      const validatedConsoles: Console[] = data.map((c: Console) => {
-        if (!c.id || !c.name) {
-          console.warn("Console avec données manquantes:", c);
-        }
-
-        return {
+      // Valide et nettoie les données reçues
+      const validatedConsoles: Console[] = data
+        .map((c: Console) => ({
           id: Number(c.id) || 0,
           name: c.name || "Console inconnue",
-          nombre: Number(c.nombre) || Number(c.nombre) || 0,
+          nombre: Number(c.nombre) || 0,
           image: c.image || "/placeholder_consoles.jpg",
-        };
-      }).filter(c => c.id > 0);
+        }))
+        .filter((c) => c.id > 0);
 
-      setConsoles(validatedConsoles);
-      setLoadingState("success");
-      
-      console.log(`${validatedConsoles.length} consoles chargées avec succès`);
-      
+      setSelectedConsoleId(selectedId || null); // Met à jour l'ID de la console sélectionnée
+      setConsoles(validatedConsoles); // Met à jour la liste des consoles
+      setLoadingState("success"); // Chargement réussi
     } catch (err) {
       console.error("Erreur lors du chargement:", err);
-      
       let errorMessage = "Une erreur est survenue";
-      
       if (err instanceof Error) {
         if (err.name === "AbortError") {
           errorMessage = "Le chargement a pris trop de temps";
@@ -91,21 +82,30 @@ export default function ConsoleSelectionGrid({
           errorMessage = err.message;
         }
       }
-      
       setError(errorMessage);
       setLoadingState("error");
+    } finally {
+      clearTimeout(timeoutId);
     }
   }, []);
 
+  // Fonction pour réessayer le chargement
   const retry = useCallback(() => {
     setRetryCount(prev => prev + 1);
     fetchConsoles();
   }, [fetchConsoles]);
 
+  // Récupère les consoles au montage du composant
   useEffect(() => {
     fetchConsoles();
   }, [fetchConsoles]);
 
+  useEffect(() => {
+    setSelectedConsoleId(selectedId);
+  }, [selectedId]);
+
+
+  // Filtre les consoles en fonction de la recherche
   const filteredConsoles = useMemo(() => {
     if (!search.trim()) return consoles;
     
@@ -115,10 +115,13 @@ export default function ConsoleSelectionGrid({
     );
   }, [consoles, search]);
 
+  // Gère la sélection d'une console
   const handleSelect = useCallback((console: Console) => {
+    setSelectedConsoleId(console.id);
     onSelect(console);
   }, [onSelect]);
 
+  // Rendu conditionnel en fonction de l'état de chargement
   if (loadingState === "loading" && consoles.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-4">
@@ -129,6 +132,7 @@ export default function ConsoleSelectionGrid({
     );
   }
 
+  // Affiche les erreurs
   if (loadingState === "error") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-4 p-6">
@@ -165,7 +169,9 @@ export default function ConsoleSelectionGrid({
     );
   }
 
-  const availableConsoles = filteredConsoles.filter(c => c.nombre > 0);
+  const availableConsoles = filteredConsoles.filter(
+    c => c.nombre > 0 || c.id === reservedId
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -216,8 +222,7 @@ export default function ConsoleSelectionGrid({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {availableConsoles.map((console) => {
-          const isSelected = selectedId === console.id;
-          
+          const isSelected = selectedConsoleId === console.id || reservedId === console.id;
           return (
             <div
               key={console.id}
@@ -237,20 +242,24 @@ export default function ConsoleSelectionGrid({
                   fill
                   className="object-cover"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = "/placeholder_consoles.jpg";
-                  }}
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                {console.id === reservedId && (
+                  <div className="absolute top-3 left-3 bg-cyan-600 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md">
+                    Réservée pour vous
+                  </div>
+                )}
 
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <p className="text-white text-lg font-bold line-clamp-2">
                     {console.name}
                   </p>
                   <p className="text-white/90 text-sm mt-1">
-                    {console.nombre} disponible{console.nombre > 1 ? 's' : ''}
+                    {console.nombre > 0
+                      ? `${console.nombre} disponible${console.nombre > 1 ? "s" : ""}`
+                      : "Épuisée"}
                   </p>
                 </div>
 

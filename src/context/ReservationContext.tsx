@@ -1,4 +1,8 @@
+"use client"
 
+import { Console } from "@/types/console";
+
+/// Contexte de réservation
 import React, {
   createContext,
   useContext,
@@ -11,52 +15,56 @@ import React, {
  * Types
  */
 interface ReservationContextType {
-  timeRemaining: number;
-  isTimerActive: boolean;
-  isReservationCancelled: boolean;
-  isLoading: boolean;
-  error: string | null;
-  reservationId: string | null;
-  expiresAt: string | null;
+  timeRemaining: number; // en secondes
+  isTimerActive: boolean; // indique si le timer est actif
+  isReservationCancelled: boolean; // indique si la réservation a été annulée
+  isLoading: boolean; // indique si une opération est en cours
+  error: string | null; // message d'erreur s'il y en a
+  reservationId: string | null; // ID de la réservation temporaire
+  expiresAt: string | null; // date d'expiration de la réservation (ISO)
 
   // Actions Timer
-  startTimer: () => Promise<void>;
-  stopTimer: () => void;
-  resetTimer: () => void;
+  startTimer: () => Promise<void>; // démarre une réservation temporaire
+  stopTimer: () => void; // stoppe le timer localement
+  resetTimer: () => void; // reset complet
 
   // Données liées à la réservation
-  userId: number;
-  selectedConsole: number | null;
-  selectedGames: string[];
-  currentStep: number;
+  userId: number; // ID de l'utilisateur
+  selectedConsole: Console | null; // console sélectionnée
+  selectedGames: string[]; // liste des jeux sélectionnés
+  currentStep: number; // étape actuelle du processus de réservation
 
   // Mutateurs
-  setUserId: (id: number) => void;
-  setSelectedConsole: (console: number) => void;
-  setSelectedGames: (games: string[]) => void;
-  setCurrentStep: (step: number) => void;
+  setUserId: (id: number) => void; // définit l'ID utilisateur
+  setSelectedConsole: (console: Console | null) => void; // définit la console sélectionnée
+  setSelectedGames: (games: string[]) => void; // définit la liste des jeux sélectionnés
+  setCurrentStep: (step: number) => void; // définit l'étape actuelle
 
   // Actions Réservation
-  cancelReservation: () => Promise<void>;
-  completeReservation: () => Promise<void>;
-  clearError: () => void;
+  cancelReservation: () => Promise<void>; // annule la réservation côté serveur
+  completeReservation: () => Promise<void>; // finalise la réservation côté serveur
+  clearError: () => void; // efface le message d'erreur
+  updateReservationConsole: (newConsoleId: number) => Promise<void>; // met à jour la console de la réservation
 }
 
+// Contexte
 const ReservationContext = createContext<ReservationContextType | undefined>(
   undefined
 );
 
+// Props du provider
 interface ReservationProviderProps {
   children: ReactNode;
   timerDuration?: number; // durée du timer en minutes
 }
 
+// État minimal pour la sauvegarde/restauration
 interface MinimalReservationState {
   reservationId: string;
   timestamp: number;
 }
 
-const STORAGE_KEY = "reservation_hold";
+const STORAGE_KEY = "reservation_hold"; // clé pour sessionStorage
 
 /**
  * Provider principal pour gérer tout le cycle de vie d'une réservation
@@ -79,7 +87,7 @@ export function ReservationProvider({
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
   const [userId, setUserId] = useState(0);
-  const [selectedConsole, setSelectedConsole] = useState<number | null>(null);
+  const [selectedConsole, setSelectedConsole] = useState<Console | null>(null);
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -121,8 +129,7 @@ export function ReservationProvider({
         const { reservationId: savedId, timestamp }: MinimalReservationState =
           JSON.parse(savedData);
 
-        // Vérifie si la sauvegarde est trop ancienne (>20 min)
-        if (Date.now() - timestamp > 20 * 60 * 1000) {
+        if (Date.now() - timestamp > 15 * 60 * 1000) {
           clearStorage();
           return;
         }
@@ -146,10 +153,11 @@ export function ReservationProvider({
         }
 
         // Restaure les infos
+        console.log("Restauration réservation:", data);
         setReservationId(data.reservationId);
         setExpiresAt(data.expiresAt);
         setUserId(data.userId);
-        setSelectedConsole(data.consoleId);
+        setSelectedConsole(data.console)
         setSelectedGames(data.games || []);
         setCurrentStep(data.currentStep || 1);
         setIsTimerActive(true);
@@ -222,12 +230,10 @@ export function ReservationProvider({
    */
 
   /** Crée une réservation temporaire */
-  const startTimer = async () => {
-    const
-    if (!userId || !selectedConsole) {
-      console.log("Console sélectionnée:", selectedConsole, "UserId:", userId);
-      console.error("Informations manquantes pour démarrer la réservation");
-      setError("Informations manquantes pour démarrer la réservation");
+  const startTimer = async (consoleId?: number) => {
+    const cid = consoleId ?? selectedConsole?.id;
+    if (!cid) {
+      setError("Aucune console sélectionnée");
       return;
     }
     if (isTimerActive && timeRemaining > 0) return;
@@ -237,7 +243,7 @@ export function ReservationProvider({
       const res = await fetch(`/api/reservation/create-hold-reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, consoleId: selectedConsole }),
+        body: JSON.stringify({ userId, consoleId: cid }),
       });
 
       if (!res.ok) throw new Error("Erreur création réservation");
@@ -298,6 +304,29 @@ export function ReservationProvider({
     }
   };
 
+const updateReservationConsole = async (newConsoleId: number) => {
+  if (!reservationId) return;
+
+  console.log("Mise à jour console réservation:", reservationId, newConsoleId);
+
+  try {
+    const res = await fetch(`/api/reservation/update-hold-reservation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reservationId, newConsoleId }),
+    });
+
+    if (!res.ok) throw new Error("Erreur modification console");
+
+    const data = await res.json();
+    if (data.success) {
+      setSelectedConsole({ ...selectedConsole!, id: newConsoleId }); 
+    }
+  } catch (e) {
+    setError(e instanceof Error ? e.message : "Erreur update console");
+  }
+};
+
   /** Finalise la réservation côté serveur */
   const completeReservation = async () => {
     if (!reservationId || selectedGames.length === 0) {
@@ -353,6 +382,7 @@ export function ReservationProvider({
     cancelReservation,
     completeReservation,
     clearError,
+    updateReservationConsole
   };
 
   if (isRestoring) {
@@ -383,3 +413,4 @@ export function useReservation() {
   }
   return context;
 }
+

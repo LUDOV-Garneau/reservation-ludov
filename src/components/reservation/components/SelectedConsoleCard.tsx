@@ -10,12 +10,14 @@ interface SelectedConsoleCardProps {
   console: Console | null;
   onClear: () => void;
   onSuccess?: () => void;
+  buttonLabel?: string;
 }
 
 export default function SelectedConsoleCard({
   console,
   onClear,
   onSuccess,
+  buttonLabel
 }: SelectedConsoleCardProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +122,7 @@ export default function SelectedConsoleCard({
             </>
           ) : (
             <>
-              Continuer
+              {buttonLabel ?? "Continuer"} {/* 👈 dynamique */}
               <ArrowRight className="ml-2 h-4 w-4" />
             </>
           )}
