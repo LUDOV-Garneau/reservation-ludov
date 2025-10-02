@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
-interface Accessory {
+export interface Accessory {
   id: number;
   name: string;
   console_id: number[];
@@ -28,12 +27,7 @@ export default function AccessorySelectionGrid({
       try {
         const res = await fetch("/api/reservation/accessories");
         const data = await res.json();
-
-        if (Array.isArray(data)) {
-          setAccessories(data);
-        } else {
-          setAccessories([]);
-        }
+        setAccessories(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error("Erreur fetch accessories :", err);
       }
@@ -47,6 +41,7 @@ export default function AccessorySelectionGrid({
 
   return (
     <div className="space-y-4">
+      {/* Recherche */}
       <div className="relative">
         <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
@@ -57,21 +52,20 @@ export default function AccessorySelectionGrid({
         />
       </div>
 
+      {/* Grille */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {filtered.map((a) => (
-          <Card
+          <div
             key={a.id}
             onClick={() => onSelect(a)}
-            className={`cursor-pointer transition ${
+            className={`p-4 rounded-lg border text-center cursor-pointer transition ${
               selectedIds.includes(a.id)
-                ? "ring-2 ring-green-500"
-                : "hover:ring-2 hover:ring-gray-300"
+                ? "border-green-500 bg-green-50"
+                : "border-gray-200 hover:border-gray-400"
             }`}
           >
-            <CardContent className="p-4 text-center">
-              <p className="font-semibold">{a.name}</p>
-            </CardContent>
-          </Card>
+            <p className="font-semibold">{a.name}</p>
+          </div>
         ))}
       </div>
     </div>

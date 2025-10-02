@@ -225,6 +225,32 @@ export function ReservationProvider({
     }
   };
 
+  const updateReservationGames = async (games: number[]) => {
+    if (!reservationId) return;
+
+    try {
+      const res = await fetch(`/api/reservation/update-hold-reservation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reservationId,
+          game1Id: games[0] || null,
+          game2Id: games[1] || null,
+          game3Id: games[2] || null,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Erreur update jeux");
+
+      const data = await res.json();
+      if (data.success) {
+        setSelectedGames(games.map(String)); // on garde la sélection localement
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur update jeux");
+    }
+  };
+
   /**
    * --- Actions publiques ---
    */
@@ -382,7 +408,7 @@ const updateReservationConsole = async (newConsoleId: number) => {
     cancelReservation,
     completeReservation,
     clearError,
-    updateReservationConsole
+    updateReservationConsole,
   };
 
   if (isRestoring) {
