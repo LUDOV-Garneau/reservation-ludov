@@ -17,6 +17,7 @@ import {
 import ConsoleSelection from "@/components/reservation/ConsoleSelection"
 import GamesSelection from "@/components/reservation/GamesSelection"
 import AccessoriesSelection from "@/components/reservation/AccessoriesSelection"
+import CourseSelection from "@/components/reservation/CourseSelection";
 import { useTranslations } from "next-intl";
 
 export default function ReservationLayout() {
@@ -57,6 +58,10 @@ export default function ReservationLayout() {
       {
         id: 3,
         component: <AccessoriesSelection />
+      },
+      {
+        id: 4,
+        component: <CourseSelection />
       }
     ];
 
