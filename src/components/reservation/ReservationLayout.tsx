@@ -17,7 +17,6 @@ import {
 import ConsoleSelection from "@/components/reservation/ConsoleSelection"
 import GamesSelection from "@/components/reservation/GamesSelection"
 import AccessoriesSelection from "@/components/reservation/AccessoriesSelection"
-import Calendrier from "@/components/reservation/Calendrier"
 import { useTranslations } from "next-intl";
 
 export default function ReservationLayout() {
@@ -32,16 +31,6 @@ export default function ReservationLayout() {
   } = useReservation();
 
     const t = useTranslations();
-    
-    const { 
-        timeRemaining, 
-        isTimerActive, 
-        isReservationCancelled,
-        currentStep,
-        setCurrentStep,
-        resetTimer,
-        cancelReservation
-    } = useReservation();
 
     const formatTimeRemaining = (seconds: number): string => {
       const mins = Math.floor(seconds / 60);
