@@ -351,7 +351,7 @@ export default function ConfirmReservation() {
             </div>
 
             <p className="text-xs text-gray-500 mt-4 text-center">
-              En confirmant, vous acceptez nos conditions d'utilisation
+              En confirmant, vous acceptez nos conditions dutilisation
             </p>
           </div>
         </div>
