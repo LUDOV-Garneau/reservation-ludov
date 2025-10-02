@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AccessorySelectionGrid, { Accessory } from "@/components/reservation/components/AccessoriesSelectionGrid";
+import AccessorySelectionGrid, { Accessory as ImportedAccessory } from "@/components/reservation/components/AccessoriesSelectionGrid";
 import SelectedAccessoryCard from "@/components/reservation/components/SelectedAccessoryCard";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
