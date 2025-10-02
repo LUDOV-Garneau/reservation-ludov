@@ -74,6 +74,33 @@ export default function AccessoriesSelection() {
     }
   };
 
+  const handleSave = async () => {
+    if (selected.length === 0) {
+      setError("Sélectionnez au moins un accessoire");
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/reservation/accessories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessoryIds: selected.map((a) => a.id) }),
+      });
+
+      if (!res.ok) throw new Error("Erreur de sauvegarde");
+
+      console.log("Accessoires sauvegardés ✅");
+    } catch (err) {
+      setError("Impossible de sauvegarder les accessoires.");
+      console.error(err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Panneau gauche */}
