@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
 
     const [rows] = await pool.query(
-      "SELECT id, email, password as password_hash, firstname as name, isAdmin FROM users WHERE email = ? LIMIT 1",
+      "SELECT id, email, password as password_hash, firstname as name, isAdmin FROM users WHERE email = ? AND password IS NOT NULL LIMIT 1",
       [email]
     );
 
@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
+    console.log(error);
     return NextResponse.json(
       { message: "Une erreur s'est produite." },
       { status: 500 }
