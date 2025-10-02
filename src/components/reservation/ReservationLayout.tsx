@@ -17,7 +17,6 @@ import {
 import ConsoleSelection from "@/components/reservation/ConsoleSelection"
 import GamesSelection from "@/components/reservation/GamesSelection"
 import AccessoriesSelection from "@/components/reservation/AccessoriesSelection"
-import Calendrier from "@/components/reservation/Calendrier"
 
 export default function ReservationLayout() {
 
