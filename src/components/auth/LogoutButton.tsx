@@ -39,12 +39,11 @@ export default function LogoutButton({ name }: LogoutButtonProps) {
       </PopoverTrigger>
       <PopoverContent
         asChild
-        className="border-2 border-black"
         onClick={logout}
       >
         <Button
           disabled={isLoading}
-          className="w-fit text-white font-bold bg-red-400 hover:bg-red-300 border-2 border-black"
+          className="w-fit text-white font-bold bg-red-600 hover:bg-red-500"
         >
           {isLoading ? t("header.logoutLoading") : t("header.logout")}
         </Button>
