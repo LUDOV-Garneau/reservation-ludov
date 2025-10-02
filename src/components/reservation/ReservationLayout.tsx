@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/breadcrumb"
 
 import ConsoleSelection from "@/components/reservation/ConsoleSelection"
-import GamesSelection from "./GamesSelection"
+import GamesSelection from "@/components/reservation/GamesSelection"
+import AccessoriesSelection from "@/components/reservation/AccessoriesSelection"
 import Calendrier from "@/components/reservation/Calendrier"
 
 export default function ReservationLayout() {
@@ -49,6 +50,14 @@ export default function ReservationLayout() {
       {
         id: 2,
         component: <GamesSelection />
+      },
+      {
+        id: 3,
+        component: <AccessoriesSelection />
+      },
+      {
+        id: 4,
+        component: <Calendrier />
       }
     ];
 

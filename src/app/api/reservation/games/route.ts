@@ -1,31 +1,34 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { RowDataPacket } from "mysql2";
+
+interface GameRow extends RowDataPacket {
+  id: number;
+  titre: string;
+  author: string | null;
+  picture: string | null;
+  available: number;
+  biblio_id: number | null;
+}
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '12');
-    const search = searchParams.get('search') || '';
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "12", 10);
+    const search = searchParams.get("search") || "";
 
-    // Calculer l'offset pour la pagination
     const offset = (page - 1) * limit;
 
     let query: string;
-    let queryParams: any[];
+    let queryParams: (string | number)[];
     let countQuery: string;
-    let countParams: any[];
+    let countParams: (string | number)[];
 
     if (search) {
-      // Requête avec recherche
       query = `
-        SELECT 
-          id,
-          titre,
-          author,
-          picture,
-          available,
-          biblio_id
+        SELECT DISTINCT
+          id, titre, author, picture, available, biblio_id
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
           AND available > 0
@@ -38,12 +41,10 @@ export async function GET(req: Request) {
           titre ASC
         LIMIT ? OFFSET ?
       `;
-      
       const searchPattern = `%${search}%`;
       const exactPattern = `${search}%`;
       queryParams = [searchPattern, exactPattern, searchPattern, limit, offset];
-      
-      // Requête pour compter le total avec recherche
+
       countQuery = `
         SELECT COUNT(*) as total
         FROM games
@@ -52,23 +53,16 @@ export async function GET(req: Request) {
       `;
       countParams = [searchPattern];
     } else {
-      // Requête sans recherche - tous les jeux disponibles
       query = `
-        SELECT 
-          id,
-          titre,
-          author,
-          picture,
-          available,
-          biblio_id
+        SELECT DISTINCT
+          id, titre, author, picture, available, biblio_id
         FROM games
         WHERE available > 0
         ORDER BY titre ASC
         LIMIT ? OFFSET ?
       `;
       queryParams = [limit, offset];
-      
-      // Requête pour compter le total sans recherche
+
       countQuery = `
         SELECT COUNT(*) as total
         FROM games
@@ -77,48 +71,42 @@ export async function GET(req: Request) {
       countParams = [];
     }
 
-    // Exécuter les requêtes en parallèle
-    const [gamesResult, countResult]: any = await Promise.all([
-      pool.query(query, queryParams),
-      pool.query(countQuery, countParams)
-    ]);
+    const [gamesRows] = await pool.query<GameRow[]>(query, queryParams);
+    const [countRows] = await pool.query<RowDataPacket[]>(countQuery, countParams);
 
-    const games = gamesResult[0];
-    const totalCount = countResult[0][0]?.total || 0;
+    const totalCount = (countRows[0] as { total: number })?.total || 0;
 
-    // Formater les données
-    const formattedGames = games.map((game: any) => ({
+    const formattedGames = gamesRows.map((game) => ({
       id: game.id,
       titre: game.titre || "Jeu sans nom",
       author: game.author || "",
       picture: game.picture || "/placeholder_games.jpg",
       available: Number(game.available) || 0,
-      biblio_id: game.biblio_id
+      biblio_id: game.biblio_id,
     }));
 
-    // Calculer si il y a plus de pages
-    const hasMore = (page * limit) < totalCount;
+    const hasMore = page * limit < totalCount;
     const totalPages = Math.ceil(totalCount / limit);
 
     return NextResponse.json({
+      success: true,
       games: formattedGames,
       pagination: {
         page,
         limit,
         total: totalCount,
         totalPages,
-        hasMore
+        hasMore,
       },
-      hasMore // Pour compatibilité avec le frontend
+      hasMore, // 👈 champ racine requis par ton lazy loader
     });
-
   } catch (err: unknown) {
     console.error("Erreur SQL:", err);
     return NextResponse.json(
-      { 
+      {
         success: false,
         message: "Erreur lors de la récupération des jeux",
-        error: err instanceof Error ? err.message : "Unknown error"
+        error: err instanceof Error ? err.message : "Unknown error",
       },
       { status: 500 }
     );
