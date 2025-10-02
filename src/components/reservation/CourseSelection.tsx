@@ -23,7 +23,7 @@ const COURS_AUTRE: Cours = {
   nom_cours: "Autre",
 };
 
-export default function SelectionCours() {
+export default function CourseSelection() {
   const [cours, setCours] = useState<Cours[]>([]);
   const [selectedCours, setSelectedCours] = useState("");
   const [loading, setLoading] = useState(true);
@@ -31,7 +31,7 @@ export default function SelectionCours() {
   useEffect(() => {
     async function fetchCours() {
       try {
-        const res = await fetch("/api/reservation/courses");
+        const res = await fetch("/api/reservation/cours");
         if (!res.ok) throw new Error("Erreur lors du chargement des cours");
         const data = await res.json();
         setCours(data);

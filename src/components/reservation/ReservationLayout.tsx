@@ -16,7 +16,6 @@ import {
 
 import ConsoleSelection from "@/components/reservation/ConsoleSelection"
 import Calendrier from "@/components/reservation/Calendrier"
-import ConfirmerReservation from "@/components/reservation/ConfirmerReservation"
 
 export default function ReservationLayout() {
 
@@ -49,10 +48,6 @@ export default function ReservationLayout() {
       {
         id: 2,
         component: <Calendrier />
-      },
-      {
-        id: 3,
-        component: <ConfirmerReservation />
       }
     ];
 
