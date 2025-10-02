@@ -390,28 +390,61 @@ const updateReservationConsole = async (newConsoleId: number) => {
 };
 
   /** Finalise la réservation côté serveur */
+// Extrait de la fonction completeReservation corrigée pour le ReservationContext
+
+/** Finalise la réservation côté serveur */
   const completeReservation = async () => {
-    if (!reservationId || selectedGames.length === 0) {
-      setError("Informations manquantes");
+    if (!reservationId) {
+      setError("Aucune réservation à finaliser");
       return;
     }
+    
     setIsLoading(true);
+    setError(null);
+    
     try {
       const res = await fetch(`/api/reservation/complete-reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           reservationId,
-          games: selectedGames,
-          userId,
-          consoleId: selectedConsole,
+          userId: userId || null,
+          consoleId: selectedConsole?.id || null,
+          games: selectedGames
         }),
       });
-      if (!res.ok) throw new Error("Erreur finalisation");
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => null);
+        throw new Error(errorData?.message || "Erreur lors de la finalisation");
+      }
+      
+      const data = await res.json();
+      
+      // Sauvegarder les détails pour la page de succès
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('last_reservation', JSON.stringify({
+          reservationId: data.reservationId || reservationId,
+          finalReservationId: data.finalReservationId,
+          console: selectedConsole,
+          games: selectedGames,
+          date: new Date().toLocaleDateString('fr-CA'),
+          heure: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
+        }));
+      }
+      
+      // Réinitialiser le contexte
       setIsTimerActive(false);
+      setReservationId(null);
+      setExpiresAt(null);
       clearStorage();
+      
+      // La navigation sera gérée par le composant appelant
+      return data;
+      
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur finalisation");
+      throw e; // Re-throw pour que le composant puisse gérer l'erreur
     } finally {
       setIsLoading(false);
     }

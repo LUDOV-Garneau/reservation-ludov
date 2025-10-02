@@ -1,232 +1,361 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock9 } from "lucide-react";
-import CarteElement from "@/components/reservation/components/CarteElement";
+import { 
+  Calendar, 
+  Clock, 
+  Gamepad2, 
+  Package, 
+  AlertCircle,
+  CheckCircle2,
+  Loader2
+} from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import Image from "next/image";
 
-type Jeu = { nom: string };
-type Console = { nom: string; id: number };
-type Accessoire = { nom: string };
+// ---------------------
+// Types
+// ---------------------
+interface Game {
+  id: number;
+  nom: string;
+  picture?: string;
+  author?: string;
+}
 
-type ReservationData = {
-  jeux: Jeu[];
-  console: Console;
-  accessoires?: Accessoire[];
-  cours: string;
+interface Console {
+  id: number;
+  nom: string;
+  image?: string;
+}
+
+interface Accessoire {
+  id: number;
+  nom: string;
+}
+
+interface Station {
+  id: number;
+  nom: string;
+}
+
+interface ReservationData {
+  jeux: Game[];
+  console: Console | null;
+  accessoires: Accessoire[];
   date: string;
   heure: string;
-};
+  station?: Station | null;
+}
 
 export default function ConfirmReservation() {
-  const { reservationId, completeReservation, isLoading, error, clearError } =
-    useReservation();
-
-  const t = useTranslations();
-
-  const [jeux, setJeux] = useState<Jeu[]>([]);
-  const [console, setConsole] = useState<Console | null>(null);
-  const [accessoires, setAccessoires] = useState<Accessoire[]>([]);
-  const [cours, setCours] = useState("");
-  const [date, setDate] = useState("");
-  const [heure, setHeure] = useState("");
-
-  const [loadingData, setLoadingData] = useState(false);
+  const { 
+    reservationId, 
+    completeReservation, 
+    isLoading: contextLoading,
+    selectedConsole,
+    timeRemaining
+  } = useReservation();
 
   const router = useRouter();
+  const [data, setData] = useState<ReservationData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  /**
-   * Fetch des données détaillées de la réservation
-   */
+  // Fetch des données de réservation
   useEffect(() => {
-    if (reservationId) {
-      getReservation(reservationId);
-    }
-  }, [reservationId]);
+    const fetchReservation = async () => {
+      if (!reservationId) {
+        setError("Aucune réservation active");
+        setLoading(false);
+        return;
+      }
 
-  async function getReservation(id: string) {
-    setLoadingData(true);
-    try {
-      const res = await fetch(`/api/reservation/get-reservation?id=${id}`);
-      if (!res.ok) throw new Error("Impossible de charger la réservation");
-      const data: ReservationData = await res.json();
+      try {
+        const res = await fetch(`/api/reservation/get-reservation?id=${reservationId}`);
+        if (!res.ok) throw new Error("Erreur chargement");
+        
+        const json = await res.json();
 
-      setJeux(data.jeux || []);
-      setConsole(data.console || null);
-      setAccessoires(data.accessoires || []);
-      setCours(data.cours || "");
-      setDate(data.date || "");
-      setHeure(data.heure || "");
-    } catch {
-    } finally {
-      setLoadingData(false);
-    }
-  }
+        setData({
+          jeux: (json.jeux || []) as Game[],
+          console: (json.console || selectedConsole || null) as Console | null,
+          accessoires: (json.accessoires || []) as Accessoire[],
+          date: (json.date || new Date().toLocaleDateString("fr-CA")) as string,
+          heure: (json.heure || "À déterminer") as string,
+          station: (json.station || null) as Station | null,
+        });
+      } catch (err) {
+        console.error("Erreur:", err);
+        setError("Impossible de charger les détails");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  /**
-   * Confirmation finale
-   */
+    fetchReservation();
+  }, [reservationId, selectedConsole]);
+
+  // Confirmation finale
   const handleConfirm = async () => {
-    if (!reservationId) {
-      return;
-    }
-
+    if (!reservationId || !data) return;
+    
+    setConfirmLoading(true);
+    setError(null);
+    
     try {
       await completeReservation();
-      router.push("/reservation/success"); // adapte le chemin à ton app
-    } catch {}
+      
+      // Sauvegarder les détails pour la page de succès
+      sessionStorage.setItem(
+        "last_reservation", 
+        JSON.stringify({
+          ...data,
+          reservationId,
+        })
+      );
+      
+      router.push("/reservation/success");
+    } catch (err) {
+      console.error("Erreur confirmation:", err);
+      setError("Erreur lors de la confirmation");
+      setConfirmLoading(false);
+    }
   };
 
-  /**
-   * Gestion d’erreur provenant du contexte
-   */
-  useEffect(() => {
-    if (error) {
-      clearError();
-    }
-  }, [error, clearError]);
-
-  /**
-   * Loading global
-   */
-  if (loadingData) {
+  // États de chargement
+  if (loading) {
     return (
-      <div className="mx-auto max-w-6xl p-4 md:p-6">
-        <div className="flex flex-col items-center justify-center py-20">
-          <div className="inline-block h-16 w-16 animate-spin rounded-full border-4 border-cyan-400 border-r-transparent mb-6"></div>
-          <p className="text-xl text-gray-600 font-medium">
-            {t("reservation.confirm.loadingReservation")}
-          </p>
-          <p className="text-sm text-gray-400 mt-2">
-            {t("reservation.confirm.pleaseWait")}
-          </p>
+      <div className="min-h-[600px] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-cyan-500 mx-auto mb-4" />
+          <p className="text-lg text-gray-600">Chargement de votre réservation...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="mx-auto max-w-6xl p-4 md:p-6">
-      {/* --- Header réservation --- */}
-      <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <h2 className="text-3xl font-bold">
-          {t("reservation.confirm.yourReservation")}
-        </h2>
-
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-          {/* Date + heure */}
-          {date && heure && (
-            <span className="inline-flex items-center gap-3 rounded-md border bg-white px-3 py-1 text-sm shadow-sm">
-              <span className="inline-flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {date}
-              </span>
-              <span className="text-gray-400">•</span>
-              <span className="inline-flex items-center gap-1">
-                <Clock9 className="h-4 w-4" />
-                {heure}
-              </span>
-            </span>
-          )}
-
-          {/* Bouton confirmer */}
-          <Button
-            type="button"
-            onClick={handleConfirm}
-            disabled={isLoading}
-            aria-busy={isLoading}
-            className="h-11 w-full sm:w-auto bg-cyan-300 text-black hover:bg-cyan-500"
-          >
-            {isLoading
-              ? t("reservation.confirm.confirmationInProgress")
-              : t("reservation.confirm.confirmButton")}
+  if (error && !data) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-lg text-gray-700 mb-4">{error}</p>
+          <Button onClick={() => router.push("/reservation")} variant="outline">
+            Retour
           </Button>
         </div>
       </div>
+    );
+  }
 
-      {/* --- Jeux & console --- */}
-      <div className="mb-3 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6">
-        <h3 className="text-xl font-medium">
-          {t("reservation.confirm.selectedGames")}
-        </h3>
-        <h3 className="text-xl font-medium hidden md:block">
-          {t("reservation.confirm.selectedConsole")}
-        </h3>
+  if (!data) return null;
+
+  const isProcessing = confirmLoading || contextLoading;
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* Header avec timer */}
+      <div className="mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Confirmer votre réservation
+            </h1>
+            <p className="text-gray-600 mt-2">
+              Vérifiez les détails avant de valider
+            </p>
+          </div>
+          
+          {/* Timer et infos */}
+          <div className="flex flex-wrap items-center gap-3">
+            {timeRemaining > 0 && (
+              <div className={`px-4 py-2 rounded-full ${
+                timeRemaining < 120 
+                  ? "bg-red-50 text-red-700 animate-pulse" 
+                  : "bg-gray-100 text-gray-700"
+              }`}>
+                <Clock className="inline h-4 w-4 mr-1" />
+                {Math.floor(timeRemaining / 60)}:
+                {(timeRemaining % 60).toString().padStart(2, "0")}
+              </div>
+            )}
+            
+            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="font-medium">{data.date}</span>
+              <span className="text-gray-400">|</span>
+              <Clock className="h-4 w-4 text-gray-500" />
+              <span className="font-medium">{data.heure}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6 items-start">
-        {/* Jeux */}
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          {jeux.length > 0 ? (
-            jeux.map((jeu, index) => (
-              <CarteElement key={`${jeu.nom}-${index}`} nom={jeu.nom} />
-            ))
-          ) : (
-            <p className="text-gray-500 col-span-full">
-              {t("reservation.confirm.noGameSelected")}
-            </p>
+      {/* Grille principale */}
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Colonne gauche */}
+        <div className="lg:col-span-2 space-y-6">
+          
+          {/* Console */}
+          {data.console && (
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Gamepad2 className="h-5 w-5 text-cyan-500" />
+                Console sélectionnée
+              </h2>
+              <div className="flex items-center gap-4">
+                <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
+                  <Image
+                    src={data.console.image || "/placeholder_consoles.jpg"}
+                    alt={data.console.nom}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <p className="text-xl font-medium">{data.console.nom}</p>
+                  <p className="text-sm text-gray-500">Console de jeu</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Jeux */}
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Package className="h-5 w-5 text-cyan-500" />
+              Jeux sélectionnés ({data.jeux.length})
+            </h2>
+            
+            {data.jeux.length > 0 ? (
+              <div className="grid sm:grid-cols-2 gap-4">
+                {data.jeux.map((jeu) => (
+                  <div key={jeu.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="relative w-16 h-16 rounded bg-gray-200 flex-shrink-0">
+                      {jeu.picture ? (
+                        <Image
+                          src={jeu.picture}
+                          alt={jeu.nom}
+                          fill
+                          className="object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Gamepad2 className="h-6 w-6 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{jeu.nom}</p>
+                      {jeu.author && (
+                        <p className="text-xs text-gray-500">{jeu.author}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500">Aucun jeu sélectionné</p>
+            )}
+          </div>
+
+          {/* Accessoires */}
+          {data.accessoires.length > 0 && (
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold mb-4">Accessoires</h2>
+              <div className="flex flex-wrap gap-2">
+                {data.accessoires.map((acc) => (
+                  <span key={acc.id} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                    {acc.nom}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
         </div>
 
-        {/* Console */}
-        <div className="md:hidden mb-4">
-          <h3 className="text-xl font-medium mb-3">
-            {t("reservation.confirm.selectedConsole")}
-          </h3>
+        {/* Colonne droite */}
+        <div className="lg:col-span-1">
+          <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
+            <h2 className="text-lg font-semibold mb-4">Récapitulatif</h2>
+            
+            <div className="space-y-4 mb-6">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Console</span>
+                <span className="font-medium">
+                  {data.console ? "1" : "0"}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Jeux</span>
+                <span className="font-medium">{data.jeux.length}</span>
+              </div>
+              {data.accessoires.length > 0 && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Accessoires</span>
+                  <span className="font-medium">{data.accessoires.length}</span>
+                </div>
+              )}
+              
+              <div className="border-t pt-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Date</span>
+                  <span className="font-medium">{data.date}</span>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-gray-600">Heure</span>
+                  <span className="font-medium">{data.heure}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Messages */}
+            {error && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p>Réservation confirmer</p>
+              </div>
+            )}
+
+            {/* Boutons */}
+            <div className="space-y-3">
+              <Button
+                onClick={handleConfirm}
+                disabled={isProcessing}
+                className="w-full h-12 bg-cyan-500 hover:bg-cyan-600 text-white font-medium"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Confirmation...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="mr-2 h-5 w-5" />
+                    Confirmer la réservation
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                variant="outline"
+                className="w-full h-12"
+                disabled={isProcessing}
+                onClick={() => router.push("/reservation")}
+              >
+                Retour
+              </Button>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-4 text-center">
+              En confirmant, vous acceptez nos conditions dutilisation
+            </p>
+          </div>
         </div>
-        {console ? (
-          <CarteElement nom={console.nom} />
-        ) : (
-          <p className="text-gray-500">
-            {t("reservation.confirm.noConsoleSelected")}
-          </p>
-        )}
       </div>
-
-      {/* --- Accessoires --- */}
-      {!!accessoires.length && (
-        <div className="mb-6">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xl font-medium">
-              {t("reservation.confirm.accessories")}
-            </h3>
-            {accessoires.map((acc, index) => (
-              <p key={`${acc.nom}-${index}`}>
-                {acc.nom}
-                {index < accessoires.length - 1 && ", "}
-              </p>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* --- Cours --- */}
-      {cours && (
-        <div className="mb-8">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xl font-medium">
-              {t("reservation.confirm.courses")}
-            </h3>
-            <p>{cours}</p>
-          </div>
-        </div>
-      )}
-
-      {/* --- Bouton confirmer bas de page --- */}
-      <Button
-        type="button"
-        onClick={handleConfirm}
-        disabled={isLoading}
-        aria-busy={isLoading}
-        className="h-11 w-full bg-cyan-300 text-black hover:bg-cyan-500"
-      >
-        {isLoading
-          ? t("reservation.confirm.confirmationInProgress")
-          : t("reservation.confirm.confirmButton")}
-      </Button>
     </div>
   );
 }

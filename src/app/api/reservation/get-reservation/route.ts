@@ -1,212 +1,243 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import pool from "@/lib/db";
-import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/jwt";
 import { RowDataPacket } from "mysql2";
 
+// ---------------------
+// Interfaces DB
+// ---------------------
 interface ReservationRow extends RowDataPacket {
-  id: string;
-  user_id: number;
-  console_id: number;
-  game1_id: number | null;
-  game2_id: number | null;
-  game3_id: number | null;
-  station_id: number | null;
-  accessoir_id: number | null;
-  expireAt: Date;
-  date: Date | null;
-  createdAt: Date;
+  reservationId: number;
+  userId: number;
+  consoleId: number | null;
+  game1Id: number | null;
+  game2Id: number | null;
+  game3Id: number | null;
+  stationId: number | null;
+  accessoirId: number | null;
+  date: string | null;
+  expireAt: string;
+  createdAt: string;
+  consoleName: string | null;
+  consoleImage: string | null;
 }
 
 interface GameRow extends RowDataPacket {
   id: number;
-  nom: string;
+  titre: string;
+  picture: string;
+  author: string;
 }
 
-interface ConsoleRow extends RowDataPacket {
+interface StationRow extends RowDataPacket {
   id: number;
-  nom: string;
+  name: string;
 }
 
 interface AccessoireRow extends RowDataPacket {
   id: number;
+  name: string;
+}
+
+// ---------------------
+// Interfaces API
+// ---------------------
+interface Jeu {
+  id: number;
+  nom: string;
+  picture: string;
+  author: string;
+}
+
+interface ConsoleInfo {
+  id: number;
+  nom: string;
+  image: string | null;
+}
+
+interface Accessoire {
+  id: number;
   nom: string;
 }
 
-export async function GET(request: NextRequest) {
+interface Station {
+  id: number;
+  nom: string;
+}
+
+interface ReservationResponse {
+  success: boolean;
+  reservationId: number;
+  jeux: Jeu[];
+  console: ConsoleInfo | null;
+  accessoires: Accessoire[];
+  station: Station | null;
+  cours: string;
+  date: string | null;
+  heure: string | null;
+  expireAt: string;
+  userId: number;
+}
+
+export async function GET(req: Request) {
   try {
-    // Get reservationId from query params
-    const reservationId =
-      request.nextUrl.searchParams.get("id") ||
-      request.nextUrl.searchParams.get("reservationId");
+    const { searchParams } = new URL(req.url);
+    const reservationId = searchParams.get("id");
 
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("SESSION");
-
-    let user = null;
-    try {
-      const token = sessionCookie?.value;
-      if (token != undefined) {
-        user = verifyToken(token);
-      }
-    } catch (error) {
-      console.error("Token verification error:", error);
-    }
-
-    // Validate inputs
     if (!reservationId) {
       return NextResponse.json(
         {
           success: false,
-          message: "reservationId is required",
+          message: "Reservation ID is required",
         },
         { status: 400 }
       );
     }
 
-    if (!user || !user.id) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "User not authenticated",
-        },
-        { status: 401 }
-      );
-    }
-
-    // Fetch reservation from reservation_hold table
-    const [reservationRows] = await pool.query<ReservationRow[]>(
-      "SELECT * FROM reservation_hold WHERE id = ?",
+    // ---------------------
+    // Récupération réservation
+    // ---------------------
+    const [reservations] = await pool.query<ReservationRow[]>(
+      `SELECT 
+        rh.id as reservationId,
+        rh.user_id as userId,
+        rh.console_id as consoleId,
+        rh.game1_id as game1Id,
+        rh.game2_id as game2Id,
+        rh.game3_id as game3Id,
+        rh.station_id as stationId,
+        rh.accessoir_id as accessoirId,
+        rh.date,
+        rh.expireAt,
+        rh.createdAt,
+        c.name as consoleName,
+        c.picture as consoleImage
+      FROM reservation_hold rh
+      LEFT JOIN consoles c ON rh.console_id = c.id
+      WHERE rh.id = ?`,
       [reservationId]
     );
 
-    if (!Array.isArray(reservationRows) || reservationRows.length === 0) {
+    if (!reservations || reservations.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          message: "Reservation not found",
+          message: "Réservation non trouvée",
         },
         { status: 404 }
       );
     }
 
-    const reservation = reservationRows[0];
+    const reservation = reservations[0];
 
-    // Verify that the reservation belongs to the authenticated user
-    if (reservation.user_id !== Number(user.id)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Unauthorized access to this reservation",
-        },
-        { status: 403 }
-      );
-    }
+    // ---------------------
+    // Jeux
+    // ---------------------
+    const gameIds = [reservation.game1Id, reservation.game2Id, reservation.game3Id].filter(
+      (id): id is number => id !== null
+    );
 
-    // Fetch games based on game1_id, game2_id, game3_id
-    const gameIds = [
-      reservation.game1_id,
-      reservation.game2_id,
-      reservation.game3_id,
-    ].filter((id) => id !== null);
-
-    let games: GameRow[] = [];
+    let jeux: Jeu[] = [];
     if (gameIds.length > 0) {
-      try {
-        const placeholders = gameIds.map(() => "?").join(",");
-        // Try common column names: nom, name, titre, title
-        const [gameRows] = await pool.query<GameRow[]>(
-          `SELECT * FROM jeux WHERE id IN (${placeholders})`,
-          gameIds
-        );
-        games = gameRows;
-      } catch (error) {
-        console.error("Error fetching games:", error);
-      }
-    }
-
-    // Fetch console information
-    let consoleRows: ConsoleRow[] = [];
-    try {
-      const [rows] = await pool.query<ConsoleRow[]>(
-        "SELECT * FROM consoles WHERE id = ?",
-        [reservation.console_id]
+      const [games] = await pool.query<GameRow[]>(
+        `SELECT id, titre, picture, author FROM games 
+         WHERE id IN (${gameIds.map(() => "?").join(",")})`,
+        gameIds
       );
-      consoleRows = rows;
-    } catch (error) {
-      console.error("Error fetching console:", error);
+
+      jeux = games.map((g) => ({
+        id: g.id,
+        nom: g.titre,
+        picture: g.picture,
+        author: g.author,
+      }));
     }
 
-    // Fetch accessory if exists
-    let accessoires: AccessoireRow[] = [];
-    if (reservation.accessoir_id) {
-      try {
-        const [accessoireRows] = await pool.query<AccessoireRow[]>(
-          "SELECT * FROM accessoires WHERE id = ?",
-          [reservation.accessoir_id]
-        );
-        accessoires = accessoireRows;
-      } catch (error) {
-        console.error("Error fetching accessory:", error);
+    // ---------------------
+    // Station
+    // ---------------------
+    let station: Station | null = null;
+    if (reservation.stationId) {
+      const [stations] = await pool.query<StationRow[]>(
+        `SELECT id, name FROM stations WHERE id = ?`,
+        [reservation.stationId]
+      );
+      if (stations.length > 0) {
+        station = {
+          id: stations[0].id,
+          nom: stations[0].name,
+        };
       }
     }
 
-    const getNameField = (
-      obj: GameRow | ConsoleRow | AccessoireRow
-    ): string => {
-      return obj?.nom || "Unknown";
-    };
+    // ---------------------
+    // Accessoires
+    // ---------------------
+    let accessoires: Accessoire[] = [];
+    if (reservation.accessoirId) {
+      const [accessoiresData] = await pool.query<AccessoireRow[]>(
+        `SELECT id, name FROM accessoires WHERE id = ?`,
+        [reservation.accessoirId]
+      );
+      if (accessoiresData.length > 0) {
+        accessoires = [
+          {
+            id: accessoiresData[0].id,
+            nom: accessoiresData[0].name,
+          },
+        ];
+      }
+    }
 
-    const now = new Date();
-    if (new Date(reservation.expireAt) < now) {
+    // ---------------------
+    // Format date
+    // ---------------------
+    const dateReservation = reservation.date ? new Date(reservation.date) : null;
+    const dateFormatted = dateReservation ? dateReservation.toLocaleDateString("fr-CA") : null;
+    const heureFormatted = dateReservation
+      ? dateReservation.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" })
+      : null;
+
+    // Vérifier l'expiration de la réservation
+    if (reservation.expireAt && new Date(reservation.expireAt) < new Date()) {
       return NextResponse.json(
         {
           success: false,
-          message: "Reservation has expired",
+          message: "La réservation a expiré"
         },
         { status: 410 }
       );
     }
-
-    const responseData = {
-      jeux: games.map((game) => ({ nom: getNameField(game) })),
-      console:
-        consoleRows.length > 0
-          ? {
-              id: consoleRows[0].id,
-              nom: getNameField(consoleRows[0]),
-            }
-          : null,
-      accessoires: accessoires.map((acc) => ({ nom: getNameField(acc) })),
-      cours: "", // Not used in hold reservations
-      date: reservation.date
-        ? new Date(reservation.date).toISOString().split("T")[0]
+    // ---------------------
+    // Réponse finale
+    // ---------------------
+    const response: ReservationResponse = {
+      success: true,
+      reservationId: reservation.reservationId,
+      jeux,
+      console: reservation.consoleId
+        ? {
+            id: reservation.consoleId,
+            nom: reservation.consoleName || "Console",
+            image: reservation.consoleImage,
+          }
         : null,
-      heure: reservation.date
-        ? new Date(reservation.date).toLocaleTimeString("fr-FR", {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "",
-      status: "hold",
-      reservationId: reservation.id,
-      expiresAt: new Date(reservation.expireAt).toISOString(),
-      stationId: reservation.station_id,
+      accessoires,
+      station,
+      cours: "", // à adapter si tu ajoutes les cours
+      date: dateFormatted,
+      heure: heureFormatted,
+      expireAt: reservation.expireAt,
+      userId: reservation.userId,
     };
 
-    console.log("Reservation data retrieved:", responseData);
-
-    return NextResponse.json(responseData, { status: 200 });
+    return NextResponse.json(response);
   } catch (err: unknown) {
     console.error("Erreur SQL:", err);
     return NextResponse.json(
       {
         success: false,
         message: "Erreur lors de la récupération de la réservation",
-        error:
-          process.env.NODE_ENV === "development" && err instanceof Error
-            ? err.message
-            : undefined,
+        error: err instanceof Error ? err.message : "Unknown error",
       },
       { status: 500 }
     );
