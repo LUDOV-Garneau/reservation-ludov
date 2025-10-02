@@ -4,7 +4,15 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Console } from "@/types/console";
-import { Gamepad2Icon, Loader2, Check, X, AlertCircle, ArrowRight } from "lucide-react";
+import {
+  Gamepad2Icon,
+  Loader2,
+  Check,
+  X,
+  AlertCircle,
+  ArrowRight,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface SelectedConsoleCardProps {
   console: Console | null;
@@ -17,8 +25,10 @@ export default function SelectedConsoleCard({
   console,
   onClear,
   onSuccess,
-  buttonLabel
+  buttonLabel,
 }: SelectedConsoleCardProps) {
+  const t = useTranslations();
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -27,9 +37,11 @@ export default function SelectedConsoleCard({
     return (
       <div className="p-8 border-dashed border-2 border-gray-300 rounded-2xl flex flex-col items-center gap-3 w-full">
         <Gamepad2Icon className="h-12 w-12 text-gray-400" />
-        <p className="text-center text-lg font-medium">Aucune console sélectionnée</p>
+        <p className="text-center text-lg font-medium">
+          {t("reservation.console.noneSelected")}
+        </p>
         <p className="text-center text-gray-500 text-sm">
-          Choisissez une console pour commencer
+          {t("reservation.console.chooseToStart")}
         </p>
       </div>
     );
@@ -41,20 +53,22 @@ export default function SelectedConsoleCard({
     setSuccess(false);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simule une attente
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
       setSuccess(true);
 
-      if(onSuccess) {
+      if (onSuccess) {
         setTimeout(() => {
           onSuccess();
         }, 1500);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Une erreur est survenue");
+      setError(
+        e instanceof Error ? e.message : t("reservation.console.errorOccurred")
+      );
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="w-full space-y-4">
@@ -69,13 +83,13 @@ export default function SelectedConsoleCard({
             target.src = "/images/placeholder.png";
           }}
         />
-        
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-        
+
         <button
           onClick={onClear}
           className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
-          aria-label="Changer de console"
+          aria-label={t("reservation.console.changeConsole")}
         >
           <X className="h-4 w-4" />
         </button>
@@ -83,14 +97,16 @@ export default function SelectedConsoleCard({
         {success && (
           <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
             <Check className="h-3.5 w-3.5" />
-            <span className="text-sm font-medium">Enregistré</span>
+            <span className="text-sm font-medium">
+              {t("reservation.console.saved")}
+            </span>
           </div>
         )}
       </div>
 
       <div className="px-1">
         <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">
-          Console sélectionnée
+          {t("reservation.console.consoleSelected")}
         </p>
         <h3 className="text-2xl font-bold text-gray-900 leading-tight">
           {console.name}
@@ -113,16 +129,16 @@ export default function SelectedConsoleCard({
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Validation...
+              {t("reservation.console.validating")}
             </>
           ) : success ? (
             <>
               <Check className="mr-2 h-4 w-4" />
-              Confirmé
+              {t("reservation.console.confirmed")}
             </>
           ) : (
             <>
-              {buttonLabel ?? "Continuer"} {/* 👈 dynamique */}
+              {buttonLabel ?? t("reservation.console.continue")}
               <ArrowRight className="ml-2 h-4 w-4" />
             </>
           )}

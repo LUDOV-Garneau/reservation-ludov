@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DatePicker } from "@/components/reservation/DatePicker";
-import { TimePicker } from "@/components/reservation/TimePicker";
+import { DatePicker } from "@/components/reservation/components/DatePicker";
+import { TimePicker } from "@/components/reservation/components/TimePicker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 
-export default function Calendrier() {
+export default function DateSelection() {
   const t = useTranslations();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -62,7 +62,7 @@ export default function Calendrier() {
               ))}
           </div>
         ) : availableTimes.length === 0 ? (
-          <p>Aucune plage horaire disponible pour cette journée.</p>
+          <p>{t("reservation.calendar.noValidDate")}</p>
         ) : (
           <TimePicker
             times={availableTimes}

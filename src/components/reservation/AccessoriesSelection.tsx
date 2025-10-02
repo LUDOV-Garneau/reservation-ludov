@@ -1,12 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import AccessorySelectionGrid, { Accessory } from "@/components/reservation/components/AccessoriesSelectionGrid";
+import AccessorySelectionGrid, { Accessory as ImportedAccessory } from "@/components/reservation/components/AccessoriesSelectionGrid";
 import SelectedAccessoryCard from "@/components/reservation/components/SelectedAccessoryCard";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
+type Accessory = {
+  id: number;
+  name: string;
+  console_id: number[];
+};
+
 export default function AccessoriesSelection() {
+  const t = useTranslations();
+
   const [selected, setSelected] = useState<Accessory[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -70,20 +79,21 @@ export default function AccessoriesSelection() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Panneau gauche */}
-      <div className="md:col-span-1 bg-white rounded-2xl p-6 m-6 shadow">
+      <div className="md:col-span-1 bg-[white] rounded-2xl p-6 m-6">
         <div className="sticky top-4 space-y-4">
-          <h2 className="text-xl font-bold">Accessoires sélectionnés</h2>
-
+          <h2 className="text-xl font-bold mb-2">
+            {t("reservation.accessory.selectedAccessories")}
+          </h2>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-
           <div className="max-h-[400px] overflow-y-auto pr-2 space-y-3">
             {isLoading ? (
               <div className="flex justify-center py-6">
                 <Loader2 className="h-6 w-6 animate-spin text-cyan-500" />
               </div>
             ) : selected.length === 0 ? (
-              <p className="text-gray-500">Aucun accessoire sélectionné</p>
+              <p className="text-gray-500">
+                {t("reservation.accessory.noneSelected")}
+              </p>
             ) : (
               selected.map((a) => (
                 <SelectedAccessoryCard
@@ -105,9 +115,10 @@ export default function AccessoriesSelection() {
         </div>
       </div>
 
-      {/* Panneau droit */}
-      <div className="md:col-span-2 bg-white rounded-2xl p-6 m-6 shadow">
-        <h2 className="text-xl font-bold mb-2">Sélection des accessoires</h2>
+      <div className="md:col-span-2 bg-[white] rounded-2xl p-6 m-6 shadow">
+        <h2 className="text-xl font-bold mb-2">
+          {t("reservation.accessory.accessorySelection")}
+        </h2>
         <AccessorySelectionGrid
           selectedIds={selected.map((a) => a.id)}
           onSelect={handleSelect}
