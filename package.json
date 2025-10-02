@@ -16,8 +16,8 @@
     "@mui/joy": "^5.0.0-beta.52",
     "@mui/material": "^6.5.0",
     "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-scroll-area": "^1.2.10",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
     "bcrypt": "^6.0.0",
@@ -37,6 +37,7 @@
     "react": "19.1.0",
     "react-day-picker": "^9.11.0",
     "react-dom": "19.1.0",
+    "react-toastify": "^11.0.5",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
