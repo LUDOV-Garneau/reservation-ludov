@@ -24,7 +24,6 @@ export default function AccessoriesSelection() {
 
   const [allAccessories, setAllAccessories] = useState<Accessory[]>([]);
   const t = useTranslations();
-  const [selected, setSelected] = useState<Accessory[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
