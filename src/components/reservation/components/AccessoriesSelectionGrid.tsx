@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Accessory {
   id: number;
@@ -20,6 +21,8 @@ export default function AccessorySelectionGrid({
   selectedIds,
   onSelect,
 }: AccessorySelectionGridProps) {
+  const t = useTranslations();
+
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [search, setSearch] = useState("");
 
@@ -50,7 +53,7 @@ export default function AccessorySelectionGrid({
       <div className="relative">
         <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
-          placeholder="Nom de l'accessoire"
+          placeholder={t("reservation.accessory.accessoryName")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="pl-8"

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 type Accessory = {
   id: number;
@@ -19,13 +20,15 @@ export default function SelectedAccessoryCard({
   accessory,
   onClear,
 }: SelectedAccessoryCardProps) {
+  const t = useTranslations();
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!accessory) {
     return (
       <Card className="p-6 w-full flex items-center justify-center">
-        <p>Aucun accessoire sélectionné</p>
+        <p>{t("reservation.accessory.noneSelected")}</p>
       </Card>
     );
   }
@@ -44,12 +47,12 @@ export default function SelectedAccessoryCard({
       setIsLoading(false);
 
       if (!res.ok) {
-        setError("Impossible d'enregistrer l'accessoire sélectionné.");
+        setError(t("reservation.accessory.postError"));
         return;
       }
     } catch (e) {
       setIsLoading(false);
-      setError("Erreur réseau, réessayez. " + e);
+      setError(t("reservation.accessory.networkError", { error: String(e) }));
     }
   };
 
@@ -67,7 +70,9 @@ export default function SelectedAccessoryCard({
         </div>
         {error && <p className="text-red-500 text-sm">{error}</p>}
         <Button onClick={handlePost} disabled={isLoading} className="w-full">
-          {isLoading ? "Envoi..." : "Continuer"}
+          {isLoading
+            ? t("reservation.accessory.sending")
+            : t("reservation.accessory.continue")}
         </Button>
       </CardContent>
     </Card>

@@ -6,6 +6,7 @@ import { Calendar, Clock9 } from "lucide-react";
 import CarteElement from "@/components/reservation/components/CarteElement";
 import { useReservation } from "@/context/ReservationContext";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 type Jeu = { nom: string };
 type Console = { nom: string; id: number };
@@ -20,9 +21,11 @@ type ReservationData = {
   heure: string;
 };
 
-export default function ConfirmerReservation() {
+export default function ConfirmReservation() {
   const { reservationId, completeReservation, isLoading, error, clearError } =
     useReservation();
+
+  const t = useTranslations();
 
   const [jeux, setJeux] = useState<Jeu[]>([]);
   const [console, setConsole] = useState<Console | null>(null);
@@ -95,22 +98,23 @@ export default function ConfirmerReservation() {
         <div className="flex flex-col items-center justify-center py-20">
           <div className="inline-block h-16 w-16 animate-spin rounded-full border-4 border-cyan-400 border-r-transparent mb-6"></div>
           <p className="text-xl text-gray-600 font-medium">
-            Chargement de votre réservation...
+            {t("reservation.confirm.loadingReservation")}
           </p>
-          <p className="text-sm text-gray-400 mt-2">Veuillez patienter</p>
+          <p className="text-sm text-gray-400 mt-2">
+            {t("reservation.confirm.pleaseWait")}
+          </p>
         </div>
       </div>
     );
   }
 
-  /**
-   * UI principale
-   */
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-6">
       {/* --- Header réservation --- */}
       <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <h2 className="text-3xl font-bold">Votre réservation</h2>
+        <h2 className="text-3xl font-bold">
+          {t("reservation.confirm.yourReservation")}
+        </h2>
 
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
           {/* Date + heure */}
@@ -136,15 +140,21 @@ export default function ConfirmerReservation() {
             aria-busy={isLoading}
             className="h-11 w-full sm:w-auto bg-cyan-300 text-black hover:bg-cyan-500"
           >
-            {isLoading ? "Confirmation..." : "Confirmer ma réservation"}
+            {isLoading
+              ? t("reservation.confirm.confirmationInProgress")
+              : t("reservation.confirm.confirmButton")}
           </Button>
         </div>
       </div>
 
       {/* --- Jeux & console --- */}
       <div className="mb-3 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6">
-        <h3 className="text-xl font-medium">Jeux sélectionnés</h3>
-        <h3 className="text-xl font-medium hidden md:block">Console</h3>
+        <h3 className="text-xl font-medium">
+          {t("reservation.confirm.selectedGames")}
+        </h3>
+        <h3 className="text-xl font-medium hidden md:block">
+          {t("reservation.confirm.selectedConsole")}
+        </h3>
       </div>
 
       <div className="mb-8 grid grid-cols-1 md:grid-cols-[1fr_340px] gap-6 items-start">
@@ -155,18 +165,24 @@ export default function ConfirmerReservation() {
               <CarteElement key={`${jeu.nom}-${index}`} nom={jeu.nom} />
             ))
           ) : (
-            <p className="text-gray-500 col-span-full">Aucun jeu sélectionné</p>
+            <p className="text-gray-500 col-span-full">
+              {t("reservation.confirm.noGameSelected")}
+            </p>
           )}
         </div>
 
         {/* Console */}
         <div className="md:hidden mb-4">
-          <h3 className="text-xl font-medium mb-3">Console</h3>
+          <h3 className="text-xl font-medium mb-3">
+            {t("reservation.confirm.selectedConsole")}
+          </h3>
         </div>
         {console ? (
           <CarteElement nom={console.nom} />
         ) : (
-          <p className="text-gray-500">Aucune console sélectionnée</p>
+          <p className="text-gray-500">
+            {t("reservation.confirm.noConsoleSelected")}
+          </p>
         )}
       </div>
 
@@ -174,7 +190,9 @@ export default function ConfirmerReservation() {
       {!!accessoires.length && (
         <div className="mb-6">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xl font-medium">Accessoires :</h3>
+            <h3 className="text-xl font-medium">
+              {t("reservation.confirm.accessories")}
+            </h3>
             {accessoires.map((acc, index) => (
               <p key={`${acc.nom}-${index}`}>
                 {acc.nom}
@@ -189,7 +207,9 @@ export default function ConfirmerReservation() {
       {cours && (
         <div className="mb-8">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-xl font-medium">Cours :</h3>
+            <h3 className="text-xl font-medium">
+              {t("reservation.confirm.courses")}
+            </h3>
             <p>{cours}</p>
           </div>
         </div>
@@ -203,7 +223,9 @@ export default function ConfirmerReservation() {
         aria-busy={isLoading}
         className="h-11 w-full bg-cyan-300 text-black hover:bg-cyan-500"
       >
-        {isLoading ? "Confirmation..." : "Confirmer ma réservation"}
+        {isLoading
+          ? t("reservation.confirm.confirmationInProgress")
+          : t("reservation.confirm.confirmButton")}
       </Button>
     </div>
   );
