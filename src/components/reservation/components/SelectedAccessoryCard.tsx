@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
-import { Accessory } from "./AccessoriesSelectionGrid";
 
 type Accessory = {
   id: number;
