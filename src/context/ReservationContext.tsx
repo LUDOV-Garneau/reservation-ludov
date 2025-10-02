@@ -1,6 +1,7 @@
 "use client"
 
 import { Console } from "@/types/console";
+import { set } from "date-fns";
 
 /// Contexte de réservation
 import React, {
@@ -45,6 +46,10 @@ interface ReservationContextType {
   completeReservation: () => Promise<void>; // finalise la réservation côté serveur
   clearError: () => void; // efface le message d'erreur
   updateReservationConsole: (newConsoleId: number) => Promise<void>; // met à jour la console de la réservation
+
+  selectedAccessories: number[];
+  setSelectedAccessories: (ids: number[]) => void;
+  updateReservationAccessories: (ids: number[]) => Promise<void>;
 }
 
 // Contexte
@@ -90,6 +95,7 @@ export function ReservationProvider({
   const [selectedConsole, setSelectedConsole] = useState<Console | null>(null);
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedAccessories, setSelectedAccessories] = useState<number[]>([]);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -159,6 +165,7 @@ export function ReservationProvider({
         setUserId(data.userId);
         setSelectedConsole(data.console)
         setSelectedGames(data.games || []);
+        setSelectedAccessories(data.accessories || []);
         setCurrentStep(data.currentStep || 1);
         setIsTimerActive(true);
         setTimeRemaining(computeRemaining(data.expiresAt));
@@ -225,32 +232,6 @@ export function ReservationProvider({
     }
   };
 
-  const updateReservationGames = async (games: number[]) => {
-    if (!reservationId) return;
-
-    try {
-      const res = await fetch(`/api/reservation/update-hold-reservation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reservationId,
-          game1Id: games[0] || null,
-          game2Id: games[1] || null,
-          game3Id: games[2] || null,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Erreur update jeux");
-
-      const data = await res.json();
-      if (data.success) {
-        setSelectedGames(games.map(String)); // on garde la sélection localement
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur update jeux");
-    }
-  };
-
   /**
    * --- Actions publiques ---
    */
@@ -289,6 +270,36 @@ export function ReservationProvider({
       setIsLoading(false);
     }
   };
+
+  const updateReservationAccessories = async (accessories: number[]) => {
+    if (!reservationId) return;
+
+    // Optimistic update
+    setSelectedAccessories(accessories);
+
+    try {
+      const res = await fetch(`/api/reservation/update-hold-reservation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId, accessories }),
+      });
+
+      if (!res.ok) throw new Error("Erreur update accessoires");
+
+      const data = await res.json();
+      if (!data.success) {
+        throw new Error("Échec côté serveur");
+      }
+    } catch (e) {
+      console.error("Erreur update accessoires:", e);
+      setError(e instanceof Error ? e.message : "Erreur update accessoires");
+
+      // rollback (optionnel)
+      // ici tu pourrais remettre l’ancien state si tu veux
+    }
+  };
+
+
 
   /** Stoppe le timer local (sans annuler la réservation) */
   const stopTimer = () => setIsTimerActive(false);
@@ -409,6 +420,9 @@ const updateReservationConsole = async (newConsoleId: number) => {
     completeReservation,
     clearError,
     updateReservationConsole,
+    selectedAccessories,
+    setSelectedAccessories,
+    updateReservationAccessories,
   };
 
   if (isRestoring) {

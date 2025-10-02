@@ -9,7 +9,7 @@ export default function Stepper() {
     "Choix de la console",
     "Choix des jeux",
     "Choix des accessoires",
-    "Choix de la date",
+    // "Choix de la date",
     "Choix du cours",
     "Confirmation",
   ];

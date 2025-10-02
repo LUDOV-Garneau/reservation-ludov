@@ -3,7 +3,7 @@ import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
 
 export async function POST(req: Request) {
-  const { reservationId, game1Id, game2Id, game3Id, newConsoleId } = await req.json();
+  const { reservationId, game1Id, game2Id, game3Id, newConsoleId, accessories } = await req.json();
 
   if (!reservationId) {
     return NextResponse.json(
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
 
     const currentConsoleId = rows[0].console_id;
 
-    // Si l'utilisateur veut changer de console
+    // Vérifier si la console doit être changée
     if (newConsoleId && newConsoleId !== currentConsoleId) {
       // Libérer l'ancienne
       await conn.query(
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
         [currentConsoleId]
       );
 
-      // Réserver la nouvelle (vérifier dispo)
+      // Vérifier la dispo de la nouvelle
       const [checkNew] = await conn.query<RowDataPacket[]>(
         `SELECT nombre FROM consoles WHERE id = ? FOR UPDATE`,
         [newConsoleId]
@@ -54,25 +54,39 @@ export async function POST(req: Request) {
         );
       }
 
+      // Décrémenter le stock de la nouvelle console
       await conn.query(
         `UPDATE consoles SET nombre = nombre - 1 WHERE id = ?`,
         [newConsoleId]
       );
 
-      // Mise à jour de la réservation avec la nouvelle console
+      // Mettre à jour la réservation
       await conn.query(
         `UPDATE reservation_hold 
-         SET console_id = ?, game1_id = ?, game2_id = ?, game3_id = ?
+         SET console_id = ?, game1_id = ?, game2_id = ?, game3_id = ?, accessoir_id = ?
          WHERE id = ?`,
-        [newConsoleId, game1Id || null, game2Id || null, game3Id || null, reservationId]
+        [
+          newConsoleId,
+          game1Id || null,
+          game2Id || null,
+          game3Id || null,
+          accessories?.[0] || null, // 1 accessoire max
+          reservationId,
+        ]
       );
     } else {
-      // Mise à jour simple (jeux uniquement)
+      // Mise à jour simple (jeux + accessoire)
       await conn.query(
         `UPDATE reservation_hold 
-         SET game1_id = ?, game2_id = ?, game3_id = ?
+         SET game1_id = ?, game2_id = ?, game3_id = ?, accessoir_id = ?
          WHERE id = ?`,
-        [game1Id || null, game2Id || null, game3Id || null, reservationId]
+        [
+          game1Id || null,
+          game2Id || null,
+          game3Id || null,
+          accessories?.[0] || null, // 1 accessoire max
+          reservationId,
+        ]
       );
     }
 
@@ -82,6 +96,7 @@ export async function POST(req: Request) {
       success: true,
       reservationId,
       consoleId: newConsoleId || currentConsoleId,
+      accessories: accessories || [],
     });
   } catch (err) {
     await conn.rollback();

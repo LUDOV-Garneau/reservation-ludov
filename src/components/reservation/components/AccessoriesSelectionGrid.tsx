@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
@@ -11,33 +11,24 @@ export interface Accessory {
 }
 
 interface AccessorySelectionGridProps {
+  accessories: Accessory[];       // <- fourni par le parent
   selectedIds: number[];
   onSelect: (a: Accessory) => void;
 }
 
 export default function AccessorySelectionGrid({
+  accessories,
   selectedIds,
   onSelect,
 }: AccessorySelectionGridProps) {
-  const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await fetch("/api/reservation/accessories");
-        const data = await res.json();
-        setAccessories(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Erreur fetch accessories :", err);
-      }
-    };
-    load();
-  }, []);
-
-  const filtered = accessories.filter((a) =>
-    a.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Optimisation: filtrage mémoïsé
+  const filtered = useMemo(() => {
+    return accessories.filter((a) =>
+      a.name.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [accessories, search]);
 
   return (
     <div className="space-y-4">
@@ -53,21 +44,25 @@ export default function AccessorySelectionGrid({
       </div>
 
       {/* Grille */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {filtered.map((a) => (
-          <div
-            key={a.id}
-            onClick={() => onSelect(a)}
-            className={`p-4 rounded-lg border text-center cursor-pointer transition ${
-              selectedIds.includes(a.id)
-                ? "border-green-500 bg-green-50"
-                : "border-gray-200 hover:border-gray-400"
-            }`}
-          >
-            <p className="font-semibold">{a.name}</p>
-          </div>
-        ))}
-      </div>
+      {filtered.length === 0 ? (
+        <p className="text-gray-500 text-center">Aucun accessoire trouvé</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((a) => (
+            <div
+              key={a.id}
+              onClick={() => onSelect(a)}
+              className={`p-4 rounded-lg border text-center cursor-pointer transition ${
+                selectedIds.includes(a.id)
+                  ? "border-green-500 bg-green-50"
+                  : "border-gray-200 hover:border-gray-400"
+              }`}
+            >
+              <p className="font-semibold">{a.name}</p>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
