@@ -21,13 +21,8 @@ type ReservationData = {
 };
 
 export default function ConfirmerReservation() {
-  const {
-    reservationId,
-    completeReservation,
-    isLoading,
-    error,
-    clearError,
-  } = useReservation();
+  const { reservationId, completeReservation, isLoading, error, clearError } =
+    useReservation();
 
   const [jeux, setJeux] = useState<Jeu[]>([]);
   const [console, setConsole] = useState<Console | null>(null);
@@ -62,8 +57,7 @@ export default function ConfirmerReservation() {
       setCours(data.cours || "");
       setDate(data.date || "");
       setHeure(data.heure || "");
-    } catch (err) {
-
+    } catch {
     } finally {
       setLoadingData(false);
     }
@@ -80,8 +74,7 @@ export default function ConfirmerReservation() {
     try {
       await completeReservation();
       router.push("/reservation/success"); // adapte le chemin à ton app
-    } catch {
-    }
+    } catch {}
   };
 
   /**

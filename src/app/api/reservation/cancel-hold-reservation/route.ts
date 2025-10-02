@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { RowDataPacket } from "mysql2";
+
+type ConsoleRow = RowDataPacket & {
+  console_id: number;
+};
 
 export async function POST(req: Request) {
   try {
@@ -13,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     // Récupérer l’ancienne console pour la libérer
-    const [rows]: any = await pool.query(
+    const [rows] = await pool.query<ConsoleRow[]>(
       `SELECT console_id FROM reservation_hold WHERE id = ?`,
       [reservationId]
     );

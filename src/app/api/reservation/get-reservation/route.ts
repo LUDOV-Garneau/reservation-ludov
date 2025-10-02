@@ -3,7 +3,6 @@ import pool from "@/lib/db";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import { RowDataPacket } from "mysql2";
-import { Reservation } from "@/types/reservation";
 
 interface ReservationRow extends RowDataPacket {
   id: string;
@@ -37,9 +36,10 @@ interface AccessoireRow extends RowDataPacket {
 export async function GET(request: NextRequest) {
   try {
     // Get reservationId from query params
-    const reservationId = request.nextUrl.searchParams.get("id") || 
-                         request.nextUrl.searchParams.get("reservationId");
-    
+    const reservationId =
+      request.nextUrl.searchParams.get("id") ||
+      request.nextUrl.searchParams.get("reservationId");
+
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
 
@@ -56,9 +56,9 @@ export async function GET(request: NextRequest) {
     // Validate inputs
     if (!reservationId) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          message: "reservationId is required"
+          message: "reservationId is required",
         },
         { status: 400 }
       );
@@ -66,9 +66,9 @@ export async function GET(request: NextRequest) {
 
     if (!user || !user.id) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          message: "User not authenticated"
+          message: "User not authenticated",
         },
         { status: 401 }
       );
@@ -82,9 +82,9 @@ export async function GET(request: NextRequest) {
 
     if (!Array.isArray(reservationRows) || reservationRows.length === 0) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          message: "Reservation not found"
+          message: "Reservation not found",
         },
         { status: 404 }
       );
@@ -95,9 +95,9 @@ export async function GET(request: NextRequest) {
     // Verify that the reservation belongs to the authenticated user
     if (reservation.user_id !== Number(user.id)) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          message: "Unauthorized access to this reservation"
+          message: "Unauthorized access to this reservation",
         },
         { status: 403 }
       );
@@ -107,13 +107,13 @@ export async function GET(request: NextRequest) {
     const gameIds = [
       reservation.game1_id,
       reservation.game2_id,
-      reservation.game3_id
-    ].filter(id => id !== null);
+      reservation.game3_id,
+    ].filter((id) => id !== null);
 
     let games: GameRow[] = [];
     if (gameIds.length > 0) {
       try {
-        const placeholders = gameIds.map(() => '?').join(',');
+        const placeholders = gameIds.map(() => "?").join(",");
         // Try common column names: nom, name, titre, title
         const [gameRows] = await pool.query<GameRow[]>(
           `SELECT * FROM jeux WHERE id IN (${placeholders})`,
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
         );
         games = gameRows;
       } catch (error) {
-        console.error('Error fetching games:', error);
+        console.error("Error fetching games:", error);
       }
     }
 
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
       );
       consoleRows = rows;
     } catch (error) {
-      console.error('Error fetching console:', error);
+      console.error("Error fetching console:", error);
     }
 
     // Fetch accessory if exists
@@ -147,59 +147,68 @@ export async function GET(request: NextRequest) {
         );
         accessoires = accessoireRows;
       } catch (error) {
-        console.error('Error fetching accessory:', error);
+        console.error("Error fetching accessory:", error);
       }
     }
 
-    const getNameField = (obj: GameRow | ConsoleRow | AccessoireRow): string => {
-      return obj?.nom || 'Unknown';
+    const getNameField = (
+      obj: GameRow | ConsoleRow | AccessoireRow
+    ): string => {
+      return obj?.nom || "Unknown";
     };
 
     const now = new Date();
     if (new Date(reservation.expireAt) < now) {
       return NextResponse.json(
-        { 
+        {
           success: false,
-          message: "Reservation has expired"
+          message: "Reservation has expired",
         },
         { status: 410 }
       );
     }
 
     const responseData = {
-      jeux: games.map(game => ({ nom: getNameField(game) })),
-      console: consoleRows.length > 0 ? {
-        id: consoleRows[0].id,
-        nom: getNameField(consoleRows[0])
-      } : null,
-      accessoires: accessoires.map(acc => ({ nom: getNameField(acc) })),
+      jeux: games.map((game) => ({ nom: getNameField(game) })),
+      console:
+        consoleRows.length > 0
+          ? {
+              id: consoleRows[0].id,
+              nom: getNameField(consoleRows[0]),
+            }
+          : null,
+      accessoires: accessoires.map((acc) => ({ nom: getNameField(acc) })),
       cours: "", // Not used in hold reservations
-      date: reservation.date ? new Date(reservation.date).toISOString().split('T')[0] : null,
-      heure: reservation.date ? new Date(reservation.date).toLocaleTimeString('fr-FR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
-      }) : "",
+      date: reservation.date
+        ? new Date(reservation.date).toISOString().split("T")[0]
+        : null,
+      heure: reservation.date
+        ? new Date(reservation.date).toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "",
       status: "hold",
       reservationId: reservation.id,
       expiresAt: new Date(reservation.expireAt).toISOString(),
-      stationId: reservation.station_id
+      stationId: reservation.station_id,
     };
 
-    console.log('Reservation data retrieved:', responseData);
+    console.log("Reservation data retrieved:", responseData);
 
     return NextResponse.json(responseData, { status: 200 });
-
-    } catch (err: unknown) {
-      console.error("Erreur SQL:", err);
-      return NextResponse.json(
-        { 
-          success: false,
-          message: "Erreur lors de la récupération de la réservation",
-          error: process.env.NODE_ENV === 'development' && err instanceof Error 
-            ? err.message 
-            : undefined
-        },
-        { status: 500 }
-      );
-    }
+  } catch (err: unknown) {
+    console.error("Erreur SQL:", err);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Erreur lors de la récupération de la réservation",
+        error:
+          process.env.NODE_ENV === "development" && err instanceof Error
+            ? err.message
+            : undefined,
+      },
+      { status: 500 }
+    );
   }
+}
