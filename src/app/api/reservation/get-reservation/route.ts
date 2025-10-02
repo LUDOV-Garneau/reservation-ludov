@@ -3,7 +3,6 @@ import pool from "@/lib/db";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import { RowDataPacket } from "mysql2";
-import { Reservation } from "@/types/reservation";
 
 interface ReservationRow extends RowDataPacket {
   id: string;

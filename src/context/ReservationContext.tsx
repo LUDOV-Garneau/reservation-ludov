@@ -24,7 +24,7 @@ interface ReservationContextType {
   expiresAt: string | null; // date d'expiration de la réservation (ISO)
 
   // Actions Timer
-  startTimer: () => Promise<void>; // démarre une réservation temporaire
+  startTimer: (consoleId?: number) => Promise<void>; // démarre une réservation temporaire
   stopTimer: () => void; // stoppe le timer localement
   resetTimer: () => void; // reset complet
 
