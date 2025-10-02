@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Search, Check, Lock, Gamepad2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type Game = {
   id: number;
@@ -252,14 +253,16 @@ export default function GameSelectionGrid({
                         <p className="text-white text-lg font-bold line-clamp-2">
                           {game.titre}
                         </p>
-                        <Button   
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          alert(`Détails du jeu: ${game.titre}`)
-                        }}
-                        className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
-                          Plus de détails sur le jeu
-                        </Button>
+                        <Link href={`https://ludov.inlibro.net/cgi-bin/koha/opac-detail.pl?biblionumber=${game.biblio_id}`} target="_blank" rel="noopener noreferrer">
+                          <Button   
+                            onClick={(e) => {
+                              e.stopPropagation();
+                            }}
+                            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
+                              Plus de détails sur le jeu
+                          </Button>
+                        </Link>
+
                       </div>
                     </div>
                   </div>
