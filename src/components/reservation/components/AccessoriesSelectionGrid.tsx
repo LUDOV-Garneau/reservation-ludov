@@ -24,7 +24,6 @@ export default function AccessorySelectionGrid({
 }: AccessorySelectionGridProps) {
   const t = useTranslations();
 
-  const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [search, setSearch] = useState("");
 
   // Optimisation: filtrage mémoïsé
