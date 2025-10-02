@@ -34,7 +34,7 @@ export default function CourseSelection() {
   useEffect(() => {
     async function fetchCours() {
       try {
-        const res = await fetch("/api/reservation/courses");
+        const res = await fetch("/api/reservation/cours");
         if (!res.ok) throw new Error("Erreur lors du chargement des cours");
         const data = await res.json();
         setCours(data);

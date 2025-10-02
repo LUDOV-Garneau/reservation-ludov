@@ -45,6 +45,7 @@ export default function ReservationLayout() {
     window.location.href = "/";
   };
 
+<<<<<<< HEAD
   const steps = [
     {
       id: 1,
@@ -59,6 +60,18 @@ export default function ReservationLayout() {
       component: <ConfirmerReservation />,
     },
   ];
+=======
+    const steps = [
+      {
+        id: 1,
+        component: <ConsoleSelection />
+      },
+      {
+        id: 2,
+        component: <Calendrier />
+      }
+    ];
+>>>>>>> 0306989d3ed75e241c0fb1dfdda96f540aefd33f
 
   const currentStepConfig = steps.find((step) => step.id === currentStep);
 
