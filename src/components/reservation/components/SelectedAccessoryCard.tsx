@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
+import { X } from "lucide-react";
+import { Accessory } from "./AccessoriesSelectionGrid";
 
 type Accessory = {
   id: number;
@@ -12,7 +14,7 @@ type Accessory = {
 };
 
 interface SelectedAccessoryCardProps {
-  accessory: Accessory | null;
+  accessory: Accessory;
   onClear: () => void;
 }
 
@@ -55,26 +57,15 @@ export default function SelectedAccessoryCard({
       setError(t("reservation.accessory.networkError", { error: String(e) }));
     }
   };
-
   return (
-    <Card className="w-full">
-      <CardContent className="flex flex-col gap-4 p-4">
-        <div className="flex justify-between items-center">
-          <h3 className="font-semibold">{accessory.name}</h3>
-          <button
-            onClick={onClear}
-            className="bg-black/60 text-white rounded-full px-2"
-          >
-            ✕
-          </button>
-        </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        <Button onClick={handlePost} disabled={isLoading} className="w-full">
-          {isLoading
-            ? t("reservation.accessory.sending")
-            : t("reservation.accessory.continue")}
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="flex justify-between items-center p-3 bg-gray-50 border rounded-lg">
+      <h3 className="font-medium">{accessory.name}</h3>
+      <button
+        onClick={onClear}
+        className="p-1 text-red-500 hover:text-red-700 rounded-full hover:bg-red-100"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    </div>
   );
 }

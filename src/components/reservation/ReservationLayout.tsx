@@ -14,9 +14,10 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-import ConsoleSelection from "@/components/reservation/ConsoleSelection";
-import Calendrier from "@/components/reservation/DateSelection";
-import ConfirmerReservation from "@/components/reservation/ConfirmReservation";
+import ConsoleSelection from "@/components/reservation/ConsoleSelection"
+import GamesSelection from "@/components/reservation/GamesSelection"
+import AccessoriesSelection from "@/components/reservation/AccessoriesSelection"
+import Calendrier from "@/components/reservation/Calendrier"
 import { useTranslations } from "next-intl";
 
 export default function ReservationLayout() {
@@ -30,35 +31,46 @@ export default function ReservationLayout() {
     cancelReservation,
   } = useReservation();
 
-  const t = useTranslations();
+    const t = useTranslations();
+    
+    const { 
+        timeRemaining, 
+        isTimerActive, 
+        isReservationCancelled,
+        currentStep,
+        setCurrentStep,
+        resetTimer,
+        cancelReservation
+    } = useReservation();
 
-  const formatTimeRemaining = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  };
+    const formatTimeRemaining = (seconds: number): string => {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins.toString().padStart(2, "0")}:${secs
+        .toString()
+        .padStart(2, "0")}`;
+    };
 
-  const handleBackHome = () => {
-    resetTimer();
-    window.location.href = "/";
-  };
+    const handleBackHome = () => {
+        resetTimer();
+        window.location.href = "/";
+    };
 
-  const steps = [
-    {
-      id: 1,
-      component: <ConsoleSelection />,
-    },
-    {
-      id: 2,
-      component: <Calendrier />,
-    },
-    {
-      id: 3,
-      component: <ConfirmerReservation />,
-    },
-  ];
+    const steps = [
+      {
+        id: 1,
+        component: <ConsoleSelection />
+      },
+      {
+        id: 2,
+        component: <GamesSelection />
+      },
+      {
+        id: 3,
+        component: <AccessoriesSelection />
+      }
+    ];
+
 
   const currentStepConfig = steps.find((step) => step.id === currentStep);
 

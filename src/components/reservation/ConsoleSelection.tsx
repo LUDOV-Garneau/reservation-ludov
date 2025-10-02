@@ -26,20 +26,24 @@ export default function ConsolesSelection() {
   };
 
   const handleContinue = async () => {
-    if (!selected) return;
+    const consoleToUse = selected || selectedConsole;
+    if (!consoleToUse) return;
 
     try {
       // Cas 1 : aucune réservation encore en BD → création
       if (!selectedConsole) {
         setSelectedConsole(selected);
         if (!isTimerActive) {
-          await startTimer(selected.id);
+          await startTimer(consoleToUse.id);
         }
       }
       // Cas 2 : une réservation existe déjà et on change de console → update
-      else if (selectedConsole.id !== selected.id) {
-        await updateReservationConsole(selected.id);
-        setSelectedConsole(selected); // update local
+      else if (selectedConsole.id !== consoleToUse.id) {
+        await updateReservationConsole(consoleToUse.id);
+        setSelectedConsole(consoleToUse); // update local
+      }
+      else {
+        setSelectedConsole(consoleToUse); // même console, juste pour s'assurer
       }
 
       setCurrentStep(2);
