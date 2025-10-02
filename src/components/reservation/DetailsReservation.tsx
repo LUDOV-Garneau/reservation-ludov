@@ -26,13 +26,13 @@ export default function DetailsReservation({
   heure,
 }: DetailsReservationProps) {
   return (
-    <div className="mx-auto max-w-6xl p-4 md:p-6">
-      <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-        <h2 className="text-5xl">Votre réservation</h2>
+    <div className="mx-auto max-w-6xl p-4 xl:p-6">
+      <div className="mb-4 flex flex-col items-start justify-between gap-3 xl:flex-row xl:items-center">
+        <h2 className="text-3xl lg:text-4xl xl:text-5xl">Votre réservation</h2>
 
-        <div className="w-full sm:w-auto flex flex-col items-center gap-5 sm:flex-row sm:items-center rounded-md border bg-white p-3 shadow-sm">
+        <div className="w-full xl:w-auto flex flex-col items-center gap-3 lg:flex-row lg:items-center lg:justify-between rounded-md border bg-white p-3 shadow-sm">
           {date && heure && (
-            <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap sm:mr-8">
+            <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap lg:mr-auto xl:mr-8">
               <span className="inline-flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 {date}
@@ -45,17 +45,17 @@ export default function DetailsReservation({
             </span>
           )}
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:gap-2 w-full sm:w-auto">
+          <div className="flex flex-col gap-2 lg:flex-row lg:gap-2 w-full lg:w-auto lg:ml-auto">
             <Button
               type="button"
-              className="h-auto py-1 px-3 w-full sm:w-auto bg-cyan-300 text-black hover:bg-cyan-500 whitespace-nowrap text-sm"
+              className="h-auto py-1 px-3 w-full lg:w-auto bg-cyan-300 text-black hover:bg-cyan-500 whitespace-nowrap text-sm"
             >
               Ajouter dans mon calendrier
             </Button>
             <Button
               type="button"
               variant="destructive"
-              className="h-auto py-1 px-3 w-full sm:w-auto whitespace-nowrap text-sm"
+              className="h-auto py-1 px-3 w-full lg:w-auto whitespace-nowrap text-sm"
             >
               Annuler
             </Button>
@@ -63,12 +63,12 @@ export default function DetailsReservation({
         </div>
       </div>
 
-      <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="mb-3 grid grid-cols-1 xl:grid-cols-2 gap-6">
         <h3 className="text-xl">Jeux sélectionnés</h3>
-        <h3 className="text-xl hidden md:block">Console</h3>
+        <h3 className="text-xl hidden xl:block">Console</h3>
       </div>
 
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+      <div className="mb-8 grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
         <div className="flex flex-col gap-4">
           {jeux.map((jeu) => (
             <CarteElement
@@ -81,7 +81,7 @@ export default function DetailsReservation({
           ))}
         </div>
 
-        <div className="md:hidden mb-4">
+        <div className="xl:hidden mb-4">
           <h3 className="text-xl mb-3">Console</h3>
         </div>
         <CarteElement nom={console.nom} type="console" />
