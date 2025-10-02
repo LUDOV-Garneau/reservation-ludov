@@ -197,6 +197,16 @@ export async function GET(req: Request) {
       ? dateReservation.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" })
       : null;
 
+    // Vérifier l'expiration de la réservation
+    if (reservation.expireAt && new Date(reservation.expireAt) < new Date()) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "La réservation a expiré"
+        },
+        { status: 410 }
+      );
+    }
     // ---------------------
     // Réponse finale
     // ---------------------
