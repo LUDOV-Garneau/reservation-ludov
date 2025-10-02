@@ -5,7 +5,15 @@ import { Console } from "@/types/console";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { Search, Loader2, AlertCircle, Check, RefreshCw, Gamepad2 } from "lucide-react";
+import {
+  Search,
+  Loader2,
+  AlertCircle,
+  Check,
+  RefreshCw,
+  Gamepad2,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // Contexte de réservation
 interface ConsoleSelectionGridProps {
@@ -17,15 +25,22 @@ interface ConsoleSelectionGridProps {
 // État de chargement
 type LoadingState = "idle" | "loading" | "success" | "error";
 
-export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}: ConsoleSelectionGridProps) {
+export default function ConsoleSelectionGrid({
+  selectedId,
+  reservedId,
+  onSelect,
+}: ConsoleSelectionGridProps) {
+  const t = useTranslations();
 
   // États locaux
   const [consoles, setConsoles] = useState<Console[]>([]); // Liste des consoles
-  const [search, setSearch] = useState(""); // Terme de recherche 
+  const [search, setSearch] = useState(""); // Terme de recherche
   const [loadingState, setLoadingState] = useState<LoadingState>("idle"); // État de chargement
   const [error, setError] = useState<string | null>(null); // Message d'erreur
   const [retryCount, setRetryCount] = useState(0); // Compteur de tentatives de rechargement
-  const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(selectedId || null); // ID de la console sélectionnée
+  const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(
+    selectedId || null
+  ); // ID de la console sélectionnée
 
   // Fonction pour récupérer les consoles depuis l'API
   const fetchConsoles = useCallback(async () => {
@@ -49,7 +64,9 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
 
       // Gestion des erreurs HTTP
       if (!res.ok) {
-        throw new Error(data?.message || `Erreur ${res.status}: ${res.statusText}`);
+        throw new Error(
+          data?.message || `Erreur ${res.status}: ${res.statusText}`
+        );
       }
 
       // Validation des données
@@ -72,12 +89,12 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
       setLoadingState("success"); // Chargement réussi
     } catch (err) {
       console.error("Erreur lors du chargement:", err);
-      let errorMessage = "Une erreur est survenue";
+      let errorMessage = t("reservation.console.error");
       if (err instanceof Error) {
         if (err.name === "AbortError") {
-          errorMessage = "Le chargement a pris trop de temps";
+          errorMessage = t("reservation.console.errorLoading");
         } else if (err.message.includes("fetch")) {
-          errorMessage = "Problème de connexion au serveur";
+          errorMessage = t("reservation.console.errorServer");
         } else {
           errorMessage = err.message;
         }
@@ -91,7 +108,7 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
 
   // Fonction pour réessayer le chargement
   const retry = useCallback(() => {
-    setRetryCount(prev => prev + 1);
+    setRetryCount((prev) => prev + 1);
     fetchConsoles();
   }, [fetchConsoles]);
 
@@ -104,35 +121,38 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
     setSelectedConsoleId(selectedId);
   }, [selectedId]);
 
-
   // Filtre les consoles en fonction de la recherche
   const filteredConsoles = useMemo(() => {
     if (!search.trim()) return consoles;
-    
+
     const searchLower = search.toLowerCase();
-    return consoles.filter((c) =>
-      c.name.toLowerCase().includes(searchLower)
-    );
+    return consoles.filter((c) => c.name.toLowerCase().includes(searchLower));
   }, [consoles, search]);
 
   // Gère la sélection d'une console
-  const handleSelect = useCallback((console: Console) => {
-    setSelectedConsoleId(console.id);
-    onSelect(console);
-  }, [onSelect]);
+  const handleSelect = useCallback(
+    (console: Console) => {
+      setSelectedConsoleId(console.id);
+      onSelect(console);
+    },
+    [onSelect]
+  );
 
   // Rendu conditionnel en fonction de l'état de chargement
   if (loadingState === "loading" && consoles.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-cyan-500" />
-        <p className="text-gray-600 font-medium">Chargement des consoles...</p>
-        <p className="text-sm text-gray-500">Cela peut prendre quelques secondes</p>
+        <p className="text-gray-600 font-medium">
+          {t("reservation.console.loadingConsoles")}
+        </p>
+        <p className="text-sm text-gray-500">
+          {t("reservation.console.loadingDelay")}
+        </p>
       </div>
     );
   }
 
-  // Affiche les erreurs
   if (loadingState === "error") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-4 p-6">
@@ -140,7 +160,8 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
         <div className="text-center">
           <p className="text-red-600 font-semibold text-lg mb-1">{error}</p>
           <p className="text-sm text-gray-500">
-            {retryCount > 0 && `Tentative ${retryCount} échouée`}
+            {retryCount > 0 &&
+              t("reservation.console.retryAttempt", { count: retryCount })}
           </p>
         </div>
         <button
@@ -148,7 +169,7 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
           className="mt-2 px-6 py-2.5 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors flex items-center gap-2"
         >
           <RefreshCw className="h-4 w-4" />
-          Réessayer
+          {t("reservation.console.retry")}
         </button>
       </div>
     );
@@ -158,19 +179,21 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-4">
         <Gamepad2 className="h-12 w-12 text-gray-400" />
-        <p className="text-gray-600 font-medium">Aucune console disponible</p>
+        <p className="text-gray-600 font-medium">
+          {t("reservation.console.noConsoleAvailable")}
+        </p>
         <button
           onClick={retry}
           className="text-cyan-500 hover:text-cyan-600 text-sm underline"
         >
-          Actualiser
+          {t("reservation.console.refresh")}
         </button>
       </div>
     );
   }
 
   const availableConsoles = filteredConsoles.filter(
-    c => c.nombre > 0 || c.id === reservedId
+    (c) => c.nombre > 0 || c.id === reservedId
   );
 
   return (
@@ -179,16 +202,23 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <Input
-            placeholder="Rechercher une console..."
+            placeholder={t("reservation.console.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 h-11 text-base rounded-lg"
-            aria-label="Rechercher une console"
+            aria-label={t("reservation.console.searchPlaceholder")}
           />
         </div>
         {search && (
           <p className="text-sm text-gray-500 px-1">
-            {availableConsoles.length} console{availableConsoles.length > 1 ? 's' : ''} disponible{availableConsoles.length > 1 ? 's' : ''} trouvée{availableConsoles.length > 1 ? 's' : ''}
+            {t("reservation.console.consoleCount", {
+              count: availableConsoles.length,
+            })}{" "}
+            {availableConsoles.length > 1
+              ? t("reservation.console.consoleCountFound", {
+                  count: availableConsoles.length,
+                })
+              : ""}
           </p>
         )}
       </div>
@@ -197,13 +227,13 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
         <div className="text-center py-12">
           <Gamepad2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-600 font-medium">
-            Aucune console disponible pour {search}
+            {t("reservation.console.noConsoleForSearch", { search })}
           </p>
           <button
             onClick={() => setSearch("")}
             className="mt-3 text-cyan-500 hover:text-cyan-600 text-sm underline"
           >
-            Effacer la recherche
+            {t("reservation.console.clearSearch")}
           </button>
         </div>
       )}
@@ -212,17 +242,18 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
         <div className="text-center py-12">
           <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-3" />
           <p className="text-gray-600 font-medium">
-            Aucune console est actuellement disponible
+            {t("reservation.console.noneAvailable")}
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            Toutes les consoles sont réservées
+            {t("reservation.console.allReserved")}
           </p>
         </div>
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {availableConsoles.map((console) => {
-          const isSelected = selectedConsoleId === console.id || reservedId === console.id;
+          const isSelected =
+            selectedConsoleId === console.id || reservedId === console.id;
           return (
             <div
               key={console.id}
@@ -232,7 +263,7 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
                 rounded-xl overflow-hidden shadow-md
                 transition-all duration-200 cursor-pointer 
                 hover:scale-[1.02]
-                ${isSelected ? 'ring-2 ring-cyan-500 scale-[1.02]' : ''}
+                ${isSelected ? "ring-2 ring-cyan-500 scale-[1.02]" : ""}
               `}
             >
               <div className="relative w-full h-48 bg-gray-100">
@@ -243,12 +274,11 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
                   className="object-cover"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 />
-
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
                 {console.id === reservedId && (
                   <div className="absolute top-3 left-3 bg-cyan-600 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md">
-                    Réservée pour vous
+                    {t("reservation.console.reservedForYou")}
                   </div>
                 )}
 
@@ -258,12 +288,14 @@ export default function ConsoleSelectionGrid({selectedId, reservedId, onSelect,}
                   </p>
                   <p className="text-white/90 text-sm mt-1">
                     {console.nombre > 0
-                      ? `${console.nombre} disponible${console.nombre > 1 ? "s" : ""}`
-                      : "Épuisée"}
+                      ? t("reservation.console.available", {
+                          count: console.nombre,
+                        })
+                      : t("reservation.console.soldOut")}
                   </p>
                 </div>
 
-                 {isSelected && (
+                {isSelected && (
                   <div className="absolute top-3 right-3 bg-cyan-500 rounded-full p-2 shadow-lg animate-in zoom-in-50">
                     <Check className="h-5 w-5 text-white" strokeWidth={3} />
                   </div>

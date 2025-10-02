@@ -1,17 +1,19 @@
 "use client";
 
 import { useReservation } from "@/context/ReservationContext";
+import { useTranslations } from "next-intl";
 
 export default function Stepper() {
+  const t = useTranslations();
   const { currentStep, setCurrentStep } = useReservation();
 
   const steps = [
-    "Choix de la console",
-    "Choix des jeux",
-    "Choix des accessoires",
-    // "Choix de la date",
-    "Choix du cours",
-    "Confirmation",
+    t("reservation.steps.consoleSelection"),
+    t("reservation.steps.gamesSelection"),
+    t("reservation.steps.accessoriesSelection"),
+    // t("reservation.steps.dateSelection"),
+    t("reservation.steps.courseSelection"),
+    t("reservation.steps.confirm"),
   ];
 
   return (

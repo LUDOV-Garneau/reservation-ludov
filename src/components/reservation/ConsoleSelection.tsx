@@ -5,8 +5,11 @@ import { useState } from "react";
 import { useReservation } from "@/context/ReservationContext";
 import SelectedConsoleCard from "@/components/reservation/components/SelectedConsoleCard";
 import ConsoleSelectionGrid from "@/components/reservation/components/ConsoleSelectionGrid";
+import { useTranslations } from "next-intl";
 
 export default function ConsolesSelection() {
+  const t = useTranslations();
+
   const [selected, setSelected] = useState<Console | null>(null);
 
   const {
@@ -60,20 +63,26 @@ export default function ConsolesSelection() {
       <div className="lg:col-span-1">
         <div className="bg-[white] sticky top-10 rounded-2xl p-6 shadow-lg">
           <h2 className="text-3xl font-bold mb-4 text-center">
-            Console sélectionnée
+            {t("reservation.console.selectedConsole")}
           </h2>
           <SelectedConsoleCard
             console={displayedConsole}
             onClear={() => setSelected(null)}
             onSuccess={handleContinue}
-            buttonLabel={isModification ? "Modifier" : "Continuer"}
+            buttonLabel={
+              isModification
+                ? t("reservation.console.modify")
+                : t("reservation.console.continue")
+            }
           />
         </div>
       </div>
 
       <div className="lg:col-span-3 md:col-span-2">
         <div className="bg-[white] rounded-2xl p-6 shadow-lg">
-          <h2 className="text-3xl font-bold mb-4">Sélection de la console</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            {t("reservation.console.consoleSelection")}
+          </h2>
           <ConsoleSelectionGrid
             selectedId={selected?.id ?? null}
             reservedId={selectedConsole?.id ?? null}
