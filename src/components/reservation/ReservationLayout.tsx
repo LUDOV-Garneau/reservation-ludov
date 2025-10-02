@@ -1,7 +1,7 @@
 "use client"
 
 import Stepper from "@/components/Stepper"
-import { HourglassIcon } from "lucide-react"
+import { HourglassIcon, MoveLeft  } from "lucide-react"
 import { useReservation } from "@/context/ReservationContext"
 import { Button } from "@/components/ui/button"
 
@@ -125,6 +125,13 @@ export default function ReservationLayout() {
             </div>
           )}
         </div>
+
+        { currentStep > 1 && (
+          <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mt-5">
+            <MoveLeft className="h-6 w-6 mr-2"/>
+            <p>Étape précendente</p>
+          </div>
+        )}
         
         <div className="bg-white rounded-lg my-8">
           {currentStepConfig ? currentStepConfig.component : (
