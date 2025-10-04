@@ -147,5 +147,16 @@
       "errorAlreadySet": "Cet utilisateur a déjà un mot de passe.",
       "error": "Une erreur s'est produite lors de la création de votre mot de passe. Veuillez réessayer ultérieurement."
     }
+  },
+  "admin": {
+    "users": {
+      "title": "Utilisateurs"
+    },
+    "reservations": {
+      "title": "Réservations"
+    },
+    "stations": {
+      "title": "Stations"
+    }
   }
 }

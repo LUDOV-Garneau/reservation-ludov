@@ -146,5 +146,16 @@
       "errorAlreadySet": "This user already has a password.",
       "error": "An error occurred while creating your password. Please try again later."
     }
+  },
+  "admin": {
+    "users": {
+      "title": "Users"
+    },
+    "reservations": {
+      "title": "Reservations"
+    },
+    "stations": {
+      "title": "Stations"
+    }
   }
 }
