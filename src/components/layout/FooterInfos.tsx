@@ -11,13 +11,15 @@ export default function FooterInfos() {
     <>
       <div className="relative z-10 flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold">
-          <Image
-            src="/images/LUDOV-logo-texte.png"
-            alt="LUDOV"
-            width={1010}
-            height={247}
-            className="w-[128px] h-auto"
-          />
+          <Link href="/">
+            <Image
+              src="/images/LUDOV-logo-texte.png"
+              alt="LUDOV"
+              width={1010}
+              height={247}
+              className="w-[128px] h-auto"
+            />
+          </Link>
         </h1>
         <div className="flex gap-6">
           <a
