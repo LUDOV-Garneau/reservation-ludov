@@ -156,6 +156,9 @@
     },
     "stations": {
       "title": "Stations"
+    },
+    "availabilities": {
+      "title": "Availabilities"
     }
   }
 }

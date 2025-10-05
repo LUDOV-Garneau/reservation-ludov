@@ -13,6 +13,9 @@ export default function AdminTabs() {
         {t("admin.reservations.title")}
       </TabsTrigger>
       <TabsTrigger value="stations">{t("admin.stations.title")}</TabsTrigger>
+      <TabsTrigger value="availabilities">
+        {t("admin.availabilities.title")}
+      </TabsTrigger>
     </TabsList>
   );
 }

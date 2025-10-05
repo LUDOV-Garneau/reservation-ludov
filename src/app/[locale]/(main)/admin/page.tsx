@@ -1,4 +1,5 @@
 import AdminTabs from "@/components/admin/AdminTabs";
+import AvailabilitiesTab from "@/components/admin/AvailabilitiesTab";
 import ReservationsTab from "@/components/admin/ReservationsTab";
 import StationsTab from "@/components/admin/StationsTab";
 import UsersTab from "@/components/admin/UsersTab";
@@ -13,6 +14,7 @@ export default function AdminPage() {
           <UsersTab />
           <ReservationsTab />
           <StationsTab />
+          <AvailabilitiesTab />
         </Tabs>
       </div>
     </div>
