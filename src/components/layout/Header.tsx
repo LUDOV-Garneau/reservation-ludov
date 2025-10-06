@@ -17,13 +17,13 @@ export default async function Header() {
 
   return (
     <div className="bg-[white]">
-      <header className="md:px-[60px] px-6 py-[30px] mx-auto w-full max-w-7xl flex justify-between items-center">
+      <header className=" px-6 py-[30px] mx-auto w-full flex justify-between items-center">
         <Image
           src="/images/LUDOV-logo-texte.png"
           alt="LUDOV"
           width={1010}
           height={247}
-          className="w-[128px] h-auto"
+          className="md:w-52 w-[128px] h-auto"
         />
         <HeaderMenu username={user?.name || ""} />
       </header>
