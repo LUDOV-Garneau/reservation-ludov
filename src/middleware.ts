@@ -5,14 +5,12 @@ import { verifyToken } from "./lib/jwt";
 
 const i18nMiddleware = createMiddleware(routing);
 
-const publicRoutes = ["/auth"];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const pathWithoutLocale = pathname.replace(/^\/(fr|en)(?=\/|$)/, "");
 
-  if (publicRoutes.some((route) => pathWithoutLocale.startsWith(route))) {
+  if (pathWithoutLocale.startsWith("/auth")) {
     return i18nMiddleware(request);
   }
 
@@ -28,6 +26,11 @@ export function middleware(request: NextRequest) {
 
     const url = request.nextUrl.clone();
     url.pathname = `/${locale}/auth`;
+    return NextResponse.redirect(url);
+  }
+
+  if (pathWithoutLocale.startsWith("/admin") && !session.isAdmin) {
+    const url = new URL("/not-found", request.url);
     return NextResponse.redirect(url);
   }
 
