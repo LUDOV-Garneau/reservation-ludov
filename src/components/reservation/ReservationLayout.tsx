@@ -1,6 +1,6 @@
 "use client";
 
-import Stepper from "@/components/Stepper";
+import Stepper from "@/components/reservation/Stepper";
 import { HourglassIcon } from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
 import { Button } from "@/components/ui/button";
