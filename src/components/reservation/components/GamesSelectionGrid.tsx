@@ -65,7 +65,6 @@ export default function GameSelectionGrid({
       
       const data = await res.json();
 
-      console.log(data)
       
       if (reset) {
         setGames(data.games || []);
