@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useReservation } from "@/context/ReservationContext";
 import GameSelectionGrid from "@/components/reservation/components/GamesSelectionGrid";
-import { AlertCircle, Loader2, Gamepad2 } from "lucide-react";
+import { AlertCircle, Loader2, Gamepad2, MoveLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 type Game = {
   id: number;
@@ -18,14 +19,17 @@ type Game = {
 
 export default function GamesSelection() {
   const { 
-    selectedGames,       // IDs des jeux sauvegardés en BD
+    selectedGames,
     setSelectedGames, 
     setCurrentStep,
     selectedConsole,
     reservationId,
     error,
-    clearError
+    clearError,
+    currentStep
   } = useReservation();
+
+  const t = useTranslations();
 
   const [selectedGameObjects, setSelectedGameObjects] = useState<Game[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -34,7 +38,12 @@ export default function GamesSelection() {
 
   /**
    * Restaure les jeux déjà sauvegardés dans le contexte
-   */
+  */
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     const restoreSelectedGames = async () => {
       if (!reservationId || selectedGames.length === 0) {
@@ -153,10 +162,16 @@ export default function GamesSelection() {
   const displayError = error || localError;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <div className="grid xl:grid-cols-4 grid-cols-2 gap-6">
       {/* Panneau latéral - Sélection */}
-      <div className="lg:col-span-1">
+      <div className="col-span-2 xl:col-span-1">
         <div className="bg-[white] sticky top-24 rounded-2xl p-6 shadow-lg max-h-[calc(100vh-120px)] overflow-y-auto">
+          { currentStep > 1 && (
+            <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mb-3 w-fit">
+              <MoveLeft className="h-6 w-6 mr-2"/>
+              <p>{t("reservation.layout.previousStep")}</p>
+            </div>
+          )}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-800">Vos jeux</h2>
             <span className={`text-sm font-medium px-2 py-1 rounded-full ${
@@ -171,7 +186,7 @@ export default function GamesSelection() {
           {/* Info console si disponible */}
           {selectedConsole && (
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">Console réservée</p>
+              <p className="text-xs text-gray-500 mb-1">Plateforme réservée</p>
               <p className="text-sm font-medium text-gray-700">{selectedConsole.name}</p>
             </div>
           )}
@@ -195,10 +210,10 @@ export default function GamesSelection() {
             ) : selectedGameObjects.length === 0 ? (
               <div className="text-center py-12">
                 <Gamepad2 className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm">
+                <p className="text-gray-500 text-xl">
                   Sélectionnez jusqu&#39;à 3 jeux
                 </p>
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-lg text-gray-400 mt-2">
                   Parcourez la liste pour choisir
                 </p>
               </div>
@@ -210,13 +225,19 @@ export default function GamesSelection() {
                     className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-3 group hover:shadow-md transition-shadow"
                   >
                     <div className="relative w-16 h-20 rounded overflow-hidden flex-shrink-0 bg-gray-100">
-                      <Image
-                        src={game.picture || "/placeholder_games.jpg"}
-                        alt={game.titre}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
+                      {game.picture === null ? (
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <Gamepad2 className="h-10 w-10 text-gray-400" />
+                        </div>
+                      ): (
+                          <Image
+                            src={game.picture}
+                            alt={game.titre}
+                            fill
+                            className="object-cover"
+                            sizes="64px"
+                          />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900 line-clamp-2">
@@ -225,7 +246,7 @@ export default function GamesSelection() {
                     </div>
                     <button
                       onClick={() => clearGame(game.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded"
+                      className="2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded"
                       aria-label={`Retirer ${game.titre}`}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -262,7 +283,7 @@ export default function GamesSelection() {
       </div>
 
       {/* Grille principale */}
-      <div className="lg:col-span-3">
+      <div className="xl:col-span-3 col-span-2">
         <div className="bg-[white] rounded-2xl p-6 shadow-lg">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -280,6 +301,7 @@ export default function GamesSelection() {
             selectedIds={selectedGameObjects.map(g => g.id)}
             onSelect={toggleSelect}
             maxReached={selectedGameObjects.length >= 3}
+            consoleSelectedId={selectedConsole ? selectedConsole.id : null}
           />
         </div>
       </div>
