@@ -50,7 +50,6 @@ export default function GameSelectionGrid({
   const loadGames = useCallback(async (pageNum: number, searchQuery: string, reset: boolean = false, consoleId: number | null) => {
     if (loading || (!hasMore && !reset)) return;
 
-    console.log("Loading games...", { pageNum, searchQuery, reset, consoleId });
     
     setLoading(true);
     
