@@ -71,8 +71,6 @@ export default function AccessoriesSelection() {
 
     try {
       await updateReservationAccessories(selectedAccessories);
-      console.log("Accessoires sauvegardés ✅");
-
       // Passer à l’étape suivante
       setCurrentStep(4);
     } catch (err) {

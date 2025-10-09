@@ -14,6 +14,9 @@ interface ReservationRow extends RowDataPacket {
   accessoir_id: number | null;
   expireAt: string;
   createdAt: string;
+  date: Date | null;
+  time: string | null;
+  cours: number | null;
 
   // champs console
   console_name: string;
@@ -51,7 +54,11 @@ export async function GET(request: NextRequest) {
 
     // Récupère la réservation + console associée
     const [rows] = await pool.query<ReservationRow[]>(
-      `SELECT r.*, c.name as console_name, c.nombre as console_nombre, c.picture as console_image
+      `SELECT 
+        r.*, 
+        c.name as console_name, 
+        c.nombre as console_nombre, 
+        c.picture as console_image
        FROM reservation_hold r
        JOIN consoles c ON r.console_id = c.id
        WHERE r.id = ?`,
@@ -104,6 +111,8 @@ export async function GET(request: NextRequest) {
     if (reservation.console_id) currentStep = 2;
     if (gameIds.length > 0) currentStep = 3;
     if (accessories.length > 0) currentStep = 4;
+    if (reservation.date && reservation.time) currentStep = 5;
+    if (reservation.cours) currentStep = 6;
 
     const responseData = {
       success: true,
@@ -118,16 +127,13 @@ export async function GET(request: NextRequest) {
       },
       games: gameIds,
       accessories,
+      date: reservation.date,
+      time: reservation.time,
+      cours: reservation.cours,
       expiresAt: expiry.toISOString(),
       createdAt: new Date(reservation.createdAt).toISOString(),
       currentStep,
     };
-
-    console.log("Active reservation:", {
-      resId: reservation.id.slice(0, 8) + "...",
-      userId: reservation.user_id,
-      step: currentStep,
-    });
 
     return NextResponse.json(responseData, { status: 200 });
 

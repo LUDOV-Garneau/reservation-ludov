@@ -9,45 +9,21 @@ import {
   Package, 
   AlertCircle,
   CheckCircle2,
-  Loader2
+  Loader2,
+  BookOpen
 } from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-// ---------------------
-// Types
-// ---------------------
-interface Game {
-  id: number;
-  nom: string;
-  picture?: string;
-  author?: string;
-}
-
-interface Console {
-  id: number;
-  nom: string;
-  image?: string;
-}
-
-interface Accessoire {
-  id: number;
-  nom: string;
-}
-
-interface Station {
-  id: number;
-  nom: string;
-}
-
 interface ReservationData {
-  jeux: Game[];
-  console: Console | null;
-  accessoires: Accessoire[];
-  date: string;
-  heure: string;
-  station?: Station | null;
+  jeux: Array<{ id: number; nom: string; picture?: string; author?: string }>;
+  console: { id: number; nom: string; image?: string } | null;
+  accessoires: Array<{ id: number; nom: string }>;
+  date: string | null;
+  time: string | null;
+  reservationId: string;
+  cours?: number | null;
 }
 
 export default function ConfirmReservation() {
@@ -56,7 +32,9 @@ export default function ConfirmReservation() {
     completeReservation, 
     isLoading: contextLoading,
     selectedConsole,
-    timeRemaining
+    selectedDate,
+    selectedTime,
+    selectedCours,
   } = useReservation();
 
   const router = useRouter();
@@ -75,21 +53,27 @@ export default function ConfirmReservation() {
       }
 
       try {
+        console.log("📥 Chargement réservation:", reservationId);
+        
         const res = await fetch(`/api/reservation/get-reservation?id=${reservationId}`);
         if (!res.ok) throw new Error("Erreur chargement");
         
         const json = await res.json();
+        console.log("📦 Données reçues:", json);
 
         setData({
-          jeux: (json.jeux || []) as Game[],
-          console: (json.console || selectedConsole || null) as Console | null,
-          accessoires: (json.accessoires || []) as Accessoire[],
-          date: (json.date || new Date().toLocaleDateString("fr-CA")) as string,
-          heure: (json.heure || "À déterminer") as string,
-          station: (json.station || null) as Station | null,
+          jeux: json.jeux || [],
+          console: json.console || selectedConsole || null,
+          accessoires: json.accessoires || [],
+          date: json.date || (selectedDate ? selectedDate.toLocaleDateString('fr-CA') : null),
+          time: json.time,
+          reservationId: json.reservationId || reservationId,
+          cours: selectedCours,
         });
+        
+        console.log("✅ Données préparées");
       } catch (err) {
-        console.error("Erreur:", err);
+        console.error("❌ Erreur:", err);
         setError("Impossible de charger les détails");
       } finally {
         setLoading(false);
@@ -97,31 +81,27 @@ export default function ConfirmReservation() {
     };
 
     fetchReservation();
-  }, [reservationId, selectedConsole]);
+  }, [reservationId, selectedConsole, selectedDate, selectedTime]);
 
   // Confirmation finale
   const handleConfirm = async () => {
-    if (!reservationId || !data) return;
+    if (!reservationId || !data) {
+      setError("Données manquantes");
+      return;
+    }
     
+    console.log("🚀 Confirmation de la réservation...");
     setConfirmLoading(true);
     setError(null);
     
     try {
       await completeReservation();
       
-      // Sauvegarder les détails pour la page de succès
-      sessionStorage.setItem(
-        "last_reservation", 
-        JSON.stringify({
-          ...data,
-          reservationId,
-        })
-      );
-      
+      console.log("✅ Réservation confirmée, redirection...");
       router.push("/reservation/success");
     } catch (err) {
-      console.error("Erreur confirmation:", err);
-      setError("Erreur lors de la confirmation");
+      console.error("❌ Erreur confirmation:", err);
+      setError(err instanceof Error ? err.message : "Erreur lors de la confirmation");
       setConfirmLoading(false);
     }
   };
@@ -160,7 +140,7 @@ export default function ConfirmReservation() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Header avec timer */}
       <div className="mb-8">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-[white] p-6 rounded-2xl shadow-sm">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
               Confirmer votre réservation
@@ -168,29 +148,6 @@ export default function ConfirmReservation() {
             <p className="text-gray-600 mt-2">
               Vérifiez les détails avant de valider
             </p>
-          </div>
-          
-          {/* Timer et infos */}
-          <div className="flex flex-wrap items-center gap-3">
-            {timeRemaining > 0 && (
-              <div className={`px-4 py-2 rounded-full ${
-                timeRemaining < 120 
-                  ? "bg-red-50 text-red-700 animate-pulse" 
-                  : "bg-gray-100 text-gray-700"
-              }`}>
-                <Clock className="inline h-4 w-4 mr-1" />
-                {Math.floor(timeRemaining / 60)}:
-                {(timeRemaining % 60).toString().padStart(2, "0")}
-              </div>
-            )}
-            
-            <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <span className="font-medium">{data.date}</span>
-              <span className="text-gray-400">|</span>
-              <Clock className="h-4 w-4 text-gray-500" />
-              <span className="font-medium">{data.heure}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -202,7 +159,7 @@ export default function ConfirmReservation() {
           
           {/* Console */}
           {data.console && (
-            <div className="bg-white rounded-xl shadow-sm border p-6">
+            <div className="bg-[white] rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Gamepad2 className="h-5 w-5 text-cyan-500" />
                 Console sélectionnée
@@ -225,7 +182,7 @@ export default function ConfirmReservation() {
           )}
 
           {/* Jeux */}
-          <div className="bg-white rounded-xl shadow-sm border p-6">
+          <div className="bg-[white] rounded-xl shadow-sm border p-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Package className="h-5 w-5 text-cyan-500" />
               Jeux sélectionnés ({data.jeux.length})
@@ -234,14 +191,14 @@ export default function ConfirmReservation() {
             {data.jeux.length > 0 ? (
               <div className="grid sm:grid-cols-2 gap-4">
                 {data.jeux.map((jeu) => (
-                  <div key={jeu.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div className="relative w-16 h-16 rounded bg-gray-200 flex-shrink-0">
+                  <div key={jeu.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <div className="relative w-16 h-20 rounded bg-gray-200 flex-shrink-0 overflow-hidden">
                       {jeu.picture ? (
                         <Image
                           src={jeu.picture}
                           alt={jeu.nom}
                           fill
-                          className="object-cover rounded"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -250,73 +207,104 @@ export default function ConfirmReservation() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{jeu.nom}</p>
+                      <p className="font-medium text-gray-900 line-clamp-2 text-sm">
+                        {jeu.nom}
+                      </p>
                       {jeu.author && (
-                        <p className="text-xs text-gray-500">{jeu.author}</p>
+                        <p className="text-xs text-gray-500 mt-1">{jeu.author}</p>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500">Aucun jeu sélectionné</p>
+              <div className="text-center py-8 text-gray-500">
+                <Gamepad2 className="h-10 w-10 mx-auto mb-2 text-gray-300" />
+                <p>Aucun jeu sélectionné</p>
+              </div>
             )}
           </div>
 
           {/* Accessoires */}
           {data.accessoires.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border p-6">
-              <h2 className="text-lg font-semibold mb-4">Accessoires</h2>
+            <div className="bg-[white] rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Package className="h-5 w-5 text-cyan-500" />
+                Accessoires ({data.accessoires.length})
+              </h2>
               <div className="flex flex-wrap gap-2">
                 {data.accessoires.map((acc) => (
-                  <span key={acc.id} className="px-3 py-1 bg-gray-100 rounded-full text-sm">
+                  <span 
+                    key={acc.id} 
+                    className="px-3 py-2 bg-cyan-50 text-cyan-700 rounded-lg text-sm font-medium border border-cyan-200"
+                  >
                     {acc.nom}
                   </span>
                 ))}
               </div>
             </div>
           )}
+
+          {/* Cours */}
+          {data.cours && (
+            <div className="bg-[white] rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-cyan-500" />
+                Cours associé
+              </h2>
+              <p className="text-gray-700 font-medium">{data.cours}</p>
+            </div>
+          )}
         </div>
 
-        {/* Colonne droite */}
+        {/* Colonne droite - Récapitulatif */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm border p-6 sticky top-6">
+          <div className="bg-[white] rounded-xl shadow-sm border p-6 sticky top-6">
             <h2 className="text-lg font-semibold mb-4">Récapitulatif</h2>
             
-            <div className="space-y-4 mb-6">
-              <div className="flex justify-between text-sm">
+            <div className="space-y-3 mb-6">
+              <div className="flex justify-between text-sm py-2 border-b">
                 <span className="text-gray-600">Console</span>
                 <span className="font-medium">
-                  {data.console ? "1" : "0"}
+                  {data.console ? "✓ Sélectionnée" : "Aucune"}
                 </span>
               </div>
-              <div className="flex justify-between text-sm">
+              <div className="flex justify-between text-sm py-2 border-b">
                 <span className="text-gray-600">Jeux</span>
-                <span className="font-medium">{data.jeux.length}</span>
+                <span className="font-medium">{data.jeux.length} / 3</span>
               </div>
               {data.accessoires.length > 0 && (
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm py-2 border-b">
                   <span className="text-gray-600">Accessoires</span>
                   <span className="font-medium">{data.accessoires.length}</span>
                 </div>
               )}
-              
-              <div className="border-t pt-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Date</span>
-                  <span className="font-medium">{data.date}</span>
+              {data.cours && (
+                <div className="flex justify-between text-sm py-2 border-b">
+                  <span className="text-gray-600">Cours</span>
+                  <span className="font-medium">{data.cours}</span>
                 </div>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-gray-600">Heure</span>
-                  <span className="font-medium">{data.heure}</span>
+              )}
+              
+              <div className="pt-4 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Date</span>
+                  <span className="font-medium">{String(data.date).split('T')[0] || "Non définie"}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600 text-sm">Heure</span>
+                  <span className="font-medium">{String(data.time).substring(0, 5) || "Non définie"}</span>
                 </div>
               </div>
             </div>
 
-            {/* Messages */}
+            {/* Message d'erreur */}
             {error && (
-              <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <p>Réservation confirmer</p>
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
               </div>
             )}
 
@@ -330,7 +318,7 @@ export default function ConfirmReservation() {
                 {isProcessing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Confirmation...
+                    Confirmation en cours...
                   </>
                 ) : (
                   <>
@@ -344,14 +332,14 @@ export default function ConfirmReservation() {
                 variant="outline"
                 className="w-full h-12"
                 disabled={isProcessing}
-                onClick={() => router.push("/reservation")}
+                onClick={() => router.back()}
               >
                 Retour
               </Button>
             </div>
 
             <p className="text-xs text-gray-500 mt-4 text-center">
-              En confirmant, vous acceptez nos conditions dutilisation
+              En confirmant, vous acceptez nos conditions d&apos;utilisation
             </p>
           </div>
         </div>

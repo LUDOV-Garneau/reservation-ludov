@@ -33,12 +33,18 @@ interface ReservationContextType {
   selectedConsole: Console | null; // console sélectionnée
   selectedGames: string[]; // liste des jeux sélectionnés
   currentStep: number; // étape actuelle du processus de réservation
+  selectedDate: Date | undefined; // date sélectionnée
+  selectedTime: string | undefined; // heure sélectionnée
+  selectedCours: number | null;
 
   // Mutateurs
   setUserId: (id: number) => void; // définit l'ID utilisateur
   setSelectedConsole: (console: Console | null) => void; // définit la console sélectionnée
   setSelectedGames: (games: string[]) => void; // définit la liste des jeux sélectionnés
   setCurrentStep: (step: number) => void; // définit l'étape actuelle
+  setSelectedDate: (date: Date | undefined) => void; // définit la date sélectionnée
+  setSelectedTime: (time: string | undefined) => void; // définit l'heure sélectionnée
+  setSelectedCours: (coursId: number | null) => void; // définit le cours sélectionné
 
   // Actions Réservation
   cancelReservation: () => Promise<void>; // annule la réservation côté serveur
@@ -95,6 +101,9 @@ export function ReservationProvider({
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAccessories, setSelectedAccessories] = useState<number[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
+  const [selectedCours, setSelectedCours] = useState<number | null>(null);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -154,20 +163,38 @@ export function ReservationProvider({
         if (!data.success || data.status === "expired") {
           clearStorage();
           setIsReservationCancelled(true);
+          setIsRestoring(false);
+          setIsHydrated(true);
           return;
         }
 
-        // Restaure les infos
-        console.log("Restauration réservation:", data);
-        setReservationId(data.reservationId);
+        setReservationId(String(data.reservationId));
         setExpiresAt(data.expiresAt);
         setUserId(data.userId);
-        setSelectedConsole(data.console)
+
+        if (data.console) {
+          setSelectedConsole({
+            id: Number(data.console.id),
+            name: String(data.console.name),
+            nombre: Number(data.console.nombre),
+            image: data.console.picture,
+          });
+        }
+
+        setSelectedCours(data.cours || null);
+
         setSelectedGames(data.games || []);
+
         setSelectedAccessories(data.accessories || []);
+
+        setSelectedDate(data.selectedDate ? new Date(data.selectedDate) : undefined);
+        setSelectedTime(data.selectedTime || undefined);
+
         setCurrentStep(data.currentStep || 1);
+
         setIsTimerActive(true);
         setTimeRemaining(computeRemaining(data.expiresAt));
+
       } catch (e) {
         console.error("Erreur restauration réservation:", e);
         clearStorage();
@@ -324,8 +351,6 @@ export function ReservationProvider({
     }
   };
 
-
-
   /** Stoppe le timer local (sans annuler la réservation) */
   const stopTimer = () => setIsTimerActive(false);
 
@@ -341,6 +366,13 @@ export function ReservationProvider({
     setSelectedGames([]);
     setCurrentStep(1);
     clearStorage();
+    setSelectedAccessories([]);
+    setSelectedDate(undefined);
+    setSelectedTime(undefined);
+    setUserId(0);
+    setIsHydrated(true);
+    setIsRestoring(false);
+    setSelectedCours(null);
   };
 
   /** Annule la réservation côté serveur */
@@ -368,8 +400,6 @@ export function ReservationProvider({
 
 const updateReservationConsole = async (newConsoleId: number) => {
   if (!reservationId) return;
-
-  console.log("Mise à jour console réservation:", reservationId, newConsoleId);
 
   try {
     const res = await fetch(`/api/reservation/update-hold-reservation`, {
@@ -481,6 +511,12 @@ const updateReservationConsole = async (newConsoleId: number) => {
     selectedAccessories,
     setSelectedAccessories,
     updateReservationAccessories,
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    selectedCours,
+    setSelectedCours,
   };
 
   if (isRestoring) {

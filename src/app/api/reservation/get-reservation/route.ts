@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
+import { Cours } from "@/types/cours";
 
 // ---------------------
 // Interfaces DB
@@ -14,7 +15,9 @@ interface ReservationRow extends RowDataPacket {
   game3Id: number | null;
   stationId: number | null;
   accessoirId: number | null;
-  date: string | null;
+  date: Date | null;
+  time: string | null;
+  cours: number | null;
   expireAt: string;
   createdAt: string;
   consoleName: string | null;
@@ -71,9 +74,9 @@ interface ReservationResponse {
   console: ConsoleInfo | null;
   accessoires: Accessoire[];
   station: Station | null;
-  cours: string;
-  date: string | null;
-  heure: string | null;
+  cours: Cours;
+  date: Date | null;
+  time: string | null;
   expireAt: string;
   userId: number;
 }
@@ -107,6 +110,7 @@ export async function GET(req: Request) {
         rh.station_id as stationId,
         rh.accessoir_id as accessoirId,
         rh.date,
+        rh.time,
         rh.expireAt,
         rh.createdAt,
         c.name as consoleName,
@@ -192,7 +196,6 @@ export async function GET(req: Request) {
     // Format date
     // ---------------------
     const dateReservation = reservation.date ? new Date(reservation.date) : null;
-    const dateFormatted = dateReservation ? dateReservation.toLocaleDateString("fr-CA") : null;
     const heureFormatted = dateReservation
       ? dateReservation.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" })
       : null;
@@ -223,9 +226,15 @@ export async function GET(req: Request) {
         : null,
       accessoires,
       station,
-      cours: "", // à adapter si tu ajoutes les cours
-      date: dateFormatted,
-      heure: heureFormatted,
+      cours: reservation.cours
+        ? {
+            id: reservation.cours,
+            nom_cours: reservation.coursNom,
+            code_cours: reservation.coursCode,
+          }
+        : { id: 0, nom_cours: "", code_cours: "" },
+      date: reservation.date,
+      time: reservation.time,
       expireAt: reservation.expireAt,
       userId: reservation.userId,
     };

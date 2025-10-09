@@ -10,7 +10,9 @@ export async function POST(req: Request) {
     game3Id, 
     newConsoleId, 
     accessories, 
-    coursId 
+    coursId,
+    date,
+    time
   } = await req.json();
 
   if (!reservationId) {
@@ -24,9 +26,19 @@ export async function POST(req: Request) {
   try {
     await conn.beginTransaction();
 
-    // Vérifier la réservation
+    // Vérifier la réservation et récupérer l'état actuel
     const [rows] = await conn.query<RowDataPacket[]>(
-      `SELECT console_id FROM reservation_hold WHERE id = ? FOR UPDATE`,
+      `SELECT 
+        console_id, 
+        game1_id, 
+        game2_id, 
+        game3_id,
+        date,
+        time,
+        expireAt
+      FROM reservation_hold 
+      WHERE id = ? 
+      FOR UPDATE`,
       [reservationId]
     );
 
@@ -38,15 +50,27 @@ export async function POST(req: Request) {
       );
     }
 
-    const currentConsoleId = rows[0].console_id;
+    const reservation = rows[0];
+
+    // Vérifier si la réservation n'a pas expiré
+    if (new Date(reservation.expireAt) < new Date()) {
+      await conn.rollback();
+      return NextResponse.json(
+        { success: false, message: "Réservation expirée" },
+        { status: 410 }
+      );
+    }
+
+    const currentConsoleId = reservation.console_id;
 
     // --- Construction dynamique des updates ---
     const updates: string[] = [];
     const values: unknown[] = [];
 
+    // Jeux
     if (game1Id !== undefined) {
       updates.push("game1_id = ?");
-      values.push(game1Id); // null explicite seulement si tu veux reset
+      values.push(game1Id);
     }
     if (game2Id !== undefined) {
       updates.push("game2_id = ?");
@@ -56,22 +80,41 @@ export async function POST(req: Request) {
       updates.push("game3_id = ?");
       values.push(game3Id);
     }
+
+    // Accessoires (support pour plusieurs)
     if (accessories !== undefined) {
-      updates.push("accessoir_id = ?");
-      values.push(accessories?.[0] || null);
+      if (Array.isArray(accessories)) {
+        // Si tu veux supporter plusieurs accessoires, tu devras adapter ta DB
+        // Pour l'instant on prend juste le premier
+        updates.push("accessoir_id = ?");
+        values.push(accessories.length > 0 ? accessories[0] : null);
+      } else {
+        updates.push("accessoir_id = ?");
+        values.push(accessories);
+      }
     }
+
+    // Cours
     if (coursId !== undefined) {
       updates.push("cours = ?");
       values.push(coursId || null);
     }
 
-    // --- Changement de console ---
-    if (newConsoleId && newConsoleId !== currentConsoleId) {
-      await conn.query(
-        `UPDATE consoles SET nombre = nombre + 1 WHERE id = ?`,
-        [currentConsoleId]
-      );
+    // Date et heure
+    if (date !== undefined) {
+      updates.push("date = ?");
+      values.push(date);
+    }
+    if (time !== undefined) {
+      updates.push("time = ?");
+      values.push(time);
+    }
 
+    // --- Changement de console ---
+    let finalConsoleId = currentConsoleId;
+
+    if (newConsoleId && newConsoleId !== currentConsoleId) {
+      // Vérifier disponibilité de la nouvelle console
       const [checkNew] = await conn.query<RowDataPacket[]>(
         `SELECT nombre FROM consoles WHERE id = ? FOR UPDATE`,
         [newConsoleId]
@@ -85,6 +128,13 @@ export async function POST(req: Request) {
         );
       }
 
+      // Libérer l'ancienne console
+      await conn.query(
+        `UPDATE consoles SET nombre = nombre + 1 WHERE id = ?`,
+        [currentConsoleId]
+      );
+
+      // Réserver la nouvelle console
       await conn.query(
         `UPDATE consoles SET nombre = nombre - 1 WHERE id = ?`,
         [newConsoleId]
@@ -92,6 +142,7 @@ export async function POST(req: Request) {
 
       updates.push("console_id = ?");
       values.push(newConsoleId);
+      finalConsoleId = newConsoleId;
     }
 
     // --- Mise à jour en DB seulement si nécessaire ---
@@ -103,18 +154,46 @@ export async function POST(req: Request) {
 
     await conn.commit();
 
+    // Récupérer les données mises à jour pour la réponse
+    const [updatedRows] = await conn.query<RowDataPacket[]>(
+      `SELECT 
+        id,
+        console_id,
+        game1_id,
+        game2_id,
+        game3_id,
+        accessoir_id,
+        cours,
+        date,
+        time,
+        expireAt
+      FROM reservation_hold 
+      WHERE id = ?`,
+      [reservationId]
+    );
+
+    const updated = updatedRows[0];
+
     return NextResponse.json({
       success: true,
       reservationId,
-      consoleId: newConsoleId || currentConsoleId,
-      accessories: accessories || [],
-      coursId: coursId || null,
+      consoleId: finalConsoleId,
+      games: [
+        updated.game1_id,
+        updated.game2_id,
+        updated.game3_id
+      ].filter(id => id !== null),
+      accessories: updated.accessoir_id ? [updated.accessoir_id] : [],
+      coursId: updated.cours || null,
+      date: updated.date,
+      time: updated.time,
+      expireAt: updated.expireAt,
     });
   } catch (err) {
     await conn.rollback();
     console.error("Erreur update reservation:", err);
     return NextResponse.json(
-      { success: false, message: "Erreur serveur" },
+      { success: false, message: "Erreur serveur", error: err instanceof Error ? err.message : "Unknown error" },
       { status: 500 }
     );
   } finally {

@@ -7,7 +7,9 @@ export interface Reservation {
   game3_id: number | null;
   station_id: number | null;
   accessoir_id: number | null;
+  cours: number | null;
   expireAt: Date;
   date: Date | null;
+  time: string | null;
   createdAt: Date;
 }
