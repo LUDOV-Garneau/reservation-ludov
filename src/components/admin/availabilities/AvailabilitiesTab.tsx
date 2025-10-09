@@ -22,6 +22,7 @@ export default function AvailabilitiesTab() {
         selectedCard={selectedCard}
         setSelectedCard={(id: string) => setSelectedCard(id)}
       />
+
       {selectedCard === "weekly" && (
         <Card className="p-6 mt-4">
           <WeekAvailabilitiesSelection />
@@ -35,6 +36,7 @@ export default function AvailabilitiesTab() {
           </Button>
         </Card>
       )}
+
       {selectedCard === "specific-dates" && (
         <Card className="p-6 mt-4">
           <strong className="block text-lg mb-2">
