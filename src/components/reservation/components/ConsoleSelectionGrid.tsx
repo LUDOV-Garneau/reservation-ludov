@@ -80,7 +80,7 @@ export default function ConsoleSelectionGrid({
           id: Number(c.id) || 0,
           name: c.name || "Console inconnue",
           nombre: Number(c.nombre) || 0,
-          image: c.image || "/placeholder_consoles.jpg",
+          image: c.image,
         }))
         .filter((c) => c.id > 0);
 

@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
       rows.map((g) => ({
         id: g.id,
         titre: g.titre,
-        picture: g.picture || "/placeholder_games.jpg",
+        picture: g.picture,
         available: g.available,
         biblio_id: g.biblio_id,
         author: g.author,
