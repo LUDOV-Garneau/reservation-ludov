@@ -4,6 +4,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 
 interface AvailabilitiesTypeSelectionProps {
   selectedCard: string;
@@ -14,6 +15,8 @@ export default function AvailabilitiesTypeSelection({
   selectedCard,
   setSelectedCard,
 }: AvailabilitiesTypeSelectionProps) {
+  const t = useTranslations();
+
   return (
     <div className="flex gap-10 text-center">
       <Card
@@ -32,10 +35,10 @@ export default function AvailabilitiesTypeSelection({
               "group-hover:text-[#02dcde] transition-colors"
             }`}
           >
-            Par semaine
+            {t("admin.availabilities.typeSelection.weekly.title")}
           </CardTitle>
           <CardDescription>
-            Ajoutez des disponibilités récurrentes à chaque semaine.
+            {t("admin.availabilities.typeSelection.weekly.description")}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -55,10 +58,10 @@ export default function AvailabilitiesTypeSelection({
               "group-hover:text-[#02dcde] transition-colors"
             }`}
           >
-            Dates spécifiques
+            {t("admin.availabilities.typeSelection.specificDates.title")}
           </CardTitle>
           <CardDescription>
-            Ajoutez des disponibilités spécifiques.
+            {t("admin.availabilities.typeSelection.specificDates.description")}
           </CardDescription>
         </CardHeader>
       </Card>

@@ -111,7 +111,7 @@ export default function HourRangeSelection({
             className="text-red-400 text-xs !p-2"
             onClick={removeRow}
           >
-            Remove
+            {t("admin.availabilities.actions.remove")}
           </Button>
         )}
         {showAddButton && (
@@ -120,7 +120,7 @@ export default function HourRangeSelection({
             className="text-[#02dcde] text-xs !p-2"
             onClick={addRow}
           >
-            + Add
+            {t("admin.availabilities.actions.add")}
           </Button>
         )}
       </div>

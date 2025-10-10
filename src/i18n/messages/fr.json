@@ -159,7 +159,67 @@
       "title": "Stations"
     },
     "availabilities": {
-      "title": "Disponibilités"
+      "title": "Disponibilités",
+      "days": {
+        "sunday": "Dimanche",
+        "monday": "Lundi",
+        "tuesday": "Mardi",
+        "wednesday": "Mercredi",
+        "thursday": "Jeudi",
+        "friday": "Vendredi",
+        "saturday": "Samedi"
+      },
+      "actions": {
+        "set": "Enregistrer les disponibilités",
+        "saveDates": "Enregistrer les dates valides",
+        "remove": "Supprimer",
+        "add": "+ Ajouter"
+      },
+      "text": {
+        "selectLabel": "Sélectionnez les dates valides et les plages horaires"
+      },
+      "errors": {
+        "invalidRange": "L'heure de fin doit être après l'heure de début.",
+        "overlap": "Plages horaires qui se chevauchent.",
+        "exception": "Exception le {date} : {error}",
+        "fixErrors": "Veuillez corriger les erreurs suivantes avant de continuer :\n{errors}"
+      },
+      "messages": {
+        "savedWeekly": "Disponibilités hebdomadaires enregistrées.",
+        "savedSpecific": "Dates valides enregistrées."
+      },
+      "typeSelection": {
+        "weekly": {
+          "title": "Par semaine",
+          "description": "Ajoutez des disponibilités récurrentes à chaque semaine."
+        },
+        "specificDates": {
+          "title": "Dates spécifiques",
+          "description": "Ajoutez des disponibilités spécifiques."
+        }
+      },
+      "blockSpecificDates": {
+        "title": "Bloquer des dates spécifiques (exceptions)",
+        "description": "Définissez des dates spécifiques qui seront",
+        "highlight": "exclues",
+        "remaining": "de vos disponibilités hebdomadaires."
+      },
+      "dateRange": {
+        "title": "Définissez la période de validité des disponibilités",
+        "select": "Sélectionner une plage de dates",
+        "alwaysApplies": "Toujours applicable"
+      },
+      "specificDates": {
+        "label": "Définissez vos dates et horaires spécifiques",
+        "pickDate": "Choisir une date",
+        "duplicate": "Dupliquer",
+        "remove": "Supprimer",
+        "addNew": "+ Ajouter une nouvelle date"
+      },
+      "weekAvailabilities": {
+        "title": "Définissez votre disponibilité hebdomadaire ci-dessous",
+        "unavailableOn": "Indisponible les {day}"
+      }
     }
   }
 }

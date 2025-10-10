@@ -15,124 +15,38 @@ type HourRange = {
 };
 
 type WeekDay = {
-  label: string;
+  label: string; // key like "sunday"
   enabled: boolean;
   hoursRanges: HourRange[];
 };
 
-const daysDict: Record<string, WeekDay> = {
-  sunday: {
-    label: "Sunday",
-    enabled: false,
-    hoursRanges: [
-      {
-        id: 1,
-        startHour: "08",
-        startMinute: "00",
-        endHour: "17",
-        endMinute: "00",
-      },
-    ],
-  },
-  monday: {
-    label: "Monday",
-    enabled: false,
-    hoursRanges: [
-      {
-        id: 1,
-        startHour: "08",
-        startMinute: "00",
-        endHour: "17",
-        endMinute: "00",
-      },
-    ],
-  },
-  tuesday: {
-    label: "Tuesday",
-    enabled: false,
-    hoursRanges: [
-      {
-        id: 1,
-        startHour: "08",
-        startMinute: "00",
-        endHour: "17",
-        endMinute: "00",
-      },
-    ],
-  },
-  wednesday: {
-    label: "Wednesday",
-    enabled: false,
-    hoursRanges: [
-      {
-        id: 1,
-        startHour: "08",
-        startMinute: "00",
-        endHour: "17",
-        endMinute: "00",
-      },
-    ],
-  },
-  thursday: {
-    label: "Thursday",
-    enabled: false,
-    hoursRanges: [
-      {
-        id: 1,
-        startHour: "08",
-        startMinute: "00",
-        endHour: "17",
-        endMinute: "00",
-      },
-    ],
-  },
-  friday: {
-    label: "Friday",
-    enabled: false,
-    hoursRanges: [
-      {
-        id: 1,
-        startHour: "08",
-        startMinute: "00",
-        endHour: "17",
-        endMinute: "00",
-      },
-    ],
-  },
-  saturday: {
-    label: "Saturday",
-    enabled: false,
-    hoursRanges: [
-      {
-        id: 1,
-        startHour: "08",
-        startMinute: "00",
-        endHour: "17",
-        endMinute: "00",
-      },
-    ],
-  },
+type Props = {
+  weekly: Record<string, WeekDay>;
+  onChange: (updatedWeekly: Record<string, WeekDay>) => void;
 };
 
-export default function WeekAvailabilitiesSelection() {
+export default function WeekAvailabilitiesSelection({
+  weekly,
+  onChange,
+}: Props) {
   const t = useTranslations();
 
-  const [days, setDays] = useState<Record<string, WeekDay>>(daysDict);
-
   function setEnabled(id: string, value: boolean) {
-    setDays((prevDays) => ({
-      ...prevDays,
-      [id]: { ...prevDays[id], enabled: value },
-    }));
+    const updated = {
+      ...weekly,
+      [id]: { ...weekly[id], enabled: value },
+    };
+    onChange(updated);
   }
 
-  function addHoursRange(id: string, newId: number) {
-    setDays((prevDays) => ({
-      ...prevDays,
-      [id]: {
-        ...prevDays[id],
+  function addHoursRange(dayId: string, newId: number) {
+    const day = weekly[dayId];
+    const updated = {
+      ...weekly,
+      [dayId]: {
+        ...day,
         hoursRanges: [
-          ...prevDays[id].hoursRanges,
+          ...day.hoursRanges,
           {
             id: newId,
             startHour: "08",
@@ -142,30 +56,31 @@ export default function WeekAvailabilitiesSelection() {
           },
         ],
       },
-    }));
+    };
+    onChange(updated);
   }
 
-  function removeHoursRange(id: string, idHourRange: number) {
-    setDays((prevDays) => ({
-      ...prevDays,
-      [id]: {
-        ...prevDays[id],
-        hoursRanges: prevDays[id].hoursRanges.filter(
-          (range) => range.id !== idHourRange
-        ),
+  function removeHoursRange(dayId: string, idHourRange: number) {
+    const day = weekly[dayId];
+    const updated = {
+      ...weekly,
+      [dayId]: {
+        ...day,
+        hoursRanges: day.hoursRanges.filter((r) => r.id !== idHourRange),
       },
-    }));
+    };
+    onChange(updated);
   }
 
   return (
     <>
       <strong className="block text-lg mb-2">
-        Define your weekly availability below:
+        {t("admin.availabilities.weekAvailabilities.title")}
       </strong>
-      {Object.entries(days).map(([id, { label, enabled, hoursRanges }]) => {
+
+      {Object.entries(weekly).map(([id, { label, enabled, hoursRanges }]) => {
         const minId = Math.min(...hoursRanges.map((r) => r.id));
         const maxId = Math.max(...hoursRanges.map((r) => r.id));
-
         return (
           <div
             key={id}
@@ -175,10 +90,10 @@ export default function WeekAvailabilitiesSelection() {
               <Switch
                 id={id}
                 checked={enabled}
-                onCheckedChange={(checked: boolean) => setEnabled(id, checked)}
+                onCheckedChange={(checked) => setEnabled(id, checked)}
               />
               <Label htmlFor={id} className="font-medium">
-                {label}
+                {t(`admin.availabilities.days.${label}`)}
               </Label>
             </div>
 
@@ -202,7 +117,9 @@ export default function WeekAvailabilitiesSelection() {
               </div>
             ) : (
               <span className="italic text-muted-foreground col-span-2">
-                Unavailable on {label}s
+                {t("admin.availabilities.weekAvailabilities.unavailableOn", {
+                  day: t(`admin.availabilities.days.${label}`),
+                })}
               </span>
             )}
           </div>

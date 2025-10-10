@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Label } from "../../ui/label";
 import { Button } from "../../ui/button";
 import { DateRange } from "react-day-picker";
@@ -14,28 +14,56 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { ChevronDownIcon } from "lucide-react";
 
-export default function DateRangeSelection() {
+type Props = {
+  dateRange: { startDate: Date | null; endDate: Date | null } | null;
+  onChange: (
+    range: { startDate: Date | null; endDate: Date | null } | null
+  ) => void;
+};
+
+export default function DateRangeSelection({ dateRange, onChange }: Props) {
   const t = useTranslations();
 
   const [alwaysApplies, setAlwaysApplies] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange>({
-    from: new Date(),
-    to: new Date(),
+
+  const [localRange, setLocalRange] = useState<DateRange>({
+    from: dateRange?.startDate ?? undefined,
+    to: dateRange?.endDate ?? undefined,
   });
+
+  useEffect(() => {
+    setLocalRange({
+      from: dateRange?.startDate ?? undefined,
+      to: dateRange?.endDate ?? undefined,
+    });
+  }, [dateRange]);
 
   function handleSelectDate(range: DateRange | undefined) {
     if (range) {
-      setDateRange(range);
+      setLocalRange(range);
+      onChange({ startDate: range.from ?? null, endDate: range.to ?? null });
     } else {
-      // Handle clearing or reset if needed
+      setLocalRange({ from: undefined, to: undefined });
+      onChange(null);
     }
   }
+
+  useEffect(() => {
+    if (alwaysApplies) {
+      onChange(null);
+    } else if (localRange.from !== undefined || localRange.to !== undefined) {
+      onChange({
+        startDate: localRange.from ?? null,
+        endDate: localRange.to ?? null,
+      });
+    }
+  }, [alwaysApplies]);
 
   return (
     <>
       <strong className="block text-lg mb-2 mt-8">
-        Define the date range for which these availabilities apply:
+        {t("admin.availabilities.dateRange.title")}
       </strong>
       <div className="mx-auto flex gap-10 items-center">
         <Popover
@@ -50,19 +78,19 @@ export default function DateRangeSelection() {
               className="w-fit justify-between"
               disabled={alwaysApplies}
             >
-              {dateRange.from
-                ? dateRange.to
-                  ? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
-                  : dateRange.from.toLocaleDateString()
-                : "Select date range"}
+              {localRange.from
+                ? localRange.to
+                  ? `${localRange.from.toLocaleDateString()} - ${localRange.to.toLocaleDateString()}`
+                  : localRange.from.toLocaleDateString()
+                : t("admin.availabilities.dateRange.select")}
               <ChevronDownIcon className="ml-2 h-4 w-4" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
             <Calendar
               mode="range"
-              defaultMonth={dateRange.from}
-              selected={dateRange}
+              defaultMonth={localRange.from}
+              selected={localRange}
               onSelect={handleSelectDate}
             />
           </PopoverContent>
@@ -71,10 +99,13 @@ export default function DateRangeSelection() {
           <Checkbox
             id="toggle-always"
             className="data-[state=checked]:border-[#02dcde] data-[state=checked]:bg-[#02dcde] data-[state=checked]:text-white"
+            checked={alwaysApplies}
             onCheckedChange={(checked: boolean) => setAlwaysApplies(checked)}
           />
           <div className="grid gap-1.5 font-normal">
-            <p className="text-sm leading-none font-medium">Always applies</p>
+            <p className="text-sm leading-none font-medium">
+              {t("admin.availabilities.dateRange.alwaysApplies")}
+            </p>
           </div>
         </Label>
       </div>
