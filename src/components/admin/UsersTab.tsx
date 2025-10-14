@@ -1,5 +1,8 @@
 "use client";
 
+import UsersTable from "@/components/admin/components/UsersTable";
+import UsersForm from "@/components/admin/components/UsersForm";
+
 import {
   Card,
   CardDescription,
@@ -18,7 +21,8 @@ export default function UsersTab() {
         <CardHeader>
           <CardTitle>{t("admin.users.title")}</CardTitle>
           <CardDescription>
-            Ajouter la gestion des utilisateurs.
+            <UsersForm />
+            <UsersTable />
           </CardDescription>
         </CardHeader>
       </Card>
