@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
 };
 
 export default function AddUserForm({ onSuccess }: Props) {
+  const [open, setOpen] = useState(false);
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
@@ -56,6 +58,7 @@ export default function AddUserForm({ onSuccess }: Props) {
       setLastname("");
       setEmail("");
       setIsAdmin(false);
+      setOpen(false);
       onSuccess?.();
     } catch (err) {
       console.error(err);
@@ -66,6 +69,17 @@ export default function AddUserForm({ onSuccess }: Props) {
   };
 
   return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="default" className="mt-2">
+          + Ajouter un utilisateur
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Ajouter un utilisateur</DialogTitle>
+        </DialogHeader>
     <form
       onSubmit={handleSubmit}
       className="flex flex-col gap-4 max-w-md mt-4"
@@ -114,5 +128,7 @@ export default function AddUserForm({ onSuccess }: Props) {
         {loading ? "Ajout en cours..." : "Ajouter l'utilisateur"}
       </Button>
     </form>
+    </DialogContent>
+    </Dialog>
   );
 }

@@ -1,6 +1,7 @@
 // import type { Metadata } from "next";
 import "@/app/globals.css";
 import { Inter, Nunito } from "next/font/google";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,7 +27,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${inter.variable} ${nunito.variable}`}>
-      <body className="font-body">{children}</body>
+      <body className="font-body">
+        {children}
+        <Toaster position="top-right" />
+      </body>
     </html>
   );
 }

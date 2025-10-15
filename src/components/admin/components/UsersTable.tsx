@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -7,37 +7,44 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 type User = {
-  email: string
-  firstName: string
-  lastName: string
-}
+  email: string;
+  firstName: string;
+  lastName: string;
+};
 
 export default function UsersTable({ refreshKey }: { refreshKey: number }) {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     const fetchUsers = async () => {
-    setLoading(true);
+      setLoading(true);
       try {
-        const res = await fetch("/api/admin/users")
-        if (!res.ok) throw new Error("Erreur de requête")
-        const data = await res.json()
-        setUsers(data)
+        const res = await fetch(`/api/admin/users?page=${page}&limit=${limit}`);
+        if (!res.ok) throw new Error("Erreur de requête");
+        const data = await res.json();
+        setUsers(data.rows);
+        setTotal(data.total);
       } catch (error) {
-        console.error("Erreur lors du chargement des utilisateurs:", error)
+        console.error("Erreur lors du chargement des utilisateurs:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchUsers()
-  }, [refreshKey])
+    fetchUsers();
+  }, [refreshKey, page, limit]);
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <Card className="w-full max-w-3xl mx-auto mt-8">
@@ -52,35 +59,61 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
             ))}
           </div>
         ) : (
-          <Table>
-            <TableCaption>Liste complète des utilisateurs</TableCaption>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Prénom</TableHead>
-                <TableHead>Nom</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {users.length > 0 ? (
-                users.map((user, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{user.email}</TableCell>
-                    <TableCell>{user.firstName}</TableCell>
-                    <TableCell>{user.lastName}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
+          <>
+            <Table>
+              <TableCaption>Liste complète des utilisateurs</TableCaption>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center text-muted-foreground">
-                    Aucun utilisateur trouvé
-                  </TableCell>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Prénom</TableHead>
+                  <TableHead>Nom</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {users.length > 0 ? (
+                  users.map((user, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">
+                        {user.email}
+                      </TableCell>
+                      <TableCell>{user.firstName}</TableCell>
+                      <TableCell>{user.lastName}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={3}
+                      className="text-center text-muted-foreground"
+                    >
+                      Aucun utilisateur trouvé
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+            <div className="flex justify-between items-center mt-4">
+              <Button
+                variant="outline"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                Précédent
+              </Button>
+              <span>
+                Page {page} / {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                Suivant
+              </Button>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
