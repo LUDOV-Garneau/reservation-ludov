@@ -9,6 +9,7 @@ export async function GET() {
         firstname AS firstName,
         lastname AS lastName
       FROM users
+      ORDER BY createdAt DESC
     `)
 
     return NextResponse.json(rows)

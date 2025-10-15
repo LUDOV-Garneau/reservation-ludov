@@ -1,123 +1,56 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
-import { parse } from "csv-parse/sync";
-
-const EXPECTED_COLUMNS = [
-  "Username",
-  "Date Created",
-  "Last Login",
-  "First Name",
-  "Last Name",
-];
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
-    const file = formData.get("file") as File | null;
+    const body = await req.json();
+    const { firstname, lastname, email, isAdmin = 0 } = body;
 
-    if (!file) {
+    if (!firstname || !lastname || !email) {
       return NextResponse.json(
-        { error: "Aucun fichier téléversé." },
-        { status: 400 }
-      );
-    }
-
-    const csvText = await file.text();
-
-    const records = parse(csvText, {
-      columns: true,
-      skip_empty_lines: true,
-      trim: true,
-    });
-
-    const csvColumns = Object.keys(records[0] as object);
-    const missingColumns = EXPECTED_COLUMNS.filter(
-      (c) => !csvColumns.includes(c)
-    );
-    if (missingColumns.length > 0) {
-      return NextResponse.json(
-        {
-          error: `Colonnes manquantes: ${missingColumns.join(", ")}`,
-        },
+        { error: "Champs requis manquants (firstname, lastname, email)." },
         { status: 400 }
       );
     }
 
     const now = new Date();
-    type CsvUserRecord = {
-      Username: string;
-      "First Name": string;
-      "Last Name": string;
-      "Date Created": string;
-      [key: string]: unknown;
-    };
-
-    const users = (records as CsvUserRecord[]).map((r) => ({
-      username: r["Username"],
-      firstName: r["First Name"],
-      lastName: r["Last Name"],
-      dateCreated: new Date(r["Date Created"]),
-      password: null,
-      isAdmin: 0,
-      lastUpdatedAt: now,
-    }));
 
     const conn = await pool.getConnection();
     try {
-      const emails = users.map((u) => u.username);
-      const [existingRows] = await conn.query(
-        `SELECT email FROM users WHERE email IN (?)`,
-        [emails]
+      const [existing] = await conn.query(
+        "SELECT id FROM users WHERE email = ?",
+        [email]
       );
 
-      const existingEmails = new Set(
-        (existingRows as { email: string }[]).map((r) => r.email)
-      );
-
-      const newUsers = users.filter((u) => !existingEmails.has(u.username));
-
-      if (newUsers.length === 0) {
+      if ((existing as import("mysql2").RowDataPacket[]).length > 0) {
         conn.release();
-        return NextResponse.json({
-          success: false,
-          message: "Aucun nouvel utilisateur à insérer.",
-        });
+        return NextResponse.json(
+          { error: "Un utilisateur avec cet email existe déjà." },
+          { status: 409 }
+        );
       }
 
-      await conn.beginTransaction();
+      await conn.query(
+        `
+        INSERT INTO users (firstname, lastname, email, password, isAdmin, lastUpdatedAt, createdAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        `,
+        [firstname, lastname, email, null, isAdmin, now, now]
+      );
 
-      const sql = `
-        INSERT INTO users 
-          (firstname, lastname, email, password, isAdmin, lastUpdatedAt, createdAt)
-        VALUES ?
-      `;
-
-      const values = newUsers.map((u) => [
-        u.firstName,
-        u.lastName,
-        u.username,
-        u.password,
-        u.isAdmin,
-        u.lastUpdatedAt,
-        u.dateCreated,
-      ]);
-
-      await conn.query(sql, [values]);
-      await conn.commit();
-
-      return NextResponse.json({
-        success: true,
-        inserted: newUsers.length,
-        skipped: users.length - newUsers.length,
-      });
-    } catch (err) {
-      await conn.query("ROLLBACK");
-      throw err;
-    } finally {
       conn.release();
+
+      return NextResponse.json(
+        { success: true, message: "Utilisateur ajouté avec succès." },
+        { status: 201 }
+      );
+    } catch (err) {
+      conn.release();
+      console.error("Erreur lors de l'insertion :", err);
+      return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
     }
   } catch (error) {
-    console.error("Error importing CSV:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error("Erreur lors de l'ajout de l'utilisateur :", error);
+    return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }
 }

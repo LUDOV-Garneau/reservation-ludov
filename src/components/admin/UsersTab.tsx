@@ -2,6 +2,7 @@
 
 import UsersTable from "@/components/admin/components/UsersTable";
 import UsersForm from "@/components/admin/components/UsersForm";
+import AddUserForm from "@/components/admin/components/AddUserForm";
 
 import {
   Card,
@@ -22,6 +23,7 @@ export default function UsersTab() {
           <CardTitle>{t("admin.users.title")}</CardTitle>
           <CardDescription>
             <UsersForm />
+            <AddUserForm />
             <UsersTable />
           </CardDescription>
         </CardHeader>
