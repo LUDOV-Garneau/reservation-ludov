@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 
-export default function UsersForm() {
+type Props = {
+  onSuccess?: () => void;
+};
+
+export default function UsersForm({ onSuccess }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const router = useRouter(); 
 
@@ -27,7 +31,7 @@ export default function UsersForm() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("/api/admin/add-user", {
+      const res = await fetch("/api/admin/add-users", {
         method: "POST",
         body: formData,
       });
@@ -36,7 +40,7 @@ export default function UsersForm() {
 
       toast.success("Fichier CSV importé avec succès !");
       setFile(null);
-
+      onSuccess?.();
       router.refresh();
     } catch (error) {
       toast.error("Impossible d'importer le fichier CSV.");

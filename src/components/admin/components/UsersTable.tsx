@@ -17,12 +17,13 @@ type User = {
   lastName: string
 }
 
-export default function UsersTable() {
+export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchUsers = async () => {
+    setLoading(true);
       try {
         const res = await fetch("/api/admin/users")
         if (!res.ok) throw new Error("Erreur de requête")
@@ -36,7 +37,7 @@ export default function UsersTable() {
     }
 
     fetchUsers()
-  }, [])
+  }, [refreshKey])
 
   return (
     <Card className="w-full max-w-3xl mx-auto mt-8">

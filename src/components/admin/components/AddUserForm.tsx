@@ -8,7 +8,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 
-export default function AddUserForm() {
+type Props = {
+  onSuccess?: () => void;
+};
+
+export default function AddUserForm({ onSuccess }: Props) {
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
@@ -52,6 +56,7 @@ export default function AddUserForm() {
       setLastname("");
       setEmail("");
       setIsAdmin(false);
+      onSuccess?.();
     } catch (err) {
       console.error(err);
       toast.error("Impossible d'ajouter l'utilisateur.");
