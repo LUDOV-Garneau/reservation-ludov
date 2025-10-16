@@ -12,7 +12,7 @@ type Reservation = {
   date: string;
   heure: string;
   console: { nom: string };
-  jeux: { nom: string; description?: string; materielRequis?: string }[];
+  jeux: { nom: string; biblio: number }[];
   accessoires?: { nom: string }[];
 };
 
@@ -47,7 +47,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
   }, [id]);
 
   return (
-    <div className="md:px-[60px] px-6 py-[30px] mx-auto w-full max-w-7xl bg-[white] rounded-2xl p-6 m-6">
+    <div>
       {!isLoading && reservation != null ? (
         <DetailsReservation
           jeux={reservation.jeux}
@@ -58,7 +58,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
           heure={reservation.heure}
         />
       ) : (
-        <div className="mx-auto max-w-6xl p-4 md:p-6">
+        <div>
           <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
             <Skeleton className="h-14 w-60 mb-2" />
             <div className="w-full sm:w-auto flex flex-col items-center gap-5 sm:flex-row sm:items-center rounded-md border bg-white p-3 shadow-sm">

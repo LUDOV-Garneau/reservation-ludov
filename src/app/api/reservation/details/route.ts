@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
+import { Bilbo } from "next/font/google";
 
 type ReservationHoldRow = RowDataPacket & {
   id: number;
@@ -40,9 +41,9 @@ export async function GET(request: NextRequest) {
       `
       SELECT 
         rh.id, rh.user_id, rh.station_id, rh.createdAt, c.name AS console_name, 
-        g1.titre AS game1_title, g1.author AS game1_author,
-        g2.titre AS game2_title, g2.author AS game2_author,
-        g3.titre AS game3_title, g3.author AS game3_author,
+        g1.titre AS game1_title, g1.biblio_id AS game1_biblio_id,
+        g2.titre AS game2_title, g2.biblio_id AS game2_biblio_id,
+        g3.titre AS game3_title, g3.biblio_id AS game3_biblio_id,
         a.name  AS accessoire_name
       FROM reservation_hold rh
       JOIN consoles c ON c.id = rh.console_id
@@ -73,14 +74,14 @@ export async function GET(request: NextRequest) {
     const heure = (timePart ?? "").slice(0, 5);
 
     const jeux = [
-      { titre: row.game1_title, author: row.game1_author },
-      { titre: row.game2_title, author: row.game2_author },
-      { titre: row.game3_title, author: row.game3_author },
+      { titre: row.game1_title, biblio: row.game1_biblio_id },
+      { titre: row.game2_title, biblio: row.game2_biblio_id },
+      { titre: row.game3_title, biblio: row.game3_biblio_id },
     ]
       .filter((j) => j.titre)
       .map((j) => ({
         nom: j.titre as string,
-        description: j.author ?? undefined,
+        biblio: j.biblio ?? undefined,
       }));
 
     return NextResponse.json({
