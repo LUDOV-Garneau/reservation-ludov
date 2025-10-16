@@ -17,12 +17,11 @@ type Reservation = {
 };
 
 export default function DetailsReservationClient({ id }: { id: string }) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reservation, setReservation] = useState<Reservation | null>(null);
 
   useEffect(() => {
     const getReservation = async () => {
-      setIsLoading(true);
       try {
         const response = await fetch(
           `/api/reservation/details?id=${encodeURIComponent(id)}`
@@ -48,7 +47,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
   }, [id]);
 
   return (
-    <div className="md:px-[60px] px-6 py-[30px] mx-auto w-full max-w-7xl">
+    <div className="md:px-[60px] px-6 py-[30px] mx-auto w-full max-w-7xl bg-[white] rounded-2xl p-6 m-6">
       {!isLoading && reservation != null ? (
         <DetailsReservation
           jeux={reservation.jeux}
