@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
         id: reservation.console_id,
         name: reservation.console_name,
         nombre: reservation.console_nombre,
-        image: reservation.console_image || "/placeholder_consoles.jpg",
+        image: reservation.console_image,
       },
       games: gameIds,
       accessories,

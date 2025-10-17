@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { Search, Check, Lock, Gamepad2, Loader2 } from "lucide-react";
+import { Search, Check, Gamepad2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -14,12 +14,14 @@ type Game = {
   picture: string;
   available: number;
   biblio_id?: number;
+  platform: string;
 };
 
 interface GameSelectionGridProps {
   selectedIds: number[];
   onSelect: (game: Game) => void;
   maxReached: boolean;
+  consoleSelectedId: number | null;
 }
 
 const ITEMS_PER_PAGE = 12;
@@ -27,7 +29,8 @@ const ITEMS_PER_PAGE = 12;
 export default function GameSelectionGrid({ 
   selectedIds, 
   onSelect, 
-  maxReached 
+  maxReached,
+  consoleSelectedId
 }: GameSelectionGridProps) {
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState("");
@@ -37,14 +40,16 @@ export default function GameSelectionGrid({
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchDebounce, setSearchDebounce] = useState("");
   const [totalGames, setTotalGames] = useState(0);
+  const [consoleId] = useState<number | null>(consoleSelectedId || null);
   
   // Ref pour l'intersection observer
   const observerTarget = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fonction pour charger les jeux
-  const loadGames = useCallback(async (pageNum: number, searchQuery: string, reset: boolean = false) => {
+  const loadGames = useCallback(async (pageNum: number, searchQuery: string, reset: boolean = false, consoleId: number | null) => {
     if (loading || (!hasMore && !reset)) return;
+
     
     setLoading(true);
     
@@ -52,15 +57,15 @@ export default function GameSelectionGrid({
       const params = new URLSearchParams({
         page: String(pageNum),
         limit: String(ITEMS_PER_PAGE),
-        ...(searchQuery && { search: searchQuery })
+        ...(searchQuery && { search: searchQuery }),
       });
 
-      const res = await fetch(`/api/reservation/games?${params}`);
+      const res = await fetch(`/api/reservation/games?${params}&consoleId=${consoleId}`);
       if (!res.ok) throw new Error("Erreur lors du chargement des jeux");
       
       const data = await res.json();
+
       
-      // Si c'est un reset, remplacer les jeux, sinon ajouter
       if (reset) {
         setGames(data.games || []);
         setPage(1);
@@ -68,7 +73,6 @@ export default function GameSelectionGrid({
         setGames(prev => [...prev, ...(data.games || [])]);
       }
       
-      // Mettre à jour les infos de pagination
       setHasMore(data.hasMore || false);
       setTotalGames(data.pagination?.total || 0);
       
@@ -80,7 +84,6 @@ export default function GameSelectionGrid({
     }
   }, [loading, hasMore]);
 
-  // Debounce de la recherche
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -97,12 +100,11 @@ export default function GameSelectionGrid({
     };
   }, [search]);
 
-  // Effet pour la recherche
   useEffect(() => {
     setGames([]);
     setPage(1);
     setHasMore(true);
-    loadGames(1, searchDebounce, true);
+    loadGames(1, searchDebounce, true, consoleId);
   }, [searchDebounce]);
 
   // Intersection Observer pour l'infinite scroll
@@ -112,7 +114,7 @@ export default function GameSelectionGrid({
       if (entries[0].isIntersecting && hasMore && !loading && !search){
         setPage(prev => {
           const next = prev + 1;
-          loadGames(next, searchDebounce, false);
+          loadGames(next, searchDebounce, false, consoleId);
           return next;
         });
       }},
@@ -136,7 +138,7 @@ export default function GameSelectionGrid({
     if (!loading && hasMore) {
       const nextPage = page + 1;
       setPage(nextPage);
-      loadGames(nextPage, searchDebounce, false);
+      loadGames(nextPage, searchDebounce, false, consoleId);
     }
   };
 
@@ -195,7 +197,7 @@ export default function GameSelectionGrid({
       ) : (
         <>
           {/* Grille des jeux */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
             {games.map((game) => {
               const isSelected = selectedIds.includes(game.id);
               const isDisabled = !isSelected && maxReached;
@@ -217,23 +219,27 @@ export default function GameSelectionGrid({
                   `}
                 >
                   {/* Image du jeu */}
-                  <div className="relative aspect-[3/4]">
-                    <Image
-                      src={game.picture || "/placeholder_games.jpg"}
-                      alt={game.titre}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 20vw"
-                      loading="lazy"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "/placeholder_games.jpg";
-                      }}
-                    />
+                  <div className="relative h-96">
+                    {game.picture === null ? (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <Gamepad2 className="h-20 w-20 text-gray-400" />
+                      </div>
+                    ) : (
+                      <div className="w-full h-96 relative">
+                        <Image
+                          src={game.picture}
+                          alt={game.titre}
+                          fill
+                          className="object-cover object-top sm:h-52"
+                          loading="lazy"
+                        />
+                      </div>
+
+                    )}
                     
                     {/* Overlay au hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40" />
-                    
+                    <div className={`${game.picture !== null && "2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity"} absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`} />
+
                     {/* Badge sélectionné */}
                     {isSelected && (
                       <div className="absolute top-2 right-2 bg-cyan-500 rounded-full p-2 shadow-lg animate-in zoom-in-50">
@@ -241,15 +247,15 @@ export default function GameSelectionGrid({
                       </div>
                     )}
 
-                    <div className="absolute top-2 left-2">
+                    <div className={`${game.picture !== null && ("2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity")} absolute top-2 left-2`}>
                       <div className="bg-black/70 text-white rounded-full px-2 py-1 font-medium flex items-center gap-2">
                         <img src="/ConsoleLogos/Playstation.png" className="w-5"></img>
-                      PlayStation
+                        {game.platform}
                       </div>
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 p-4">
-                      <div className="flex flex-col items-baseline gap-4">
+                    <div className={`${game.picture !== null && ("2xl:group-hover:opacity-100 2xl:transition-opacity 2xl:opacity-0")} absolute bottom-0 left-0 right-0 p-4`}>
+                      <div className="flex flex-col gap-4 items-center">
                         <p className="text-white text-lg font-bold line-clamp-2">
                           {game.titre}
                         </p>
@@ -258,8 +264,8 @@ export default function GameSelectionGrid({
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
-                            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white">
-                              Plus de détails sur le jeu
+                            className="bg-cyan-500 hover:bg-cyan-600 text-white text-xs lg:text-sm">
+                              Plus de détails
                           </Button>
                         </Link>
 
