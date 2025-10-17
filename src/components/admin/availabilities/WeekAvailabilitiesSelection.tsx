@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 import { Switch } from "../../ui/switch";
 import { Label } from "../../ui/label";
 import HourRangeSelection from "./HourRangeSelection";
@@ -15,7 +14,7 @@ type HourRange = {
 };
 
 type WeekDay = {
-  label: string; // key like "sunday"
+  label: string;
   enabled: boolean;
   hoursRanges: HourRange[];
 };
@@ -55,6 +54,21 @@ export default function WeekAvailabilitiesSelection({
             endMinute: "00",
           },
         ],
+      },
+    };
+    onChange(updated);
+  }
+
+  function modifyHoursRange(dayId: string, updatedRange: HourRange) {
+    const day = weekly[dayId];
+    const updatedRanges = day.hoursRanges.map((r) =>
+      r.id === updatedRange.id ? updatedRange : r
+    );
+    const updated = {
+      ...weekly,
+      [dayId]: {
+        ...day,
+        hoursRanges: updatedRanges,
       },
     };
     onChange(updated);
@@ -111,6 +125,9 @@ export default function WeekAvailabilitiesSelection({
                     }
                     showAddButton={timeRange.id === maxId}
                     addRow={() => addHoursRange(id, maxId + 1)}
+                    onModify={(range) =>
+                      modifyHoursRange(id, { ...range, id: timeRange.id })
+                    }
                     removeRow={() => removeHoursRange(id, timeRange.id)}
                   />
                 ))}

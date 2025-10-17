@@ -16,15 +16,21 @@ import { ChevronDownIcon } from "lucide-react";
 
 type Props = {
   dateRange: { startDate: Date | null; endDate: Date | null } | null;
+  alwaysApplies: boolean;
   onChange: (
     range: { startDate: Date | null; endDate: Date | null } | null
   ) => void;
+  onToggleAlways: (enabled: boolean) => void;
 };
 
-export default function DateRangeSelection({ dateRange, onChange }: Props) {
+export default function DateRangeSelection({
+  dateRange,
+  alwaysApplies,
+  onChange,
+  onToggleAlways,
+}: Props) {
   const t = useTranslations();
 
-  const [alwaysApplies, setAlwaysApplies] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const [localRange, setLocalRange] = useState<DateRange>({
@@ -100,7 +106,7 @@ export default function DateRangeSelection({ dateRange, onChange }: Props) {
             id="toggle-always"
             className="data-[state=checked]:border-[#02dcde] data-[state=checked]:bg-[#02dcde] data-[state=checked]:text-white"
             checked={alwaysApplies}
-            onCheckedChange={(checked: boolean) => setAlwaysApplies(checked)}
+            onCheckedChange={onToggleAlways}
           />
           <div className="grid gap-1.5 font-normal">
             <p className="text-sm leading-none font-medium">

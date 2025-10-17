@@ -11,7 +11,10 @@ import SpecificDatesSelection, {
 import WeekAvailabilitiesSelection from "./WeekAvailabilitiesSelection";
 import AvailabilitiesTypeSelection from "./AvailabilitiesTypeSelection";
 import DateRangeSelection from "./DateRangeSelection";
-import BlockSpecificDatesSelection from "./BlockSpecificDatesSelection";
+import BlockSpecificDatesSelection, {
+  flattenExceptionsToDateSelections,
+  groupDateSelectionsToExceptions,
+} from "./BlockSpecificDatesSelection";
 
 type HourRange = {
   id: number;
@@ -34,12 +37,15 @@ type Exception = {
 
 type AvailabilityState = {
   weekly: Record<string, WeekDay>;
-  dateRange: { startDate: Date | null; endDate: Date | null } | null;
-  exceptions: Exception[];
+  dateRange: {
+    alwaysApplies: boolean;
+    range: { startDate: Date | null; endDate: Date | null } | null;
+  };
+  exceptions: { enabled: boolean; dates: Exception[] };
 };
 
 const defaultHR: HourRange = {
-  id: 1,
+  id: 0,
   startHour: "09",
   startMinute: "00",
   endHour: "17",
@@ -62,16 +68,20 @@ export default function AvailabilitiesTab() {
   const [availabilityState, setAvailabilityState] = useState<AvailabilityState>(
     {
       weekly: defaultW,
-      dateRange: null,
-      exceptions: [],
+      dateRange: { alwaysApplies: false, range: null },
+      exceptions: { enabled: false, dates: [] },
     }
   );
 
-  const [specificDates, setSpecificDates] = useState<DateSelection[]>([]);
+  const [specificDates, setSpecificDates] = useState<Exception[]>([]);
   const [selectedCard, setSelectedCard] = useState<string>("weekly");
-  const [blockEnabled, setBlockEnabled] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [specificDatesErrors, setSpecificDatesErrors] = useState<string[]>([]);
+
+  const dateSelections = flattenExceptionsToDateSelections(specificDates);
+
+  const handleSpecificDatesChange = (newSelections: DateSelection[]) =>
+    setSpecificDates(groupDateSelectionsToExceptions(newSelections));
 
   const toMinutes = (h: string, m: string) => parseInt(h) * 60 + parseInt(m);
 
@@ -103,50 +113,80 @@ export default function AvailabilitiesTab() {
     )) {
       if (!enabled) continue;
       const err = validateHourRanges(hoursRanges);
-      if (err) newErrors.push(day + ": " + err);
-    }
-    for (const exception of availabilityState.exceptions) {
-      const err = validateHourRanges([exception.timeRange]);
       if (err)
         newErrors.push(
           t("admin.availabilities.errors.exception", {
-            date: exception.date.toLocaleDateString(),
+            date: t(`admin.availabilities.days.${day}`).toLowerCase(),
             error: err,
           })
         );
+    }
+    if (availabilityState.exceptions.enabled) {
+      const exceptionsByDate = availabilityState.exceptions.dates.reduce(
+        (acc, exception) => {
+          const dateKey = exception.date.toLocaleDateString();
+          if (!acc[dateKey]) {
+            acc[dateKey] = [];
+          }
+          acc[dateKey].push(exception.timeRange);
+          return acc;
+        },
+        {} as Record<string, HourRange[]>
+      );
+      for (const [dateStr, hourRanges] of Object.entries(exceptionsByDate)) {
+        const err = validateHourRanges(hourRanges);
+        if (err)
+          newErrors.push(
+            t("admin.availabilities.errors.exception", {
+              date: dateStr,
+              error: err,
+            })
+          );
+      }
     }
     setErrors(newErrors);
   }, [availabilityState, t]);
 
   useEffect(() => {
     const newErrors: string[] = [];
-    for (const item of specificDates) {
-      const err = validateHourRanges([
-        {
-          id: 0,
-          startHour: item.startHour,
-          startMinute: item.startMinute,
-          endHour: item.endHour,
-          endMinute: item.endMinute,
-        },
-      ]);
-      if (err) newErrors.push(item.date.toLocaleDateString() + ": " + err);
+    const exceptionsByDate = specificDates.reduce((acc, exception) => {
+      const dateKey = exception.date.toLocaleDateString();
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(exception.timeRange);
+      return acc;
+    }, {} as Record<string, HourRange[]>);
+    for (const [dateStr, hourRanges] of Object.entries(exceptionsByDate)) {
+      const err = validateHourRanges(hourRanges);
+      if (err)
+        newErrors.push(
+          t("admin.availabilities.errors.exception", {
+            date: dateStr,
+            error: err,
+          })
+        );
+      setSpecificDatesErrors(newErrors);
     }
-    setSpecificDatesErrors(newErrors);
   }, [specificDates, t]);
 
   function updateWeekly(updatedWeekly: Record<string, WeekDay>) {
     setAvailabilityState((prev) => ({ ...prev, weekly: updatedWeekly }));
   }
+
   function updateDateRange(
     range: { startDate: Date | null; endDate: Date | null } | null
   ) {
-    setAvailabilityState((prev) => ({ ...prev, dateRange: range }));
+    setAvailabilityState((prev) => ({
+      ...prev,
+      dateRange: { ...prev.dateRange, range: range },
+    }));
   }
+
   function updateExceptions(updatedExceptions: Exception[]) {
     setAvailabilityState((prev) => ({
       ...prev,
-      exceptions: updatedExceptions,
+      exceptions: { ...prev.exceptions, dates: updatedExceptions },
     }));
   }
 
@@ -190,13 +230,32 @@ export default function AvailabilitiesTab() {
             onChange={updateWeekly}
           />
           <DateRangeSelection
-            dateRange={availabilityState.dateRange}
+            dateRange={availabilityState.dateRange.range}
+            alwaysApplies={availabilityState.dateRange.alwaysApplies}
             onChange={updateDateRange}
+            onToggleAlways={(value) =>
+              setAvailabilityState((prev) => ({
+                ...prev,
+                dateRange: {
+                  ...prev.dateRange,
+                  alwaysApplies: value,
+                  ...(value ? { range: null } : {}),
+                },
+              }))
+            }
           />
           <BlockSpecificDatesSelection
-            blockEnabled={blockEnabled}
-            onToggleBlock={setBlockEnabled}
-            exceptions={availabilityState.exceptions}
+            blockEnabled={availabilityState.exceptions.enabled}
+            onToggleBlock={(enabled) =>
+              setAvailabilityState((prev) => ({
+                ...prev,
+                exceptions: {
+                  ...prev.exceptions,
+                  enabled: enabled,
+                },
+              }))
+            }
+            exceptions={availabilityState.exceptions.dates}
             onChange={updateExceptions}
           />
           {errors.length > 0 && (
@@ -207,6 +266,11 @@ export default function AvailabilitiesTab() {
             </div>
           )}
           <Button
+            disabled={
+              (!availabilityState.dateRange.alwaysApplies &&
+                availabilityState.dateRange.range == null) ||
+              errors.length > 0
+            }
             onClick={handleSubmitWeekly}
             type="submit"
             className="mt-4 w-fit mx-auto font-semibold text-base"
@@ -219,8 +283,8 @@ export default function AvailabilitiesTab() {
       {selectedCard === "specific-dates" && (
         <Card className="p-6 mt-4">
           <SpecificDatesSelection
-            exceptions={specificDates}
-            onChange={setSpecificDates}
+            exceptions={dateSelections}
+            onChange={handleSpecificDatesChange}
             label={t("admin.availabilities.text.selectLabel")}
           />
           {specificDatesErrors.length > 0 && (
@@ -231,6 +295,9 @@ export default function AvailabilitiesTab() {
             </div>
           )}
           <Button
+            disabled={
+              specificDates.length == 0 || specificDatesErrors.length > 0
+            }
             type="submit"
             className="mt-4 w-fit mx-auto font-semibold text-base"
             onClick={handleSubmitSpecificDates}

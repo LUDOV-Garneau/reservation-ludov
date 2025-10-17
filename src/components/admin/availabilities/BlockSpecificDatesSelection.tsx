@@ -33,7 +33,7 @@ type Props = {
   onToggleBlock: (enabled: boolean) => void;
 };
 
-function flattenExceptionsToDateSelections(
+export function flattenExceptionsToDateSelections(
   exceptions: Exception[]
 ): DateSelection[] {
   return exceptions.map(({ date, timeRange }) => ({
@@ -45,7 +45,7 @@ function flattenExceptionsToDateSelections(
   }));
 }
 
-function groupDateSelectionsToExceptions(
+export function groupDateSelectionsToExceptions(
   selections: DateSelection[]
 ): Exception[] {
   return selections.map((sel, idx) => ({

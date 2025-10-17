@@ -218,7 +218,7 @@
       },
       "weekAvailabilities": {
         "title": "Définissez votre disponibilité hebdomadaire ci-dessous",
-        "unavailableOn": "Indisponible les {day}"
+        "unavailableOn": "Indisponible les {day}s"
       }
     }
   }

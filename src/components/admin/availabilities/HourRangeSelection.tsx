@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../../ui/button";
 import {
   Select,
@@ -20,6 +20,12 @@ interface HourRangeSelectionProps {
   showAddButton: boolean;
   addRow: () => void;
   removeRow: () => void;
+  onModify: (updatedRange: {
+    startHour: string;
+    startMinute: string;
+    endHour: string;
+    endMinute: string;
+  }) => void;
 }
 
 export default function HourRangeSelection({
@@ -31,6 +37,7 @@ export default function HourRangeSelection({
   removeRow,
   showRemoveButton,
   showAddButton,
+  onModify,
 }: HourRangeSelectionProps) {
   const t = useTranslations();
 
@@ -39,10 +46,43 @@ export default function HourRangeSelection({
   const [endHour, setEndHour] = useState(endH);
   const [endMinute, setEndMinute] = useState(endM);
 
+  useEffect(() => {
+    setStartHour(startH);
+  }, [startH]);
+  useEffect(() => {
+    setStartMinute(startM);
+  }, [startM]);
+  useEffect(() => {
+    setEndHour(endH);
+  }, [endH]);
+  useEffect(() => {
+    setEndMinute(endM);
+  }, [endM]);
+
+  function onChange(
+    newStartHour: string,
+    newStartMinute: string,
+    newEndHour: string,
+    newEndMinute: string
+  ) {
+    onModify({
+      startHour: newStartHour,
+      startMinute: newStartMinute,
+      endHour: newEndHour,
+      endMinute: newEndMinute,
+    });
+  }
+
   return (
     <>
       <div className="flex items-center gap-2 col-span-2">
-        <Select value={startHour} onValueChange={setStartHour}>
+        <Select
+          value={startHour}
+          onValueChange={(val) => {
+            setStartHour(val);
+            onChange(val, startMinute, endHour, endMinute);
+          }}
+        >
           <SelectTrigger className="w-11 text-sm text-center">
             <SelectValue placeholder="08" />
           </SelectTrigger>
@@ -58,7 +98,13 @@ export default function HourRangeSelection({
           </SelectContent>
         </Select>
         <span>:</span>
-        <Select value={startMinute} onValueChange={setStartMinute}>
+        <Select
+          value={startMinute}
+          onValueChange={(val) => {
+            setStartMinute(val);
+            onChange(startHour, val, endHour, endMinute);
+          }}
+        >
           <SelectTrigger className="w-11 text-sm text-center">
             <SelectValue placeholder="00" />
           </SelectTrigger>
@@ -74,7 +120,13 @@ export default function HourRangeSelection({
           </SelectContent>
         </Select>
         <span>-</span>
-        <Select value={endHour} onValueChange={setEndHour}>
+        <Select
+          value={endHour}
+          onValueChange={(val) => {
+            setEndHour(val);
+            onChange(startHour, startMinute, val, endMinute);
+          }}
+        >
           <SelectTrigger className="w-11 text-sm text-center">
             <SelectValue placeholder="17" />
           </SelectTrigger>
@@ -90,7 +142,13 @@ export default function HourRangeSelection({
           </SelectContent>
         </Select>
         <span>:</span>
-        <Select value={endMinute} onValueChange={setEndMinute}>
+        <Select
+          value={endMinute}
+          onValueChange={(val) => {
+            setEndMinute(val);
+            onChange(startHour, startMinute, endHour, val);
+          }}
+        >
           <SelectTrigger className="w-11 text-sm text-center">
             <SelectValue placeholder="00" />
           </SelectTrigger>
