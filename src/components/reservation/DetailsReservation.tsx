@@ -4,12 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock9, Gamepad2, Monitor } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { CancelReservationAlertDialog } from "./components/CancelReservationAlertDialog";
 
 type Jeu = { nom: string; biblio: number | undefined };
 type Console = { nom: string };
 type Accessoire = { nom: string };
 
 type DetailsReservationProps = {
+  reservationId: string;
   jeux: Jeu[];
   console: Console;
   accessoires?: Accessoire[];
@@ -21,7 +23,6 @@ type DetailsReservationProps = {
 function CarteJeu({ nom, biblio }: { nom: string; biblio: number | undefined }) {
   return (
     <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-white p-6 shadow-sm">
-      {/* Imagen */}
       <div className="relative h-56 w-full lg:h-64 lg:w-64 flex-shrink-0 overflow-hidden rounded-lg">
         <Image
           src="/image_game.jpg"
@@ -33,7 +34,6 @@ function CarteJeu({ nom, biblio }: { nom: string; biblio: number | undefined }) 
         />
       </div>
 
-      {/* Contenedor de texto */}
       <div className="relative flex flex-col items-center text-center w-full h-auto lg:h-64">
         <h4 className="text-2xl font-semibold text-gray-800">{nom}</h4>
 
@@ -79,6 +79,7 @@ function CarteConsole({ nom }: { nom: string }) {
 }
 
 export default function DetailsReservation({
+  reservationId,
   jeux,
   console,
   accessoires,
@@ -115,13 +116,14 @@ export default function DetailsReservation({
             >
               Ajouter dans mon calendrier
             </Button>
-            <Button
+            {/* <Button
               type="button"
               variant="destructive"
               className="h-auto py-1 px-3 w-full md:w-auto whitespace-nowrap text-sm"
             >
               Annuler
-            </Button>
+            </Button> */}
+            <CancelReservationAlertDialog reservationId={reservationId} />
           </div>
         </div>
       </div>

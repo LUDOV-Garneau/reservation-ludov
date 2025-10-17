@@ -50,6 +50,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
     <div>
       {!isLoading && reservation != null ? (
         <DetailsReservation
+          reservationId={reservation.id.toString()}
           jeux={reservation.jeux}
           console={reservation.console}
           accessoires={reservation.accessoires ?? []}
