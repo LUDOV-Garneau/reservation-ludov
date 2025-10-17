@@ -1,0 +1,119 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import AccueilReservationSection from '@/components/reservation/components/AccueilReservationSection';
+import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+
+interface Reservation {
+    id: string;
+    games: string[];
+    console: string;
+    date: string;
+    heure: string;
+}
+
+export default function AccueilReservations() {
+    const t = useTranslations();
+    const [upcomingReservations, setUpcomingReservations] = useState<Reservation[]>([]);
+    const [pastReservations, setPastReservations] = useState<Reservation[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        async function fetchReservations() {
+            try {
+                setIsLoading(true);
+
+                const upcomingReservationsResponse = await fetch("/api/reservation/upcoming-reservations");
+
+                if (!upcomingReservationsResponse.ok) {
+                    throw new Error('Error getting upcoming reservations');
+                }
+
+                const upcomingData = await upcomingReservationsResponse.json();
+                const pastReservationsResponse = await fetch('/api/reservation/past-reservations');
+
+                if (!pastReservationsResponse.ok) {
+                    throw new Error('Error getting past reservations');
+                }
+
+                const pastData = await pastReservationsResponse.json();
+                setUpcomingReservations(upcomingData);
+                setPastReservations(pastData);
+            } catch (err) {
+                console.error('Error loading reservations:', err);
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchReservations();
+    }, []);
+
+    const handleDetailsClick = (reservation: Reservation) => {
+        router.push(`/reservation/details/${reservation.id}`);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
+                    <p className="text-lg">Chargement...</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-gray-50 p-6">
+            <div className="max-w-7xl mx-auto">
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-bold">Bonjour,</h1>
+                    <Link href="/reservation">
+                        <Button
+                            className="bg-white hover:bg-green-600 text-green-500 border border-green-500 hover:text-white"
+                        >
+                            {t("reservation.new")}
+                        </Button>
+                    </Link>
+                </div>
+
+
+                {upcomingReservations.length > 0 ? (
+                    <AccueilReservationSection
+                        title="Réservations à venir"
+                        reservations={upcomingReservations}
+                        onDetailsClick={handleDetailsClick}
+                    />
+                ) : (
+                    <div className="w-full rounded-lg shadow-sm p-6 mb-6 text-center bg-white">
+                        <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-300 pb-4">
+                            Réservations à venir
+                        </h2>
+                        <p className="text-gray-500">Aucune réservation à venir</p>
+                    </div>
+                )}
+
+                {/* Historique des réservations */}
+                {pastReservations.length > 0 ? (
+                    <AccueilReservationSection
+                        title="Historique des réservations"
+                        reservations={pastReservations}
+                        onDetailsClick={handleDetailsClick}
+                    />
+                ) : (
+                    <div className="w-full rounded-lg shadow-sm p-6 mb-6 text-center bg-white">
+                        <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-300 pb-4">
+                            Historique des réservations
+                        </h2>
+                        <p className="text-gray-500">Aucune réservation passée</p>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
