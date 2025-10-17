@@ -99,6 +99,19 @@
       "accessories": "Accessoires :",
       "courses": "Cours :",
       "yourReservation": "Votre réservation"
+    },
+    "details": {
+      "cancelButton": "Annuler",
+      "cancelConfirmationTitle": "Confirmer l’annulation",
+      "cancelConfirmation": "Cette action est irréversible. Voulez-vous annuler cette réservation?",
+      "returnButton": "Retour",
+      "detailsButton": "Plus de détails sur le jeu",
+      "pageDetailsTitle": "Votre réservation",
+      "addToCalendar": "Ajouter dans mon calendrier",
+      "selectedGames": "Jeux sélectionnés",
+      "selectedConsole": "Console",
+      "accessoriesIncluded": "Accessoires inclus",
+      "stationAssigned": "Station assignée"
     }
   },
   "auth": {

@@ -99,6 +99,19 @@
       "accessories": "Accessories:",
       "courses": "Courses:",
       "yourReservation": "Your reservation"
+    },
+    "details": {
+      "cancelButton": "Cancel",
+      "cancelConfirmationTitle": "Confirm Cancellation",
+      "cancelConfirmation": "This action cannot be undone. Do you really want to cancel this reservation?",
+      "returnButton": "Back",
+      "detailsButton": "More details about the game",
+      "pageDetailsTitle": "Your reservation",
+      "addToCalendar": "Add to my calendar",
+      "selectedGames": "Selected games",
+      "selectedConsole": "Console",
+      "accessoriesIncluded": "Included accessories",
+      "stationAssigned": "Assigned station"
     }
   },
   "auth": {

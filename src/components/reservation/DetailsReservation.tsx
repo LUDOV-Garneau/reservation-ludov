@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock9, Gamepad2, Monitor } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { CancelReservationAlertDialog } from "./components/CancelReservationAlertDialog";
+import CancelReservationAlertDialog from "./components/CancelReservationAlertDialog";
+import { useTranslations } from "next-intl";
 
 type Jeu = { nom: string; biblio: number | undefined };
 type Console = { nom: string };
@@ -21,6 +22,7 @@ type DetailsReservationProps = {
 };
 
 function CarteJeu({ nom, biblio }: { nom: string; biblio: number | undefined }) {
+  const t = useTranslations();
   return (
     <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-white p-6 shadow-sm">
       <div className="relative h-56 w-full lg:h-64 lg:w-64 flex-shrink-0 overflow-hidden rounded-lg">
@@ -48,7 +50,7 @@ function CarteJeu({ nom, biblio }: { nom: string; biblio: number | undefined }) 
               onClick={(e) => e.stopPropagation()}
               className="bg-transparent text-cyan-500 hover:bg-transparent hover:text-cyan-400 text-sm lg:text-base"
             >
-              Plus de détails sur le jeu
+              {t("reservation.details.detailsButton")}
             </Button>
           </Link>
         )}
@@ -87,11 +89,12 @@ export default function DetailsReservation({
   date,
   heure,
 }: DetailsReservationProps) {
+  const t = useTranslations();
   return (
     <div className="mx-auto max-w-6xl p-4 xl:p-6">
       <div className="mb-4 flex flex-col items-start justify-between gap-3 lg:flex-row lg:items-center">
         <h2 className="text-3xl lg:text-4xl font-bold border-b-4 border-cyan-300 pb-2">
-          Votre réservation
+          {t("reservation.details.pageDetailsTitle")}
         </h2>
 
         <div className="w-full lg:w-auto flex flex-col items-center gap-3 md:flex-row md:items-center md:justify-between rounded-md border bg-white p-3 shadow-sm">
@@ -114,15 +117,8 @@ export default function DetailsReservation({
               type="button"
               className="h-auto py-1 px-3 w-full md:w-auto bg-cyan-300 text-black hover:bg-cyan-500 whitespace-nowrap text-sm"
             >
-              Ajouter dans mon calendrier
+              {t("reservation.details.addToCalendar")}
             </Button>
-            {/* <Button
-              type="button"
-              variant="destructive"
-              className="h-auto py-1 px-3 w-full md:w-auto whitespace-nowrap text-sm"
-            >
-              Annuler
-            </Button> */}
             <CancelReservationAlertDialog reservationId={reservationId} />
           </div>
         </div>
@@ -130,14 +126,14 @@ export default function DetailsReservation({
 
       <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         <div className="space-y-4">
-          <h3 className="text-2xl font-semibold mb-4">Jeux sélectionnés</h3>
+          <h3 className="text-2xl font-semibold mb-4">{t("reservation.details.selectedGames")}</h3>
           {jeux.map((jeu, index) => (
             <CarteJeu key={`${jeu.nom}-${index}`} nom={jeu.nom} biblio={jeu.biblio} />
           ))}
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-2xl font-semibold mb-4">Console</h3>
+          <h3 className="text-2xl font-semibold mb-4">{t("reservation.details.selectedConsole")}</h3>
           <CarteConsole nom={console.nom} />
         </div>
       </div>
@@ -149,7 +145,7 @@ export default function DetailsReservation({
               <Gamepad2 className="h-6 w-6 flex-shrink-0" />
               <div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                  Accessoires inclus
+                  {t("reservation.details.accessoriesIncluded")}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {accessoires.map((acc) => (
@@ -171,7 +167,7 @@ export default function DetailsReservation({
             <Monitor className="h-6 w-6 flex-shrink-0" />
             <div>
               <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                Station assignée
+                {t("reservation.details.stationAssigned")}
               </h3>
               <p className="font-medium text-gray-700">{station}</p>
             </div>

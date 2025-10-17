@@ -14,8 +14,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
-export function CancelReservationAlertDialog({ reservationId }: { reservationId: string }) {
+export default function CancelReservationAlertDialog({ reservationId }: { reservationId: string }) {
+  const t = useTranslations();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
 
@@ -26,7 +28,7 @@ export function CancelReservationAlertDialog({ reservationId }: { reservationId:
         method: "DELETE",
       });
       if (!res.ok) {
-        console.error("Delete failed");
+        console.error("Delete reservation failed");
         return;
       }
       router.push("/fr/"); 
@@ -43,23 +45,23 @@ export function CancelReservationAlertDialog({ reservationId }: { reservationId:
           variant="destructive"
           className="h-auto py-1 px-3 w-full md:w-auto whitespace-nowrap text-sm"
         >
-          Annuler
+          {t("reservation.details.cancelButton")}
         </Button>
       </AlertDialogTrigger>
 
       <AlertDialogContent className="rounded-xl border bg-white p-6 shadow-xl">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-lg font-semibold">
-            Confirmer l’annulation
+            {t("reservation.details.cancelConfirmationTitle")}
           </AlertDialogTitle>
           <AlertDialogDescription className="mt-2 text-sm text-gray-600">
-            Cette action est irréversible. Voulez-vous annuler cette réservation?
+            {t("reservation.details.cancelConfirmation")}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
-            <Button variant="outline" disabled={submitting}>Retour</Button>
+            <Button variant="outline" disabled={submitting}>{t("reservation.details.returnButton")}</Button>
           </AlertDialogCancel>
 
           <AlertDialogAction asChild>
