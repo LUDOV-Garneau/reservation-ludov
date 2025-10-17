@@ -111,7 +111,9 @@
       "selectedGames": "Selected games",
       "selectedConsole": "Console",
       "accessoriesIncluded": "Included accessories",
-      "stationAssigned": "Assigned station"
+      "stationAssigned": "Assigned station",
+      "titleSection": "Reservation details"
+
     }
   },
   "auth": {

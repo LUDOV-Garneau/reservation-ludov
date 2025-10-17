@@ -6,6 +6,14 @@ import Image from "next/image";
 import Link from "next/link";
 import CancelReservationAlertDialog from "./components/CancelReservationAlertDialog";
 import { useTranslations } from "next-intl";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 type Jeu = { nom: string; biblio: number | undefined };
 type Console = { nom: string };
@@ -92,10 +100,27 @@ export default function DetailsReservation({
   const t = useTranslations();
   return (
     <div className="mx-auto max-w-6xl p-4 xl:p-6">
+      <div className="mb-10">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">
+                {t("reservation.layout.home")}
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>
+                {t("reservation.details.titleSection")}
+              </BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
       <div className="mb-4 flex flex-col items-start justify-between gap-3 lg:flex-row lg:items-center">
-        <h2 className="text-3xl lg:text-4xl font-bold border-b-4 border-cyan-300 pb-2">
+        <h1 className="text-3xl lg:text-4xl font-bold border-b-4 border-cyan-300 pb-2">
           {t("reservation.details.pageDetailsTitle")}
-        </h2>
+        </h1>
 
         <div className="w-full lg:w-auto flex flex-col items-center gap-3 md:flex-row md:items-center md:justify-between rounded-md border bg-white p-3 shadow-sm">
           {date && heure && (

@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock9, Monitor } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface AccueilReservationCardProps {
   games: string[];
@@ -17,6 +18,7 @@ export default function AccueilReservationCard({
   heure,
   onDetailsClick,
 }: AccueilReservationCardProps) {
+  const t = useTranslations();
   return (
     <Card className="w-full max-w-sm bg-gray-200">
       <CardContent className="p-6 flex flex-col items-center text-center space-y-3">
@@ -57,7 +59,7 @@ export default function AccueilReservationCard({
           className="w-full text-cyan-500 border-cyan-500 hover:bg-cyan-500 hover:text-white"
           onClick={onDetailsClick}
         >
-          Détails
+          {t("reservation.accueil.detailsButton")}
         </Button>
       </CardContent>
     </Card>

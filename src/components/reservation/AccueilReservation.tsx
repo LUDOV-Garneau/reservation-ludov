@@ -62,7 +62,7 @@ export default function AccueilReservations() {
             <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
-                    <p className="text-lg">Chargement...</p>
+                    <p className="text-lg">{t("reservation.accueil.loadingReservations")}</p>
                 </div>
             </div>
         );
@@ -72,7 +72,7 @@ export default function AccueilReservations() {
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="max-w-7xl mx-auto">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">Bonjour,</h1>
+                    <h1 className="text-2xl font-bold">{t("reservation.accueil.greeting")}</h1>
                     <Link href="/reservation">
                         <Button
                             className="bg-white hover:bg-green-600 text-green-500 border border-green-500 hover:text-white"
@@ -85,32 +85,32 @@ export default function AccueilReservations() {
 
                 {upcomingReservations.length > 0 ? (
                     <AccueilReservationSection
-                        title="Réservations à venir"
+                        title={t("reservation.accueil.upcomingReservations")}
                         reservations={upcomingReservations}
                         onDetailsClick={handleDetailsClick}
                     />
                 ) : (
                     <div className="w-full rounded-lg shadow-sm p-6 mb-6 text-center bg-white">
                         <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-300 pb-4">
-                            Réservations à venir
+                            {t("reservation.accueil.upcomingReservations")}
                         </h2>
-                        <p className="text-gray-500">Aucune réservation à venir</p>
+                        <p className="text-gray-500">{t("reservation.accueil.noUpcomingReservations")}</p>
                     </div>
                 )}
 
                 {/* Historique des réservations */}
                 {pastReservations.length > 0 ? (
                     <AccueilReservationSection
-                        title="Historique des réservations"
+                        title={t("reservation.accueil.pastReservations")}
                         reservations={pastReservations}
                         onDetailsClick={handleDetailsClick}
                     />
                 ) : (
                     <div className="w-full rounded-lg shadow-sm p-6 mb-6 text-center bg-white">
                         <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-300 pb-4">
-                            Historique des réservations
+                            {t("reservation.accueil.pastReservations")}
                         </h2>
-                        <p className="text-gray-500">Aucune réservation passée</p>
+                        <p className="text-gray-500">{t("reservation.accueil.noPastReservations")}</p>
                     </div>
                 )}
             </div>

@@ -111,7 +111,18 @@
       "selectedGames": "Jeux sélectionnés",
       "selectedConsole": "Console",
       "accessoriesIncluded": "Accessoires inclus",
-      "stationAssigned": "Station assignée"
+      "stationAssigned": "Station assignée",
+      "titleSection": "Détails de la réservation"
+    },
+    "accueil": {
+      "upcomingReservations": "Réservations à venir",
+      "pastReservations": "Historique des réservations",
+      "noUpcomingReservations": "Vous n'avez aucune réservation à venir.",
+      "noPastReservations": "Vous n'avez aucune réservation passée.",
+      "detailsButton": "Détails",
+      "loadingReservations": "Chargement...",
+      "errorLoadingReservations": "Une erreur s'est produite lors du chargement des réservations.",
+      "greeting": "Bonjour"
     }
   },
   "auth": {
