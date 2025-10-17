@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
-import { Bilbo } from "next/font/google";
 
 type ReservationHoldRow = RowDataPacket & {
   id: number;
@@ -18,10 +17,12 @@ type ReservationHoldRow = RowDataPacket & {
   accessoire_name: string | null;
 };
 
+// --- GET ---
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const idString = searchParams.get("id");
+
     if (!idString || !/^\d+$/.test(idString)) {
       return NextResponse.json(
         { error: "Missing or invalid id parameter." },
@@ -30,12 +31,6 @@ export async function GET(request: NextRequest) {
     }
 
     const idReservation = Number(idString);
-    if (isNaN(idReservation) || idReservation < 1) {
-      return NextResponse.json(
-        { error: "Invalid reservation id." },
-        { status: 400 }
-      );
-    }
 
     const [rows] = await pool.query<ReservationHoldRow[]>(
       `
@@ -64,7 +59,6 @@ export async function GET(request: NextRequest) {
     }
 
     const row = rows[0];
-
     const dateString =
       row.createdAt instanceof Date
         ? row.createdAt.toISOString().replace("T", " ").substring(0, 19)
@@ -97,6 +91,50 @@ export async function GET(request: NextRequest) {
     console.error("🔴 ERREUR DETAILS RÉSERVATION:", error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération de la réservation." },
+      { status: 500 }
+    );
+  }
+}
+
+// Delete une réservation
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const idString = searchParams.get("id");
+
+    if (!idString || !/^\d+$/.test(idString)) {
+      return NextResponse.json(
+        { error: "Missing or invalid id parameter." },
+        { status: 400 }
+      );
+    }
+
+    const idReservation = Number(idString);
+
+    const [rows] = await pool.query<RowDataPacket[]>(
+      "SELECT id FROM reservation_hold WHERE id = ?",
+      [idReservation]
+    );
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return NextResponse.json(
+        { error: "Reservation not found." },
+        { status: 404 }
+      );
+    }
+
+    await pool.query("DELETE FROM reservation_hold WHERE id = ?", [
+      idReservation,
+    ]);
+
+    return NextResponse.json(
+      { message: "Reservation supprimée avec succès." },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("🔴 ERREUR DELETE RÉSERVATION:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la suppression de la réservation." },
       { status: 500 }
     );
   }
