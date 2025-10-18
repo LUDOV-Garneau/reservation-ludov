@@ -5,6 +5,7 @@ import DetailsReservation from "@/components/reservation/DetailsReservation";
 import { Calendar, Clock9 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 type Reservation = {
   id: number;
@@ -19,6 +20,7 @@ type Reservation = {
 export default function DetailsReservationClient({ id }: { id: string }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reservation, setReservation] = useState<Reservation | null>(null);
+  const t = useTranslations();
 
   useEffect(() => {
     const getReservation = async () => {
@@ -51,7 +53,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
       <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
-          <p className="text-lg">Chargement...</p>
+          <p className="text-lg">{t("reservation.accueil.loadingReservations")}</p>
         </div>
       </div>
     );

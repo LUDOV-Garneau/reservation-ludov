@@ -113,7 +113,16 @@
       "accessoriesIncluded": "Included accessories",
       "stationAssigned": "Assigned station",
       "titleSection": "Reservation details"
-
+    },
+    "accueil": {
+      "upcomingReservations": "Upcoming reservations",
+      "pastReservations": "Reservation history",
+      "noUpcomingReservations": "You have no upcoming reservations.",
+      "noPastReservations": "You have no past reservations.",
+      "detailsButton": "Details",
+      "loadingReservations": "Loading...",
+      "errorLoadingReservations": "An error occurred while loading reservations.",
+      "greeting": "Hello"
     }
   },
   "auth": {
