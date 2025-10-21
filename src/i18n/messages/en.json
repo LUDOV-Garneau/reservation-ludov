@@ -169,7 +169,9 @@
         "saturday": "Saturday"
       },
       "actions": {
+        "setting": "Setting availabilities...",
         "set": "Set availabilities",
+        "savingDates": "Saving dates...",
         "saveDates": "Save valid dates",
         "remove": "Remove",
         "add": "+ Add"

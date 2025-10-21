@@ -44,6 +44,11 @@ type AvailabilityState = {
   exceptions: { enabled: boolean; dates: Exception[] };
 };
 
+type fetchAvailabilities = {
+  availability: AvailabilityState;
+  specificDates: Exception[];
+};
+
 const defaultHR: HourRange = {
   id: 0,
   startHour: "09",
@@ -64,6 +69,7 @@ const defaultW: Record<string, WeekDay> = {
 
 export default function AvailabilitiesTab() {
   const t = useTranslations();
+  const [isLoading, setIsLoading] = useState(false);
 
   const [availabilityState, setAvailabilityState] = useState<AvailabilityState>(
     {
@@ -105,6 +111,56 @@ export default function AvailabilitiesTab() {
     }
     return null;
   }
+
+  useEffect(() => {
+    async function loadInitialValues() {
+      try {
+        const response = await fetch("/api/admin/week-availabilities", {
+          credentials: "include",
+        });
+        if (!response.ok) {
+          //setErrors([t("auth.login.invalidCredentials")]);
+          return;
+        }
+        const data = (await response.json()) as fetchAvailabilities;
+        const parsedAvailability = {
+          ...data.availability,
+          dateRange: {
+            ...data.availability.dateRange,
+            range: data.availability.dateRange.range
+              ? {
+                  startDate: data.availability.dateRange.range.startDate
+                    ? new Date(data.availability.dateRange.range.startDate)
+                    : null,
+                  endDate: data.availability.dateRange.range.endDate
+                    ? new Date(data.availability.dateRange.range.endDate)
+                    : null,
+                }
+              : null,
+          },
+          exceptions: {
+            ...data.availability.exceptions,
+            dates: data.availability.exceptions.dates.map((ex) => ({
+              ...ex,
+              date: new Date(ex.date),
+            })),
+          },
+        };
+
+        setAvailabilityState(parsedAvailability);
+        setSpecificDates(
+          data.specificDates.map((d) => ({
+            ...d,
+            date: new Date(d.date),
+          }))
+        );
+      } catch (e) {
+        //setErrors([t("auth.login.invalidCredentials")]);
+      }
+    }
+
+    loadInitialValues();
+  }, []);
 
   useEffect(() => {
     const newErrors: string[] = [];
@@ -190,30 +246,58 @@ export default function AvailabilitiesTab() {
     }));
   }
 
-  function handleSubmitWeekly() {
-    if (errors.length > 0) {
-      alert(
-        t("admin.availabilities.errors.fixErrors", {
-          errors: errors.join("\n"),
-        })
-      );
-      return;
+  async function handleSubmitWeekly() {
+    if (errors.length > 0) return;
+
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/week-availabilities", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(availabilityState),
+        credentials: "include",
+      });
+      setIsLoading(false);
+      if (response.status === 400) {
+        //setErrors([t("auth.login.invalidCredentials")]);
+        return;
+      } else if (!response.ok) {
+        //setErrors([t("auth.login.invalidCredentials")]);
+        return;
+      }
+    } catch (e) {
+      setIsLoading(false);
+      //setErrors([t("auth.login.invalidCredentials")]);
     }
-    alert(t("admin.availabilities.messages.savedWeekly"));
-    console.log("Weekly availabilities saved:", availabilityState);
   }
 
-  function handleSubmitSpecificDates() {
-    if (specificDatesErrors.length > 0) {
-      alert(
-        t("admin.availabilities.errors.fixErrors", {
-          errors: specificDatesErrors.join("\n"),
-        })
-      );
-      return;
+  async function handleSubmitSpecificDates() {
+    if (specificDatesErrors.length > 0) return;
+
+    try {
+      setIsLoading(true);
+      const response = await fetch("/api/admin/specific-availabilities", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(specificDates),
+        credentials: "include",
+      });
+      setIsLoading(false);
+      if (response.status === 400) {
+        //setErrors([t("auth.login.invalidCredentials")]);
+        return;
+      } else if (!response.ok) {
+        //setErrors([t("auth.login.invalidCredentials")]);
+        return;
+      }
+    } catch (e) {
+      setIsLoading(false);
+      //setErrors([t("auth.login.invalidCredentials")]);
     }
-    alert(t("admin.availabilities.messages.savedSpecific"));
-    console.log("Valid dates saved:", specificDates);
   }
 
   return (
@@ -267,6 +351,7 @@ export default function AvailabilitiesTab() {
           )}
           <Button
             disabled={
+              isLoading ||
               (!availabilityState.dateRange.alwaysApplies &&
                 availabilityState.dateRange.range == null) ||
               errors.length > 0
@@ -275,7 +360,9 @@ export default function AvailabilitiesTab() {
             type="submit"
             className="mt-4 w-fit mx-auto font-semibold text-base"
           >
-            {t("admin.availabilities.actions.set")}
+            {isLoading
+              ? t("admin.availabilities.actions.setting")
+              : t("admin.availabilities.actions.set")}
           </Button>
         </Card>
       )}
@@ -296,13 +383,17 @@ export default function AvailabilitiesTab() {
           )}
           <Button
             disabled={
-              specificDates.length == 0 || specificDatesErrors.length > 0
+              isLoading ||
+              specificDates.length == 0 ||
+              specificDatesErrors.length > 0
             }
             type="submit"
             className="mt-4 w-fit mx-auto font-semibold text-base"
             onClick={handleSubmitSpecificDates}
           >
-            {t("admin.availabilities.actions.saveDates")}
+            {isLoading
+              ? t("admin.availabilities.actions.savingDates")
+              : t("admin.availabilities.actions.saveDates")}
           </Button>
         </Card>
       )}

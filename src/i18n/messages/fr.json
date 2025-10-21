@@ -170,7 +170,9 @@
         "saturday": "Samedi"
       },
       "actions": {
+        "setting": "Enregistrement des disponibilités en cours...",
         "set": "Enregistrer les disponibilités",
+        "savingDates": "Enregistrement des dates en cours...",
         "saveDates": "Enregistrer les dates valides",
         "remove": "Supprimer",
         "add": "+ Ajouter"
