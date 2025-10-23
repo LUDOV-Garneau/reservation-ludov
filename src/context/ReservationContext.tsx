@@ -176,8 +176,8 @@ export function ReservationProvider({
           setSelectedConsole({
             id: Number(data.console.id),
             name: String(data.console.name),
-            nombre: Number(data.console.nombre),
-            image: data.console.picture,
+            active_units: Number(data.console.active_units || 0),
+            picture: data.console.picture,
           });
         }
 
@@ -290,8 +290,8 @@ export function ReservationProvider({
 
   /** Crée une réservation temporaire */
   const startTimer = async (consoleId?: number) => {
-    const cid = consoleId ?? selectedConsole?.id;
-    if (!cid) {
+    const consoleTypeId = consoleId ?? selectedConsole?.id;
+    if (!consoleTypeId) {
       setError("Aucune console sélectionnée");
       return;
     }
@@ -302,19 +302,29 @@ export function ReservationProvider({
       const res = await fetch(`/api/reservation/create-hold-reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, consoleId: cid }),
+        body: JSON.stringify({ consoleTypeId, minutes: timerDuration }),
+        signal: AbortSignal.timeout(10000),
       });
 
-      if (!res.ok) throw new Error("Erreur création réservation");
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message || "Erreur création réservation");
+      }
 
       const data = await res.json();
-      if (!data.reservationId || !data.expiresAt)
-        throw new Error("Réponse invalide du serveur");
+      const expires = data.expiresAt || data.expires_at || data.expireAt;
+      
+      if (!data.reservationId && !data.holdId) {
+        throw new Error("Réponse invalide du serveur (reservationId manquant)");
+      }
+      if (!expires) {
+        throw new Error("Réponse invalide du serveur (expiresAt manquant)");
+      }
 
-      setReservationId(data.reservationId);
-      setExpiresAt(data.expiresAt);
-      setIsTimerActive(true);
-      setTimeRemaining(computeRemaining(data.expiresAt));
+    setReservationId(String(data.reservationId ?? data.holdId));
+    setExpiresAt(String(expires));
+    setIsTimerActive(true);
+    setTimeRemaining(computeRemaining(String(expires)));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur inconnue");
       setIsTimerActive(false);
@@ -412,7 +422,7 @@ const updateReservationConsole = async (newConsoleId: number) => {
 
     const data = await res.json();
     if (data.success) {
-      setSelectedConsole({ ...selectedConsole!, id: newConsoleId }); 
+      setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
     }
   } catch (e) {
     setError(e instanceof Error ? e.message : "Erreur update console");
