@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     // On récupère les jeux de la BD
     const [rows] = await pool.query<GameRow[]>(
-      `SELECT id, titre, picture, available, biblio_id, author
+      `SELECT id, titre, picture, biblio_id, author
        FROM games
        WHERE id IN (?)`,
       [ids]

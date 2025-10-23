@@ -47,11 +47,10 @@ export async function GET(req: Request) {
     if (search) {
       query = `
         SELECT DISTINCT
-          id, titre, author, picture, platform, available, biblio_id
+          id, titre, author, picture, platform, biblio_id
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
-          AND available > 0 
-          AND console_koha_id = ?
+          AND console_type_id = ?
         ORDER BY 
           CASE 
             WHEN LOWER(titre) LIKE LOWER(?) THEN 1
@@ -69,16 +68,15 @@ export async function GET(req: Request) {
         SELECT COUNT(*) as total
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
-          AND available > 0
-          AND console_koha_id = ?
+          AND console_type_id = ?
       `;
       countParams = [searchPattern, consoleId];
     } else {
       query = `
         SELECT DISTINCT
-          id, titre, author, picture, platform, available, biblio_id
+          id, titre, author, picture, platform, biblio_id
         FROM games
-        WHERE available > 0 AND console_koha_id = ?
+        WHERE console_type_id = ?
         ORDER BY titre ASC
         LIMIT ? OFFSET ?
       `;
@@ -87,7 +85,7 @@ export async function GET(req: Request) {
       countQuery = `
         SELECT COUNT(*) as total
         FROM games
-        WHERE available > 0 AND console_koha_id = ?
+        WHERE console_type_id = ?
       `;
       countParams = [consoleId];
     }
