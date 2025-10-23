@@ -116,7 +116,7 @@ export async function GET(req: Request) {
         c.name as consoleName,
         c.picture as consoleImage
       FROM reservation_hold rh
-      LEFT JOIN consoles c ON rh.console_id = c.id
+      LEFT JOIN console_stock c ON rh.console_id = c.id
       WHERE rh.id = ?`,
       [reservationId]
     );

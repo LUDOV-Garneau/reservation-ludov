@@ -82,6 +82,7 @@ export async function POST(req: Request) {
         FROM console_stock cs
         WHERE cs.console_type_id = ?
           AND cs.is_active = 1
+          AND cs.holding = 0
           AND NOT EXISTS (
             SELECT 1 FROM reservation_hold h
             WHERE h.console_id = cs.id
@@ -117,6 +118,11 @@ export async function POST(req: Request) {
          FROM reservation_hold WHERE id = ?`,
         [reservationId]
       );
+
+      await connection.query(
+        `UPDATE console_stock SET holding = 1 WHERE id = ?`,
+        [consoleStockId]
+      )
 
       await connection.commit();
 
