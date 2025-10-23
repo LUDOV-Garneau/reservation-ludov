@@ -51,6 +51,7 @@ export async function GET(req: Request) {
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
           AND console_type_id = ?
+          AND holding = 0
         ORDER BY 
           CASE 
             WHEN LOWER(titre) LIKE LOWER(?) THEN 1
@@ -69,6 +70,7 @@ export async function GET(req: Request) {
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
           AND console_type_id = ?
+          AND holding = 0
       `;
       countParams = [searchPattern, consoleId];
     } else {
@@ -77,6 +79,7 @@ export async function GET(req: Request) {
           id, titre, author, picture, platform, biblio_id
         FROM games
         WHERE console_type_id = ?
+        AND holding = 0
         ORDER BY titre ASC
         LIMIT ? OFFSET ?
       `;
@@ -86,6 +89,7 @@ export async function GET(req: Request) {
         SELECT COUNT(*) as total
         FROM games
         WHERE console_type_id = ?
+        AND holding = 0
       `;
       countParams = [consoleId];
     }

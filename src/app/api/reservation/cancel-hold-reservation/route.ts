@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 
     // Récupérer l’ancienne console pour la libérer
     const [rows] = await pool.query<ConsoleRow[]>(
-      `SELECT console_id FROM reservation_hold WHERE id = ?`,
+      `SELECT console_id, game1_id, game2_id, game3_id FROM reservation_hold WHERE id = ?`,
       [reservationId]
     );
 
@@ -68,6 +68,14 @@ export async function POST(req: Request) {
       await pool.query(`UPDATE console_stock SET holding = 0 WHERE id = ?`, [
         consoleId,
       ]);
+    }
+
+    for (const gameId of [rows[0].game1_id, rows[0].game2_id, rows[0].game3_id]) {
+      if (gameId) {
+        await pool.query(`UPDATE games SET holding = 0 WHERE id = ?`, [
+          gameId,
+        ]);
+      }
     }
 
     return NextResponse.json({

@@ -114,7 +114,61 @@ export async function POST(req: Request) {
       const updates: string[] = [];
       const values: unknown[] = [];
 
-      // Jeux
+      //Check la disponibilité des jeux
+      const gameIdsToCheck = [
+        { id: game1Id, field: "game1_id" as const },
+        { id: game2Id, field: "game2_id" as const },
+        { id: game3Id, field: "game3_id" as const },
+      ];
+
+      for (const game of gameIdsToCheck) {
+        const currentGameId = reservation[game.field];
+        
+        if (game.id !== undefined && game.id !== null) {
+          
+          if (currentGameId === game.id) {
+            continue;
+          }
+          
+          const [gameCheck] = await conn.query<RowDataPacket[]>(
+            `SELECT id 
+            FROM games 
+            WHERE id = ? 
+            AND holding = 0
+            FOR UPDATE`,
+            [game.id]
+          );
+
+          if (!gameCheck || gameCheck.length === 0) {
+            await conn.rollback();
+            return NextResponse.json(
+              { success: false, message: `Jeu ${game.id} indisponible` },
+              { status: 400 }
+            );
+          }
+
+          await conn.query(
+            `UPDATE games SET holding = 1 WHERE id = ?`,
+            [game.id]
+          );
+
+          if (currentGameId !== null) {
+            await conn.query(
+              `UPDATE games SET holding = 0 WHERE id = ?`,
+              [currentGameId]
+            );
+          }
+        } 
+        else if (game.id === null) {
+          if (currentGameId !== null) {
+            await conn.query(
+              `UPDATE games SET holding = 0 WHERE id = ?`,
+              [currentGameId]
+            );
+          }
+        }
+      }
+
       if (game1Id !== undefined) {
         updates.push("game1_id = ?");
         values.push(game1Id);
@@ -128,11 +182,8 @@ export async function POST(req: Request) {
         values.push(game3Id);
       }
 
-      // Accessoires (support pour plusieurs)
       if (accessories !== undefined) {
         if (Array.isArray(accessories)) {
-          // Si tu veux supporter plusieurs accessoires, tu devras adapter ta DB
-          // Pour l'instant on prend juste le premier
           updates.push("accessoir_id = ?");
           values.push(accessories.length > 0 ? accessories[0] : null);
         } else {

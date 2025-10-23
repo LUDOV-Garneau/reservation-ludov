@@ -12,7 +12,7 @@ export async function GET() {
         active_units,
         total_units
        FROM console_catalog 
-       WHERE active_units > 0 
+       WHERE active_units > 0
        ORDER BY name`
     );
     
