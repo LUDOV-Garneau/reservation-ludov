@@ -10,7 +10,7 @@ type Body = {
   game2Id?: number | null;
   game3Id?: number | null;
   newConsoleId?: number;
-  accessories?: number[] | number | null;
+  accessories?: number[] | null;
   coursId?: number | null;
   date?: string | null;
   time?: string | null;
@@ -182,13 +182,12 @@ export async function POST(req: Request) {
         values.push(game3Id);
       }
 
-      if (accessories !== undefined) {
-        if (Array.isArray(accessories)) {
-          updates.push("accessoir_id = ?");
-          values.push(accessories.length > 0 ? accessories[0] : null);
-        } else {
-          updates.push("accessoir_id = ?");
-          values.push(accessories);
+      if (accessories !== undefined) { 
+        if (accessories === null || accessories.length === 0) {
+          updates.push("accessoirs = NULL");
+        } else if (Array.isArray(accessories)) {
+          updates.push("accessoirs = CAST(? AS JSON)");
+          values.push(JSON.stringify(accessories));
         }
       }
 
@@ -273,7 +272,7 @@ export async function POST(req: Request) {
           game1_id,
           game2_id,
           game3_id,
-          accessoir_id,
+          accessoirs,
           cours,
           date,
           time,
@@ -285,6 +284,23 @@ export async function POST(req: Request) {
 
       const updated = updatedRows[0];
 
+      let accessoriesArray: number[] = [];
+      if (updated.accessoir_id) {
+        try {
+          if (typeof updated.accessoir_id === 'string') {
+            accessoriesArray = JSON.parse(updated.accessoir_id);
+          } else if (Array.isArray(updated.accessoir_id)) {
+            accessoriesArray = updated.accessoir_id;
+          }
+        } catch (e) {
+          return NextResponse.json(
+            { success: false, message: "Erreur lors de la récupération des accessoires" },
+            { status: 500 }
+          );
+        }
+      }
+
+
       return NextResponse.json({
         success: true,
         reservationId,
@@ -294,7 +310,7 @@ export async function POST(req: Request) {
           updated.game2_id,
           updated.game3_id
         ].filter(id => id !== null),
-        accessories: updated.accessoir_id ? [updated.accessoir_id] : [],
+        accessories: accessoriesArray,
         coursId: updated.cours || null,
         date: updated.date,
         time: updated.time,

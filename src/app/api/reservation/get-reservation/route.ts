@@ -14,7 +14,7 @@ interface ReservationRow extends RowDataPacket {
   game2Id: number | null;
   game3Id: number | null;
   stationId: number | null;
-  accessoirId: number | null;
+  accessoirs: number[] | null;
   date: Date | null;
   time: string | null;
   cours: number | null;
@@ -108,7 +108,7 @@ export async function GET(req: Request) {
         rh.game2_id as game2Id,
         rh.game3_id as game3Id,
         rh.station_id as stationId,
-        rh.accessoir_id as accessoirId,
+        rh.accessoirs as accessoirs,
         rh.date,
         rh.time,
         rh.expireAt,
@@ -176,19 +176,19 @@ export async function GET(req: Request) {
     // ---------------------
     // Accessoires
     // ---------------------
-    let accessoires: Accessoire[] = [];
-    if (reservation.accessoirId) {
-      const [accessoiresData] = await pool.query<AccessoireRow[]>(
-        `SELECT id, name FROM accessoires WHERE id = ?`,
-        [reservation.accessoirId]
-      );
-      if (accessoiresData.length > 0) {
-        accessoires = [
-          {
+    const accessoires: Accessoire[] = [];
+    if (reservation.accessoirs && reservation.accessoirs.length > 0) {
+      for (const accessoirId of reservation.accessoirs) {
+        const [accessoiresData] = await pool.query<AccessoireRow[]>(
+          `SELECT id, name FROM accessoires WHERE id = ?`,
+          [accessoirId]
+        );
+        if (accessoiresData.length > 0) {
+          accessoires.push({  // ✅ PUSH au lieu de remplacer
             id: accessoiresData[0].id,
             nom: accessoiresData[0].name,
-          },
-        ];
+          });
+        }
       }
     }
 

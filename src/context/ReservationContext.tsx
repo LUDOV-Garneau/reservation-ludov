@@ -36,6 +36,7 @@ interface ReservationContextType {
   selectedDate: Date | undefined; // date sélectionnée
   selectedTime: string | undefined; // heure sélectionnée
   selectedCours: number | null;
+  selectedAccessories: number[];
 
   // Mutateurs
   setUserId: (id: number) => void; // définit l'ID utilisateur
@@ -45,6 +46,8 @@ interface ReservationContextType {
   setSelectedDate: (date: Date | undefined) => void; // définit la date sélectionnée
   setSelectedTime: (time: string | undefined) => void; // définit l'heure sélectionnée
   setSelectedCours: (coursId: number | null) => void; // définit le cours sélectionné
+  setSelectedAccessories: React.Dispatch<React.SetStateAction<number[]>>;
+
 
   // Actions Réservation
   cancelReservation: () => Promise<void>; // annule la réservation côté serveur
@@ -52,8 +55,6 @@ interface ReservationContextType {
   clearError: () => void; // efface le message d'erreur
   updateReservationConsole: (newConsoleId: number) => Promise<void>; // met à jour la console de la réservation
 
-  selectedAccessories: number[];
-  setSelectedAccessories: (ids: number[]) => void;
   updateReservationAccessories: (ids: number[]) => Promise<void>;
 }
 
