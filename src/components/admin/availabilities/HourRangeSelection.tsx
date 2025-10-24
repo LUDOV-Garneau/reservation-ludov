@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../ui/select";
+import { Plus, Trash2 } from "lucide-react";
 
 interface HourRangeSelectionProps {
   startH: string;
@@ -83,7 +84,7 @@ export default function HourRangeSelection({
             onChange(val, startMinute, endHour, endMinute);
           }}
         >
-          <SelectTrigger className="w-11 text-sm text-center">
+          <SelectTrigger className="text-sm text-center px-2 py-2">
             <SelectValue placeholder="08" />
           </SelectTrigger>
           <SelectContent>
@@ -105,7 +106,7 @@ export default function HourRangeSelection({
             onChange(startHour, val, endHour, endMinute);
           }}
         >
-          <SelectTrigger className="w-11 text-sm text-center">
+          <SelectTrigger className="text-sm text-center px-2 py-2">
             <SelectValue placeholder="00" />
           </SelectTrigger>
           <SelectContent>
@@ -119,6 +120,7 @@ export default function HourRangeSelection({
             })}
           </SelectContent>
         </Select>
+
         <span>-</span>
         <Select
           value={endHour}
@@ -127,7 +129,7 @@ export default function HourRangeSelection({
             onChange(startHour, startMinute, val, endMinute);
           }}
         >
-          <SelectTrigger className="w-11 text-sm text-center">
+          <SelectTrigger className="text-sm text-center px-2 py-2">
             <SelectValue placeholder="17" />
           </SelectTrigger>
           <SelectContent>
@@ -149,7 +151,7 @@ export default function HourRangeSelection({
             onChange(startHour, startMinute, endHour, val);
           }}
         >
-          <SelectTrigger className="w-11 text-sm text-center">
+          <SelectTrigger className="text-sm text-center px-2 py-2">
             <SelectValue placeholder="00" />
           </SelectTrigger>
           <SelectContent>
@@ -169,7 +171,10 @@ export default function HourRangeSelection({
             className="text-red-400 text-xs !p-2"
             onClick={removeRow}
           >
-            {t("admin.availabilities.actions.remove")}
+            <Trash2 className="h-4 w-4 block md:hidden" />
+            <p className="hidden md:block">
+              {t("admin.availabilities.actions.remove")}
+            </p>
           </Button>
         )}
         {showAddButton && (
@@ -178,7 +183,10 @@ export default function HourRangeSelection({
             className="text-[#02dcde] text-xs !p-2"
             onClick={addRow}
           >
-            {t("admin.availabilities.actions.add")}
+            <Plus className="h-4 w-4 block md:hidden" />
+            <p className="hidden md:block">
+              {t("admin.availabilities.actions.add")}
+            </p>
           </Button>
         )}
       </div>

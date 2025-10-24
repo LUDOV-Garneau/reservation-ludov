@@ -98,9 +98,9 @@ export default function WeekAvailabilitiesSelection({
         return (
           <div
             key={id}
-            className="grid grid-cols-3 py-4 px-2 border-b last:border-0 items-start"
+            className="grid grid-cols-1 md:grid-cols-3 py-4 px-2 border-b last:border-0 items-start gap-3"
           >
-            <div className="flex items-center gap-3 mt-2">
+            <div className="flex items-center gap-3">
               <Switch
                 id={id}
                 checked={enabled}
@@ -112,7 +112,7 @@ export default function WeekAvailabilitiesSelection({
             </div>
 
             {enabled ? (
-              <div className="col-span-2 flex flex-col gap-2">
+              <div className="col-span-1 md:col-span-2 flex flex-col gap-2 w-full">
                 {hoursRanges.map((timeRange) => (
                   <HourRangeSelection
                     key={timeRange.id}
@@ -133,9 +133,11 @@ export default function WeekAvailabilitiesSelection({
                 ))}
               </div>
             ) : (
-              <span className="italic text-muted-foreground col-span-2">
+              <span className="italic text-muted-foreground col-span-1 md:col-span-2">
                 {t("admin.availabilities.weekAvailabilities.unavailableOn", {
-                  day: t(`admin.availabilities.days.${label}`),
+                  day: t(
+                    `admin.availabilities.days.${label}`
+                  ).toLocaleLowerCase(),
                 })}
               </span>
             )}

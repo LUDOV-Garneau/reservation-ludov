@@ -71,7 +71,7 @@ export default function DateRangeSelection({
       <strong className="block text-lg mb-2 mt-8">
         {t("admin.availabilities.dateRange.title")}
       </strong>
-      <div className="mx-auto flex gap-10 items-center">
+      <div className="mx-auto flex flex-col md:flex-row gap-4 md:gap-10 items-start md:items-center">
         <Popover
           open={alwaysApplies ? false : isPopoverOpen}
           onOpenChange={(open) => {
@@ -81,7 +81,7 @@ export default function DateRangeSelection({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-fit justify-between"
+              className="w-full md:w-fit justify-between"
               disabled={alwaysApplies}
             >
               {localRange.from
@@ -98,10 +98,13 @@ export default function DateRangeSelection({
               defaultMonth={localRange.from}
               selected={localRange}
               onSelect={handleSelectDate}
+              disabled={(date) =>
+                date < new Date(new Date().setHours(0, 0, 0, 0))
+              }
             />
           </PopoverContent>
         </Popover>
-        <Label className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-[#02dcde] has-[[aria-checked=true]]:bg-blue-50">
+        <Label className="w-full md:w-auto hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-[#02dcde] has-[[aria-checked=true]]:bg-blue-50">
           <Checkbox
             id="toggle-always"
             className="data-[state=checked]:border-[#02dcde] data-[state=checked]:bg-[#02dcde] data-[state=checked]:text-white"
