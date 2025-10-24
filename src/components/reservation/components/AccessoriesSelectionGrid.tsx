@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 export interface Accessory {
   id: number;
   name: string;
-  console_id: number[];
 }
 
 interface AccessorySelectionGridProps {

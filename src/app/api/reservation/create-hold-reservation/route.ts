@@ -107,10 +107,10 @@ export async function POST(req: Request) {
 
       await connection.query(
         `
-        INSERT INTO reservation_hold (id, user_id, console_id, expireAt, createdAt)
-        VALUES (?, ?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? MINUTE), NOW())
+        INSERT INTO reservation_hold (id, user_id, console_id, console_type_id, expireAt, createdAt)
+        VALUES (?, ?, ?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? MINUTE), NOW())
         `,
-        [reservationId, userId, consoleStockId, minutes]
+        [reservationId, userId, consoleStockId, consoleTypeId, minutes]
       );
 
       const [created] = await connection.query<RowDataPacket[]>(

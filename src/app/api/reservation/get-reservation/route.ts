@@ -184,7 +184,7 @@ export async function GET(req: Request) {
           [accessoirId]
         );
         if (accessoiresData.length > 0) {
-          accessoires.push({  // ✅ PUSH au lieu de remplacer
+          accessoires.push({
             id: accessoiresData[0].id,
             nom: accessoiresData[0].name,
           });

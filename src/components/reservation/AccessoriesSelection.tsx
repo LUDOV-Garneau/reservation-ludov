@@ -10,7 +10,6 @@ import { useReservation } from "@/context/ReservationContext";
 type Accessory = {
   id: number;
   name: string;
-  console_id: number[];
 };
 
 export default function AccessoriesSelection() {
@@ -28,30 +27,42 @@ export default function AccessoriesSelection() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Charger tous les accessoires
+  type ApiResponse<T> = { success: boolean; data: T; message?: string };
+
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchAccessories = async () => {
       setIsLoading(true);
       setError(null);
-      
       try {
-        const res = await fetch("/api/reservation/accessories");
-        if (!res.ok) throw new Error("Erreur fetch accessoires");
-        
-        const data = await res.json();
-        
-        // Support différents formats de réponse
-        const accessories = Array.isArray(data) ? data : (data.accessories || []);
-        setAllAccessories(accessories);
-      } catch (err) {
+        const res = await fetch("/api/reservation/accessories", {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal,
+          headers: { "Accept": "application/json" },
+        });
+
+        // Réponse uniforme: { success, data, message }
+        const payload = (await res.json()) as ApiResponse<Accessory[]>;
+
+        if (!res.ok || !payload.success) {
+          throw new Error(payload.message || "Failed to fetch accessories");
+        }
+
+        setAllAccessories(payload.data ?? []);
+      } catch (err: any) {
+        if (err?.name === "AbortError") return;
         console.error("Erreur chargement accessoires:", err);
-        setError("Impossible de charger les accessoires");
+        setAllAccessories([]); // évite un state inconsistent
+        setError(err?.message || "Impossible de charger les accessoires");
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     fetchAccessories();
+    return () => controller.abort();
   }, []);
 
   // Sélection/désélection d'un accessoire
