@@ -17,7 +17,7 @@ interface ReservationRow extends RowDataPacket {
   accessoirs: number[] | null;
   date: Date | null;
   time: string | null;
-  cours: number | null;
+  coursId: number | null;
   expireAt: string;
   createdAt: string;
   consoleName: string | null;
@@ -33,6 +33,12 @@ interface GameRow extends RowDataPacket {
 
 interface StationRow extends RowDataPacket {
   id: number;
+  name: string;
+}
+
+interface CoursRow extends RowDataPacket {
+  id: number;
+  code_cours: string;
   name: string;
 }
 
@@ -57,6 +63,12 @@ interface ConsoleInfo {
   image: string | null;
 }
 
+interface CoursInfo {
+  id: number;
+  code_cours: string;
+  nom_cours: string;
+}
+
 interface Accessoire {
   id: number;
   nom: string;
@@ -74,7 +86,7 @@ interface ReservationResponse {
   console: ConsoleInfo | null;
   accessoires: Accessoire[];
   station: Station | null;
-  cours: Cours;
+  cours: CoursInfo | null;
   date: Date | null;
   time: string | null;
   expireAt: string;
@@ -114,9 +126,13 @@ export async function GET(req: Request) {
         rh.expireAt,
         rh.createdAt,
         c.name as consoleName,
-        c.picture as consoleImage
+        c.picture as consoleImage,
+        co.id as coursId,
+        co.code_cours,
+        co.nom_cours
       FROM reservation_hold rh
       LEFT JOIN console_stock c ON rh.console_id = c.id
+      JOIN cours co ON rh.cours = co.id
       WHERE rh.id = ?`,
       [reservationId]
     );
@@ -183,6 +199,7 @@ export async function GET(req: Request) {
           `SELECT id, name FROM accessoires WHERE id = ?`,
           [accessoirId]
         );
+        
         if (accessoiresData.length > 0) {
           accessoires.push({
             id: accessoiresData[0].id,
@@ -226,13 +243,13 @@ export async function GET(req: Request) {
         : null,
       accessoires,
       station,
-      cours: reservation.cours
+      cours: reservation.coursId 
         ? {
-            id: reservation.cours,
-            nom_cours: reservation.coursNom,
-            code_cours: reservation.coursCode,
+            id: reservation.coursId,
+            nom_cours: reservation.nom_cours,
+            code_cours: reservation.code_cours,
           }
-        : { id: 0, nom_cours: "", code_cours: "" },
+        : null,
       date: reservation.date,
       time: reservation.time,
       expireAt: reservation.expireAt,

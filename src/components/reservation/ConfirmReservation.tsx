@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { 
-  Calendar, 
-  Clock, 
   Gamepad2, 
   Package, 
   AlertCircle,
@@ -23,7 +21,7 @@ interface ReservationData {
   date: string | null;
   time: string | null;
   reservationId: string;
-  cours?: number | null;
+  cours: { id: number; code_cours: string; nom_cours: string} | null;
 }
 
 export default function ConfirmReservation() {
@@ -34,7 +32,6 @@ export default function ConfirmReservation() {
     selectedConsole,
     selectedDate,
     selectedTime,
-    selectedCours,
   } = useReservation();
 
   const router = useRouter();
@@ -68,9 +65,9 @@ export default function ConfirmReservation() {
           date: json.date || (selectedDate ? selectedDate.toLocaleDateString('fr-CA') : null),
           time: json.time,
           reservationId: json.reservationId || reservationId,
-          cours: selectedCours,
+          cours: json.cours || null,
         });
-        
+
         console.log("✅ Données préparées");
       } catch (err) {
         console.error("❌ Erreur:", err);
@@ -252,7 +249,14 @@ export default function ConfirmReservation() {
                 <BookOpen className="h-5 w-5 text-cyan-500" />
                 Cours associé
               </h2>
-              <p className="text-gray-700 font-medium">{data.cours}</p>
+              <div className="flex flex-wrap gap-2">
+                <span
+                  key={data.cours.id}
+                  className="px-3 py-2 bg-cyan-50 text-cyan-700 rounded-lg text-sm font-medium border border-cyan-200"
+                >
+                  <p className="text-gray-700 font-medium">{data.cours.code_cours} - {data.cours.nom_cours}</p>
+                </span>
+              </div>
             </div>
           )}
         </div>
@@ -282,7 +286,7 @@ export default function ConfirmReservation() {
               {data.cours && (
                 <div className="flex justify-between text-sm py-2 border-b">
                   <span className="text-gray-600">Cours</span>
-                  <span className="font-medium">{data.cours}</span>
+                  <span className="font-medium">{data.cours.code_cours} - {data.cours.nom_cours}</span>
                 </div>
               )}
               
