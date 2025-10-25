@@ -269,7 +269,7 @@ export default function ConsoleSelectionGrid({
             >
               <div className="relative w-full h-48 bg-gray-100">
                 <Image
-                  src={console.picture}
+                  src={console.picture || "/placeholder_consoles.jpg"}
                   alt={console.name}
                   fill
                   className="object-cover"
