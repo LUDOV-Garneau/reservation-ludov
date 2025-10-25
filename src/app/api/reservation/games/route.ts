@@ -20,8 +20,6 @@ export async function GET(req: Request) {
     const search = searchParams.get("search") || "";
     const consoleId = parseInt(searchParams.get("consoleId") || "0", 10);
 
-    console.log("Fetching games with params:", { page, limit, search, consoleId });
-
     const offset = (page - 1) * limit;
 
     let query: string;
@@ -111,13 +109,6 @@ export async function GET(req: Request) {
 
     const hasMore = page * limit < totalCount;
     const totalPages = Math.ceil(totalCount / limit);
-
-    console.log("Query result:", { 
-      totalCount, 
-      gamesReturned: formattedGames.length, 
-      hasMore,
-      page 
-    });
 
     return NextResponse.json({
       success: true,

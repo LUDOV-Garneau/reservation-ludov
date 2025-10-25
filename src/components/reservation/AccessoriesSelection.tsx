@@ -51,11 +51,11 @@ export default function AccessoriesSelection() {
         }
 
         setAllAccessories(payload.data ?? []);
-      } catch (err: any) {
-        if (err?.name === "AbortError") return;
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return;
         console.error("Erreur chargement accessoires:", err);
         setAllAccessories([]); // évite un state inconsistent
-        setError(err?.message || "Impossible de charger les accessoires");
+        setError(err instanceof Error ? err.message : "Impossible de charger les accessoires");
       } finally {
         setIsLoading(false);
       }

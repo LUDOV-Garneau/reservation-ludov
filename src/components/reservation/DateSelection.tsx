@@ -62,8 +62,6 @@ export default function DateSelection() {
   const onSelectDate = async (newDate: Date | undefined) => {
     if (!newDate) return;
 
-    console.log("Selected date:", newDate.toISOString().split("T")[0]);
-
     // Réinitialiser l'heure si on change de date
     setTime("");
     setSelectedTime("");
@@ -77,7 +75,6 @@ export default function DateSelection() {
   const onSelectTime = (selectedTime: string) => {
     setTime(selectedTime);
     setSelectedTime(selectedTime);
-    console.log("Selected time:", selectedTime);
   };
 
   const handleContinue = async () => {

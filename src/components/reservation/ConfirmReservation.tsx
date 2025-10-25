@@ -50,14 +50,9 @@ export default function ConfirmReservation() {
       }
 
       try {
-        console.log("📥 Chargement réservation:", reservationId);
-        
         const res = await fetch(`/api/reservation/get-reservation?id=${reservationId}`);
         if (!res.ok) throw new Error("Erreur chargement");
-        
         const json = await res.json();
-        console.log("📦 Données reçues:", json);
-
         setData({
           jeux: json.jeux || [],
           console: json.console || selectedConsole || null,
@@ -68,7 +63,6 @@ export default function ConfirmReservation() {
           cours: json.cours || null,
         });
 
-        console.log("✅ Données préparées");
       } catch (err) {
         console.error("❌ Erreur:", err);
         setError("Impossible de charger les détails");
@@ -87,14 +81,11 @@ export default function ConfirmReservation() {
       return;
     }
     
-    console.log("🚀 Confirmation de la réservation...");
     setConfirmLoading(true);
     setError(null);
     
     try {
       await completeReservation();
-      
-      console.log("✅ Réservation confirmée, redirection...");
       router.push("/reservation/success");
     } catch (err) {
       console.error("❌ Erreur confirmation:", err);
