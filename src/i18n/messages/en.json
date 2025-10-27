@@ -122,7 +122,7 @@
       "detailsButton": "Details",
       "loadingReservations": "Loading...",
       "errorLoadingReservations": "An error occurred while loading reservations.",
-      "greeting": "Hello"
+      "greeting": "Welcome"
     }
   },
   "auth": {
