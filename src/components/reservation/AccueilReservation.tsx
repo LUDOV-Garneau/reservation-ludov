@@ -71,7 +71,7 @@ export default function AccueilReservations() {
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="max-w-7xl mx-auto">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 sm:gap-0">
                     <h1 className="text-2xl font-bold">{t("reservation.accueil.greeting")}</h1>
                     <Link href="/reservation">
                         <Button

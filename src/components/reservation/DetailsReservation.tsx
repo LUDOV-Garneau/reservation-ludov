@@ -55,7 +55,6 @@ function CarteJeu({ nom, biblio }: { nom: string; biblio: number | undefined }) 
             className="mt-2 lg:mt-0 lg:absolute lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2"
           >
             <Button
-              onClick={(e) => e.stopPropagation()}
               className="bg-transparent text-cyan-500 hover:bg-transparent hover:text-cyan-400 text-sm lg:text-base"
             >
               {t("reservation.details.detailsButton")}
@@ -165,7 +164,7 @@ export default function DetailsReservation({
 
       <div className="grid grid-cols-1 md:grid-cols-[70%_30%] gap-6">
         {!!accessoires?.length && (
-          <div className="rounded-lg border bg-gradient-to-r from-blue-50 to-cyan-50 p-6 shadow-sm">
+          <div className="rounded-lg border p-6 shadow-sm">
             <div className="flex items-start gap-3">
               <Gamepad2 className="h-6 w-6 flex-shrink-0" />
               <div>
@@ -187,7 +186,7 @@ export default function DetailsReservation({
           </div>
         )}
 
-        <div className="rounded-lg border bg-gradient-to-r from-purple-50 to-pink-50 p-6 shadow-sm">
+        <div className="rounded-lg border p-6 shadow-sm">
           <div className="flex items-start gap-3">
             <Monitor className="h-6 w-6 flex-shrink-0" />
             <div>
