@@ -124,7 +124,11 @@
       "loadingReservations": "Chargement...",
       "errorLoadingReservations": "Une erreur s'est produite lors du chargement des réservations.",
       "greeting": "Bonjour",
-      "errorFetching": "Une erreur s'est produite, veuillez réessayer ultérieurement."
+      "errorFetching": "Une erreur s'est produite, veuillez réessayer ultérieurement.",
+      "date": "Date",
+      "time": "Heure",
+      "games": "Jeux réservés",
+      "console": "Console"
     }
   },
   "auth": {
