@@ -31,7 +31,7 @@ export default function CancelReservationAlertDialog({ reservationId }: { reserv
         console.error("Delete reservation failed");
         return;
       }
-      router.push("/fr/"); 
+      router.push("/"); 
     } finally {
       setSubmitting(false);
     }
