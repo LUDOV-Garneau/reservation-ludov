@@ -37,6 +37,7 @@ interface ReservationContextType {
   selectedTime: string | undefined; // heure sélectionnée
   selectedCours: number | null;
   selectedAccessories: number[];
+  selectedConsoleId: number | null;
 
   // Mutateurs
   setUserId: (id: number) => void; // définit l'ID utilisateur
@@ -47,7 +48,7 @@ interface ReservationContextType {
   setSelectedTime: (time: string | undefined) => void; // définit l'heure sélectionnée
   setSelectedCours: (coursId: number | null) => void; // définit le cours sélectionné
   setSelectedAccessories: React.Dispatch<React.SetStateAction<number[]>>;
-
+  setSelectedConsoleId: (consoleId: number | null) => void;
 
   // Actions Réservation
   cancelReservation: () => Promise<void>; // annule la réservation côté serveur
@@ -105,6 +106,7 @@ export function ReservationProvider({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
   const [selectedCours, setSelectedCours] = useState<number | null>(null);
+  const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(null);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -413,19 +415,51 @@ const updateReservationConsole = async (newConsoleId: number) => {
       setError("Aucune réservation à finaliser");
       return;
     }
+
+    if (!selectedConsole) {
+      setError("Aucune console sélectionnée");
+      return;
+    }
+
+    if (selectedGames.length === 0) {
+      setError("Aucun jeu sélectionné");
+      return;
+    }
+
+    if (!selectedCours) {
+      setError("Aucun cours sélectionné");
+      return;
+    }
+
+    if (!selectedDate) {
+      setError("Aucune date sélectionnée");
+      return;
+    }
+
+    if (!selectedTime) {
+      setError("Aucune heure sélectionnée");
+      return;
+    }
     
     setIsLoading(true);
     setError(null);
+
     
     try {
-      const res = await fetch(`/api/reservation/complete-reservation`, {
+      const res = await fetch(`/api/reservation/confirm-reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          reservationId,
-          userId: userId || null,
-          consoleId: selectedConsole?.id || null,
-          games: selectedGames
+          reservationHoldId: reservationId,
+          consoleId: selectedConsoleId,
+          consoleTypeId: selectedConsole?.id,
+          game1Id: selectedGames[0] ? Number(selectedGames[0]) : null,
+          game2Id: selectedGames[1] ? Number(selectedGames[1]) : null,
+          game3Id: selectedGames[2] ? Number(selectedGames[2]) : null,
+          accessoryIds: selectedAccessories,
+          coursId: selectedCours,
+          date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
+          time: selectedTime || null,
         }),
       });
       
@@ -436,26 +470,26 @@ const updateReservationConsole = async (newConsoleId: number) => {
       
       const data = await res.json();
       
-      // Sauvegarder les détails pour la page de succès
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('last_reservation', JSON.stringify({
-          reservationId: data.reservationId || reservationId,
-          finalReservationId: data.finalReservationId,
-          console: selectedConsole,
-          games: selectedGames,
-          date: new Date().toLocaleDateString('fr-CA'),
-          heure: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
-        }));
-      }
+      // // Sauvegarder les détails pour la page de succès
+      // if (typeof window !== 'undefined') {
+      //   sessionStorage.setItem('last_reservation', JSON.stringify({
+      //     reservationId: data.reservationId || reservationId,
+      //     finalReservationId: data.finalReservationId,
+      //     console: selectedConsole,
+      //     games: selectedGames,
+      //     date: new Date().toLocaleDateString('fr-CA'),
+      //     heure: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
+      //   }));
+      // }
       
-      // Réinitialiser le contexte
-      setIsTimerActive(false);
-      setReservationId(null);
-      setExpiresAt(null);
-      clearStorage();
+      // // Réinitialiser le contexte
+      // setIsTimerActive(false);
+      // setReservationId(null);
+      // setExpiresAt(null);
+      // clearStorage();
       
       // La navigation sera gérée par le composant appelant
-      return data;
+      // return data;
       
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur finalisation");
@@ -502,6 +536,8 @@ const updateReservationConsole = async (newConsoleId: number) => {
     setSelectedTime,
     selectedCours,
     setSelectedCours,
+    setSelectedConsoleId,
+    selectedConsoleId
   };
 
   if (isRestoring) {

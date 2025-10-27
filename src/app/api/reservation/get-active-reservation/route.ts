@@ -11,14 +11,13 @@ interface ReservationRow extends RowDataPacket {
   game1_id: number | null;
   game2_id: number | null;
   game3_id: number | null;
-  accessoir_id: number | null;
+  accessoirs: string | null;
   expireAt: string;
   createdAt: string;
   date: Date | null;
   time: string | null;
   cours: number | null;
 
-  // champs console
   ct_id: number;
   ct_name: string;
   ct_picture: string | null;
@@ -52,7 +51,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Récupère la réservation + console associée
     const [rows] = await pool.query<ReservationRow[]>(
       `SELECT 
         r.*, 
@@ -69,18 +67,23 @@ export async function GET(request: NextRequest) {
     );
 
     if (rows.length === 0) {
-      return NextResponse.json({ success: false, status: "not_found", message: "Reservation not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, status: "not_found", message: "Reservation not found" },
+        { status: 404 }
+      );
     }
 
     const r = rows[0];
     if (r.user_id !== Number(user.id)) {
-      return NextResponse.json({ success: false, message: "Unauthorized access to this reservation" }, { status: 403 });
+      return NextResponse.json(
+        { success: false, message: "Unauthorized access to this reservation" },
+        { status: 403 }
+      );
     }
 
     const now = new Date();
     const expiry = new Date(r.expireAt);
 
-    // Si expiré: on supprime juste le hold (pas d'UPDATE sur "consoles")
     if (expiry <= now) {
       const conn = await pool.getConnection();
       try {
@@ -94,11 +97,28 @@ export async function GET(request: NextRequest) {
         conn.release();
       }
 
-      return NextResponse.json({ success: false, status: "expired", message: "Reservation has expired" }, { status: 410 });
+      return NextResponse.json(
+        { success: false, status: "expired", message: "Reservation has expired" },
+        { status: 410 }
+      );
     }
 
     const gameIds = [r.game1_id, r.game2_id, r.game3_id].filter(Boolean) as number[];
-    const accessories = r.accessoir_id ? [r.accessoir_id] : [];
+
+    let accessories: number[] = [];
+    if (r.accessoirs) {
+      try {
+        if (typeof r.accessoirs === 'string') {
+          accessories = JSON.parse(r.accessoirs);
+        } 
+        else if (Array.isArray(r.accessoirs)) {
+          accessories = r.accessoirs;
+        }
+      } catch (e) {
+        console.error("Error parsing accessories:", e);
+        accessories = [];
+      }
+    }
 
     let currentStep = 1;
     if (r.console_id) currentStep = 2;
@@ -112,7 +132,6 @@ export async function GET(request: NextRequest) {
       status: "active",
       reservationId: r.id,
       userId: r.user_id,
-      // ⚠️ l'UI veut un id de TYPE
       console: {
         id: r.ct_id,
         name: r.ct_name,
@@ -120,7 +139,7 @@ export async function GET(request: NextRequest) {
       },
       games: gameIds,
       accessories,
-      selectedDate: r.date,   // ton provider lit selectedDate/selectedTime
+      selectedDate: r.date,
       selectedTime: r.time,
       cours: r.cours,
       expiresAt: expiry.toISOString(),
@@ -132,7 +151,11 @@ export async function GET(request: NextRequest) {
   } catch (err: unknown) {
     console.error("Error fetching active reservation:", err);
     return NextResponse.json(
-      { success: false, message: "Error fetching reservation", error: (err as Error).message ?? "Unknown error" },
+      {
+        success: false,
+        message: "Error fetching reservation",
+        error: (err as Error).message ?? "Unknown error",
+      },
       { status: 500 }
     );
   }

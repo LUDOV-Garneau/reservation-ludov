@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import AccessorySelectionGrid from "@/components/reservation/components/AccessoriesSelectionGrid";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShoppingBag, Trash2, CheckCircle2, XCircle, Joystick, Cable } from "lucide-react";
+import { Loader2, ShoppingBag, Trash2, CheckCircle2, XCircle, Joystick, Cable, MoveLeft } from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
 
 type Accessory = {
@@ -18,7 +18,8 @@ export default function AccessoriesSelection() {
     setSelectedAccessories, 
     updateReservationAccessories,
     setCurrentStep,
-    selectedConsole
+    selectedConsole,
+    currentStep
   } = useReservation();
 
   const [allAccessories, setAllAccessories] = useState<Accessory[]>([]);
@@ -43,7 +44,6 @@ export default function AccessoriesSelection() {
           headers: { "Accept": "application/json" },
         });
 
-        // Réponse uniforme: { success, data, message }
         const payload = (await res.json()) as ApiResponse<Accessory[]>;
 
         if (!res.ok || !payload.success) {
@@ -54,7 +54,7 @@ export default function AccessoriesSelection() {
       } catch (err: unknown) {
         if (err instanceof Error && err.name === "AbortError") return;
         console.error("Erreur chargement accessoires:", err);
-        setAllAccessories([]); // évite un state inconsistent
+        setAllAccessories([]);
         setError(err instanceof Error ? err.message : "Impossible de charger les accessoires");
       } finally {
         setIsLoading(false);
@@ -65,39 +65,31 @@ export default function AccessoriesSelection() {
     return () => controller.abort();
   }, []);
 
-  // Sélection/désélection d'un accessoire
   const handleSelect = (accessory: Accessory) => {
     setSelectedAccessories((prev: number[]) => {
       if (prev.includes(accessory.id)) {
-        // Déjà sélectionné → retirer
         return prev.filter(id => id !== accessory.id);
       } else {
-        // Pas encore sélectionné → ajouter
         return [...prev, accessory.id];
       }
     });
   };
 
-  // Retirer un accessoire spécifique
   const handleRemove = (accessoryId: number) => {
     setSelectedAccessories((prev: number[]) => prev.filter(id => id !== accessoryId));
   };
 
-  // Tout effacer
   const handleClearAll = () => {
     setSelectedAccessories([]);
   };
 
-  // Sauvegarder et continuer
   const handleContinue = async () => {
     setIsSaving(true);
     setError(null);
 
     try {
-      // Appeler l'API avec la liste d'accessoires (vide ou non)
       await updateReservationAccessories(selectedAccessories);
       
-      // Passer à l'étape suivante
       setCurrentStep(4);
     } catch (err) {
       console.error("Erreur sauvegarde accessoires:", err);
@@ -107,7 +99,6 @@ export default function AccessoriesSelection() {
     }
   };
 
-  // Obtenir les accessoires sélectionnés
   const selectedAccessoriesData = allAccessories.filter(a => 
     selectedAccessories.includes(a.id)
   );
@@ -115,7 +106,6 @@ export default function AccessoriesSelection() {
   return (
     <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header avec info console */}
         {selectedConsole && (
           <div className="bg-[white] rounded-2xl p-4 shadow-md mb-6 flex items-center gap-4">
             <div className="h-12 w-12 bg-cyan-100 rounded-lg flex items-center justify-center">
@@ -129,11 +119,13 @@ export default function AccessoriesSelection() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Panneau gauche - Panier */}
           <div className="lg:col-span-1">
             <div className="bg-[white] rounded-2xl shadow-lg sticky top-6">
-              {/* Header du panier */}
               <div className="p-6 border-b border-gray-200">
+                <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mb-8 w-fit">
+                  <MoveLeft className="h-6 w-6 mr-2"/>
+                  <p>{t("reservation.layout.previousStep")}</p>
+                </div>
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-2xl font-bold flex items-center gap-2">
                     <ShoppingBag className="h-6 w-6 text-cyan-500" />
@@ -151,7 +143,6 @@ export default function AccessoriesSelection() {
                 </p>
               </div>
 
-              {/* Message d'erreur */}
               {error && (
                 <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
                   <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
@@ -162,7 +153,6 @@ export default function AccessoriesSelection() {
                 </div>
               )}
 
-              {/* Liste des accessoires sélectionnés */}
               <div className="p-6 space-y-3 max-h-[400px] overflow-y-auto">
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-12">
@@ -185,21 +175,18 @@ export default function AccessoriesSelection() {
                         key={accessory.id}
                         className="bg-gray-100 rounded-xl p-4 flex items-center gap-3 group hover:bg-gray-200 transition-colors"
                       >
-                        {/* Image ou icône */}
                         <div className="h-14 w-14 bg-[white] rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
                           <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-cyan-100 to-cyan-200">
                             <Cable className="h-6 w-6 text-cyan-600" />
                           </div>
                         </div>
 
-                        {/* Nom */}
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-sm text-gray-900">
                             {accessory.name}
                           </p>
                         </div>
 
-                        {/* Bouton supprimer */}
                         <button
                           onClick={() => handleRemove(accessory.id)}
                           className="h-8 w-8 flex items-center justify-center rounded-lg bg-[white] border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
@@ -210,7 +197,6 @@ export default function AccessoriesSelection() {
                       </div>
                     ))}
 
-                    {/* Bouton tout effacer */}
                     {selectedAccessoriesData.length > 1 && (
                       <button
                         onClick={handleClearAll}
@@ -224,7 +210,6 @@ export default function AccessoriesSelection() {
                 )}
               </div>
 
-              {/* Footer avec bouton continuer */}
               <div className="p-6 border-t border-gray-200 space-y-3">
                 <Button
                   onClick={handleContinue}
@@ -251,7 +236,6 @@ export default function AccessoriesSelection() {
             </div>
           </div>
 
-          {/* Panneau droit - Grille de sélection */}
           <div className="lg:col-span-2">
             <div className="bg-[white] rounded-2xl shadow-lg p-6">
               <div className="mb-6">

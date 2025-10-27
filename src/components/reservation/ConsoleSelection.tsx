@@ -18,7 +18,8 @@ export default function ConsolesSelection() {
     updateReservationConsole,
     isTimerActive,
     setCurrentStep,
-    selectedConsole, // console déjà réservée en BD
+    selectedConsole,
+    setSelectedConsoleId
   } = useReservation();
 
   const handleConsoleSelect = (console: Console) => {
@@ -30,20 +31,23 @@ export default function ConsolesSelection() {
     if (!consoleToUse) return;
 
     try {
-      // Cas 1 : aucune réservation encore en BD → création
       if (!selectedConsole) {
         setSelectedConsole(selected);
+        setSelectedConsoleId(consoleToUse.id);
         if (!isTimerActive) {
           await startTimer(consoleToUse.id);
+          setSelectedConsoleId(consoleToUse.id);
         }
       }
-      // Cas 2 : une réservation existe déjà et on change de console → update
       else if (selectedConsole.id !== consoleToUse.id) {
         await updateReservationConsole(consoleToUse.id);
-        setSelectedConsole(consoleToUse); // update local
+        setSelectedConsole(consoleToUse);
+        setSelectedConsoleId(consoleToUse.id);
       }
       else {
-        setSelectedConsole(consoleToUse); // même console, juste pour s'assurer
+        setSelectedConsole(consoleToUse);
+        setSelectedConsoleId(consoleToUse.id);
+
       }
 
       setCurrentStep(2);
@@ -52,7 +56,6 @@ export default function ConsolesSelection() {
     }
   };
 
-  // Détermine si on doit afficher "Continuer" ou "Modifier"
   const isModification =
     selected && selectedConsole && selected.id !== selectedConsole.id;
 
