@@ -68,10 +68,15 @@ export async function GET() {
     };
     const fetchedSpecificDates: Exception[] = [];
 
-    if (weeklyRows[0].always_available) {
+    if (weeklyRows.length <= 0) {
+      fetchedAvailability.dateRange = {
+        alwaysApplies: false,
+        range: null,
+      };
+    } else if (weeklyRows[0].always_available) {
       fetchedAvailability.dateRange = {
         alwaysApplies: true,
-        range: { startDate: null, endDate: null },
+        range: null,
       };
     } else {
       fetchedAvailability.dateRange = {

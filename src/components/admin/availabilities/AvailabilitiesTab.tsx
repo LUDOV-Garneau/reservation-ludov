@@ -123,8 +123,8 @@ export default function AvailabilitiesTab() {
           return;
         }
         const data = (await response.json()) as fetchAvailabilities;
-        const parsedAvailability = {
-          ...data.availability,
+
+        const parsedAvailability: Partial<AvailabilityState> = {
           dateRange: {
             ...data.availability.dateRange,
             range: data.availability.dateRange.range
@@ -147,7 +147,17 @@ export default function AvailabilitiesTab() {
           },
         };
 
-        setAvailabilityState(parsedAvailability);
+        if (
+          data.availability.weekly &&
+          Object.keys(data.availability.weekly).length > 0
+        ) {
+          parsedAvailability.weekly = data.availability.weekly;
+        }
+
+        setAvailabilityState((defaultAvailabilities) => ({
+          ...defaultAvailabilities,
+          ...parsedAvailability,
+        }));
         setSpecificDates(
           data.specificDates.map((d) => ({
             ...d,
