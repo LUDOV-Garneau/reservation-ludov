@@ -15,7 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-type Jeu = { nom: string; biblio: number | undefined };
+type Jeu = { nom: string; picture: string; biblio: number | undefined };
 type Console = { nom: string };
 type Accessoire = { nom: string };
 
@@ -29,13 +29,13 @@ type DetailsReservationProps = {
   heure: string;
 };
 
-function CarteJeu({ nom, biblio }: { nom: string; biblio: number | undefined }) {
+function CarteJeu({ nom, picture, biblio }: { nom: string; picture: string; biblio: number | undefined }) {
   const t = useTranslations();
   return (
     <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-white p-6 shadow-sm">
       <div className="relative h-56 w-full lg:h-64 lg:w-64 flex-shrink-0 overflow-hidden rounded-lg">
         <Image
-          src="/image_game.jpg"
+          src={picture}
           alt={nom}
           fill
           className="object-contain"
@@ -125,12 +125,12 @@ export default function DetailsReservation({
           {date && heure && (
             <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap md:mr-auto lg:mr-8">
               <span className="inline-flex items-center gap-1">
-                <Calendar className="h-5 w-5 flex-shrink-0" />
+                <Calendar className="h-5 w-5 text-cyan-600" />
                 {date}
               </span>
               <span className="text-gray-400">•</span>
               <span className="inline-flex items-center gap-1">
-                <Clock9 className="h-5 w-5 flex-shrink-0" />
+                <Clock9 className="h-5 w-5 text-cyan-600" />
                 {heure}
               </span>
             </span>
@@ -152,7 +152,7 @@ export default function DetailsReservation({
         <div className="space-y-4">
           <h3 className="text-2xl font-semibold mb-4">{t("reservation.details.selectedGames")}</h3>
           {jeux.map((jeu, index) => (
-            <CarteJeu key={`${jeu.nom}-${index}`} nom={jeu.nom} biblio={jeu.biblio} />
+            <CarteJeu key={`${jeu.nom}-${index}`} nom={jeu.nom} picture={jeu.picture} biblio={jeu.biblio} />
           ))}
         </div>
 
@@ -166,7 +166,7 @@ export default function DetailsReservation({
         {!!accessoires?.length && (
           <div className="rounded-lg border p-6 shadow-sm">
             <div className="flex items-start gap-3">
-              <Gamepad2 className="h-6 w-6 flex-shrink-0" />
+              <Gamepad2 className="h-6 w-6 text-cyan-600" />
               <div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800">
                   {t("reservation.details.accessoriesIncluded")}
@@ -188,7 +188,7 @@ export default function DetailsReservation({
 
         <div className="rounded-lg border p-6 shadow-sm">
           <div className="flex items-start gap-3">
-            <Monitor className="h-6 w-6 flex-shrink-0" />
+            <Monitor className="h-6 w-6 text-cyan-600" />
             <div>
               <h3 className="text-xl font-semibold mb-2 text-gray-800">
                 {t("reservation.details.stationAssigned")}

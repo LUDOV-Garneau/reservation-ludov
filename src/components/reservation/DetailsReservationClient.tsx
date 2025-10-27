@@ -12,7 +12,7 @@ type Reservation = {
   date: string;
   heure: string;
   console: { nom: string };
-  jeux: { nom: string; biblio: number }[];
+  jeux: { nom: string; picture: string; biblio: number }[];
   accessoires?: { nom: string }[];
 };
 
