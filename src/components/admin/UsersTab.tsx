@@ -26,8 +26,6 @@ export default function UsersTab() {
         <CardHeader>
           <CardTitle>{t("admin.users.title")}</CardTitle>
           <CardDescription>
-            <UsersForm onSuccess={handleRefresh}/>
-            <AddUserForm onSuccess={handleRefresh}/>
             <UsersTable refreshKey={refreshKey}/>
           </CardDescription>
         </CardHeader>

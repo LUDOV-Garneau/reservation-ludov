@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react"
 
 type Props = {
   onSuccess?: () => void;
@@ -72,7 +73,7 @@ export default function AddUserForm({ onSuccess }: Props) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" className="mt-2">
-          + Ajouter un utilisateur
+          Ajouter un utilisateur
         </Button>
       </DialogTrigger>
 

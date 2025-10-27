@@ -8,9 +8,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6.js";
+import { Plus } from "lucide-react";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import AddUserForm from "@/components/admin/components/AddUserForm";
+import UsersForm from "@/components/admin/components/UsersForm";
 
 type User = {
   email: string;
@@ -24,6 +44,8 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [localRefreshKey, setLocalRefreshKey] = useState(0);
+  const handleRefresh = () => setLocalRefreshKey((prev: number) => prev + 1);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -42,14 +64,43 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
     };
 
     fetchUsers();
-  }, [refreshKey, page, limit]);
+  }, [refreshKey, localRefreshKey, page, limit]);
 
-  const totalPages = Math.ceil(total / limit);
+  let totalPages = Math.ceil(total / limit);
+  if (totalPages === 0) totalPages = 1;
 
   return (
     <Card className="w-full max-w-3xl mx-auto mt-8">
-      <CardHeader>
-        <CardTitle>Liste des utilisateurs</CardTitle>
+      <CardHeader className="flex items-center justify-between">
+        <div>
+          <CardTitle>Liste des utilisateurs</CardTitle>
+          <CardDescription>Gestion des comptes</CardDescription>
+        </div>
+        <Tooltip>
+          <Popover>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <Button variant="default" className="mt-2">
+                  <Plus className="h-5 w-5" />
+                </Button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+
+            <TooltipContent>
+              <p>Ajouter des utilisateurs</p>
+            </TooltipContent>
+
+            <PopoverContent className="w-auto">
+              <h4 className="font-medium leading-none mb-2">
+                Ajouter des utilisateurs
+              </h4>
+              <div className="space-y-4 flex flex-col items-center">
+                <UsersForm onSuccess={handleRefresh} />
+                <AddUserForm onSuccess={handleRefresh} />
+              </div>
+            </PopoverContent>
+          </Popover>
+        </Tooltip>
       </CardHeader>
       <CardContent>
         {loading ? (
