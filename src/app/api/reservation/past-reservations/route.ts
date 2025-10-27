@@ -7,7 +7,8 @@ import { RowDataPacket } from "mysql2";
 
 type ReservationRow = RowDataPacket & {
   id: number;
-  createdAt: Date | string;
+  date: string | Date;
+  time: string;
   console_name: string;
   game1_title: string | null;
   game2_title: string | null;
@@ -36,54 +37,53 @@ export async function GET() {
 
     const userId = Number(user.id);
     // const userId = 1;
-    const now = new Date();
 
     const [rows] = await pool.query<ReservationRow[]>(
       `
       SELECT 
         rh.id,
-        rh.createdAt,
+        DATE(rh.date) AS date,
+        rh.time,
         c.name AS console_name,
         g1.titre AS game1_title,
         g2.titre AS game2_title,
         g3.titre AS game3_title
       FROM reservation_hold rh
-      JOIN consoles c ON c.id = rh.console_id
+      JOIN console_type c ON c.id = rh.console_type_id
       LEFT JOIN games g1 ON g1.id = rh.game1_id
       LEFT JOIN games g2 ON g2.id = rh.game2_id
       LEFT JOIN games g3 ON g3.id = rh.game3_id
-      WHERE rh.user_id = ? AND rh.createdAt < ?
-      ORDER BY rh.createdAt DESC
-      `,
-      [userId, now]
+      WHERE rh.user_id = ?  AND TIMESTAMP(rh.date, rh.time) < NOW()
+      ORDER BY TIMESTAMP(rh.date, rh.time) DESC`,
+      [userId]
     );
 
     if (!rows.length) {
       return NextResponse.json([]);
     }
-
     const reservations = rows.map((row) => {
-      const dateString = row.createdAt instanceof Date
-        ? row.createdAt.toISOString().replace("T", " ").substring(0, 19)
-        : String(row.createdAt ?? "");
+      const games = [row.game1_title, row.game2_title, row.game3_title]
+        .filter(Boolean) as string[];
 
-      const [datePart, timePart] = dateString.split(" ");
-      const heure = (timePart ?? "").slice(0, 5);
-
-      const games = [
-        row.game1_title,
-        row.game2_title,
-        row.game3_title
-      ].filter(Boolean) as string[];
+      let formattedDate: string;
+      if (row.date instanceof Date) {
+        const year = row.date.getFullYear();
+        const month = String(row.date.getMonth() + 1).padStart(2, '0');
+        const day = String(row.date.getDate()).padStart(2, '0');
+        formattedDate = `${year}-${month}-${day}`;
+      } else {
+        formattedDate = String(row.date).split('T')[0];
+      }
 
       return {
-        id: row.id.toString(),
+        id: String(row.id),
         games,
         console: row.console_name,
-        date: datePart ?? "",
-        heure: heure ?? "",
+        date: formattedDate,
+        heure: row.time.slice(0, 5),
       };
     });
+
     return NextResponse.json(reservations);
   } catch (error) {
     console.error("🔴 ERREUR PAST RÉSERVATIONS:", error);
