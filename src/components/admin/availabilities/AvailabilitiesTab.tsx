@@ -15,6 +15,7 @@ import BlockSpecificDatesSelection, {
   flattenExceptionsToDateSelections,
   groupDateSelectionsToExceptions,
 } from "./BlockSpecificDatesSelection";
+import { toast } from "sonner";
 
 type HourRange = {
   id: number;
@@ -119,7 +120,7 @@ export default function AvailabilitiesTab() {
           credentials: "include",
         });
         if (!response.ok) {
-          //setErrors([t("auth.login.invalidCredentials")]);
+          toast.error(t("admin.availabilities.errors.fetchAvailabilities"));
           return;
         }
         const data = (await response.json()) as fetchAvailabilities;
@@ -176,8 +177,8 @@ export default function AvailabilitiesTab() {
             date: new Date(d.date),
           }))
         );
-      } catch (e) {
-        //setErrors([t("auth.login.invalidCredentials")]);
+      } catch {
+        toast.error(t("admin.availabilities.errors.fetchAvailabilities"));
       }
     }
 
@@ -282,16 +283,14 @@ export default function AvailabilitiesTab() {
         credentials: "include",
       });
       setIsLoading(false);
-      if (response.status === 400) {
-        //setErrors([t("auth.login.invalidCredentials")]);
-        return;
-      } else if (!response.ok) {
-        //setErrors([t("auth.login.invalidCredentials")]);
+      if (!response.ok) {
+        toast.error(t("admin.availabilities.errors.savingAvailabilities"));
         return;
       }
-    } catch (e) {
+      toast.success(t("admin.availabilities.messages.savedWeekly"));
+    } catch {
       setIsLoading(false);
-      //setErrors([t("auth.login.invalidCredentials")]);
+      toast.error(t("admin.availabilities.errors.savingAvailabilities"));
     }
   }
 
@@ -309,16 +308,14 @@ export default function AvailabilitiesTab() {
         credentials: "include",
       });
       setIsLoading(false);
-      if (response.status === 400) {
-        //setErrors([t("auth.login.invalidCredentials")]);
-        return;
-      } else if (!response.ok) {
-        //setErrors([t("auth.login.invalidCredentials")]);
+      if (!response.ok) {
+        toast.error(t("admin.availabilities.errors.savingAvailabilities"));
         return;
       }
+      toast.success(t("admin.availabilities.messages.savedSpecific"));
     } catch (e) {
       setIsLoading(false);
-      //setErrors([t("auth.login.invalidCredentials")]);
+      toast.error(t("admin.availabilities.errors.savingAvailabilities"));
     }
   }
 

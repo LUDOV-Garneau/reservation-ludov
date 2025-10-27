@@ -183,7 +183,9 @@
         "invalidRange": "End time must be after start time.",
         "overlap": "Overlapping time ranges.",
         "exception": "Exception on {date}: {error}",
-        "fixErrors": "Please correct the following errors before continuing:\n{errors}"
+        "fixErrors": "Please correct the following errors before continuing:\n{errors}",
+        "fetchAvailabilities": "An error occurred while fetching availabilities :(",
+        "savingAvailabilities": "An error occurred while saving availabilities :("
       },
       "messages": {
         "savedWeekly": "Weekly availabilities saved.",

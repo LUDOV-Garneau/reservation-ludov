@@ -184,7 +184,9 @@
         "invalidRange": "L'heure de fin doit être après l'heure de début.",
         "overlap": "Plages horaires qui se chevauchent.",
         "exception": "Exception le {date} : {error}",
-        "fixErrors": "Veuillez corriger les erreurs suivantes avant de continuer :\n{errors}"
+        "fixErrors": "Veuillez corriger les erreurs suivantes avant de continuer :\n{errors}",
+        "fetchAvailabilities": "Une erreur s'est produite lors de la récupération des disponibilités :(",
+        "savingAvailabilities": "Une erreur s'est produite lors de l'enregistrement des disponibilités :("
       },
       "messages": {
         "savedWeekly": "Disponibilités hebdomadaires enregistrées.",
