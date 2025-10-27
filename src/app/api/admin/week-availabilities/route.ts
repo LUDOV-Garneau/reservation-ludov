@@ -127,7 +127,7 @@ export async function GET() {
         (hr) => weeklyRow.weekly_id === hr.weekly_id
       )) {
         fetchedAvailability.weekly[weeklyRow.day_of_week].hoursRanges.push({
-          id: hoursRow.id,
+          id: hoursRow.range_id,
           startHour: hoursRow.start_hour,
           startMinute: hoursRow.start_minute,
           endHour: hoursRow.end_hour,

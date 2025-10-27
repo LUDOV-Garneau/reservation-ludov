@@ -151,7 +151,19 @@ export default function AvailabilitiesTab() {
           data.availability.weekly &&
           Object.keys(data.availability.weekly).length > 0
         ) {
-          parsedAvailability.weekly = data.availability.weekly;
+          const filledWeekly: Record<string, WeekDay> = Object.fromEntries(
+            Object.entries(data.availability.weekly).map(([day, w]) => [
+              day,
+              {
+                ...w,
+                hoursRanges:
+                  Array.isArray(w.hoursRanges) && w.hoursRanges.length > 0
+                    ? w.hoursRanges
+                    : [defaultHR],
+              },
+            ])
+          );
+          parsedAvailability.weekly = filledWeekly;
         }
 
         setAvailabilityState((defaultAvailabilities) => ({
