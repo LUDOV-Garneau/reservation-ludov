@@ -285,12 +285,12 @@ export async function POST(req: Request) {
       const updated = updatedRows[0];
 
       let accessoriesArray: number[] = [];
-      if (updated.accessoir_id) {
+      if (updated.accessoirs) {
         try {
-          if (typeof updated.accessoir_id === 'string') {
-            accessoriesArray = JSON.parse(updated.accessoir_id);
-          } else if (Array.isArray(updated.accessoir_id)) {
-            accessoriesArray = updated.accessoir_id;
+          if (typeof updated.accessoirs === 'string') {
+            accessoriesArray = JSON.parse(updated.accessoirs);
+          } else if (Array.isArray(updated.accessoirs)) {
+            accessoriesArray = updated.accessoirs;
           }
         } catch (e) {
           return NextResponse.json(
