@@ -6,6 +6,7 @@ import Link from 'next/link';
 import AccueilReservationSection from '@/components/reservation/components/AccueilReservationSection';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { toast } from "sonner";
 
 interface Reservation {
     id: string;
@@ -21,6 +22,8 @@ export default function AccueilReservations() {
     const [pastReservations, setPastReservations] = useState<Reservation[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+
+    const errorMessage = t("reservation.accueil.errorFetching");
 
     useEffect(() => {
         async function fetchReservations() {
@@ -43,15 +46,15 @@ export default function AccueilReservations() {
                 const pastData = await pastReservationsResponse.json();
                 setUpcomingReservations(upcomingData);
                 setPastReservations(pastData);
-            } catch (err) {
-                console.error('Error loading reservations:', err);
+            } catch {
+                toast.error(errorMessage);
             } finally {
                 setIsLoading(false);
             }
         }
 
         fetchReservations();
-    }, []);
+    }, [errorMessage]);
 
     const handleDetailsClick = (reservation: Reservation) => {
         router.push(`/reservation/details/${reservation.id}`);

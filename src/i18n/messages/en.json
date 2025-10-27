@@ -104,6 +104,7 @@
       "cancelButton": "Cancel",
       "cancelConfirmationTitle": "Confirm Cancellation",
       "cancelConfirmation": "This action cannot be undone. Do you really want to cancel this reservation?",
+      "deleteReservationFailed": "Failed to delete the reservation.",
       "returnButton": "Back",
       "detailsButton": "More details about the game",
       "pageDetailsTitle": "Your reservation",
@@ -122,7 +123,8 @@
       "detailsButton": "Details",
       "loadingReservations": "Loading...",
       "errorLoadingReservations": "An error occurred while loading reservations.",
-      "greeting": "Welcome"
+      "greeting": "Welcome",
+      "errorFetching": "An error occurred, please try again later."
     }
   },
   "auth": {

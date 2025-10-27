@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 export default function CancelReservationAlertDialog({ reservationId }: { reservationId: string }) {
   const t = useTranslations();
@@ -28,7 +29,7 @@ export default function CancelReservationAlertDialog({ reservationId }: { reserv
         method: "DELETE",
       });
       if (!res.ok) {
-        console.error("Delete reservation failed");
+        toast.error(t("reservation.details.deleteReservationFailed"));
         return;
       }
       router.push("/"); 

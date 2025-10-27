@@ -104,6 +104,7 @@
       "cancelButton": "Annuler",
       "cancelConfirmationTitle": "Confirmer l’annulation",
       "cancelConfirmation": "Cette action est irréversible. Voulez-vous annuler cette réservation?",
+      "deleteReservationFailed": "Échec de la suppression de la réservation.",
       "returnButton": "Retour",
       "detailsButton": "Plus de détails sur le jeu",
       "pageDetailsTitle": "Votre réservation",
@@ -122,7 +123,8 @@
       "detailsButton": "Détails",
       "loadingReservations": "Chargement...",
       "errorLoadingReservations": "Une erreur s'est produite lors du chargement des réservations.",
-      "greeting": "Bonjour"
+      "greeting": "Bonjour",
+      "errorFetching": "Une erreur s'est produite, veuillez réessayer ultérieurement."
     }
   },
   "auth": {

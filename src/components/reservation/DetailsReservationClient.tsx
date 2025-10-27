@@ -5,7 +5,6 @@ import DetailsReservation from "@/components/reservation/DetailsReservation";
 import { Calendar, Clock9 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useTranslations } from "next-intl";
 
 type Reservation = {
   id: number;
@@ -20,7 +19,6 @@ type Reservation = {
 export default function DetailsReservationClient({ id }: { id: string }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [reservation, setReservation] = useState<Reservation | null>(null);
-  const t = useTranslations();
 
   useEffect(() => {
     const getReservation = async () => {
