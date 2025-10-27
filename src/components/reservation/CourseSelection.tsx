@@ -167,7 +167,7 @@ export default function CourseSelection() {
           </div>
 
           {selectedCoursDetails && (
-            <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-xl sm:rounded-2xl shadow-lg">
+            <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-cyan-500 rounded-xl sm:rounded-2xl shadow-lg">
               <div className="flex items-start gap-2 sm:gap-3">
                 <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-white flex-shrink-0 mt-0.5 sm:mt-1" />
                 <div className="min-w-0 flex-1">

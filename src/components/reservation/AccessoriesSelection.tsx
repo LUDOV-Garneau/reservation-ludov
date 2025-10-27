@@ -129,7 +129,7 @@ export default function AccessoriesSelection() {
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-2xl font-bold flex items-center gap-2">
                     <ShoppingBag className="h-6 w-6 text-cyan-500" />
-                    Panier
+                    Sélection
                   </h2>
                   <div className="bg-cyan-500 text-white text-sm font-bold px-3 py-1 rounded-full">
                     {selectedAccessories.length}

@@ -110,7 +110,6 @@ export async function POST(req: Request) {
 
       const currentConsoleId = reservation.console_id;
 
-      // --- Construction dynamique des updates ---
       const updates: string[] = [];
       const values: unknown[] = [];
 
@@ -253,6 +252,19 @@ export async function POST(req: Request) {
         updates.push("console_id = ?");
         values.push(unitsNewConsole[0].consoleStockId);
         finalConsoleId = unitsNewConsole[0].consoleStockId;
+
+        await conn.query(
+          `UPDATE reservation_hold SET game1_id = NULL WHERE id = ?`,
+          [reservationId]
+        );
+        await conn.query(
+          `UPDATE reservation_hold SET game2_id = NULL WHERE id = ?`,
+          [reservationId]
+        );
+        await conn.query(
+          `UPDATE reservation_hold SET game3_id = NULL WHERE id = ?`,
+          [reservationId]
+        );
       }
 
       // --- Mise à jour en DB seulement si nécessaire ---

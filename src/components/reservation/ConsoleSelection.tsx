@@ -33,20 +33,16 @@ export default function ConsolesSelection() {
     try {
       if (!selectedConsole) {
         setSelectedConsole(selected);
-        setSelectedConsoleId(consoleToUse.id);
         if (!isTimerActive) {
           await startTimer(consoleToUse.id);
-          setSelectedConsoleId(consoleToUse.id);
         }
       }
       else if (selectedConsole.id !== consoleToUse.id) {
         await updateReservationConsole(consoleToUse.id);
         setSelectedConsole(consoleToUse);
-        setSelectedConsoleId(consoleToUse.id);
       }
       else {
         setSelectedConsole(consoleToUse);
-        setSelectedConsoleId(consoleToUse.id);
 
       }
 
@@ -62,7 +58,7 @@ export default function ConsolesSelection() {
   const displayedConsole = selected || selectedConsole;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <div className="lg:col-span-1">
         <div className="bg-[white] sticky top-10 rounded-2xl p-6 shadow-lg">
           <h2 className="text-3xl font-bold mb-4 text-center">

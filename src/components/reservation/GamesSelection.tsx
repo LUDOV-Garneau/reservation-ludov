@@ -35,10 +35,6 @@ export default function GamesSelection() {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoadingSelected, setIsLoadingSelected] = useState(false);
 
-  /**
-   * Restaure les jeux déjà sauvegardés dans le contexte
-  */
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -52,7 +48,6 @@ export default function GamesSelection() {
 
       setIsLoadingSelected(true);
       try {
-        // Récupère les détails des jeux déjà sélectionnés
         const gameIds = selectedGames.join(",");
         const res = await fetch(`/api/reservation/games/details?ids=${gameIds}`);
         if (res.ok) {
@@ -69,9 +64,6 @@ export default function GamesSelection() {
     restoreSelectedGames();
   }, [reservationId, selectedGames]);
 
-  /**
-   * Toggle sélection/désélection
-   */
   const toggleSelect = (game: Game) => {
     const isSelected = selectedGameObjects.find(g => g.id === game.id);
     
@@ -164,7 +156,7 @@ export default function GamesSelection() {
     <div className="grid xl:grid-cols-4 grid-cols-2 gap-6">
       {/* Panneau latéral - Sélection */}
       <div className="col-span-2 xl:col-span-1">
-        <div className="bg-[white] sticky top-24 rounded-2xl p-6 shadow-lg max-h-[calc(100vh-120px)] overflow-y-auto">
+        <div className="bg-[white] sticky top-10 rounded-2xl p-6 shadow-lg max-h-[100vh] overflow-y-auto">
           { currentStep > 1 && (
             <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mb-3 w-fit">
               <MoveLeft className="h-6 w-6 mr-2"/>
@@ -185,7 +177,7 @@ export default function GamesSelection() {
           {/* Info console si disponible */}
           {selectedConsole && (
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">Plateforme réservée</p>
+              <p className="text-xs text-gray-500 mb-1">Plateforme sélectionnée</p>
               <p className="text-sm font-medium text-gray-700">{selectedConsole.name}</p>
             </div>
           )}
@@ -201,7 +193,7 @@ export default function GamesSelection() {
           )}
 
           {/* Liste des jeux sélectionnés */}
-          <div className="space-y-3 mb-4 min-h-[300px]">
+          <div className="space-y-3 mb-4 min-h-[fit-content]">
             {isLoadingSelected ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-6 w-6 animate-spin text-cyan-500" />
@@ -239,7 +231,7 @@ export default function GamesSelection() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 line-clamp-2">
+                      <p className="text-sm font-medium text-gray-900">
                         {game.titre}
                       </p>
                     </div>

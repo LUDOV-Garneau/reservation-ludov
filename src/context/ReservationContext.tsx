@@ -388,6 +388,8 @@ export function ReservationProvider({
 const updateReservationConsole = async (newConsoleId: number) => {
   if (!reservationId) return;
 
+  setSelectedGames([]);
+
   try {
     const res = await fetch(`/api/reservation/update-hold-reservation`, {
       method: "POST",
