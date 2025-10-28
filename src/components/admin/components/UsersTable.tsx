@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -59,7 +59,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         const res = await fetch("/api/auth/login");
         if (!res.ok) return;
         const data = await res.json();
-        setCurrentUserId(data.user.id);
+        setCurrentUserId(Number(data.user?.id ?? null));
       } catch (err) {
         console.error("Erreur lors du fetch du user connecté :", err);
       }
@@ -89,6 +89,44 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
 
   let totalPages = Math.ceil(total / limit);
   if (totalPages === 0) totalPages = 1;
+
+  const handleDelete = async (userId: number, email: string) => {
+    if (!confirm(`Supprimer l’utilisateur ${email} ?`)) return;
+    try {
+      const res = await fetch(`/api/admin/delete-user?userId=${userId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err?.error || "Erreur lors de la suppression");
+        return;
+      }
+      toast.success("Utilisateur supprimé");
+      handleRefresh();
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur réseau");
+    }
+  };
+
+  const handleResetPassword = async (userId: number, email: string) => {
+    if (!confirm(`Réinitialiser le mot de passe de ${email} ? (définira le mot de passe à une chaîne vide)`)) return;
+    try {
+      const res = await fetch(`/api/admin/reset-password?userId=${userId}`, {
+        method: "POST",
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err?.error || "Erreur lors de la réinitialisation");
+        return;
+      }
+      toast.success("Mot de passe réinitialisé");
+      handleRefresh();
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur réseau");
+    }
+  };
 
   return (
     <Card className="w-full max-w-3xl mx-auto mt-8">
@@ -147,36 +185,32 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                       <TableCell>{user.firstName}</TableCell>
                       <TableCell>{user.lastName}</TableCell>
                       <TableCell>{user.isAdmin ? "Oui" : "Non"}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right space-x-2">
                         {user.id !== currentUserId && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={async () => {
-                              if (!confirm(`Supprimer l’utilisateur ${user.email} ?`)) return;
-                              const res = await fetch(`/api/admin/delete-user?userId=${user.id}`, {
-                                method: "DELETE",
-                              });
+                          <>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDelete(user.id, user.email)}
+                            >
+                              Supprimer
+                            </Button>
 
-                              if (!res.ok) {
-                                alert("Erreur lors de la suppression");
-                                return;
-                              }
-                              handleRefresh();
-                            }}
-                          >
-                            Supprimer
-                          </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleResetPassword(user.id, user.email)}
+                            >
+                              Réinitialiser le mot de passe
+                            </Button>
+                          </>
                         )}
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center text-muted-foreground"
-                    >
+                    <TableCell colSpan={5} className="text-center text-muted-foreground">
                       Aucun utilisateur trouvé
                     </TableCell>
                   </TableRow>
