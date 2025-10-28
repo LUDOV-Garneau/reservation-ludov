@@ -162,41 +162,43 @@ export default function DetailsReservation({
         </div>
       </div>
 
+      {!!accessoires?.length && (
+        <div className="rounded-lg border p-6 shadow-sm bg-[white]">
+          <div className="flex items-start gap-3">
+            <Gamepad2 className="h-6 w-6 text-cyan-600" />
+            <div>
+              <h3 className="text-xl font-semibold mb-2 text-gray-800">
+                {t("reservation.details.accessoriesIncluded")}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {accessoires.map((acc) => (
+                  <span
+                    key={acc.nom}
+                    className="inline-flex items-center rounded-full bg-[white] px-4 py-1.5 text-sm font-medium text-gray-700 shadow-lg border"
+                  >
+                    {acc.nom}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-[70%_30%] gap-6">
-        {!!accessoires?.length && (
-          <div className="rounded-lg border p-6 shadow-sm">
+        {station !== "null" && (
+          <div className="rounded-lg border p-6 shadow-xl bg-[white]">
             <div className="flex items-start gap-3">
-              <Gamepad2 className="h-6 w-6 text-cyan-600" />
+              <Monitor className="h-6 w-6 text-cyan-600" />
               <div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                  {t("reservation.details.accessoriesIncluded")}
+                  {t("reservation.details.stationAssigned")}
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {accessoires.map((acc) => (
-                    <span
-                      key={acc.nom}
-                      className="inline-flex items-center rounded-full bg-white px-4 py-1.5 text-sm font-medium text-gray-700 shadow-sm border"
-                    >
-                      {acc.nom}
-                    </span>
-                  ))}
-                </div>
+                <p className="font-medium text-gray-700">{station}</p>
               </div>
             </div>
           </div>
         )}
-
-        <div className="rounded-lg border p-6 shadow-sm">
-          <div className="flex items-start gap-3">
-            <Monitor className="h-6 w-6 text-cyan-600" />
-            <div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                {t("reservation.details.stationAssigned")}
-              </h3>
-              <p className="font-medium text-gray-700">{station}</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

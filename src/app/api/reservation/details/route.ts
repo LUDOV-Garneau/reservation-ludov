@@ -21,6 +21,12 @@ type ReservationHoldRow = RowDataPacket & {
   accessoires_json: Array<{ id: number; name: string }> | null;
 };
 
+const REGEX_RESERVATION_ID = /^RSVP-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function testReservationIdRegex(id: string): boolean {
+  return REGEX_RESERVATION_ID.test(id);
+}
+
 const toYMD = (d: string | Date): string => {
   if (!d) return "";
   if (typeof d === "string") {
@@ -44,14 +50,13 @@ const toYMD = (d: string | Date): string => {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const idString = searchParams.get("id");
-    if (!idString || !/^\d+$/.test(idString)) {
+    const idReservation = searchParams.get("id");
+    if (!idReservation || !testReservationIdRegex(idReservation)) {
       return NextResponse.json(
         { error: "Missing or invalid id parameter." },
         { status: 400 }
       );
     }
-    const idReservation = Number(idString);
 
     const [rows] = await pool.query<ReservationHoldRow[]>(
       `
@@ -124,7 +129,7 @@ export async function GET(request: NextRequest) {
       heure: row.time.slice(0, 5),
     });
   } catch (error) {
-    console.error("🔴 ERREUR DETAILS RÉSERVATION:", error);
+    console.error("ERREUR DETAILS RÉSERVATION:", error);
     return NextResponse.json(
       { error: "Erreur lors de la récupération de la réservation." },
       { status: 500 }
@@ -138,7 +143,7 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const idString = searchParams.get("id");
 
-    if (!idString || !/^\d+$/.test(idString)) {
+    if (!idString || !testReservationIdRegex(idString)) {
       return NextResponse.json(
         { error: "Missing or invalid id parameter." },
         { status: 400 }
@@ -168,7 +173,7 @@ export async function DELETE(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("🔴 ERREUR DELETE RÉSERVATION:", error);
+    console.error("ERREUR DELETE RÉSERVATION:", error);
     return NextResponse.json(
       { error: "Erreur lors de la suppression de la réservation." },
       { status: 500 }
