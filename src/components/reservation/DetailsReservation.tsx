@@ -32,7 +32,7 @@ type DetailsReservationProps = {
 function CarteJeu({ nom, picture, biblio }: { nom: string; picture: string; biblio: number | undefined }) {
   const t = useTranslations();
   return (
-    <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-white p-6 shadow-sm">
+    <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-[white] p-6 shadow-sm">
       <div className="relative h-56 w-full lg:h-64 lg:w-64 flex-shrink-0 overflow-hidden rounded-lg">
         <Image
           src={picture}
@@ -68,7 +68,7 @@ function CarteJeu({ nom, picture, biblio }: { nom: string; picture: string; bibl
 
 function CarteConsole({ nom }: { nom: string }) {
   return (
-    <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-white p-6 shadow-sm">
+    <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-[white] p-6 shadow-sm">
       <div className="relative h-56 w-full lg:h-64 lg:w-64 flex-shrink-0 overflow-hidden rounded-lg">
         <Image
           src="/placeholder_consoles.jpg"

@@ -21,7 +21,7 @@ export default function AccueilReservationSection({
     onDetailsClick,
 }: AccueilReservationSectionProps) {
     return (
-        <div className="w-full rounded-lg shadow-sm p-6 mb-6">
+        <div className="w-full rounded-lg shadow-sm p-6 mb-6 bg-[white]">
             <h2 className="text-2xl font-bold text-center mb-6 border-b-2 border-cyan-300">
                 {title}
             </h2>

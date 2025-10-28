@@ -61,8 +61,8 @@ export default function DetailsReservationClient({ id }: { id: string }) {
       ) : (
         <div>
           <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <Skeleton className="h-14 w-60 mb-2" />
-            <div className="w-full sm:w-auto flex flex-col items-center gap-5 sm:flex-row sm:items-center rounded-md border bg-white p-3 shadow-sm">
+            <Skeleton className="h-14 w-60 mb-2 bg-[white]" />
+            <div className="w-full sm:w-auto flex flex-col items-center gap-5 sm:flex-row sm:items-center rounded-md border bg-[white] p-3 shadow-sm">
               <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap sm:mr-8">
                 <span className="inline-flex items-center gap-1">
                   <Calendar className="h-4 w-4 text-gray-300" />
@@ -83,32 +83,32 @@ export default function DetailsReservationClient({ id }: { id: string }) {
           </div>
 
           <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Skeleton className="h-6 w-40" />
-            <Skeleton className="h-6 w-32 hidden md:block" />
+            <Skeleton className="h-6 w-40 bg-[white]" />
+            <Skeleton className="h-6 w-32 hidden md:block bg-[white]" />
           </div>
 
           <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
             <div className="flex flex-col gap-4">
               {[1, 2].map((_, i) => (
-                <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                <Skeleton key={i} className="h-20 w-full rounded-lg bg-[white]" />
               ))}
             </div>
             <div>
-              <Skeleton className="h-20 w-full md:w-80 rounded-lg" />
+              <Skeleton className="h-20 w-full md:w-80 rounded-lg bg-[white]" />
             </div>
           </div>
 
           <div className="mb-6">
             <div className="flex flex-wrap items-center gap-2">
-              <Skeleton className="h-6 w-36" />
-              <Skeleton className="h-6 w-14" />
-              <Skeleton className="h-6 w-14" />
+              <Skeleton className="h-6 w-36 bg-[white]" />
+              <Skeleton className="h-6 w-14 bg-[white]" />
+              <Skeleton className="h-6 w-14 bg-[white]" />
             </div>
           </div>
 
           <div className="mb-8">
             <div className="flex flex-wrap items-center gap-2">
-              <Skeleton className="h-6 w-80 max-w-full" />
+              <Skeleton className="h-6 w-80 max-w-full bg-[white]" />
             </div>
           </div>
         </div>
