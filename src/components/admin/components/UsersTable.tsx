@@ -37,6 +37,7 @@ import { useTranslations } from "next-intl";
 type User = {
   id: number;
   email: string;
+  createdAt: string;
   firstName: string;
   lastName: string;
   isAdmin: boolean;
@@ -174,6 +175,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                   <TableHead>Prénom</TableHead>
                   <TableHead>Nom</TableHead>
                   <TableHead>Administrateur</TableHead>
+                  <TableHead>Date de création</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -185,6 +187,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                       <TableCell>{user.firstName}</TableCell>
                       <TableCell>{user.lastName}</TableCell>
                       <TableCell>{user.isAdmin ? "Oui" : "Non"}</TableCell>
+                      <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
                       <TableCell className="text-right space-x-2">
                         {user.id !== currentUserId && (
                           <>

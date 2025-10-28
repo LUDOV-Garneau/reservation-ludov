@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
       SELECT 
         id,
         email,
+        createdAt,
         firstname AS firstName,
         lastname AS lastName,
         isAdmin As isAdmin
