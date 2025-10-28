@@ -4,20 +4,20 @@ import { RowDataPacket } from "mysql2";
 
 type CoursRow = RowDataPacket & {
     id: number
-    number: string
-    name: string
+    code_cours: string
+    nom_cours: string
 }
 
 export async function GET() {
     try {
         const [rows] = await pool.query<CoursRow[]>(
-            "SELECT id, number, name FROM cours"
+            "SELECT id, code_cours, nom_cours FROM cours"
         );
 
         const data = (rows ?? []).map(r => ({
             id: r.id,
-            code_cours: r.number,
-            nom_cours: r.name,
+            code_cours: r.code_cours,
+            nom_cours: r.nom_cours,
         }));
 
         return NextResponse.json(data, { status: 200 });

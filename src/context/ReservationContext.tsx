@@ -33,12 +33,21 @@ interface ReservationContextType {
   selectedConsole: Console | null; // console sélectionnée
   selectedGames: string[]; // liste des jeux sélectionnés
   currentStep: number; // étape actuelle du processus de réservation
+  selectedDate: Date | undefined; // date sélectionnée
+  selectedTime: string | undefined; // heure sélectionnée
+  selectedCours: number | null;
+  selectedAccessories: number[];
 
   // Mutateurs
   setUserId: (id: number) => void; // définit l'ID utilisateur
   setSelectedConsole: (console: Console | null) => void; // définit la console sélectionnée
   setSelectedGames: (games: string[]) => void; // définit la liste des jeux sélectionnés
   setCurrentStep: (step: number) => void; // définit l'étape actuelle
+  setSelectedDate: (date: Date | undefined) => void; // définit la date sélectionnée
+  setSelectedTime: (time: string | undefined) => void; // définit l'heure sélectionnée
+  setSelectedCours: (coursId: number | null) => void; // définit le cours sélectionné
+  setSelectedAccessories: React.Dispatch<React.SetStateAction<number[]>>;
+
 
   // Actions Réservation
   cancelReservation: () => Promise<void>; // annule la réservation côté serveur
@@ -46,8 +55,6 @@ interface ReservationContextType {
   clearError: () => void; // efface le message d'erreur
   updateReservationConsole: (newConsoleId: number) => Promise<void>; // met à jour la console de la réservation
 
-  selectedAccessories: number[];
-  setSelectedAccessories: (ids: number[]) => void;
   updateReservationAccessories: (ids: number[]) => Promise<void>;
 }
 
@@ -95,6 +102,9 @@ export function ReservationProvider({
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAccessories, setSelectedAccessories] = useState<number[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
+  const [selectedCours, setSelectedCours] = useState<number | null>(null);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -154,20 +164,38 @@ export function ReservationProvider({
         if (!data.success || data.status === "expired") {
           clearStorage();
           setIsReservationCancelled(true);
+          setIsRestoring(false);
+          setIsHydrated(true);
           return;
         }
 
-        // Restaure les infos
-        console.log("Restauration réservation:", data);
-        setReservationId(data.reservationId);
+        setReservationId(String(data.reservationId));
         setExpiresAt(data.expiresAt);
         setUserId(data.userId);
-        setSelectedConsole(data.console)
+
+        if (data.console) {
+          setSelectedConsole({
+            id: Number(data.console.id),
+            name: String(data.console.name),
+            active_units: Number(data.console.active_units || 0),
+            picture: data.console.picture,
+          });
+        }
+
+        setSelectedCours(data.cours || null);
+
         setSelectedGames(data.games || []);
+
         setSelectedAccessories(data.accessories || []);
+
+        setSelectedDate(data.selectedDate ? new Date(data.selectedDate) : undefined);
+        setSelectedTime(data.selectedTime || undefined);
+
         setCurrentStep(data.currentStep || 1);
+
         setIsTimerActive(true);
         setTimeRemaining(computeRemaining(data.expiresAt));
+
       } catch (e) {
         console.error("Erreur restauration réservation:", e);
         clearStorage();
@@ -231,40 +259,14 @@ export function ReservationProvider({
     }
   };
 
-  const updateReservationGames = async (games: number[]) => {
-    if (!reservationId) return;
-
-    try {
-      const res = await fetch(`/api/reservation/update-hold-reservation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reservationId,
-          game1Id: games[0] || null,
-          game2Id: games[1] || null,
-          game3Id: games[2] || null,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Erreur update jeux");
-
-      const data = await res.json();
-      if (data.success) {
-        setSelectedGames(games.map(String)); // on garde la sélection localement
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur update jeux");
-    }
-  };
-
   /**
    * --- Actions publiques ---
    */
 
   /** Crée une réservation temporaire */
   const startTimer = async (consoleId?: number) => {
-    const cid = consoleId ?? selectedConsole?.id;
-    if (!cid) {
+    const consoleTypeId = consoleId ?? selectedConsole?.id;
+    if (!consoleTypeId) {
       setError("Aucune console sélectionnée");
       return;
     }
@@ -275,19 +277,29 @@ export function ReservationProvider({
       const res = await fetch(`/api/reservation/create-hold-reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, consoleId: cid }),
+        body: JSON.stringify({ consoleTypeId, minutes: timerDuration }),
+        signal: AbortSignal.timeout(10000),
       });
 
-      if (!res.ok) throw new Error("Erreur création réservation");
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message || "Erreur création réservation");
+      }
 
       const data = await res.json();
-      if (!data.reservationId || !data.expiresAt)
-        throw new Error("Réponse invalide du serveur");
+      const expires = data.expiresAt || data.expires_at || data.expireAt;
+      
+      if (!data.reservationId && !data.holdId) {
+        throw new Error("Réponse invalide du serveur (reservationId manquant)");
+      }
+      if (!expires) {
+        throw new Error("Réponse invalide du serveur (expiresAt manquant)");
+      }
 
-      setReservationId(data.reservationId);
-      setExpiresAt(data.expiresAt);
-      setIsTimerActive(true);
-      setTimeRemaining(computeRemaining(data.expiresAt));
+    setReservationId(String(data.reservationId ?? data.holdId));
+    setExpiresAt(String(expires));
+    setIsTimerActive(true);
+    setTimeRemaining(computeRemaining(String(expires)));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur inconnue");
       setIsTimerActive(false);
@@ -324,8 +336,6 @@ export function ReservationProvider({
     }
   };
 
-
-
   /** Stoppe le timer local (sans annuler la réservation) */
   const stopTimer = () => setIsTimerActive(false);
 
@@ -341,6 +351,13 @@ export function ReservationProvider({
     setSelectedGames([]);
     setCurrentStep(1);
     clearStorage();
+    setSelectedAccessories([]);
+    setSelectedDate(undefined);
+    setSelectedTime(undefined);
+    setUserId(0);
+    setIsHydrated(true);
+    setIsRestoring(false);
+    setSelectedCours(null);
   };
 
   /** Annule la réservation côté serveur */
@@ -369,8 +386,6 @@ export function ReservationProvider({
 const updateReservationConsole = async (newConsoleId: number) => {
   if (!reservationId) return;
 
-  console.log("Mise à jour console réservation:", reservationId, newConsoleId);
-
   try {
     const res = await fetch(`/api/reservation/update-hold-reservation`, {
       method: "POST",
@@ -382,7 +397,7 @@ const updateReservationConsole = async (newConsoleId: number) => {
 
     const data = await res.json();
     if (data.success) {
-      setSelectedConsole({ ...selectedConsole!, id: newConsoleId }); 
+      setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
     }
   } catch (e) {
     setError(e instanceof Error ? e.message : "Erreur update console");
@@ -481,6 +496,12 @@ const updateReservationConsole = async (newConsoleId: number) => {
     selectedAccessories,
     setSelectedAccessories,
     updateReservationAccessories,
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    selectedCours,
+    setSelectedCours,
   };
 
   if (isRestoring) {

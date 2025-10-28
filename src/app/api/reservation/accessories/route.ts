@@ -1,64 +1,76 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
+import { cookies } from "next/headers";
 
-export async function GET(req: NextRequest) {
-  const token = req.cookies.get("SESSION")?.value;
-  if (!token) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-  const user = verifyToken(token);
-
+export async function GET() {
   try {
-    const [reservationHoldRows] = await pool.query(
-      "SELECT console_id FROM reservation_hold WHERE user_id = ? ORDER BY createdAt DESC LIMIT 1",
-      [user?.id]
-    );
-    const lastConsole = reservationHoldRows as { console_id: number }[];
-
-    if (lastConsole.length === 0) {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("SESSION");
+    let user = null;
+    try {
+      const token = sessionCookie?.value;
+      if (token) user = verifyToken(token);
+    } catch {
+      // token invalide/expiré
+    }
+    if (!user?.id) {
       return NextResponse.json(
-        { error: "No recent reservation hold found for user" },
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    const userId = Number(user.id);
+    if (!Number.isFinite(userId)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid user ID" },
+        { status: 400 }
+      );
+    }
+
+    // Dernier hold -> console_type_id directement
+    const [holdRows] = await pool.query(
+      `SELECT console_type_id
+         FROM reservation_hold
+        WHERE user_id = ?
+        ORDER BY createdAt DESC
+        LIMIT 1`,
+      [userId]
+    );
+    const holds = holdRows as { console_type_id: number | null }[];
+    const consoleTypeId = Number(holds?.[0]?.console_type_id);
+
+    if (!Number.isFinite(consoleTypeId)) {
+      return NextResponse.json(
+        { success: false, data: [], message: "No recent reservation hold found for user" },
         { status: 404 }
       );
     }
 
-    const consoleId = lastConsole[0].console_id;
-
-    const [accessoriesRows] = await pool.query(
-      `SELECT id, name, console_id 
-       FROM accessoires 
-       WHERE JSON_CONTAINS(console_id, CAST(? AS JSON))`,
-      [consoleId]
+    // Accessoires pour ce console_type_id
+    const [rows] = await pool.query(
+      `SELECT id, name
+         FROM accessoires
+        WHERE consoles IS NOT NULL
+          AND JSON_VALID(consoles)
+          AND JSON_CONTAINS(consoles, CAST(? AS JSON), '$')`,
+      [String(consoleTypeId)] // passer l'ID en JSON
     );
 
-    const accessories = (
-      accessoriesRows as {
-        id: number;
-        name: string;
-        console_id: number[] | string;
-      }[]
-    ).map((a) => ({
-      id: a.id,
-      name: a.name,
-      console_id:
-        typeof a.console_id === "string"
-          ? JSON.parse(a.console_id)
-          : a.console_id,
-    }));
+    const accessories = (rows as { id: number; name: string }[]) || [];
 
     if (accessories.length === 0) {
       return NextResponse.json(
-        { error: "No accessories found for the user's console" },
+        { success: false, data: [], message: "No accessories found for the user's console" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json(accessories);
+    return NextResponse.json({ success: true, data: accessories });
   } catch (error) {
-    console.error("Error fetching accessories:", error);
+    console.error("Error processing request:", error);
     return NextResponse.json(
-      { error: "Failed to fetch accessories" },
+      { success: false, data: [], message: "Internal server error" },
       { status: 500 }
     );
   }

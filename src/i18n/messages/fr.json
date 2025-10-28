@@ -65,14 +65,21 @@
       "modify": "Modifier"
     },
     "accessory": {
-      "noneSelected": "Aucun accessoire sélectionné",
-      "postError": "Impossible d'enregistrer l'accessoire sélectionné.",
-      "networkError": "Erreur réseau, réessayez. {error}",
-      "sending": "Envoi...",
-      "continue": "Continuer",
-      "selectedAccessories": "Accessoires sélectionnés",
-      "accessorySelection": "Sélection des accessoires",
-      "accessoryName": "Nom de l'accessoire"
+      "header_info" : "Accessoires pour",
+      "error": "Erreur",
+      "loading_text": "Chargement...",
+      "empty_selection": "Aucun accessoire sélectionné",
+      "button_clear_all": "Tout effacer",
+      "button_state_loading_saving": "Enregistrement...",
+      "button_continue": "Continuer",
+      "help_text_continue_without_accessory": "Vous pouvez continuer sans sélectionner d'accessoire.",
+      "accessoryName": "Nom de l'accessoire",
+      "title_accessory_selection": "Sélectionnez vos accessoires",
+      "subtitle_accessory": "Sélectionnez les accessoires que vous souhaitez ajouter à votre réservation.",
+      "loading_accessory": "Chargement des accessoires...",
+      "title_no_accessory_available": "Aucun accessoire disponible",
+      "no_accessory_available": "Il n'y a pas d'accessoire disponible pour cette console.",
+      "skip_step" : "Passer cette étape"
     },
     "calendar": {
       "title": "Sélection de la date",

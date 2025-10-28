@@ -201,13 +201,12 @@ export default function GameSelectionGrid({
             {games.map((game) => {
               const isSelected = selectedIds.includes(game.id);
               const isDisabled = !isSelected && maxReached;
-              const isUnavailable = game.available === 0;
 
               return (
                 <div
                   key={game.id}
                   onClick={() => {
-                    if (!isDisabled && !isUnavailable) {
+                    if (!isDisabled) {
                       onSelect(game);
                     }
                   }}
@@ -215,7 +214,7 @@ export default function GameSelectionGrid({
                     relative group rounded-xl overflow-hidden shadow-md
                     transition-all duration-200
                     ${isSelected ? 'ring-2 ring-cyan-500 scale-[0.98]' : ''}
-                    ${isDisabled || isUnavailable ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-xl hover:scale-[1.02]'}
+                    ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-xl hover:scale-[1.02]'}
                   `}
                 >
                   {/* Image du jeu */}
