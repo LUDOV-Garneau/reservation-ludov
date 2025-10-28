@@ -35,6 +35,7 @@ type User = {
   email: string;
   firstName: string;
   lastName: string;
+  isAdmin: boolean;
 };
 
 export default function UsersTable({ refreshKey }: { refreshKey: number }) {
@@ -117,6 +118,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                   <TableHead>Email</TableHead>
                   <TableHead>Prénom</TableHead>
                   <TableHead>Nom</TableHead>
+                  <TableHead>Administrateur</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -128,6 +130,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                       </TableCell>
                       <TableCell>{user.firstName}</TableCell>
                       <TableCell>{user.lastName}</TableCell>
+                      <TableCell>{user.isAdmin ? "Oui" : "Non"}</TableCell>
                     </TableRow>
                   ))
                 ) : (

@@ -12,7 +12,8 @@ export async function GET(req: NextRequest) {
       SELECT 
         email,
         firstname AS firstName,
-        lastname AS lastName
+        lastname AS lastName,
+        isAdmin As isAdmin
       FROM users
       ORDER BY createdAt DESC
       LIMIT ? OFFSET ?
