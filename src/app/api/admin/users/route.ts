@@ -10,6 +10,7 @@ export async function GET(req: NextRequest) {
     const [rows] = await pool.query(
       `
       SELECT 
+        id,
         email,
         firstname AS firstName,
         lastname AS lastName,

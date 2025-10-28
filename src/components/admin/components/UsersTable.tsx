@@ -35,6 +35,7 @@ import UsersForm from "@/components/admin/components/UsersForm";
 import { useTranslations } from "next-intl";
 
 type User = {
+  id: number;
   email: string;
   firstName: string;
   lastName: string;
@@ -50,6 +51,22 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   const [total, setTotal] = useState(0);
   const [localRefreshKey, setLocalRefreshKey] = useState(0);
   const handleRefresh = () => setLocalRefreshKey((prev: number) => prev + 1);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const res = await fetch("/api/auth/login");
+        if (!res.ok) return;
+        const data = await res.json();
+        setCurrentUserId(data.user.id);
+      } catch (err) {
+        console.error("Erreur lors du fetch du user connecté :", err);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -119,24 +136,45 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                   <TableHead>Prénom</TableHead>
                   <TableHead>Nom</TableHead>
                   <TableHead>Administrateur</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {users.length > 0 ? (
-                  users.map((user, index) => (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">
-                        {user.email}
-                      </TableCell>
+                  users.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="font-medium">{user.email}</TableCell>
                       <TableCell>{user.firstName}</TableCell>
                       <TableCell>{user.lastName}</TableCell>
                       <TableCell>{user.isAdmin ? "Oui" : "Non"}</TableCell>
+                      <TableCell className="text-right">
+                        {user.id !== currentUserId && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={async () => {
+                              if (!confirm(`Supprimer l’utilisateur ${user.email} ?`)) return;
+                              const res = await fetch(`/api/admin/delete-user?userId=${user.id}`, {
+                                method: "DELETE",
+                              });
+
+                              if (!res.ok) {
+                                alert("Erreur lors de la suppression");
+                                return;
+                              }
+                              handleRefresh();
+                            }}
+                          >
+                            Supprimer
+                          </Button>
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={3}
+                      colSpan={5}
                       className="text-center text-muted-foreground"
                     >
                       Aucun utilisateur trouvé
