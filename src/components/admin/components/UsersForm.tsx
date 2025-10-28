@@ -38,14 +38,16 @@ export default function UsersForm({ onSuccess }: Props) {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Erreur lors de l'envoi du fichier");
+      if (!res.ok){ 
+        toast.error("Impossible d'importer le fichier CSV : " + (await res.json()).error);
+        throw new Error("Erreur lors de l'envoi du fichier");
+      }
 
       toast.success("Fichier CSV importé avec succès !");
       setFile(null);
       onSuccess?.();
       router.refresh();
     } catch (error) {
-      toast.error("Impossible d'importer le fichier CSV.");
       console.error(error);
     }
   };

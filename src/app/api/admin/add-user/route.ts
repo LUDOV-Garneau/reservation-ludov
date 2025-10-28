@@ -13,6 +13,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!EMAIL_REGEX.test(email)) {
+      return NextResponse.json(
+        { error: "Format de courriel invalide." },
+        { status: 400 }
+      );
+    }
+
     const now = new Date();
 
     const conn = await pool.getConnection();

@@ -22,7 +22,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { C } from "vitest/dist/chunks/reporters.d.BFLkQcL6.js";
 import { Plus } from "lucide-react";
 import {
   Popover,

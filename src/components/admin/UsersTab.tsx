@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import UsersTable from "@/components/admin/components/UsersTable";
-import UsersForm from "@/components/admin/components/UsersForm";
-import AddUserForm from "@/components/admin/components/AddUserForm";
 
 import {
   Card,
@@ -17,8 +15,7 @@ import { useTranslations } from "next-intl";
 export default function UsersTab() {
   const t = useTranslations();
 
-  const [refreshKey, setRefreshKey] = useState(0);
-  const handleRefresh = () => setRefreshKey((prev) => prev + 1);
+  const [refreshKey] = useState(0);
 
   return (
     <TabsContent value="users">

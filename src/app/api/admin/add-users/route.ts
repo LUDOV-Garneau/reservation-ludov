@@ -10,6 +10,8 @@ const EXPECTED_COLUMNS = [
   "Last Name",
 ];
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -38,6 +40,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error: `Colonnes manquantes: ${missingColumns.join(", ")}`,
+        },
+        { status: 400 }
+      );
+    }
+
+    const invalidEmails = (records as CsvUserRecord[])
+      .map((r) => r.Username)
+      .filter((email) => !EMAIL_REGEX.test(email));
+
+    if (invalidEmails.length > 0) {
+      return NextResponse.json(
+        {
+          error: `Certains courriels sont invalides: ${invalidEmails.join(
+            ", "
+          )}`,
         },
         { status: 400 }
       );
