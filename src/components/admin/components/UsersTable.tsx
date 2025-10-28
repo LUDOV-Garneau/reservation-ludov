@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -30,6 +32,7 @@ import {
 } from "@/components/ui/popover";
 import AddUserForm from "@/components/admin/components/AddUserForm";
 import UsersForm from "@/components/admin/components/UsersForm";
+import { useTranslations } from "next-intl";
 
 type User = {
   email: string;
@@ -39,6 +42,7 @@ type User = {
 };
 
 export default function UsersTable({ refreshKey }: { refreshKey: number }) {
+  const t = useTranslations();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -73,7 +77,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
     <Card className="w-full max-w-3xl mx-auto mt-8">
       <CardHeader className="flex items-center justify-between">
         <div>
-          <CardTitle>Liste des utilisateurs</CardTitle>
+          <CardTitle>{t("admin.users.title")}</CardTitle>
           <CardDescription>Gestion des comptes</CardDescription>
         </div>
         <Tooltip>
@@ -91,9 +95,6 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
             </TooltipContent>
 
             <PopoverContent className="w-auto">
-              <h4 className="font-medium leading-none mb-2">
-                Ajouter des utilisateurs
-              </h4>
               <div className="space-y-4 flex flex-col items-center">
                 <UsersForm onSuccess={handleRefresh} />
                 <AddUserForm onSuccess={handleRefresh} />
@@ -112,7 +113,6 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         ) : (
           <>
             <Table>
-              <TableCaption>Liste complète des utilisateurs</TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead>Email</TableHead>
