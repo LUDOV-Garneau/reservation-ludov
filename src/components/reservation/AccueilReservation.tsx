@@ -93,7 +93,7 @@ export default function AccueilReservations() {
                         onDetailsClick={handleDetailsClick}
                     />
                 ) : (
-                    <div className="w-full rounded-lg shadow-sm p-6 mb-6 text-center bg-white">
+                    <div className="w-full rounded-lg shadow-sm p-6 mb-6 text-center bg-[white]">
                         <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-300 pb-4">
                             {t("reservation.accueil.upcomingReservations")}
                         </h2>
@@ -109,7 +109,7 @@ export default function AccueilReservations() {
                         onDetailsClick={handleDetailsClick}
                     />
                 ) : (
-                    <div className="w-full rounded-lg shadow-sm p-6 mb-6 text-center bg-white">
+                    <div className="w-full rounded-lg shadow-sm p-6 mb-6 text-center bg-[white]">
                         <h2 className="text-2xl font-bold mb-4 border-b-2 border-cyan-300 pb-4">
                             {t("reservation.accueil.pastReservations")}
                         </h2>

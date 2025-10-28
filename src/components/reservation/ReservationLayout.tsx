@@ -167,7 +167,7 @@ export default function ReservationLayout() {
           )}
         </div>
 
-        <div className="bg-white rounded-lg my-8">
+        <div className="rounded-lg my-8">
           {currentStepConfig ? (
             currentStepConfig.component
           ) : (
