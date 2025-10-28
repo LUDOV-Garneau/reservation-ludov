@@ -1,6 +1,7 @@
 // import type { Metadata } from "next";
 import "@/app/globals.css";
 import { Inter, Nunito } from "next/font/google";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,12 +14,6 @@ const nunito = Nunito({
   variable: "--font-titles",
 });
 
-// export const metadata: Metadata = {
-//   title: "Module de réservation LUDOV",
-//   description:
-//     "Réservez une station avec une console et des jeux vidéo dans le cadre de vos études universitaires à l'université de Montréal.",
-// };
-
 export default function RootLayout({
   children,
 }: {
@@ -26,7 +21,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${inter.variable} ${nunito.variable}`}>
-      <body className="font-body">{children}</body>
+      <body className="font-body">
+        {children}
+        <Toaster position="bottom-right" />
+      </body>
     </html>
   );
 }

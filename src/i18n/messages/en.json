@@ -186,6 +186,73 @@
     },
     "stations": {
       "title": "Stations"
+    },
+    "availabilities": {
+      "title": "Availabilities",
+      "days": {
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday"
+      },
+      "actions": {
+        "setting": "Setting availabilities...",
+        "set": "Set availabilities",
+        "savingDates": "Saving dates...",
+        "saveDates": "Save valid dates",
+        "remove": "Remove",
+        "add": "Add"
+      },
+      "text": {
+        "selectLabel": "Select valid dates and time ranges"
+      },
+      "errors": {
+        "invalidRange": "End time must be after start time.",
+        "overlap": "Overlapping time ranges.",
+        "exception": "Exception on {date}: {error}",
+        "fixErrors": "Please correct the following errors before continuing:\n{errors}",
+        "fetchAvailabilities": "An error occurred while fetching availabilities :(",
+        "savingAvailabilities": "An error occurred while saving availabilities :("
+      },
+      "messages": {
+        "savedWeekly": "Weekly availabilities saved.",
+        "savedSpecific": "Valid dates saved."
+      },
+      "typeSelection": {
+        "weekly": {
+          "title": "Weekly",
+          "description": "Add recurring availabilities for each week."
+        },
+        "specificDates": {
+          "title": "Specific dates",
+          "description": "Add availabilities for specific dates."
+        }
+      },
+      "blockSpecificDates": {
+        "title": "Block off specific dates (overrides)",
+        "description": "Define specific dates that will be",
+        "highlight": "excluded",
+        "remaining": "from your weekly availability."
+      },
+      "dateRange": {
+        "title": "Define the date range for which these availabilities apply",
+        "select": "Select date range",
+        "alwaysApplies": "Always applies"
+      },
+      "specificDates": {
+        "label": "Define your specific dates and times",
+        "pickDate": "Pick date",
+        "duplicate": "Duplicate",
+        "remove": "Remove",
+        "addNew": "+ Add new date"
+      },
+      "weekAvailabilities": {
+        "title": "Define your weekly availability below",
+        "unavailableOn": "Unavailable on {day}s"
+      }
     }
   }
 }
