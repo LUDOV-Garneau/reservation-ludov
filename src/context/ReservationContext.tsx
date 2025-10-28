@@ -37,7 +37,7 @@ interface ReservationContextType {
   selectedTime: string | undefined; // heure sélectionnée
   selectedCours: number | null;
   selectedAccessories: number[];
-  selectedConsoleId: number | null;
+  selectedConsoleId: number;
 
   // Mutateurs
   setUserId: (id: number) => void; // définit l'ID utilisateur
@@ -48,7 +48,6 @@ interface ReservationContextType {
   setSelectedTime: (time: string | undefined) => void; // définit l'heure sélectionnée
   setSelectedCours: (coursId: number | null) => void; // définit le cours sélectionné
   setSelectedAccessories: React.Dispatch<React.SetStateAction<number[]>>;
-  setSelectedConsoleId: (consoleId: number | null) => void;
 
   // Actions Réservation
   cancelReservation: () => Promise<void>; // annule la réservation côté serveur
@@ -83,7 +82,7 @@ const STORAGE_KEY = "reservation_hold"; // clé pour sessionStorage
  */
 export function ReservationProvider({
   children,
-  timerDuration = 15,
+  timerDuration = 54,
 }: ReservationProviderProps) {
   /**
    * --- États globaux ---
@@ -106,7 +105,7 @@ export function ReservationProvider({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
   const [selectedCours, setSelectedCours] = useState<number | null>(null);
-  const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(null);
+  const [selectedConsoleId, setSelectedConsoleId] = useState<number>(0);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -182,6 +181,8 @@ export function ReservationProvider({
             active_units: Number(data.console.active_units || 0),
             picture: data.console.picture,
           });
+
+          setSelectedConsoleId(data.consoleStockId);
         }
 
         setSelectedCours(data.cours || null);
@@ -289,6 +290,7 @@ export function ReservationProvider({
       }
 
       const data = await res.json();
+      setSelectedConsoleId(data.consoleStockId);
       const expires = data.expiresAt || data.expires_at || data.expireAt;
       
       if (!data.reservationId && !data.holdId) {
@@ -423,6 +425,11 @@ const updateReservationConsole = async (newConsoleId: number) => {
       return;
     }
 
+    if (!selectedConsoleId) {
+      setError("Aucune console en stock sélectionnée");
+      return;
+    }
+
     if (selectedGames.length === 0) {
       setError("Aucun jeu sélectionné");
       return;
@@ -472,26 +479,25 @@ const updateReservationConsole = async (newConsoleId: number) => {
       
       const data = await res.json();
       
-      // // Sauvegarder les détails pour la page de succès
-      // if (typeof window !== 'undefined') {
-      //   sessionStorage.setItem('last_reservation', JSON.stringify({
-      //     reservationId: data.reservationId || reservationId,
-      //     finalReservationId: data.finalReservationId,
-      //     console: selectedConsole,
-      //     games: selectedGames,
-      //     date: new Date().toLocaleDateString('fr-CA'),
-      //     heure: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
-      //   }));
-      // }
+      // Sauvegarder les détails pour la page de succès
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('last_reservation', JSON.stringify({
+          reservationId: data.reservationId || reservationId,
+          finalReservationId: data.finalReservationId,
+          console: selectedConsole,
+          games: selectedGames,
+          date: new Date().toLocaleDateString('fr-CA'),
+          heure: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
+        }));
+      }
       
-      // // Réinitialiser le contexte
-      // setIsTimerActive(false);
-      // setReservationId(null);
-      // setExpiresAt(null);
-      // clearStorage();
+      // Réinitialiser le contexte
+      setIsTimerActive(false);
+      setReservationId(null);
+      setExpiresAt(null);
+      clearStorage();
       
-      // La navigation sera gérée par le composant appelant
-      // return data;
+      return data;
       
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur finalisation");
@@ -538,8 +544,7 @@ const updateReservationConsole = async (newConsoleId: number) => {
     setSelectedTime,
     selectedCours,
     setSelectedCours,
-    setSelectedConsoleId,
-    selectedConsoleId
+    selectedConsoleId,
   };
 
   if (isRestoring) {

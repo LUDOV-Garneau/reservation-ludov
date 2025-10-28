@@ -63,7 +63,7 @@ export default function ConfirmReservation() {
         });
 
       } catch (err) {
-        console.error("❌ Erreur:", err);
+        console.error("Erreur:", err);
         setError("Impossible de charger les détails");
       } finally {
         setLoading(false);
@@ -84,8 +84,9 @@ export default function ConfirmReservation() {
     
     try {
       await completeReservation();
+      router.push(`/reservation/success?reservationId=${reservationId}`);
     } catch (err) {
-      console.error("❌ Erreur confirmation:", err);
+      console.error("Erreur confirmation:", err);
       setError(err instanceof Error ? err.message : "Erreur lors de la confirmation");
       setConfirmLoading(false);
     }

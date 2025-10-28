@@ -19,7 +19,6 @@ export default function ConsolesSelection() {
     isTimerActive,
     setCurrentStep,
     selectedConsole,
-    setSelectedConsoleId
   } = useReservation();
 
   const handleConsoleSelect = (console: Console) => {

@@ -9,24 +9,32 @@ import { useTranslations } from "next-intl";
 import { useReservation } from "@/context/ReservationContext";
 import { Loader2, AlertCircle, Calendar, Clock, MoveLeft } from "lucide-react";
 
+type TimeSlot = {
+  time: string;
+  available: boolean;
+};
+
 export default function DateSelection() {
   const t = useTranslations();
 
-  const { 
+  const {
     setSelectedDate,
     selectedDate,
     setSelectedTime,
     selectedTime,
     setCurrentStep,
     currentStep,
-    reservationId
+    reservationId,
+    selectedConsoleId,
+    selectedGames,
+    selectedAccessories,
   } = useReservation();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [date, setDate] = useState<Date | undefined>(selectedDate);
   const [time, setTime] = useState<string>(selectedTime || "");
-  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [availableTimes, setAvailableTimes] = useState<TimeSlot[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,30 +49,40 @@ export default function DateSelection() {
 
     try {
       const dateString = selectedDate.toISOString().split("T")[0];
-      
+
       const response = await fetch(
-        `/api/reservation/calendar?date=${encodeURIComponent(dateString)}`
+        `/api/reservation/calendar?date=${encodeURIComponent(
+          dateString
+        )}&consoleId=${encodeURIComponent(
+          selectedConsoleId
+        )}&gameIds=${encodeURIComponent(
+          selectedGames.join(",")
+        )}&accessoryIds=${encodeURIComponent(selectedAccessories.join(","))}`
       );
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Erreur chargement des horaires");
       }
-      
+
       const data = await response.json();
-      
+
       if (!data.success) {
         throw new Error(data.error || "Erreur serveur");
       }
 
-      setAvailableTimes(data.availableTimes || []);
+      setAvailableTimes(data.availability || []);
 
-      if (time && !data.availableTimes.includes(time)) {
+      if (time && !data.availability.includes(time)) {
         setTime("");
         setSelectedTime("");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Impossible de charger les horaires disponibles");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Impossible de charger les horaires disponibles"
+      );
       setAvailableTimes([]);
     } finally {
       setIsLoading(false);
@@ -85,7 +103,7 @@ export default function DateSelection() {
     setSelectedTime("");
     setDate(newDate);
     setSelectedDate(newDate);
-    
+
     await loadAvailableTimes(newDate);
   };
 
@@ -133,25 +151,32 @@ export default function DateSelection() {
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         setCurrentStep(currentStep + 1);
       } else {
         throw new Error(data.message || "Échec de la sauvegarde");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur lors de la sauvegarde de la réservation");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erreur lors de la sauvegarde de la réservation"
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="max-w-7xl mx-auto sm:p-6">
       <div className="bg-[white] rounded-2xl shadow-lg px-10 py-10">
         <div className="mb-8">
-          <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mb-8 w-fit">
-            <MoveLeft className="h-6 w-6 mr-2"/>
+          <div
+            onClick={() => setCurrentStep(currentStep - 1)}
+            className="cursor-pointer flex flex-row items-center mb-8 w-fit"
+          >
+            <MoveLeft className="h-6 w-6 mr-2" />
             <p>{t("reservation.layout.previousStep")}</p>
           </div>
           <h2 className="text-4xl font-bold mb-2">
@@ -174,8 +199,8 @@ export default function DateSelection() {
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row items-start justify-center gap-10 mb-8">
-          <div className="flex-1 max-w-md">
+        <div className="grid grid-cols-1 lg:grid-cols-2 sm:items-start sm:justify-center gap-10 mb-8">
+          <div className="col-span-2 md:col-span-1 mx-auto lg:mx-0">
             <div className="mb-4 flex items-center gap-2">
               <Calendar className="h-5 w-5 text-cyan-600" />
               <h3 className="text-lg font-semibold">Date de réservation</h3>
@@ -183,7 +208,7 @@ export default function DateSelection() {
             <DatePicker selected={date} onSelect={onSelectDate} />
           </div>
 
-          <div className="flex-1 max-w-md">
+          <div className="col-span-2 md:col-span-1">
             <div className="mb-4 flex items-center gap-2">
               <Clock className="h-5 w-5 text-cyan-600" />
               <h3 className="text-lg font-semibold">Heure de début</h3>
@@ -201,9 +226,9 @@ export default function DateSelection() {
                 {Array(9)
                   .fill(0)
                   .map((_, i) => (
-                    <Skeleton 
-                      key={i} 
-                      className="h-16 w-full rounded-xl bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse" 
+                    <Skeleton
+                      key={i}
+                      className="h-16 w-full rounded-xl bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse"
                     />
                   ))}
               </div>
@@ -214,7 +239,7 @@ export default function DateSelection() {
                   {t("reservation.calendar.noValidDate")}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Toutes les plages horaires sont réservés pour cette date
+                  Toutes les plages horaires sont réservées pour cette date
                 </p>
               </div>
             ) : (
@@ -233,12 +258,13 @@ export default function DateSelection() {
               Résumé de votre sélection
             </p>
             <p className="text-cyan-700">
-              {date.toLocaleDateString("fr-FR", { 
-                weekday: "long", 
-                year: "numeric", 
-                month: "long", 
-                day: "numeric" 
-              })} à {time}
+              {date.toLocaleDateString("fr-FR", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              à {time.slice(0, 5)}
             </p>
           </div>
         )}
@@ -262,9 +288,7 @@ export default function DateSelection() {
                 Sauvegarde...
               </>
             ) : (
-              <>
-                {t("reservation.calendar.continueBtn")}
-              </>
+              <>{t("reservation.calendar.continueBtn")}</>
             )}
           </Button>
         </div>

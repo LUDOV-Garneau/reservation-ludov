@@ -64,6 +64,24 @@
       "consoleSelection": "Sélection de la console",
       "modify": "Modifier"
     },
+    "games" : {
+      "error" : {
+        "games_restore": "Erreur restauration jeux:",
+        "max_3_games": "Maximum 3 jeux peuvent être sélectionnés",
+        "selecte_at_least_one": "Sélectionnez au moins un jeu",
+        "no_active_reservation": "Aucune réservation active",
+        "save_failed" : "Erreur lors de la sauvegarde",
+        "select_console_first": "Sélectionner une console d'abord"
+      },
+      "your_games": "Vos jeux",
+      "selected_platform": "Plateforme sélectionnée",
+      "select_up_to_3": "Sélectionnez jusqu'à 3 jeux",
+      "go_through_library": "Parcourez la liste pour choisir",
+      "saving..." : "Sauvegarde...",
+      "continue": "Continuer",
+      "game_library": "Bibliothèque de jeux"
+
+    },
     "accessory": {
       "header_info" : "Accessoires pour",
       "error": "Erreur",

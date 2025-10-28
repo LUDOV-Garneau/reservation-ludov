@@ -4,7 +4,7 @@ import { Clock } from "lucide-react";
 type TimePickerProps = {
   selectedTime: string;
   onSelect: (time: string) => void;
-  times: string[];
+  times: { time: string; available: boolean }[];
 };
 
 export function TimePicker({ selectedTime, onSelect, times }: TimePickerProps) {
@@ -27,25 +27,28 @@ export function TimePicker({ selectedTime, onSelect, times }: TimePickerProps) {
         {times.length} plage{times.length > 1 ? "s" : ""} disponible{times.length > 1 ? "s" : ""} (2h de jeu)
       </p>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
         {times.map((time) => {
-          const isSelected = selectedTime === time;
+          const isSelected = selectedTime === time.time;
           return (
-            <Button
-              key={time}
-              variant={isSelected ? "default" : "outline"}
-              className={`
-                h-14 text-base font-semibold transition-all
-                ${isSelected 
-                  ? "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white shadow-md scale-105" 
-                  : "hover:border-cyan-400 hover:bg-cyan-50"
-                }
-              `}
-              onClick={() => onSelect(time)}
-            >
-              <Clock className="mr-2 h-4 w-4" />
-              {formatTime(time)}
-            </Button>
+            <>
+              <Button
+                key={time.time}
+                variant={isSelected ? "default" : "outline"}
+                className={`
+                  h-14 text-base font-semibold transition-all
+                  ${isSelected 
+                    ? "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white shadow-md scale-105" 
+                    : "hover:border-cyan-400 hover:bg-cyan-50"
+                  }
+                `}
+                onClick={() => onSelect(time.time)}
+                disabled={!time.available}
+              >
+                <Clock className="mr-2 h-4 w-4" />
+                {formatTime(time.time)}
+              </Button>
+            </>
           );
         })}
       </div>

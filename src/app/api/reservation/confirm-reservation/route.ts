@@ -3,6 +3,7 @@ import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
+import { error } from "console";
 
 type Body = {
     reservationHoldId: string;
@@ -13,7 +14,7 @@ type Body = {
     game3Id?: number | null;
     accessoryIds?: number[] | null;
     coursId: number;
-    date: string;
+    date: Date;
     time: string;
 }
 
@@ -27,7 +28,7 @@ interface ReservationHoldRow extends RowDataPacket {
     game3_id: number | null;
     accessoirs: string;
     cours: number;
-    date: string;
+    date: Date;
     time: string;
     expireAt: Date;
 }
@@ -222,7 +223,7 @@ export async function POST(req : Request) {
             game3Id,
             accessoryIds: accessoryIds.length > 0 ? accessoryIds : null,
             coursId,
-            date: dateStr,
+            date: dateObj,
             time: timeStr,
         };
 
@@ -317,8 +318,49 @@ export async function POST(req : Request) {
             }
 
             if (accessoryIds.length > 0) {
-                const holdAccessories = JSON.parse(hold.accessoirs) as number[];
-                if (JSON.stringify(holdAccessories.sort()) !== JSON.stringify(accessoryIds.sort())) {
+
+                if (!hold.accessoirs) {
+                    await connection.rollback();
+                    return NextResponse.json(
+                        { success: false, message: "No accessories held" },
+                        { status: 400 }
+                    );
+                }
+
+                let holdAccessories: number[];
+
+                if (Array.isArray(hold.accessoirs)) {
+                    holdAccessories = hold.accessoirs;
+                }
+                else if (typeof hold.accessoirs === 'string') {
+                    try {
+                        holdAccessories = JSON.parse(hold.accessoirs);
+                        if (!Array.isArray(holdAccessories)) {
+                            throw new Error("Not an array after parsing");
+                        }
+                    } catch (parseError) {
+                        console.error("Error parsing hold accessories:", parseError);
+                        await connection.rollback();
+                        return NextResponse.json(
+                            { success: false, message: "Invalid accessory data in hold" },
+                            { status: 500 }
+                        );
+                    }
+                }
+                else {
+                    console.error("❌ Unexpected accessoirs type:", typeof hold.accessoirs);
+                    await connection.rollback();
+                    return NextResponse.json(
+                        { success: false, message: "Invalid accessory data format" },
+                        { status: 500 }
+                    );
+                }
+
+                const sortedHold = [...holdAccessories].sort((a, b) => a - b);
+                const sortedRequest = [...accessoryIds].sort((a, b) => a - b);
+                
+                if (JSON.stringify(sortedHold) !== JSON.stringify(sortedRequest)) {
+                    console.error("Accessories mismatch!");
                     await connection.rollback();
                     return NextResponse.json(
                         { success: false, message: "Accessory IDs do not match the hold" },
@@ -360,7 +402,7 @@ export async function POST(req : Request) {
                 );
             }
 
-            if (hold.date !== reservationData.date) {
+            if (hold.date.toISOString().split('T')[0] !== reservationData.date.toISOString().split('T')[0]) {
                 await connection.rollback();
                 return NextResponse.json(
                     { success: false, message: "Date does not match the hold" },
@@ -387,9 +429,9 @@ export async function POST(req : Request) {
             const reservationId = `RSVP-${crypto.randomUUID()}`;
 
             const [result] = await connection.query(
-                `INSERT INTO reservations
-                    (id, user_id, console_id, console_type_id, game1_id, game2_id, game3_id, accessoirs, cours, date, time, createdAt)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+                `INSERT INTO reservation
+                    (id, user_id, console_id, console_type_id, game1_id, game2_id, game3_id, accessory_ids, cours_id, date, time, createdAt)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)`,
                 [
                     reservationId,
                     user.id,
@@ -405,21 +447,46 @@ export async function POST(req : Request) {
                 ]
             );
 
+            await connection.query(
+                `DELETE FROM reservation_hold WHERE id = ?`,
+                [reservationData.reservationHoldId]
+            );
+
+            await connection.query(
+                `UPDATE console_stock SET holding = 0  WHERE id = ?`,
+                [reservationData.consoleId]
+            );
+
+            await connection.query(
+                `UPDATE games SET holding = 0 WHERE id IN (?, ?, ?)`,
+                [
+                    reservationData.game1Id,
+                    reservationData.game2Id || 0,
+                    reservationData.game3Id || 0,
+                ]
+            );
+
+            await connection.commit();
+
             return NextResponse.json(
                 { success: true, message: "Reservation confirmed", data: reservationData },
                 { status: 200 }
             );
 
-        } catch {
+        } catch (error) {
             await connection.rollback();
             return NextResponse.json(
-                { success: false, message: "Error validating reservation hold" },
+                { 
+                    success: false, 
+                    message: "Error validating reservation hold", 
+                    error: error instanceof Error ? error.message : "Unknown error",
+                },
                 { status: 500 }
             );
         }
 
     } catch (error) {
-        console.error("❌ Error confirming reservation:", error);
+        console.error("Error confirming reservation:", error);
         return NextResponse.json(
             {
                 success: false,
