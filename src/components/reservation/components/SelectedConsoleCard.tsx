@@ -74,7 +74,7 @@ export default function SelectedConsoleCard({
     <div className="w-full space-y-4">
       <div className="relative w-full h-48 rounded-2xl overflow-hidden group bg-gray-100">
         <Image
-          src={console.image}
+          src={console.picture || "/placeholder_consoles.jpg"}
           alt={console.name}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"

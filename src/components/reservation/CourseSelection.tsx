@@ -12,25 +12,18 @@ import {
 } from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 import { useReservation } from "@/context/ReservationContext";
-
-type Cours = {
-  id: number;
-  code_cours: string;
-  nom_cours: string;
-};
-
-const COURS_AUTRE: Cours = {
-  id: 16,
-  code_cours: "Autre",
-  nom_cours: "Autre",
-};
+import { Cours } from "@/types/cours";
 
 export default function CourseSelection() {
   const t = useTranslations();
-  const { reservationId, setCurrentStep } = useReservation();
+  const { 
+    reservationId, 
+    setCurrentStep,
+    setSelectedCours,
+    selectedCours,
+  } = useReservation();
 
   const [cours, setCours] = useState<Cours[]>([]);
-  const [selectedCours, setSelectedCours] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +34,10 @@ export default function CourseSelection() {
         const res = await fetch("/api/reservation/cours");
         if (!res.ok) throw new Error("Erreur lors du chargement des cours");
         const data = await res.json();
+        setCours(data);
 
-        setCours([...data, COURS_AUTRE]);
       } catch (error) {
         console.error("Erreur chargement cours:", error);
-        setCours([COURS_AUTRE]);
       } finally {
         setLoading(false);
       }
@@ -54,7 +46,10 @@ export default function CourseSelection() {
   }, []);
 
   const handleSave = async () => {
-    if (!selectedCours || !reservationId) return;
+    if (!selectedCours || !reservationId) {
+      setError("Veuillez sélectionner un cours");
+      return;
+    }
 
     setSaving(true);
     setError(null);
@@ -65,15 +60,16 @@ export default function CourseSelection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           reservationId,
-          coursId: Number(selectedCours), // ✅ conversion en entier
+          coursId: selectedCours
         }),
       });
 
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || "Erreur sauvegarde");
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Erreur sauvegarde");
+      }
 
-      // Étape suivante
-      setCurrentStep(5);
+      setCurrentStep(6);
     } catch (err) {
       setError("Impossible de sauvegarder le cours.");
       console.error(err);
@@ -82,8 +78,12 @@ export default function CourseSelection() {
     }
   };
 
+  function HandleSelectedcours(selectedCours: string) {
+    setSelectedCours(Number(selectedCours));
+  }
+
   return (
-    <div className="md:mx-auto space-y-6 mt-6 bg-white p-10 py-32 rounded-2xl shadow-lg">
+    <div className="md:mx-auto space-y-6 mt-6 bg-[white] p-10 py-32 rounded-2xl shadow-lg">
       <div className="flex flex-col gap-3 md:w-1/2 mx-auto">
         <h2 className="text-3xl font-semibold">
           {t("reservation.course.selectionTitle")}
@@ -93,7 +93,7 @@ export default function CourseSelection() {
           {t("reservation.course.courseLabel")}
         </Label>
 
-        <Select onValueChange={setSelectedCours} disabled={loading || saving}>
+        <Select onValueChange={HandleSelectedcours} disabled={loading || saving} value={selectedCours ? String(selectedCours) : undefined}>
           <SelectTrigger id="cours" className="w-full">
             <SelectValue
               placeholder={
@@ -111,7 +111,7 @@ export default function CourseSelection() {
             ) : (
               cours.map((c) => (
                 <SelectItem key={c.id} value={String(c.id)}>
-                  {c.nom_cours} {/* ✅ on affiche seulement le nom */}
+                  {c.code_cours} - {c.nom_cours}
                 </SelectItem>
               ))
             )}

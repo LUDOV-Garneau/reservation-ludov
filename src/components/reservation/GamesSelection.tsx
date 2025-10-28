@@ -13,7 +13,6 @@ type Game = {
   titre: string;
   author?: string;
   picture: string;
-  available: number;
   biblio_id?: number;
 };
 

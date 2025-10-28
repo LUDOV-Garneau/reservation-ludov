@@ -20,8 +20,6 @@ export async function GET(req: Request) {
     const search = searchParams.get("search") || "";
     const consoleId = parseInt(searchParams.get("consoleId") || "0", 10);
 
-    console.log("Fetching games with params:", { page, limit, search, consoleId });
-
     const offset = (page - 1) * limit;
 
     let query: string;
@@ -47,11 +45,11 @@ export async function GET(req: Request) {
     if (search) {
       query = `
         SELECT DISTINCT
-          id, titre, author, picture, platform, available, biblio_id
+          id, titre, author, picture, platform, biblio_id
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
-          AND available > 0 
-          AND console_koha_id = ?
+          AND console_type_id = ?
+          AND holding = 0
         ORDER BY 
           CASE 
             WHEN LOWER(titre) LIKE LOWER(?) THEN 1
@@ -69,16 +67,17 @@ export async function GET(req: Request) {
         SELECT COUNT(*) as total
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
-          AND available > 0
-          AND console_koha_id = ?
+          AND console_type_id = ?
+          AND holding = 0
       `;
       countParams = [searchPattern, consoleId];
     } else {
       query = `
         SELECT DISTINCT
-          id, titre, author, picture, platform, available, biblio_id
+          id, titre, author, picture, platform, biblio_id
         FROM games
-        WHERE available > 0 AND console_koha_id = ?
+        WHERE console_type_id = ?
+        AND holding = 0
         ORDER BY titre ASC
         LIMIT ? OFFSET ?
       `;
@@ -87,7 +86,8 @@ export async function GET(req: Request) {
       countQuery = `
         SELECT COUNT(*) as total
         FROM games
-        WHERE available > 0 AND console_koha_id = ?
+        WHERE console_type_id = ?
+        AND holding = 0
       `;
       countParams = [consoleId];
     }
@@ -109,13 +109,6 @@ export async function GET(req: Request) {
 
     const hasMore = page * limit < totalCount;
     const totalPages = Math.ceil(totalCount / limit);
-
-    console.log("Query result:", { 
-      totalCount, 
-      gamesReturned: formattedGames.length, 
-      hasMore,
-      page 
-    });
 
     return NextResponse.json({
       success: true,
