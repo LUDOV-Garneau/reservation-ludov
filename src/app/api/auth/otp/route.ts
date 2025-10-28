@@ -46,7 +46,6 @@ export async function GET(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       { message: "Une erreur s'est produite de la validation du code OTP." },
       { status: 500 }
@@ -89,7 +88,6 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.log(error);
     return NextResponse.json(
       {
         message: "Une erreur s'est produite lors de l'envoi du courriel.",

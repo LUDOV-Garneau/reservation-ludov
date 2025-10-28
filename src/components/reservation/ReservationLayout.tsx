@@ -20,6 +20,7 @@ import AccessoriesSelection from "@/components/reservation/AccessoriesSelection"
 import CourseSelection from "@/components/reservation/CourseSelection";
 import ConfirmReservation from "@/components/reservation/ConfirmReservation";
 import { useTranslations } from "next-intl";
+import DateSelection from "./DateSelection";
 
 export default function ReservationLayout() {
   const {
@@ -62,10 +63,14 @@ export default function ReservationLayout() {
       },
       {
         id: 4,
-        component: <CourseSelection />
+        component: <DateSelection />
       },
       {
         id: 5,
+        component: <CourseSelection />
+      },
+      {
+        id: 6,
         component: <ConfirmReservation />
       }
     ];

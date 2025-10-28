@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
 
 type ConsoleRow = RowDataPacket & {
   console_id: number;
@@ -8,6 +10,31 @@ type ConsoleRow = RowDataPacket & {
 
 export async function POST(req: Request) {
   try {
+
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("SESSION");
+    let user = null;
+    try {
+      const token = sessionCookie?.value;
+      if (token) user = verifyToken(token);
+    } catch {
+      // token invalide/expiré
+    }
+    if (!user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userId = Number(user.id);
+    if (!Number.isFinite(userId)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid user ID" },
+        { status: 400 }
+      );
+    }
+
     const { reservationId } = await req.json();
 
     if (!reservationId) {
@@ -19,7 +46,7 @@ export async function POST(req: Request) {
 
     // Récupérer l’ancienne console pour la libérer
     const [rows] = await pool.query<ConsoleRow[]>(
-      `SELECT console_id FROM reservation_hold WHERE id = ?`,
+      `SELECT console_id, game1_id, game2_id, game3_id FROM reservation_hold WHERE id = ?`,
       [reservationId]
     );
 
@@ -37,11 +64,18 @@ export async function POST(req: Request) {
       reservationId,
     ]);
 
-    // Libérer la console si elle existe
     if (consoleId) {
-      await pool.query(`UPDATE consoles SET nombre = nombre + 1 WHERE id = ?`, [
+      await pool.query(`UPDATE console_stock SET holding = 0 WHERE id = ?`, [
         consoleId,
       ]);
+    }
+
+    for (const gameId of [rows[0].game1_id, rows[0].game2_id, rows[0].game3_id]) {
+      if (gameId) {
+        await pool.query(`UPDATE games SET holding = 0 WHERE id = ?`, [
+          gameId,
+        ]);
+      }
     }
 
     return NextResponse.json({

@@ -14,11 +14,14 @@ interface ReservationRow extends RowDataPacket {
   accessoir_id: number | null;
   expireAt: string;
   createdAt: string;
+  date: Date | null;
+  time: string | null;
+  cours: number | null;
 
   // champs console
-  console_name: string;
-  console_nombre: number;
-  console_image: string | null;
+  ct_id: number;
+  ct_name: string;
+  ct_picture: string | null;
 }
 
 export async function GET(request: NextRequest) {
@@ -51,94 +54,85 @@ export async function GET(request: NextRequest) {
 
     // Récupère la réservation + console associée
     const [rows] = await pool.query<ReservationRow[]>(
-      `SELECT r.*, c.name as console_name, c.nombre as console_nombre, c.picture as console_image
+      `SELECT 
+        r.*, 
+        ct.id as ct_id, 
+        ct.name as ct_name, 
+        ct.picture as ct_picture
        FROM reservation_hold r
-       JOIN consoles c ON r.console_id = c.id
-       WHERE r.id = ?`,
+       JOIN console_stock cs ON r.console_id = cs.id
+       JOIN console_type ct ON cs.console_type_id = ct.id
+       WHERE r.id = ?
+       LIMIT 1
+       `,
       [reservationId]
     );
 
     if (rows.length === 0) {
-      return NextResponse.json(
-        { success: false, status: "not_found", message: "Reservation not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, status: "not_found", message: "Reservation not found" }, { status: 404 });
     }
 
-    const reservation = rows[0];
-
-    if (reservation.user_id !== Number(user.id)) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized access to this reservation" },
-        { status: 403 }
-      );
+    const r = rows[0];
+    if (r.user_id !== Number(user.id)) {
+      return NextResponse.json({ success: false, message: "Unauthorized access to this reservation" }, { status: 403 });
     }
 
     const now = new Date();
-    const expiry = new Date(reservation.expireAt);
+    const expiry = new Date(r.expireAt);
 
+    // Si expiré: on supprime juste le hold (pas d'UPDATE sur "consoles")
     if (expiry <= now) {
       const conn = await pool.getConnection();
       try {
         await conn.beginTransaction();
-        await conn.query("DELETE FROM reservation_hold WHERE id = ?", [reservationId]);
-        await conn.query("UPDATE consoles SET nombre = nombre + 1 WHERE id = ?", [reservation.console_id]);
+        await conn.query(`DELETE FROM reservation_hold WHERE id = ?`, [reservationId]);
         await conn.commit();
-      } catch (error) {
+      } catch (e) {
         await conn.rollback();
-        throw error;
+        throw e;
       } finally {
         conn.release();
       }
 
-      return NextResponse.json(
-        { success: false, status: "expired", message: "Reservation has expired" },
-        { status: 410 }
-      );
+      return NextResponse.json({ success: false, status: "expired", message: "Reservation has expired" }, { status: 410 });
     }
 
-    const gameIds = [reservation.game1_id, reservation.game2_id, reservation.game3_id].filter(Boolean);
-    const accessories = reservation.accessoir_id ? [reservation.accessoir_id] : [];
+    const gameIds = [r.game1_id, r.game2_id, r.game3_id].filter(Boolean) as number[];
+    const accessories = r.accessoir_id ? [r.accessoir_id] : [];
 
     let currentStep = 1;
-    if (reservation.console_id) currentStep = 2;
+    if (r.console_id) currentStep = 2;
     if (gameIds.length > 0) currentStep = 3;
     if (accessories.length > 0) currentStep = 4;
+    if (r.date && r.time) currentStep = 5;
+    if (r.cours) currentStep = 6;
 
     const responseData = {
       success: true,
       status: "active",
-      reservationId: reservation.id,
-      userId: reservation.user_id,
+      reservationId: r.id,
+      userId: r.user_id,
+      // ⚠️ l'UI veut un id de TYPE
       console: {
-        id: reservation.console_id,
-        name: reservation.console_name,
-        nombre: reservation.console_nombre,
-        image: reservation.console_image,
+        id: r.ct_id,
+        name: r.ct_name,
+        picture: r.ct_picture,
       },
       games: gameIds,
       accessories,
+      selectedDate: r.date,   // ton provider lit selectedDate/selectedTime
+      selectedTime: r.time,
+      cours: r.cours,
       expiresAt: expiry.toISOString(),
-      createdAt: new Date(reservation.createdAt).toISOString(),
+      createdAt: new Date(r.createdAt).toISOString(),
       currentStep,
     };
 
-    console.log("Active reservation:", {
-      resId: reservation.id.slice(0, 8) + "...",
-      userId: reservation.user_id,
-      step: currentStep,
-    });
-
     return NextResponse.json(responseData, { status: 200 });
-
   } catch (err: unknown) {
     console.error("Error fetching active reservation:", err);
     return NextResponse.json(
-      {
-        success: false,
-        message: "Error fetching reservation",
-        error: err instanceof Error ? err.message : "Unknown error",
-      },
+      { success: false, message: "Error fetching reservation", error: (err as Error).message ?? "Unknown error" },
       { status: 500 }
     );
   }
