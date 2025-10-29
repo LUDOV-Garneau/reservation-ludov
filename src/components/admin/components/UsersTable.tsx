@@ -149,10 +149,27 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
               <p>Ajouter des utilisateurs</p>
             </TooltipContent>
 
-            <PopoverContent className="w-auto">
-              <div className="space-y-4 flex flex-col items-center">
-                <UsersForm onSuccess={handleRefresh} />
-                <AddUserForm onSuccess={handleRefresh} />
+            <PopoverContent className="w-56 p-2">
+              <div className="space-y-1">
+                <button
+                  onClick={() => {/* ouvrir UsersForm */ }}
+                  className="w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  <div className="font-medium">Importer CSV</div>
+                  <div className="text-sm text-muted-foreground">
+                    Ajouter plusieurs utilisateurs
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {/* ouvrir AddUserForm */ }}
+                  className="w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition-colors"
+                >
+                  <div className="font-medium">Ajouter un utilisateur</div>
+                  <div className="text-sm text-muted-foreground">
+                    Créer un compte individuel
+                  </div>
+                </button>
               </div>
             </PopoverContent>
           </Popover>
