@@ -11,6 +11,15 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { useTranslations } from "next-intl";
 
 type Reservation = {
@@ -32,6 +41,17 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
   const [total, setTotal] = useState(0);
   const [localRefreshKey] = useState(0);
 
+  const [alert, setAlert] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; resv: Reservation | null }>({
+    open: false,
+    resv: null,
+  });
+
+  const handleAlert = (type: "success" | "error", message: string) => {
+    setAlert({ type, message });
+    setTimeout(() => setAlert(null), 5000);
+  };
+
   useEffect(() => {
     const fetchReservations = async () => {
       setLoading(true);
@@ -42,7 +62,8 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
         setReservations(data.rows);
         setTotal(data.total);
       } catch (error) {
-        console.error("Erreur lors du chargement des réservations:", error);
+        console.error(error);
+        handleAlert("error", t("admin.reservations.ReservationTable.alert.loading_failed"));
       } finally {
         setLoading(false);
       }
@@ -53,9 +74,38 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
+  const handleDelete = async () => {
+    if (!deleteDialog.resv) return;
+    const id = deleteDialog.resv.id;
+
+    try {
+      const res = await fetch(`/api/admin/delete-reservation?reservationId=${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error();
+      handleAlert("success", t("admin.reservations.ReservationTable.alert.delete_success"));
+
+      setReservations((prev) => prev.filter((r) => r.id !== id));
+    } catch {
+      handleAlert("error", t("admin.reservations.ReservationTable.alert.delete_failed"));
+    } finally {
+      setDeleteDialog({ open: false, resv: null });
+    }
+  };
+
   return (
     <div className="w-full mx-auto mt-8 bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold mb-4">{t("admin.reservations.title") || "Réservations"}</h2>
+      <h2 className="text-xl font-semibold mb-4">{t("admin.reservations.title")}</h2>
+
+      {alert && (
+        <Alert
+          variant={alert.type === "success" ? "default" : "destructive"}
+          className="mb-4"
+        >
+          <AlertDescription>{alert.message}</AlertDescription>
+        </Alert>
+      )}
 
       {loading ? (
         <div className="space-y-2">
@@ -68,13 +118,27 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.console")}</TableHead>
-                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.games")}</TableHead>
-                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.station")}</TableHead>
-                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.date")}</TableHead>
-                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.createdAt")}</TableHead>
-                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.user")}</TableHead>
-                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.actions")}</TableHead>
+                <TableHead className="text-center">
+                  {t("admin.reservations.ReservationTable.headers.console")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("admin.reservations.ReservationTable.headers.games")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("admin.reservations.ReservationTable.headers.station")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("admin.reservations.ReservationTable.headers.date")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("admin.reservations.ReservationTable.headers.createdAt")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("admin.reservations.ReservationTable.headers.user")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("admin.reservations.ReservationTable.headers.actions")}
+                </TableHead>
               </TableRow>
             </TableHeader>
 
@@ -84,13 +148,11 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
                   <TableRow key={resv.id}>
                     <TableCell className="text-center font-medium">{resv.console}</TableCell>
                     <TableCell className="text-center">
-                    {resv.games.length > 0 ? (
-                        resv.games.map((game, idx) => (
-                        <div key={idx}>{game}</div>
-                        ))
-                    ) : (
+                      {resv.games.length > 0 ? (
+                        resv.games.map((game, idx) => <div key={idx}>{game}</div>)
+                      ) : (
                         <div>{t("admin.reservations.ReservationTable.headers.no_games")}</div>
-                    )}
+                      )}
                     </TableCell>
                     <TableCell className="text-center">{resv.station}</TableCell>
                     <TableCell className="text-center">
@@ -101,61 +163,61 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
                     </TableCell>
                     <TableCell className="text-center">{resv.etudiant_email}</TableCell>
                     <TableCell className="text-center space-x-2">
-                    <Button
+                      <Button
                         variant="destructive"
                         size="sm"
-                        onClick={async () => {
-                        if (!confirm(t("admin.reservations.ReservationTable.alert.confirm_delete"))) return;
-                        try {
-                            const res = await fetch(`/api/admin/delete-reservation?reservationId=${resv.id}`, {
-                            method: "DELETE",
-                            });
-                            const data = await res.json();
-                            if (!res.ok) throw new Error(data.error || "Erreur");
-                            alert(t("admin.reservations.ReservationTable.alert.delete_success"));
-                            setReservations((prev) => prev.filter((r) => r.id !== resv.id));
-                        } catch (err) {
-                            console.error(err);
-                            alert(t("admin.reservations.ReservationTable.alert.delete_failed"));
-                        }
-                        }}
-                    >
+                        onClick={() => setDeleteDialog({ open: true, resv })}
+                      >
                         {t("admin.reservations.ReservationTable.delete")}
-                    </Button>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground">
-                {t("admin.reservations.ReservationTable.no_reservations")}
-                </TableCell>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center text-muted-foreground"
+                  >
+                    {t("admin.reservations.ReservationTable.no_reservations")}
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
 
           <div className="flex justify-between items-center mt-4">
-            <Button
-              variant="outline"
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
+            <Button variant="outline" disabled={page === 1} onClick={() => setPage(page - 1)}>
               {t("admin.reservations.ReservationTable.Previous")}
             </Button>
-            <span>
-              Page {page} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              disabled={page === totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
+
+            <span>Page {page} / {totalPages}</span>
+
+            <Button variant="outline" disabled={page === totalPages} onClick={() => setPage(page + 1)}>
               {t("admin.reservations.ReservationTable.Next")}
             </Button>
           </div>
         </>
       )}
+
+      <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, resv: null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("admin.reservations.ReservationTable.confirm_title")}</DialogTitle>
+            <DialogDescription>
+              {t("admin.reservations.ReservationTable.alert.confirm_delete")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteDialog({ open: false, resv: null })}>
+              {t("admin.reservations.ReservationTable.cancel")}
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              {t("admin.reservations.ReservationTable.delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

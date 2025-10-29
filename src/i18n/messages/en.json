@@ -173,7 +173,9 @@
         "delete": "Delete",
         "no_reservations": "No reservations found.",
         "Previous": "Previous",
-        "Next": "Next"
+        "Next": "Next",
+        "confirm_title": "Confirm Deletion",
+        "cancel": "Cancel"
       }
     },
     "stations": {

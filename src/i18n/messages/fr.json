@@ -181,7 +181,9 @@
         "delete" : "Supprimer",
         "no_reservations": "Aucune réservation trouvée.",
         "Previous": "Précédent",
-        "Next": "Suivant"
+        "Next": "Suivant",
+        "confirm_title": "Confirmer la suppression",
+        "cancel": "Annuler"
       }
     },
     "stations": {
