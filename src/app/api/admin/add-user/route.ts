@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
+import type { RowDataPacket } from "mysql2";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
         [email]
       );
 
-      if ((existing as import("mysql2").RowDataPacket[]).length > 0) {
+      if ((existing as RowDataPacket[]).length > 0) {
         conn.release();
         return NextResponse.json(
           { error: "Un utilisateur avec cet email existe déjà." },

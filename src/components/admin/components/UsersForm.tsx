@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
@@ -9,9 +8,10 @@ import { Upload } from "lucide-react";
 
 type Props = {
   onSuccess?: () => void;
+  onAlert?: (type: "success" | "error", message: string) => void;
 };
 
-export default function UsersForm({ onSuccess }: Props) {
+export default function UsersForm({ onSuccess, onAlert }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,24 +38,42 @@ export default function UsersForm({ onSuccess }: Props) {
         body: formData,
       });
 
-      if (!res.ok){ 
-        toast.error("Impossible d'importer le fichier CSV : " + (await res.json()).error);
-        throw new Error("Erreur lors de l'envoi du fichier");
+      const data = await res.json();
+
+      if (!res.ok || !data) {
+        onAlert?.(
+          "error",
+          "Impossible d'importer le fichier CSV."
+        );
+        return;
       }
 
-      toast.success("Fichier CSV importé avec succès !");
+      if (data.success) {
+        onAlert?.(
+          "success",
+          `Importation terminée : ${data.inserted} utilisateur(s) ajouté(s), ${data.skipped} ignoré(s).`
+        );
+      } else {
+        onAlert?.(
+          "error",
+            `Aucun utilisateur ajouté. ${data.skipped ?? 0} ignoré(s).`
+        );
+      }
+
       setFile(null);
       onSuccess?.();
       router.refresh();
-    } catch (error) {
-      console.error(error);
+    } catch {
+      onAlert?.(
+        "error",
+        "Une erreur est survenue lors de l'importation du fichier."
+      );
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
-      toast.error("Veuillez sélectionner un fichier CSV.");
       return;
     }
     await uploadFile(file);
@@ -64,7 +82,7 @@ export default function UsersForm({ onSuccess }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col sm:flex-row gap-4 items-center mt-4"
+      className="flex flex-col sm:flex-row gap-4 items-center"
     >
       <Input
         type="file"
@@ -77,6 +95,7 @@ export default function UsersForm({ onSuccess }: Props) {
         type="submit"
         onClick={handleButtonClick}
         className="flex items-center gap-2"
+        variant="ghost"
       >
         <Upload className="h-5 w-5" />
         Importer un fichier CSV

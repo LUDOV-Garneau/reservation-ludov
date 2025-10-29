@@ -12,11 +12,11 @@ export async function POST(req: NextRequest) {
   let currentUser;
   try {
     currentUser = verifyToken(token);
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Token invalide" }, { status: 401 });
   }
 
-  if (!currentUser.isAdmin) {
+  if (!currentUser || !currentUser.isAdmin) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 

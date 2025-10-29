@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,18 +13,21 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Props = {
   onSuccess?: () => void;
+  onAlert?: (type: "success" | "error", message: string) => void;
 };
 
-export default function AddUserForm({ onSuccess }: Props) {
+export default function AddUserForm({ onSuccess, onAlert }: Props) {
   const [open, setOpen] = useState(false);
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -35,12 +37,12 @@ export default function AddUserForm({ onSuccess }: Props) {
     e.preventDefault();
 
     if (!firstname || !lastname || !email) {
-      toast.error("Veuillez remplir tous les champs obligatoires.");
+      setError("Veuillez remplir tous les champs obligatoires.");
       return;
     }
 
     if (!emailRegex.test(email)) {
-      toast.error("L'adresse e-mail est invalide.");
+      setError("L'adresse courriel est invalide.");
       return;
     }
 
@@ -64,14 +66,14 @@ export default function AddUserForm({ onSuccess }: Props) {
 
       if (!res.ok) {
         if (data.error?.toLowerCase().includes("existe déjà")) {
-          toast.error("Un utilisateur avec cet e-mail existe déjà.");
+          setError("Un utilisateur avec cet e-mail existe déjà.");
         } else {
-          toast.error(data.error || "Erreur lors de l'ajout de l'utilisateur.");
+          onAlert?.("error", "Erreur lors de l'ajout de l'utilisateur.");
         }
         throw new Error(data.error);
       }
 
-      toast.success("Utilisateur ajouté avec succès !");
+      onAlert?.("success", "Utilisateur ajouté avec succès !");
       router.refresh();
 
       setFirstname("");
@@ -80,17 +82,22 @@ export default function AddUserForm({ onSuccess }: Props) {
       setIsAdmin(false);
       setOpen(false);
       onSuccess?.();
-    } catch (err) {
-      console.error(err);
+    } catch {
+      onAlert?.("error", "Erreur lors de l'ajout de l'utilisateur.");
     } finally {
       setLoading(false);
     }
   };
 
+   const clearErrorOnChange = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setter(e.target.value);
+    if (error) setError(null);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="mt-2">
+        <Button variant="ghost">
           Ajouter un utilisateur
         </Button>
       </DialogTrigger>
@@ -105,7 +112,7 @@ export default function AddUserForm({ onSuccess }: Props) {
             <Input
               id="firstname"
               value={firstname}
-              onChange={(e) => setFirstname(e.target.value)}
+              onChange={clearErrorOnChange(setFirstname)}
             />
           </div>
 
@@ -114,7 +121,7 @@ export default function AddUserForm({ onSuccess }: Props) {
             <Input
               id="lastname"
               value={lastname}
-              onChange={(e) => setLastname(e.target.value)}
+              onChange={clearErrorOnChange(setLastname)}
             />
           </div>
 
@@ -124,7 +131,7 @@ export default function AddUserForm({ onSuccess }: Props) {
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={clearErrorOnChange(setEmail)}
             />
           </div>
 
@@ -136,6 +143,12 @@ export default function AddUserForm({ onSuccess }: Props) {
             />
             <Label htmlFor="isAdmin">Administrateur</Label>
           </div>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <Button type="submit" disabled={loading}>
             {loading ? "Ajout en cours..." : "Ajouter l'utilisateur"}

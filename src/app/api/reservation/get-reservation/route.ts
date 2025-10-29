@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
+import { Cours } from "@/types/cours";
 
 // ---------------------
 // Interfaces DB
@@ -13,8 +14,10 @@ interface ReservationRow extends RowDataPacket {
   game2Id: number | null;
   game3Id: number | null;
   stationId: number | null;
-  accessoirId: number | null;
-  date: string | null;
+  accessoirs: number[] | null;
+  date: Date | null;
+  time: string | null;
+  coursId: number | null;
   expireAt: string;
   createdAt: string;
   consoleName: string | null;
@@ -30,6 +33,12 @@ interface GameRow extends RowDataPacket {
 
 interface StationRow extends RowDataPacket {
   id: number;
+  name: string;
+}
+
+interface CoursRow extends RowDataPacket {
+  id: number;
+  code_cours: string;
   name: string;
 }
 
@@ -54,6 +63,12 @@ interface ConsoleInfo {
   image: string | null;
 }
 
+interface CoursInfo {
+  id: number;
+  code_cours: string;
+  nom_cours: string;
+}
+
 interface Accessoire {
   id: number;
   nom: string;
@@ -71,9 +86,9 @@ interface ReservationResponse {
   console: ConsoleInfo | null;
   accessoires: Accessoire[];
   station: Station | null;
-  cours: string;
-  date: string | null;
-  heure: string | null;
+  cours: CoursInfo | null;
+  date: Date | null;
+  time: string | null;
   expireAt: string;
   userId: number;
 }
@@ -105,14 +120,19 @@ export async function GET(req: Request) {
         rh.game2_id as game2Id,
         rh.game3_id as game3Id,
         rh.station_id as stationId,
-        rh.accessoir_id as accessoirId,
+        rh.accessoirs as accessoirs,
         rh.date,
+        rh.time,
         rh.expireAt,
         rh.createdAt,
         c.name as consoleName,
-        c.picture as consoleImage
+        c.picture as consoleImage,
+        co.id as coursId,
+        co.code_cours,
+        co.nom_cours
       FROM reservation_hold rh
-      LEFT JOIN consoles c ON rh.console_id = c.id
+      LEFT JOIN console_stock c ON rh.console_id = c.id
+      JOIN cours co ON rh.cours = co.id
       WHERE rh.id = ?`,
       [reservationId]
     );
@@ -172,19 +192,20 @@ export async function GET(req: Request) {
     // ---------------------
     // Accessoires
     // ---------------------
-    let accessoires: Accessoire[] = [];
-    if (reservation.accessoirId) {
-      const [accessoiresData] = await pool.query<AccessoireRow[]>(
-        `SELECT id, name FROM accessoires WHERE id = ?`,
-        [reservation.accessoirId]
-      );
-      if (accessoiresData.length > 0) {
-        accessoires = [
-          {
+    const accessoires: Accessoire[] = [];
+    if (reservation.accessoirs && reservation.accessoirs.length > 0) {
+      for (const accessoirId of reservation.accessoirs) {
+        const [accessoiresData] = await pool.query<AccessoireRow[]>(
+          `SELECT id, name FROM accessoires WHERE id = ?`,
+          [accessoirId]
+        );
+        
+        if (accessoiresData.length > 0) {
+          accessoires.push({
             id: accessoiresData[0].id,
             nom: accessoiresData[0].name,
-          },
-        ];
+          });
+        }
       }
     }
 
@@ -192,7 +213,6 @@ export async function GET(req: Request) {
     // Format date
     // ---------------------
     const dateReservation = reservation.date ? new Date(reservation.date) : null;
-    const dateFormatted = dateReservation ? dateReservation.toLocaleDateString("fr-CA") : null;
     const heureFormatted = dateReservation
       ? dateReservation.toLocaleTimeString("fr-CA", { hour: "2-digit", minute: "2-digit" })
       : null;
@@ -223,9 +243,15 @@ export async function GET(req: Request) {
         : null,
       accessoires,
       station,
-      cours: "", // à adapter si tu ajoutes les cours
-      date: dateFormatted,
-      heure: heureFormatted,
+      cours: reservation.coursId 
+        ? {
+            id: reservation.coursId,
+            nom_cours: reservation.nom_cours,
+            code_cours: reservation.code_cours,
+          }
+        : null,
+      date: reservation.date,
+      time: reservation.time,
       expireAt: reservation.expireAt,
       userId: reservation.userId,
     };
