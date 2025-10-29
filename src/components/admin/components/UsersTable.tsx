@@ -17,12 +17,16 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Plus } from "lucide-react";
+import {
+  Plus,
+  AlertCircle 
+} from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import AddUserForm from "@/components/admin/components/AddUserForm";
 import UsersForm from "@/components/admin/components/UsersForm";
 import { useTranslations } from "next-intl";
@@ -46,6 +50,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   const [localRefreshKey, setLocalRefreshKey] = useState(0);
   const handleRefresh = () => setLocalRefreshKey((prev: number) => prev + 1);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -54,8 +59,10 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         if (!res.ok) return;
         const data = await res.json();
         setCurrentUserId(Number(data.user?.id ?? null));
-      } catch (err) {
-        console.error("Erreur lors du fetch du user connecté :", err);
+      } catch {
+        setErrorMessage(
+          "Erreur lors du chargement du compte utilisateur connecté."
+        );
       }
     };
 
@@ -65,14 +72,15 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   useEffect(() => {
     const fetchUsers = async () => {
       setLoading(true);
+      setErrorMessage(null);
       try {
         const res = await fetch(`/api/admin/users?page=${page}&limit=${limit}`);
-        if (!res.ok) throw new Error("Erreur de requête");
+        if (!res.ok) throw new Error();
         const data = await res.json();
         setUsers(data.rows);
         setTotal(data.total);
-      } catch (error) {
-        console.error("Erreur lors du chargement des utilisateurs:", error);
+      } catch {
+        setErrorMessage("Erreur lors du chargement des utilisateurs. Veuillez réessayer ultérieurement.");
       } finally {
         setLoading(false);
       }
@@ -121,8 +129,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
       }
       toast.success("Mot de passe réinitialisé");
       handleRefresh();
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Erreur réseau");
     }
   };
@@ -158,6 +165,13 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
           </Popover>
         </Tooltip>
       </div>
+
+      {errorMessage && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
 
       {loading ? (
         <div className="space-y-2">
