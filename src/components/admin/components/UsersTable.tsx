@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
 import {
   Table,
   TableBody,
@@ -17,16 +16,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  Plus,
-  AlertCircle 
-} from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import AddUserForm from "@/components/admin/components/AddUserForm";
 import UsersForm from "@/components/admin/components/UsersForm";
 import { useTranslations } from "next-intl";
@@ -51,6 +47,15 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   const handleRefresh = () => setLocalRefreshKey((prev: number) => prev + 1);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  const handleAlert = (type: "success" | "error", message: string) => {
+    setAlert({ type, message });
+    setTimeout(() => setAlert(null), 5000);
+  };
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -80,7 +85,9 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         setUsers(data.rows);
         setTotal(data.total);
       } catch {
-        setErrorMessage("Erreur lors du chargement des utilisateurs. Veuillez réessayer ultérieurement.");
+        setErrorMessage(
+          "Erreur lors du chargement des utilisateurs. Veuillez réessayer ultérieurement."
+        );
       } finally {
         setLoading(false);
       }
@@ -99,15 +106,13 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         method: "DELETE",
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err?.error || "Erreur lors de la suppression");
+        handleAlert("error", "Erreur lors de la suppression");
         return;
       }
-      toast.success("Utilisateur supprimé");
+      handleAlert("success", "Utilisateur supprimé");
       handleRefresh();
-    } catch (err) {
-      console.error(err);
-      toast.error("Erreur réseau");
+    } catch  {
+      handleAlert("error", "Erreur réseau");
     }
   };
 
@@ -123,14 +128,13 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         method: "POST",
       });
       if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        toast.error(err?.error || "Erreur lors de la réinitialisation");
+        handleAlert("error", "Erreur lors de la réinitialisation");
         return;
       }
-      toast.success("Mot de passe réinitialisé");
+      handleAlert("success", "Mot de passe réinitialisé");
       handleRefresh();
     } catch {
-      toast.error("Erreur réseau");
+      handleAlert("error", "Erreur réseau");
     }
   };
 
@@ -146,7 +150,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
           <Popover>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
-                <Button variant="default" className="mt-2">
+                <Button variant="default" className="mt-2 bg-cyan-500 hover:bg-cyan-700">
                   <Plus className="h-5 w-5" />
                 </Button>
               </PopoverTrigger>
@@ -156,32 +160,24 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
               <p>Ajouter des utilisateurs</p>
             </TooltipContent>
 
-            <PopoverContent className="w-56 p-2">
-              <div className="space-y-1">
-                <button
-                  onClick={() => {/* ouvrir UsersForm */ }}
-                  className="w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition-colors"
-                >
-                  <div className="font-medium">Importer CSV</div>
-                  <div className="text-sm text-muted-foreground">
-                    Ajouter plusieurs utilisateurs
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => {/* ouvrir AddUserForm */ }}
-                  className="w-full text-left px-3 py-2 rounded hover:bg-accent hover:text-accent-foreground transition-colors"
-                >
-                  <div className="font-medium">Ajouter un utilisateur</div>
-                  <div className="text-sm text-muted-foreground">
-                    Créer un compte individuel
-                  </div>
-                </button>
+            <PopoverContent className="w-[210px] p-1 space-y-3 rounded-xl shadow-md">
+              <div>
+                <UsersForm onSuccess={handleRefresh} onAlert={handleAlert} />
+                <AddUserForm onSuccess={handleRefresh} onAlert={handleAlert} />
               </div>
             </PopoverContent>
           </Popover>
         </Tooltip>
       </div>
+
+      {alert && (
+        <Alert
+          variant={alert.type === "success" ? "default" : "destructive"}
+          className="mb-4"
+        >
+          <AlertDescription>{alert.message}</AlertDescription>
+        </Alert>
+      )}
 
       {errorMessage && (
         <Alert variant="destructive" className="mb-4">
@@ -189,6 +185,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
+
 
       {loading ? (
         <div className="space-y-2">

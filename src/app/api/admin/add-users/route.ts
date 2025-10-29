@@ -12,6 +12,14 @@ const EXPECTED_COLUMNS = [
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+type CsvUserRecord = {
+      Username: string;
+      "First Name": string;
+      "Last Name": string;
+      "Date Created": string;
+      [key: string]: unknown;
+    };
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -30,7 +38,7 @@ export async function POST(req: NextRequest) {
       columns: true,
       skip_empty_lines: true,
       trim: true,
-    });
+    }) as CsvUserRecord[];
 
     const csvColumns = Object.keys(records[0] as object);
     const missingColumns = EXPECTED_COLUMNS.filter(
@@ -45,31 +53,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const invalidEmails = (records as CsvUserRecord[])
-      .map((r) => r.Username)
-      .filter((email) => !EMAIL_REGEX.test(email));
+    const validRecords = records.filter((r) =>
+      EMAIL_REGEX.test(r.Username)
+    );
+    const invalidRecords = records.filter(
+      (r) => !EMAIL_REGEX.test(r.Username)
+    );
 
-    if (invalidEmails.length > 0) {
+    if (validRecords.length === 0) {
       return NextResponse.json(
         {
-          error: `Certains courriels sont invalides: ${invalidEmails.join(
-            ", "
-          )}`,
+          success: false,
+          message: "Aucun utilisateur valide à insérer.",
+          inserted: 0,
+          skipped: invalidRecords.length,
         },
         { status: 400 }
       );
     }
 
     const now = new Date();
-    type CsvUserRecord = {
-      Username: string;
-      "First Name": string;
-      "Last Name": string;
-      "Date Created": string;
-      [key: string]: unknown;
-    };
+    
 
-    const users = (records as CsvUserRecord[]).map((r) => ({
+    const users = (validRecords as CsvUserRecord[]).map((r) => ({
       username: r["Username"],
       firstName: r["First Name"],
       lastName: r["Last Name"],
@@ -97,7 +103,9 @@ export async function POST(req: NextRequest) {
         conn.release();
         return NextResponse.json({
           success: false,
-          message: "Aucun nouvel utilisateur à insérer.",
+          message: "Aucun nouvel utilisateur à insérer (tous déjà existants).",
+          inserted: 0,
+          skipped: invalidRecords.length + (users.length - newUsers.length),
         });
       }
 
@@ -125,7 +133,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         inserted: newUsers.length,
-        skipped: users.length - newUsers.length,
+        skipped:
+          invalidRecords.length + (users.length - newUsers.length),
       });
     } catch (err) {
       await conn.query("ROLLBACK");
