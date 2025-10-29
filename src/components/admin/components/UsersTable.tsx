@@ -22,6 +22,14 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import AddUserForm from "@/components/admin/components/AddUserForm";
 import UsersForm from "@/components/admin/components/UsersForm";
@@ -51,6 +59,20 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
     type: "success" | "error";
     message: string;
   } | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    user: User | null;
+  }>({
+    open: false,
+    user: null,
+  });
+  const [resetDialog, setResetDialog] = useState<{
+    open: boolean;
+    user: User | null;
+  }>({
+    open: false,
+    user: null,
+  });
 
   const handleAlert = (type: "success" | "error", message: string) => {
     setAlert({ type, message });
@@ -99,42 +121,43 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   let totalPages = Math.ceil(total / limit);
   if (totalPages === 0) totalPages = 1;
 
-  const handleDelete = async (userId: number, email: string) => {
-    if (!confirm(`Supprimer l'utilisateur ${email} ?`)) return;
+  const handleDelete = async () => {
+    if (!deleteDialog.user) return;
+    const { id, email } = deleteDialog.user;
     try {
-      const res = await fetch(`/api/admin/delete-user?userId=${userId}`, {
+      const res = await fetch(`/api/admin/delete-user?userId=${id}`, {
         method: "DELETE",
       });
       if (!res.ok) {
         handleAlert("error", "Erreur lors de la suppression");
         return;
       }
-      handleAlert("success", "Utilisateur supprimé");
+      handleAlert("success", `Utilisateur ${email} supprimé`);
       handleRefresh();
-    } catch  {
+    } catch {
       handleAlert("error", "Erreur réseau");
+    } finally {
+      setDeleteDialog({ open: false, user: null });
     }
   };
 
-  const handleResetPassword = async (userId: number, email: string) => {
-    if (
-      !confirm(
-        `Réinitialiser le mot de passe de ${email} ? (définira le mot de passe à une chaîne vide)`
-      )
-    )
-      return;
+  const handleResetPassword = async () => {
+    if (!resetDialog.user) return;
+    const { id, email } = resetDialog.user;
     try {
-      const res = await fetch(`/api/admin/reset-password?userId=${userId}`, {
+      const res = await fetch(`/api/admin/reset-password?userId=${id}`, {
         method: "POST",
       });
       if (!res.ok) {
         handleAlert("error", "Erreur lors de la réinitialisation");
         return;
       }
-      handleAlert("success", "Mot de passe réinitialisé");
+      handleAlert("success", `Mot de passe de ${email} réinitialisé`);
       handleRefresh();
     } catch {
       handleAlert("error", "Erreur réseau");
+    } finally {
+      setResetDialog({ open: false, user: null });
     }
   };
 
@@ -150,7 +173,10 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
           <Popover>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
-                <Button variant="default" className="mt-2 bg-cyan-500 hover:bg-cyan-700">
+                <Button
+                  variant="default"
+                  className="mt-2 bg-cyan-500 hover:bg-cyan-700"
+                >
                   <Plus className="h-5 w-5" />
                 </Button>
               </PopoverTrigger>
@@ -185,7 +211,6 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
-
 
       {loading ? (
         <div className="space-y-2">
@@ -232,7 +257,9 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                           <Button
                             variant="destructive"
                             size="sm"
-                            onClick={() => handleDelete(user.id, user.email)}
+                            onClick={() =>
+                              setDeleteDialog({ open: true, user })
+                            }
                           >
                             Supprimer
                           </Button>
@@ -240,9 +267,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              handleResetPassword(user.id, user.email)
-                            }
+                            onClick={() => setResetDialog({ open: true, user })}
                           >
                             Réinitialiser le mot de passe
                           </Button>
@@ -285,6 +310,59 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
           </div>
         </>
       )}
+      <Dialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ open, user: null })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer l&apos;utilisateur{" "}
+              <strong>{deleteDialog.user?.email}</strong> ?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialog({ open: false, user: null })}
+            >
+              Annuler
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Supprimer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={resetDialog.open}
+        onOpenChange={(open) => setResetDialog({ open, user: null })}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+            <DialogDescription>
+              Cela définira le mot de passe de{" "}
+              <strong>{resetDialog.user?.email}</strong> à nul.
+              <br/>
+              Continuer ?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setResetDialog({ open: false, user: null })}
+            >
+              Annuler
+            </Button>
+            <Button variant="default" onClick={handleResetPassword}>
+              Confirmer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
