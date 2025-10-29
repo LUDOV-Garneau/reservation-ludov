@@ -31,7 +31,9 @@ export async function GET(req: NextRequest) {
       (rows as RowDataPacket[]).map(async (resv) => {
         let gamesArray: number[] = [];
         try {
-          gamesArray = Array.isArray(resv.games) ? resv.games : JSON.parse(resv.games);
+          gamesArray = Array.isArray(resv.games)
+            ? resv.games
+            : JSON.parse(resv.games);
         } catch {}
 
         let gamesTitles: string[] = [];
@@ -40,15 +42,16 @@ export async function GET(req: NextRequest) {
             `SELECT titre FROM games WHERE id IN (?)`,
             [gamesArray]
           );
-          gamesTitles = (gameRows as Array<{ titre: string }>).map((g) => g.titre);
+          gamesTitles = (gameRows as Array<{ titre: string }>).map(
+            (g) => g.titre
+          );
         }
 
         let consoleName = "";
         if (resv.console_id) {
-          const [consoleRows] = await pool.query<Array<RowDataPacket & { name: string }>>(
-            `SELECT name FROM console_stock WHERE id = ?`,
-            [resv.console_id]
-          );
+          const [consoleRows] = await pool.query<
+            Array<RowDataPacket & { name: string }>
+          >(`SELECT name FROM console_stock WHERE id = ?`, [resv.console_id]);
           consoleName = consoleRows[0]?.name || "";
         }
 
@@ -60,10 +63,9 @@ export async function GET(req: NextRequest) {
       })
     );
 
-    const [countRows] = (await pool.query(`SELECT COUNT(*) AS total FROM reservations`)) as [
-      Array<{ total: number }>,
-      unknown
-    ];
+    const [countRows] = (await pool.query(
+      `SELECT COUNT(*) AS total FROM reservations`
+    )) as [Array<{ total: number }>, unknown];
     const total = countRows[0].total;
 
     return NextResponse.json({ rows: reservationsWithNames, total });
