@@ -246,13 +246,6 @@ export default function GameSelectionGrid({
                       </div>
                     )}
 
-                    <div className={`${game.picture !== null && ("2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity")} absolute top-2 left-2`}>
-                      <div className="bg-black/70 text-white rounded-full px-2 py-1 font-medium flex items-center gap-2">
-                        <img src="/ConsoleLogos/Playstation.png" className="w-5"></img>
-                        {game.platform}
-                      </div>
-                    </div>
-
                     <div className={`${game.picture !== null && ("2xl:group-hover:opacity-100 2xl:transition-opacity 2xl:opacity-0")} absolute bottom-0 left-0 right-0 p-4`}>
                       <div className="flex flex-col gap-4 items-center">
                         <p className="text-white text-lg font-bold line-clamp-2">

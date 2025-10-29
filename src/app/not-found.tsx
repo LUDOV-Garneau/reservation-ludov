@@ -16,7 +16,7 @@ export default function NotFound() {
           LUDOV
         </span>
       </div>
-      <div className="bg-white rounded-2xl shadow-md px-10 py-14 max-w-xl w-full flex flex-col items-center">
+      <div className="bg-[white] rounded-2xl shadow-md px-10 py-14 max-w-xl w-full flex flex-col items-center">
         <h1 className="text-3xl font-bold text-gray-800 mb-3">
           404 - Page introuvable
         </h1>
