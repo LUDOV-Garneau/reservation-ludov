@@ -74,6 +74,7 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
                 <TableHead className="text-center">Date de réservation</TableHead>
                 <TableHead className="text-center">Créée le</TableHead>
                 <TableHead className="text-center">Étudiant</TableHead>
+                <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -95,6 +96,29 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
                       {new Date(resv.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="text-center">{resv.etudiant_email}</TableCell>
+                    <TableCell className="text-center space-x-2">
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={async () => {
+                        if (!confirm(`Supprimer cette réservation ?`)) return;
+                        try {
+                            const res = await fetch(`/api/admin/delete-reservation?reservationId=${resv.id}`, {
+                            method: "DELETE",
+                            });
+                            const data = await res.json();
+                            if (!res.ok) throw new Error(data.error || "Erreur");
+                            alert("Réservation supprimée");
+                            setReservations((prev) => prev.filter((r) => r.id !== resv.id));
+                        } catch (err) {
+                            console.error(err);
+                            alert("Erreur lors de la suppression");
+                        }
+                        }}
+                    >
+                        Supprimer
+                    </Button>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (
