@@ -1,7 +1,7 @@
 "use client";
 
 import Stepper from "@/components/reservation/Stepper";
-import { HourglassIcon, MoveLeft } from "lucide-react";
+import { HourglassIcon } from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
 import { Button } from "@/components/ui/button";
 
@@ -20,6 +20,7 @@ import AccessoriesSelection from "@/components/reservation/AccessoriesSelection"
 import CourseSelection from "@/components/reservation/CourseSelection";
 import ConfirmReservation from "@/components/reservation/ConfirmReservation";
 import { useTranslations } from "next-intl";
+import DateSelection from "./DateSelection";
 
 export default function ReservationLayout() {
   const {
@@ -62,10 +63,14 @@ export default function ReservationLayout() {
       },
       {
         id: 4,
-        component: <CourseSelection />
+        component: <DateSelection />
       },
       {
         id: 5,
+        component: <CourseSelection />
+      },
+      {
+        id: 6,
         component: <ConfirmReservation />
       }
     ];
@@ -161,13 +166,6 @@ export default function ReservationLayout() {
             </div>
           )}
         </div>
-
-        { currentStep > 1 && (
-          <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mt-5 w-fit">
-            <MoveLeft className="h-6 w-6 mr-2"/>
-            <p>{t("reservation.layout.previousStep")}</p>
-          </div>
-        )}
 
         <div className="bg-white rounded-lg my-8">
           {currentStepConfig ? (

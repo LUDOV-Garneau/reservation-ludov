@@ -9,6 +9,7 @@ interface GameRow extends RowDataPacket {
   picture: string | null;
   available: number;
   biblio_id: number | null;
+  platform: string | null;
 }
 
 export async function GET(req: Request) {
@@ -17,6 +18,7 @@ export async function GET(req: Request) {
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "12", 10);
     const search = searchParams.get("search") || "";
+    const consoleId = parseInt(searchParams.get("consoleId") || "0", 10);
 
     const offset = (page - 1) * limit;
 
@@ -25,13 +27,29 @@ export async function GET(req: Request) {
     let countQuery: string;
     let countParams: (string | number)[];
 
+    if (consoleId === 0) {
+      return NextResponse.json({
+        success: true,
+        games: [],
+        pagination: {
+          page,
+          limit,
+          total: 0,
+          totalPages: 0,
+          hasMore: false,
+        },
+        hasMore: false,
+      });
+    }
+
     if (search) {
       query = `
         SELECT DISTINCT
-          id, titre, author, picture, available, biblio_id
+          id, titre, author, picture, platform, biblio_id
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
-          AND available > 0
+          AND console_type_id = ?
+          AND holding = 0
         ORDER BY 
           CASE 
             WHEN LOWER(titre) LIKE LOWER(?) THEN 1
@@ -43,32 +61,35 @@ export async function GET(req: Request) {
       `;
       const searchPattern = `%${search}%`;
       const exactPattern = `${search}%`;
-      queryParams = [searchPattern, exactPattern, searchPattern, limit, offset];
+      queryParams = [searchPattern, consoleId, exactPattern, searchPattern, limit, offset];
 
       countQuery = `
         SELECT COUNT(*) as total
         FROM games
         WHERE LOWER(titre) LIKE LOWER(?)
-          AND available > 0
+          AND console_type_id = ?
+          AND holding = 0
       `;
-      countParams = [searchPattern];
+      countParams = [searchPattern, consoleId];
     } else {
       query = `
         SELECT DISTINCT
-          id, titre, author, picture, available, biblio_id
+          id, titre, author, picture, platform, biblio_id
         FROM games
-        WHERE available > 0
+        WHERE console_type_id = ?
+        AND holding = 0
         ORDER BY titre ASC
         LIMIT ? OFFSET ?
       `;
-      queryParams = [limit, offset];
+      queryParams = [consoleId, limit, offset];
 
       countQuery = `
         SELECT COUNT(*) as total
         FROM games
-        WHERE available > 0
+        WHERE console_type_id = ?
+        AND holding = 0
       `;
-      countParams = [];
+      countParams = [consoleId];
     }
 
     const [gamesRows] = await pool.query<GameRow[]>(query, queryParams);
@@ -80,9 +101,10 @@ export async function GET(req: Request) {
       id: game.id,
       titre: game.titre || "Jeu sans nom",
       author: game.author || "",
-      picture: game.picture || "/placeholder_games.jpg",
+      picture: game.picture,
       available: Number(game.available) || 0,
       biblio_id: game.biblio_id,
+      platform: game.platform || "Unknown",
     }));
 
     const hasMore = page * limit < totalCount;
