@@ -84,9 +84,13 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
                   <TableRow key={resv.id}>
                     <TableCell className="text-center font-medium">{resv.console}</TableCell>
                     <TableCell className="text-center">
-                      {resv.games.length > 0
-                        ? resv.games.join(", ")
-                        : "Aucun jeu"}
+                    {resv.games.length > 0 ? (
+                        resv.games.map((game, idx) => (
+                        <div key={idx}>{game}</div>
+                        ))
+                    ) : (
+                        <div>Aucun jeu</div>
+                    )}
                     </TableCell>
                     <TableCell className="text-center">{resv.station}</TableCell>
                     <TableCell className="text-center">
@@ -123,9 +127,9 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    Aucune réservation trouvée
-                  </TableCell>
+                <TableCell colSpan={7} className="text-center text-muted-foreground">
+                Aucune réservation trouvée
+                </TableCell>
                 </TableRow>
               )}
             </TableBody>
