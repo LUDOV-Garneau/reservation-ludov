@@ -45,7 +45,7 @@ type User = {
 };
 
 export default function UsersTable({ refreshKey }: { refreshKey: number }) {
-  const t = useTranslations();
+  const t = useTranslations("admin.users");
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -87,14 +87,12 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         const data = await res.json();
         setCurrentUserId(Number(data.user?.id ?? null));
       } catch {
-        setErrorMessage(
-          "Erreur lors du chargement du compte utilisateur connecté."
-        );
+        setErrorMessage(t("errors.currentUserLoad"));
       }
     };
 
     fetchCurrentUser();
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -107,16 +105,14 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         setUsers(data.rows);
         setTotal(data.total);
       } catch {
-        setErrorMessage(
-          "Erreur lors du chargement des utilisateurs. Veuillez réessayer ultérieurement."
-        );
+        setErrorMessage(t("errors.userLoad"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchUsers();
-  }, [refreshKey, localRefreshKey, page, limit]);
+  }, [refreshKey, localRefreshKey, page, limit, t]);
 
   let totalPages = Math.ceil(total / limit);
   if (totalPages === 0) totalPages = 1;
@@ -129,13 +125,13 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         method: "DELETE",
       });
       if (!res.ok) {
-        handleAlert("error", "Erreur lors de la suppression");
+        handleAlert("error", t("alerts.deleteError"));
         return;
       }
       handleAlert("success", `Utilisateur ${email} supprimé`);
       handleRefresh();
     } catch {
-      handleAlert("error", "Erreur réseau");
+      handleAlert("error", t("alerts.deleteSuccess", { email }));
     } finally {
       setDeleteDialog({ open: false, user: null });
     }
@@ -149,13 +145,13 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
         method: "POST",
       });
       if (!res.ok) {
-        handleAlert("error", "Erreur lors de la réinitialisation");
+        handleAlert("error", t("alerts.resetError"));
         return;
       }
-      handleAlert("success", `Mot de passe de ${email} réinitialisé`);
+      handleAlert("success", t("alerts.resetSuccess", { email }));
       handleRefresh();
     } catch {
-      handleAlert("error", "Erreur réseau");
+      handleAlert("error", t("alerts.networkError"));
     } finally {
       setResetDialog({ open: false, user: null });
     }
@@ -165,8 +161,8 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
     <div className="w-full mx-auto mt-8 bg-white rounded-lg shadow-sm p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="text-xl font-semibold">{t("admin.users.title")}</h2>
-          <p className="text-sm text-muted-foreground">Gestion des comptes</p>
+          <h2 className="text-xl font-semibold">{t("title")}</h2>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
 
         <Tooltip>
@@ -183,7 +179,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
             </TooltipTrigger>
 
             <TooltipContent>
-              <p>Ajouter des utilisateurs</p>
+              <p>{t("tooltip.addUsers")}</p>
             </TooltipContent>
 
             <PopoverContent className="w-[210px] p-1 space-y-3 rounded-xl shadow-md">
@@ -223,12 +219,24 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">Email</TableHead>
-                <TableHead className="text-center">Prénom</TableHead>
-                <TableHead className="text-center">Nom</TableHead>
-                <TableHead className="text-center">Administrateur</TableHead>
-                <TableHead className="text-center">Date de création</TableHead>
-                <TableHead className="text-center">Actions</TableHead>
+                <TableHead className="text-center">
+                  {t("table.email")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("table.firstname")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("table.lastname")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("table.isAdmin")}
+                </TableHead>
+                <TableHead className="text-center">
+                  {t("table.createdAt")}
+                </TableHead>
+                <TableHead className="text-center">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
 
@@ -246,7 +254,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                       {user.lastName}
                     </TableCell>
                     <TableCell className="text-center">
-                      {user.isAdmin ? "Oui" : "Non"}
+                      {user.isAdmin ? t("common.yes") : t("common.no")}
                     </TableCell>
                     <TableCell className="text-center">
                       {new Date(user.createdAt).toLocaleDateString()}
@@ -261,7 +269,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                               setDeleteDialog({ open: true, user })
                             }
                           >
-                            Supprimer
+                            {t("buttons.delete")}
                           </Button>
 
                           <Button
@@ -269,7 +277,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                             size="sm"
                             onClick={() => setResetDialog({ open: true, user })}
                           >
-                            Réinitialiser le mot de passe
+                            {t("buttons.resetPassword")}
                           </Button>
                         </>
                       )}
@@ -282,7 +290,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
                     colSpan={6}
                     className="text-center text-muted-foreground"
                   >
-                    Aucun utilisateur trouvé
+                    {t("noUsersFound")}
                   </TableCell>
                 </TableRow>
               )}
@@ -295,7 +303,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
             >
-              Précédent
+              {t("pagination.previous")}
             </Button>
             <span>
               Page {page} / {totalPages}
@@ -305,7 +313,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
               disabled={page === totalPages}
               onClick={() => setPage((p) => p + 1)}
             >
-              Suivant
+              {t("pagination.next")}
             </Button>
           </div>
         </>
@@ -316,10 +324,11 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogTitle>{t("dialogs.delete.title")}</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer l&apos;utilisateur{" "}
-              <strong>{deleteDialog.user?.email}</strong> ?
+              {t("dialogs.delete.description", {
+                email: deleteDialog.user?.email ?? "",
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -327,10 +336,10 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
               variant="outline"
               onClick={() => setDeleteDialog({ open: false, user: null })}
             >
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
-              Supprimer
+              {t("common.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -342,12 +351,11 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Réinitialiser le mot de passe</DialogTitle>
+            <DialogTitle>{t("dialogs.reset.title")}</DialogTitle>
             <DialogDescription>
-              Cela définira le mot de passe de{" "}
-              <strong>{resetDialog.user?.email}</strong> à nul.
-              <br/>
-              Continuer ?
+              {t("dialogs.reset.description", {
+                email: resetDialog.user?.email ?? "",
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -355,10 +363,10 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
               variant="outline"
               onClick={() => setResetDialog({ open: false, user: null })}
             >
-              Annuler
+              {t("common.cancel")}
             </Button>
             <Button variant="default" onClick={handleResetPassword}>
-              Confirmer
+              {t("common.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

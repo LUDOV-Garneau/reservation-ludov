@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslations } from "next-intl";
 
 type Props = {
   onSuccess?: () => void;
@@ -21,6 +22,7 @@ type Props = {
 };
 
 export default function AddUserForm({ onSuccess, onAlert }: Props) {
+  const t = useTranslations("admin.users.addUserForm");
   const [open, setOpen] = useState(false);
   const [firstname, setFirstname] = useState("");
   const [lastname, setLastname] = useState("");
@@ -37,12 +39,12 @@ export default function AddUserForm({ onSuccess, onAlert }: Props) {
     e.preventDefault();
 
     if (!firstname || !lastname || !email) {
-      setError("Veuillez remplir tous les champs obligatoires.");
+      setError(t("errors.missingFields"));
       return;
     }
 
     if (!emailRegex.test(email)) {
-      setError("L'adresse courriel est invalide.");
+      setError(t("errors.invalidEmail"));
       return;
     }
 
@@ -66,14 +68,14 @@ export default function AddUserForm({ onSuccess, onAlert }: Props) {
 
       if (!res.ok) {
         if (data.error?.toLowerCase().includes("existe déjà")) {
-          setError("Un utilisateur avec cet e-mail existe déjà.");
+          setError(t("errors.userExists"));
         } else {
-          onAlert?.("error", "Erreur lors de l'ajout de l'utilisateur.");
+          onAlert?.("error", t("alerts.addUserError"));
         }
         throw new Error(data.error);
       }
 
-      onAlert?.("success", "Utilisateur ajouté avec succès !");
+      onAlert?.("success", t("alerts.addUserSuccess"));
       router.refresh();
 
       setFirstname("");
@@ -83,32 +85,36 @@ export default function AddUserForm({ onSuccess, onAlert }: Props) {
       setOpen(false);
       onSuccess?.();
     } catch {
-      onAlert?.("error", "Erreur lors de l'ajout de l'utilisateur.");
+      onAlert?.("error", t("alerts.addUserError"));
     } finally {
       setLoading(false);
     }
   };
 
-   const clearErrorOnChange = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setter(e.target.value);
-    if (error) setError(null);
-  };
+  const clearErrorOnChange =
+    (setter: (v: string) => void) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setter(e.target.value);
+      if (error) setError(null);
+    };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost">
-          Ajouter un utilisateur
-        </Button>
+        <Button variant="ghost">{t("button.openDialog")}</Button>
       </DialogTrigger>
 
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Ajouter un utilisateur</DialogTitle>
+          <DialogTitle>{t("titles.dialogTitle")}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md mt-4" noValidate>
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 max-w-md mt-4"
+          noValidate
+        >
           <div>
-            <Label htmlFor="firstname">Prénom *</Label>
+            <Label htmlFor="firstname">{t("fields.firstname")} *</Label>
             <Input
               id="firstname"
               value={firstname}
@@ -117,7 +123,7 @@ export default function AddUserForm({ onSuccess, onAlert }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="lastname">Nom *</Label>
+            <Label htmlFor="lastname">{t("fields.lastname")} *</Label>
             <Input
               id="lastname"
               value={lastname}
@@ -126,7 +132,7 @@ export default function AddUserForm({ onSuccess, onAlert }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">{t("fields.email")} *</Label>
             <Input
               id="email"
               type="email"
@@ -141,7 +147,7 @@ export default function AddUserForm({ onSuccess, onAlert }: Props) {
               checked={isAdmin}
               onCheckedChange={(checked) => setIsAdmin(Boolean(checked))}
             />
-            <Label htmlFor="isAdmin">Administrateur</Label>
+            <Label htmlFor="isAdmin">{t("fields.isAdmin")}</Label>
           </div>
 
           {error && (
@@ -151,7 +157,7 @@ export default function AddUserForm({ onSuccess, onAlert }: Props) {
           )}
 
           <Button type="submit" disabled={loading}>
-            {loading ? "Ajout en cours..." : "Ajouter l'utilisateur"}
+            {loading ? t("button.loading") : t("button.submit")}
           </Button>
         </form>
       </DialogContent>

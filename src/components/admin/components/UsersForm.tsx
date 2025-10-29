@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   onSuccess?: () => void;
@@ -12,6 +13,7 @@ type Props = {
 };
 
 export default function UsersForm({ onSuccess, onAlert }: Props) {
+  const t = useTranslations();
   const [file, setFile] = useState<File | null>(null);
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,22 +43,24 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
       const data = await res.json();
 
       if (!res.ok || !data) {
-        onAlert?.(
-          "error",
-          "Impossible d'importer le fichier CSV."
-        );
+        onAlert?.("error", t("admin.users.usersForm.error.importFailed"));
         return;
       }
 
       if (data.success) {
         onAlert?.(
           "success",
-          `Importation terminée : ${data.inserted} utilisateur(s) ajouté(s), ${data.skipped} ignoré(s).`
+          t("admin.users.usersForm.success.importComplete", {
+            inserted: data.inserted,
+            skipped: data.skipped,
+          })
         );
       } else {
         onAlert?.(
           "error",
-            `Aucun utilisateur ajouté. ${data.skipped ?? 0} ignoré(s).`
+          t("admin.users.usersForm.error.noUsersAdded", {
+            skipped: data.skipped ?? 0,
+          })
         );
       }
 
@@ -64,10 +68,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
       onSuccess?.();
       router.refresh();
     } catch {
-      onAlert?.(
-        "error",
-        "Une erreur est survenue lors de l'importation du fichier."
-      );
+      onAlert?.("error", t("admin.users.usersForm.error.uploadException"));
     }
   };
 
@@ -98,7 +99,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         variant="ghost"
       >
         <Upload className="h-5 w-5" />
-        Importer un fichier CSV
+        {t("admin.users.usersForm.button.importCsv")}
       </Button>
     </form>
   );
