@@ -218,7 +218,7 @@ export default function DateSelection() {
               <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                 <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                 <p className="text-gray-600">
-                  Veuillez dabord sélectionner une date
+                  Veuillez d'abord sélectionner une date
                 </p>
               </div>
             ) : isLoading ? (
