@@ -241,7 +241,7 @@ export default function GameSelectionGrid({
 
                     {/* Badge sélectionné */}
                     {isSelected && (
-                      <div className="absolute top-2 right-2 bg-cyan-500 rounded-full p-2 shadow-lg animate-in zoom-in-50">
+                      <div className="absolute top-2 right-1 bg-cyan-500 rounded-full p-2 shadow-lg animate-in zoom-in-50">
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       </div>
                     )}

@@ -40,7 +40,6 @@ export default function ConfirmReservation() {
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch des données de réservation
   useEffect(() => {
     const fetchReservation = async () => {
       if (!reservationId) {
@@ -64,7 +63,7 @@ export default function ConfirmReservation() {
         });
 
       } catch (err) {
-        console.error("❌ Erreur:", err);
+        console.error("Erreur:", err);
         setError("Impossible de charger les détails");
       } finally {
         setLoading(false);
@@ -74,7 +73,6 @@ export default function ConfirmReservation() {
     fetchReservation();
   }, [reservationId, selectedConsole, selectedDate, selectedTime]);
 
-  // Confirmation finale
   const handleConfirm = async () => {
     if (!reservationId || !data) {
       setError("Données manquantes");
@@ -86,15 +84,14 @@ export default function ConfirmReservation() {
     
     try {
       await completeReservation();
-      router.push("/reservation/success");
+      router.push(`/reservation/success?reservationId=${reservationId}`);
     } catch (err) {
-      console.error("❌ Erreur confirmation:", err);
+      console.error("Erreur confirmation:", err);
       setError(err instanceof Error ? err.message : "Erreur lors de la confirmation");
       setConfirmLoading(false);
     }
   };
 
-  // États de chargement
   if (loading) {
     return (
       <div className="min-h-[600px] flex items-center justify-center">
@@ -126,7 +123,6 @@ export default function ConfirmReservation() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Header avec timer */}
       <div className="mb-8">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-[white] p-6 rounded-2xl shadow-sm">
           <div>
@@ -140,12 +136,9 @@ export default function ConfirmReservation() {
         </div>
       </div>
 
-      {/* Grille principale */}
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Colonne gauche */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Console */}
           {data.console && (
             <div className="bg-[white] rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -169,7 +162,6 @@ export default function ConfirmReservation() {
             </div>
           )}
 
-          {/* Jeux */}
           <div className="bg-[white] rounded-xl shadow-sm border p-6">
             <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Package className="h-5 w-5 text-cyan-500" />
@@ -213,7 +205,6 @@ export default function ConfirmReservation() {
             )}
           </div>
 
-          {/* Accessoires */}
           {data.accessoires.length > 0 && (
             <div className="bg-[white] rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -233,7 +224,6 @@ export default function ConfirmReservation() {
             </div>
           )}
 
-          {/* Cours */}
           {data.cours && (
             <div className="bg-[white] rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -252,7 +242,6 @@ export default function ConfirmReservation() {
           )}
         </div>
 
-        {/* Colonne droite - Récapitulatif */}
         <div className="lg:col-span-1">
           <div className="bg-[white] rounded-xl shadow-sm border p-6 sticky top-6">
             <h2 className="text-lg font-semibold mb-4">Récapitulatif</h2>
@@ -293,7 +282,6 @@ export default function ConfirmReservation() {
               </div>
             </div>
 
-            {/* Message d'erreur */}
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                 <div className="flex items-start gap-2">
@@ -303,7 +291,6 @@ export default function ConfirmReservation() {
               </div>
             )}
 
-            {/* Boutons */}
             <div className="space-y-3">
               <Button
                 onClick={handleConfirm}
