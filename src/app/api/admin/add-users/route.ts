@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
           invalidRecords.length + (users.length - newUsers.length),
       });
     } catch (err) {
-      await conn.query("ROLLBACK");
+      await conn.rollback();
       throw err;
     } finally {
       conn.release();
