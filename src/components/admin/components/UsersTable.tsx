@@ -10,13 +10,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,6 +33,7 @@ type User = {
   firstName: string;
   lastName: string;
   isAdmin: boolean;
+  createdAt: string;
 };
 
 export default function UsersTable({ refreshKey }: { refreshKey: number }) {
@@ -110,7 +104,12 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   };
 
   const handleResetPassword = async (userId: number, email: string) => {
-    if (!confirm(`Réinitialiser le mot de passe de ${email} ? (définira le mot de passe à une chaîne vide)`)) return;
+    if (
+      !confirm(
+        `Réinitialiser le mot de passe de ${email} ? (définira le mot de passe à une chaîne vide)`
+      )
+    )
+      return;
     try {
       const res = await fetch(`/api/admin/reset-password?userId=${userId}`, {
         method: "POST",
@@ -129,12 +128,13 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   };
 
   return (
-    <Card className="w-full max-w-3xl mx-auto mt-8">
-      <CardHeader className="flex items-center justify-between">
+    <div className="w-full mx-auto mt-8 bg-white rounded-lg shadow-sm p-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <CardTitle>{t("admin.users.title")}</CardTitle>
-          <CardDescription>Gestion des comptes</CardDescription>
+          <h2 className="text-xl font-semibold">{t("admin.users.title")}</h2>
+          <p className="text-sm text-muted-foreground">Gestion des comptes</p>
         </div>
+
         <Tooltip>
           <Popover>
             <TooltipTrigger asChild>
@@ -157,88 +157,93 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
             </PopoverContent>
           </Popover>
         </Tooltip>
-      </CardHeader>
-      <CardContent>
-        {loading ? (
-          <div className="space-y-2">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full rounded-md" />
-            ))}
-          </div>
-        ) : (
-          <>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Prénom</TableHead>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Administrateur</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {users.length > 0 ? (
-                  users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.email}</TableCell>
-                      <TableCell>{user.firstName}</TableCell>
-                      <TableCell>{user.lastName}</TableCell>
-                      <TableCell>{user.isAdmin ? "Oui" : "Non"}</TableCell>
-                      <TableCell className="text-right space-x-2">
-                        {user.id !== currentUserId && (
-                          <>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDelete(user.id, user.email)}
-                            >
-                              Supprimer
-                            </Button>
+      </div>
 
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleResetPassword(user.id, user.email)}
-                            >
-                              Réinitialiser le mot de passe
-                            </Button>
-                          </>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      Aucun utilisateur trouvé
+      {loading ? (
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} className="h-10 w-full rounded-md" />
+          ))}
+        </div>
+      ) : (
+        <>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Prénom</TableHead>
+                <TableHead>Nom</TableHead>
+                <TableHead>Administrateur</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.length > 0 ? (
+                users.map((user) => (
+                  <TableRow key={user.id}>
+                    <TableCell className="font-medium">{user.email}</TableCell>
+                    <TableCell>{user.firstName}</TableCell>
+                    <TableCell>{user.lastName}</TableCell>
+                    <TableCell>{user.isAdmin ? "Oui" : "Non"}</TableCell>
+                    <TableCell>
+                      {user.id !== currentUserId && (
+                        <>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDelete(user.id, user.email)}
+                          >
+                            Supprimer
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleResetPassword(user.id, user.email)
+                            }
+                          >
+                            Réinitialiser le mot de passe
+                          </Button>
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            <div className="flex justify-between items-center mt-4">
-              <Button
-                variant="outline"
-                disabled={page === 1}
-                onClick={() => setPage((p) => p - 1)}
-              >
-                Précédent
-              </Button>
-              <span>
-                Page {page} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                disabled={page === totalPages}
-                onClick={() => setPage((p) => p + 1)}
-              >
-                Suivant
-              </Button>
-            </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={5}
+                    className="text-center text-muted-foreground"
+                  >
+                    Aucun utilisateur trouvé
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+
+          <div className="flex justify-between items-center mt-4">
+            <Button
+              variant="outline"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              Précédent
+            </Button>
+            <span>
+              Page {page} / {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              Suivant
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
