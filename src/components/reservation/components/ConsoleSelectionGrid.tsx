@@ -79,14 +79,15 @@ export default function ConsoleSelectionGrid({
         .map((c: Console) => ({
           id: Number(c.id) || 0,
           name: c.name || "Console inconnue",
-          nombre: Number(c.nombre) || 0,
-          image: c.image || "/placeholder_consoles.jpg",
+          active_units: Number(c.active_units) || 0,
+          picture: c.picture,
         }))
         .filter((c) => c.id > 0);
 
       setSelectedConsoleId(selectedId || null); // Met à jour l'ID de la console sélectionnée
       setConsoles(validatedConsoles); // Met à jour la liste des consoles
       setLoadingState("success"); // Chargement réussi
+
     } catch (err) {
       console.error("Erreur lors du chargement:", err);
       let errorMessage = t("reservation.console.error");
@@ -193,7 +194,7 @@ export default function ConsoleSelectionGrid({
   }
 
   const availableConsoles = filteredConsoles.filter(
-    (c) => c.nombre > 0 || c.id === reservedId
+    (c) => c.active_units > 0 || c.id === reservedId
   );
 
   return (
@@ -268,7 +269,7 @@ export default function ConsoleSelectionGrid({
             >
               <div className="relative w-full h-48 bg-gray-100">
                 <Image
-                  src={console.image}
+                  src={console.picture || "/placeholder_consoles.jpg"}
                   alt={console.name}
                   fill
                   className="object-cover"
@@ -287,9 +288,9 @@ export default function ConsoleSelectionGrid({
                     {console.name}
                   </p>
                   <p className="text-white/90 text-sm mt-1">
-                    {console.nombre > 0
+                    {console.active_units > 0
                       ? t("reservation.console.available", {
-                          count: console.nombre,
+                          count: console.active_units,
                         })
                       : t("reservation.console.soldOut")}
                   </p>
