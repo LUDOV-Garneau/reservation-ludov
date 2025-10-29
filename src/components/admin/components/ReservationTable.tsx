@@ -68,13 +68,13 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-center">Console</TableHead>
-                <TableHead className="text-center">Jeux</TableHead>
-                <TableHead className="text-center">Station</TableHead>
-                <TableHead className="text-center">Date de réservation</TableHead>
-                <TableHead className="text-center">Créée le</TableHead>
-                <TableHead className="text-center">Étudiant</TableHead>
-                <TableHead className="text-center">Actions</TableHead>
+                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.console")}</TableHead>
+                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.games")}</TableHead>
+                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.station")}</TableHead>
+                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.date")}</TableHead>
+                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.createdAt")}</TableHead>
+                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.user")}</TableHead>
+                <TableHead className="text-center">{t("admin.reservations.ReservationTable.headers.actions")}</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -89,7 +89,7 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
                         <div key={idx}>{game}</div>
                         ))
                     ) : (
-                        <div>Aucun jeu</div>
+                        <div>{t("admin.reservations.ReservationTable.headers.no_games")}</div>
                     )}
                     </TableCell>
                     <TableCell className="text-center">{resv.station}</TableCell>
@@ -105,22 +105,22 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
                         variant="destructive"
                         size="sm"
                         onClick={async () => {
-                        if (!confirm(`Supprimer cette réservation ?`)) return;
+                        if (!confirm(t("admin.reservations.ReservationTable.alert.confirm_delete"))) return;
                         try {
                             const res = await fetch(`/api/admin/delete-reservation?reservationId=${resv.id}`, {
                             method: "DELETE",
                             });
                             const data = await res.json();
                             if (!res.ok) throw new Error(data.error || "Erreur");
-                            alert("Réservation supprimée");
+                            alert(t("admin.reservations.ReservationTable.alert.delete_success"));
                             setReservations((prev) => prev.filter((r) => r.id !== resv.id));
                         } catch (err) {
                             console.error(err);
-                            alert("Erreur lors de la suppression");
+                            alert(t("admin.reservations.ReservationTable.alert.delete_failed"));
                         }
                         }}
                     >
-                        Supprimer
+                        {t("admin.reservations.ReservationTable.delete")}
                     </Button>
                     </TableCell>
                   </TableRow>
@@ -128,7 +128,7 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
               ) : (
                 <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground">
-                Aucune réservation trouvée
+                {t("admin.reservations.ReservationTable.no_reservations")}
                 </TableCell>
                 </TableRow>
               )}
@@ -141,7 +141,7 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
               disabled={page === 1}
               onClick={() => setPage((p) => p - 1)}
             >
-              Précédent
+              {t("admin.reservations.ReservationTable.Previous")}
             </Button>
             <span>
               Page {page} / {totalPages}
@@ -151,7 +151,7 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
               disabled={page === totalPages}
               onClick={() => setPage((p) => p + 1)}
             >
-              Suivant
+              {t("admin.reservations.ReservationTable.Next")}
             </Button>
           </div>
         </>
