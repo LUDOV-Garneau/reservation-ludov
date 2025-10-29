@@ -2,117 +2,168 @@
 
 import { notFound } from "next/navigation";
 import DetailsReservation from "@/components/reservation/DetailsReservation";
-import { Calendar, Clock9 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar, Clock } from "lucide-react";
 
 type Reservation = {
   id: number;
   station: string;
   date: string;
   heure: string;
-  console: { nom: string };
+  console: { nom: string; picture?: string };
   jeux: { nom: string; picture: string; biblio: number }[];
-  accessoires?: { nom: string }[];
+  accessoires?: { id: number; nom: string }[];
 };
 
-export default function DetailsReservationClient({ id }: { id: string }) {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [reservation, setReservation] = useState<Reservation | null>(null);
+type ReservationState = {
+  data: Reservation | null;
+  isLoading: boolean;
+  error: boolean;
+};
+
+function HeaderSkeleton() {
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div className="flex-1">
+          <Skeleton className="h-10 w-64 mb-3" />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-gray-300" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+            <span className="text-gray-300">•</span>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-gray-300" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-36" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GameCardSkeleton() {
+  return (
+    <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+      <div className="flex flex-col sm:flex-row">
+        <Skeleton className="h-48 w-full sm:h-56 sm:w-56" />
+        <div className="p-6 flex flex-col justify-between flex-1 gap-4">
+          <Skeleton className="h-6 w-3/4" />
+          <Skeleton className="h-9 w-32" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionHeaderSkeleton({ width = "w-40" }: { width?: string }) {
+  return <Skeleton className={`h-8 ${width} mb-6`} />;
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="px-4 py-8 lg:px-8">
+      <div className="mb-6">
+        <Skeleton className="h-5 w-48" />
+      </div>
+
+      <HeaderSkeleton />
+
+      <main className="space-y-8">
+        <section>
+          <SectionHeaderSkeleton />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <GameCardSkeleton />
+            <GameCardSkeleton />
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <SectionHeaderSkeleton width="w-48" />
+            <Skeleton className="h-56 w-full rounded-lg" />
+          </div>
+          <div>
+            <SectionHeaderSkeleton width="w-56" />
+            <Skeleton className="h-56 w-full rounded-lg" />
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
+
+function useReservation(id: string) {
+  const [state, setState] = useState<ReservationState>({
+    data: null,
+    isLoading: true,
+    error: false,
+  });
 
   useEffect(() => {
-    const getReservation = async () => {
+    if (!id) {
+      notFound();
+      return;
+    }
+
+    const fetchReservation = async () => {
       try {
         const response = await fetch(
           `/api/reservation/details?id=${encodeURIComponent(id)}`
         );
+
         if (!response.ok) {
-          setIsLoading(false);
+          setState({ data: null, isLoading: false, error: true });
           notFound();
-        } else {
-          const data = await response.json();
-          setReservation(data);
-          setIsLoading(false);
+          return;
         }
-      } catch {
-        setIsLoading(false);
+
+        const data = await response.json();
+        setState({ data, isLoading: false, error: false });
+      } catch (error) {
+        console.error("Error fetching reservation:", error);
+        setState({ data: null, isLoading: false, error: true });
         notFound();
       }
     };
-    if (id) {
-      getReservation();
-    } else {
-      notFound();
-    }
+
+    fetchReservation();
   }, [id]);
 
+  return state;
+}
+
+export default function DetailsReservationClient({ id }: { id: string }) {
+  const { data: reservation, isLoading } = useReservation(id);
+
+  if (isLoading) {
+    return (
+      <div className="bg-white rounded-lg h-full">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
+  if (!reservation) {
+    return null;
+  }
+
   return (
-    <div>
-      {!isLoading && reservation != null ? (
-        <DetailsReservation
-          reservationId={reservation.id.toString()}
-          jeux={reservation.jeux}
-          console={reservation.console}
-          accessoires={reservation.accessoires ?? []}
-          station={reservation.station}
-          date={reservation.date}
-          heure={reservation.heure}
-        />
-      ) : (
-        <div>
-          <div className="mb-4 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
-            <Skeleton className="h-14 w-60 mb-2 bg-[white]" />
-            <div className="w-full sm:w-auto flex flex-col items-center gap-5 sm:flex-row sm:items-center rounded-md border bg-[white] p-3 shadow-sm">
-              <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap sm:mr-8">
-                <span className="inline-flex items-center gap-1">
-                  <Calendar className="h-4 w-4 text-gray-300" />
-                  <Skeleton className="h-4 w-16" />
-                </span>
-                <span className="text-gray-400">•</span>
-                <span className="inline-flex items-center gap-1">
-                  <Clock9 className="h-4 w-4 text-gray-300" />
-                  <Skeleton className="h-4 w-12" />
-                </span>
-              </span>
-
-              <div className="flex flex-col gap-2 sm:flex-row sm:gap-2 w-full sm:w-auto">
-                <Skeleton className="h-9 w-44" />
-                <Skeleton className="h-9 w-36" />
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Skeleton className="h-6 w-40 bg-[white]" />
-            <Skeleton className="h-6 w-32 hidden md:block bg-[white]" />
-          </div>
-
-          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-            <div className="flex flex-col gap-4">
-              {[1, 2].map((_, i) => (
-                <Skeleton key={i} className="h-20 w-full rounded-lg bg-[white]" />
-              ))}
-            </div>
-            <div>
-              <Skeleton className="h-20 w-full md:w-80 rounded-lg bg-[white]" />
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex flex-wrap items-center gap-2">
-              <Skeleton className="h-6 w-36 bg-[white]" />
-              <Skeleton className="h-6 w-14 bg-[white]" />
-              <Skeleton className="h-6 w-14 bg-[white]" />
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <div className="flex flex-wrap items-center gap-2">
-              <Skeleton className="h-6 w-80 max-w-full bg-[white]" />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <DetailsReservation
+      reservationId={reservation.id.toString()}
+      jeux={reservation.jeux}
+      console={reservation.console}
+      accessoires={reservation.accessoires ?? []}
+      station={reservation.station}
+      date={reservation.date}
+      heure={reservation.heure}
+    />
   );
 }

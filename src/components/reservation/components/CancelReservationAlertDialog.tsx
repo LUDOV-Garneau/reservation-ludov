@@ -12,67 +12,124 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { toast } from "sonner";
+import { Loader2, XCircle, AlertTriangle, Shield } from "lucide-react";
 
-export default function CancelReservationAlertDialog({ reservationId }: { reservationId: string }) {
+interface CancelReservationAlertDialogProps {
+  reservationId: string;
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
+}
+
+export default function CancelReservationAlertDialog({
+  reservationId,
+  onSuccess,
+  onError,
+}: CancelReservationAlertDialogProps) {
   const t = useTranslations();
-  const router = useRouter();
-  const [submitting, setSubmitting] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleConfirm = async () => {
+    setIsDeleting(true);
+
     try {
-      setSubmitting(true);
-      const res = await fetch(`/api/reservation/details?id=${encodeURIComponent(String(reservationId))}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/reservation/details?id=${encodeURIComponent(reservationId)}`,
+        { method: "DELETE" }
+      );
+
       if (!res.ok) {
-        toast.error(t("reservation.details.deleteReservationFailed"));
-        return;
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Échec de l'annulation");
       }
-      router.push("/"); 
+
+      setOpen(false);
+      onSuccess?.();
+    } catch (error) {
+      onError?.(error instanceof Error ? error : new Error("Erreur inconnue"));
     } finally {
-      setSubmitting(false);
+      setIsDeleting(false);
     }
   };
 
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button
           type="button"
           variant="destructive"
-          className="h-auto py-1 px-3 w-full md:w-auto whitespace-nowrap text-sm"
+          size="sm"
+          className="group relative overflow-hidden transition-all hover:shadow-lg hover:shadow-red-500/30"
         >
-          {t("reservation.details.cancelButton")}
+          <span className="flex items-center gap-2">
+            <XCircle className="h-4 w-4 transition-transform group-hover:rotate-90" />
+            {t("reservation.details.cancelButton")}
+          </span>
         </Button>
       </AlertDialogTrigger>
 
-      <AlertDialogContent className="rounded-xl border bg-white p-6 shadow-xl">
+      <AlertDialogContent className="rounded-2xl border-2 bg-white shadow-2xl">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-lg font-semibold">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+            <div className="rounded-full bg-red-400 p-3">
+              <AlertTriangle className="h-6 w-6 text-white" />
+            </div>
+          </div>
+
+          <AlertDialogTitle className="text-center text-xl font-bold">
             {t("reservation.details.cancelConfirmationTitle")}
           </AlertDialogTitle>
-          <AlertDialogDescription className="mt-2 text-sm text-gray-600">
+
+          <AlertDialogDescription className="text-center text-base text-gray-600">
             {t("reservation.details.cancelConfirmation")}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <AlertDialogFooter>
+        <div className="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+          <div className="flex items-start gap-3">
+            <Shield className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-red-800">
+              <p className="font-semibold mb-1">Action irréversible</p>
+              <p className="text-red-700">
+                Cette action ne peut pas être annulée. Vous devrez créer une
+                nouvelle réservation si vous changez d'avis.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <AlertDialogFooter className="flex-col sm:flex-row gap-3">
           <AlertDialogCancel asChild>
-            <Button variant="outline" disabled={submitting}>{t("reservation.details.returnButton")}</Button>
+            <Button
+              variant="outline"
+              disabled={isDeleting}
+              className="w-full sm:w-auto rounded-xl border-2"
+            >
+              {t("reservation.details.returnButton")}
+            </Button>
           </AlertDialogCancel>
 
           <AlertDialogAction asChild>
             <Button
               type="button"
               variant="destructive"
-              disabled={submitting}
+              disabled={isDeleting}
               onClick={handleConfirm}
+              className="w-full sm:w-auto rounded-xl bg-red-500 hover:bg-black"
             >
-              {submitting ? "Annulation..." : "Confirmer"}
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Annulation...
+                </>
+              ) : (
+                <>
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Confirmer l'annulation
+                </>
+              )}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>

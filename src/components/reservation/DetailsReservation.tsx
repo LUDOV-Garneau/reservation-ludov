@@ -1,11 +1,20 @@
 "use client";
 
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock9, Gamepad2, Monitor } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Gamepad2,
+  Monitor,
+  AlertCircle,
+  CheckCircle2,
+  Cable,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import CancelReservationAlertDialog from "./components/CancelReservationAlertDialog";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,74 +23,315 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import CancelReservationAlertDialog from "./components/CancelReservationAlertDialog";
 
-type Jeu = { nom: string; picture: string; biblio: number | undefined };
-type Console = { nom: string };
-type Accessoire = { nom: string };
+interface Game {
+  nom: string;
+  picture: string | null;
+  biblio?: number;
+}
 
-type DetailsReservationProps = {
+interface Console {
+  nom: string;
+  picture: string;
+}
+
+interface Accessory {
+  id: number;
+  nom: string;
+}
+
+interface ReservationDetailsProps {
   reservationId: string;
-  jeux: Jeu[];
+  jeux: Game[];
   console: Console;
-  accessoires?: Accessoire[];
-  station: string;
+  accessoires?: Accessory[];
+  station?: string | null;
   date: string;
   heure: string;
-};
+}
 
-function CarteJeu({ nom, picture, biblio }: { nom: string; picture: string; biblio: number | undefined }) {
+type AlertState =
+  | {
+      show: boolean;
+      type: "success" | "error";
+      title: string;
+      message: string;
+    }
+  | null;
+
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
+function formatICSDateTimeLocal(date: Date) {
+  return `${date.getFullYear()}${pad2(date.getMonth() + 1)}${pad2(
+    date.getDate()
+  )}T${pad2(date.getHours())}${pad2(date.getMinutes())}00`;
+}
+
+function toICSDateRange(dateStr: string, timeStr: string) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const start = new Date(y, m - 1, d, hh, mm, 0);
+  const end = new Date(start.getTime() + 60 * 120 * 1000);
+  return {
+    dtStart: formatICSDateTimeLocal(start),
+    dtEnd: formatICSDateTimeLocal(end),
+  };
+}
+
+function sanitizeICSLine(input?: string) {
+  if (!input) return "";
+  return input.replace(/\r?\n/g, " ").slice(0, 900);
+}
+
+function downloadICS({
+  title,
+  description,
+  date,
+  time,
+}: {
+  title: string;
+  description?: string;
+  location?: string;
+  date: string;
+  time: string;
+  uid: string;
+}) {
+  const { dtStart, dtEnd } = toICSDateRange(date, time);
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Dyonisos//Reservation//FR",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `DTSTAMP:${dtStart}`,
+    `DTSTART:${dtStart}`,
+    `DTEND:${dtEnd}`,
+    `SUMMARY:${sanitizeICSLine(title)}`,
+    description ? `DESCRIPTION:${sanitizeICSLine(description)}` : "",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ]
+    .filter(Boolean)
+    .join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `reservation.ics`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function GameCard({ game }: { game: Game }) {
   const t = useTranslations();
+
   return (
-    <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-[white] p-6 shadow-sm">
-      <div className="relative h-56 w-full lg:h-64 lg:w-64 flex-shrink-0 overflow-hidden rounded-lg">
-        <Image
-          src={picture}
-          alt={nom}
-          fill
-          className="object-contain"
-          sizes="(max-width: 1024px) 100vw, 256px"
-          priority
-        />
-      </div>
+    <Card className="overflow-hidden transition-all hover:shadow-xl rounded-xl flex flex-col p-0 flex-1">
+      <CardContent className="p-0 flex flex-col flex-1">
+        <div className="relative w-full h-96 bg-gray-100">
+          {game.picture ? (
+            <Image
+              src={game.picture}
+              alt={game.nom}
+              fill
+              className="object-contain p-4"
+              priority={false}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center">
+              <Gamepad2 className="h-16 w-16 text-gray-300" aria-hidden="true" />
+            </div>
+          )}
+        </div>
 
-      <div className="relative flex flex-col items-center text-center w-full h-auto lg:h-64">
-        <h4 className="text-2xl font-semibold text-gray-800">{nom}</h4>
+        <div className="flex flex-col flex-1 p-6">
+          <h3 className="text-xl font-semibold text-gray-900 text-center line-clamp-2 mb-4">
+            {game.nom}
+          </h3>
 
-        {biblio && (
-          <Link
-            href={`https://ludov.inlibro.net/cgi-bin/koha/opac-detail.pl?biblionumber=${biblio}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 lg:mt-0 lg:absolute lg:bottom-4 lg:left-1/2 lg:-translate-x-1/2"
-          >
-            <Button
-              className="bg-transparent text-cyan-500 hover:bg-transparent hover:text-cyan-400 text-sm lg:text-base"
+          <div className="flex-1" />
+
+          {game.biblio && (
+            <Link
+              href={`https://ludov.inlibro.net/cgi-bin/koha/opac-detail.pl?biblionumber=${game.biblio}`}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              {t("reservation.details.detailsButton")}
-            </Button>
-          </Link>
-        )}
-      </div>
-    </div>
+              <Button
+                className="bg-cyan-500 hover:bg-cyan-600 transition-colors w-full"
+                size="default"
+              >
+                {t("reservation.details.detailsButton")}
+              </Button>
+            </Link>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
-function CarteConsole({ nom }: { nom: string }) {
+export function ConsoleCard({ item }: { item: Console }) {
   return (
-    <div className="flex flex-col lg:flex-row items-center lg:items-stretch gap-6 rounded-lg border bg-[white] p-6 shadow-sm">
-      <div className="relative h-56 w-full lg:h-64 lg:w-64 flex-shrink-0 overflow-hidden rounded-lg">
-        <Image
-          src="/placeholder_consoles.jpg"
-          alt={nom}
-          fill
-          className="object-contain"
-          sizes="(max-width: 1024px) 100vw, 256px"
-          priority
-        />
-      </div>
+    <Card className="h-full overflow-hidden group border-0 shadow-xl p-0">
+      <CardContent className="p-0 relative h-full min-h-[280px]">
+        <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-110">
+          {item.picture ? (
+            <Image
+              src={item.picture}
+              alt={item.nom}
+              fill
+              className="object-cover"
+              priority={false}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-cyan-500">
+              <Monitor className="h-32 w-32 text-cyan-900" aria-hidden="true" />
+            </div>
+          )}
+          
+          <div className={item.picture ? (`absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent`) : (`group-hover:from-black/90 transition-all duration-500`)} />
+        </div>
 
-      <div className="flex w-full items-start justify-center lg:justify-start">
-        <h4 className="text-2xl font-semibold text-gray-800 text-center lg:text-left">{nom}</h4>
+        <div className="relative z-10 flex flex-col justify-end h-full p-6">
+          <div className="transform transition-transform duration-500">
+            <h4 className="text-3xl font-black text-white mb-2 drop-shadow-2xl">
+              {item.nom}
+            </h4>
+            
+            <div className="h-1 bg-cyan-500 rounded-full w-full" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AccessoriesSection({ accessories }: { accessories: Accessory[] }) {
+  if (!accessories?.length) {
+    return (
+      <Card className="w-full h-full">
+        <CardContent className="p-6 flex flex-col items-center justify-center min-h-[160px]">
+          <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+          <p className="text-lg text-gray-400 italic">Aucun accessoire</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="w-full h-full p-0">
+      <CardContent className="p-6">
+        <div className="flex gap-2 flex-wrap">
+          {accessories.map((accessory) => (
+            <div
+              key={accessory.id}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-cyan-200 hover:border-cyan-400 hover:bg-cyan-50 transition-all duration-200 shadow-sm hover:shadow-md group"
+            >
+              <div className="w-2 h-2 rounded-full bg-cyan-500 group-hover:animate-pulse" />
+              <span className="text-sm font-medium text-gray-700">
+                {accessory.nom}
+              </span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ReservationHeader({
+  date,
+  heure,
+  reservationId,
+  consoleName,
+  station,
+  onCancelSuccess,
+  onCancelError,
+}: {
+  date: string;
+  heure: string;
+  reservationId: string;
+  consoleName: string;
+  station?: string | null;
+  onCancelSuccess: () => void;
+  onCancelError: (error: Error) => void;
+}) {
+  const t = useTranslations();
+
+  const handleAddToCalendar = useCallback(() => {
+    downloadICS({
+      title: t("reservation.details.pageDetailsTitle"),
+      description: `${t("reservation.details.selectedConsole")}: ${consoleName}`,
+      location: station || "",
+      date,
+      time: heure,
+      uid: reservationId,
+    });
+  }, [consoleName, date, heure, reservationId, station, t]);
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border bg-[white] shadow-sm p-8 mb-8 text-center md:text-left">
+      <div className="relative">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+          {/* Contenu principal */}
+          <div className="flex-1 space-y-4">
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
+              {t("reservation.details.pageDetailsTitle")}
+            </h1>
+            
+            <div className="flex items-center gap-6 text-lg text-gray-600">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-cyan-600" />
+                </div>
+                <time dateTime={date} className="font-medium">
+                  {date}
+                </time>
+              </div>
+              
+              <div className="w-px h-8 bg-gray-200" />
+              
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-cyan-600" />
+                </div>
+                <time dateTime={heure} className="font-medium">
+                  {heure}
+                </time>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 font-medium"
+              aria-label={t("reservation.details.addToCalendar")}
+              onClick={handleAddToCalendar}
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              {t("reservation.details.addToCalendar")}
+            </Button>
+
+            <CancelReservationAlertDialog
+              reservationId={reservationId}
+              onSuccess={onCancelSuccess}
+              onError={onCancelError}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -89,116 +339,170 @@ function CarteConsole({ nom }: { nom: string }) {
 
 export default function DetailsReservation({
   reservationId,
-  jeux,
+  jeux = [],
   console,
-  accessoires,
+  accessoires = [],
   station,
   date,
   heure,
-}: DetailsReservationProps) {
+}: ReservationDetailsProps) {
   const t = useTranslations();
+  const router = useRouter();
+  const [alert, setAlert] = useState<AlertState>(null);
+
+  const handleCancelSuccess = useCallback(() => {
+    setAlert({
+      show: true,
+      type: "success",
+      title: "Réservation annulée",
+      message: "Votre réservation a été annulée avec succès.",
+    });
+    setTimeout(() => {
+      router.replace("/");
+    }, 1600);
+  }, [router]);
+
+  const handleCancelError = useCallback((error: Error) => {
+    setAlert({
+      show: true,
+      type: "error",
+      title: "Erreur",
+      message: error.message || "Impossible d'annuler la réservation.",
+    });
+  }, []);
+
   return (
-    <div className="mx-auto max-w-6xl p-4 xl:p-6">
-      <div className="mb-10">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/">
-                {t("reservation.layout.home")}
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>
-                {t("reservation.details.titleSection")}
-              </BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
-      <div className="mb-4 flex flex-col items-start justify-between gap-3 lg:flex-row lg:items-center">
-        <h1 className="text-3xl lg:text-4xl font-bold border-b-4 border-cyan-300 pb-2">
-          {t("reservation.details.pageDetailsTitle")}
-        </h1>
+    <div className="sm:bg-[white] rounded-lg mb-10">
+      <div className="sm:px-4 sm:py-8 lg:px-8">
+        {/* Breadcrumb */}
+        <nav className="mb-6" aria-label="Breadcrumb">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/" className="text-gray-600 hover:text-cyan-600">
+                  {t("reservation.layout.home")}
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage className="text-gray-900 font-medium">
+                  {t("reservation.details.titleSection")}
+                </BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </nav>
 
-        <div className="w-full lg:w-auto flex flex-col items-center gap-3 md:flex-row md:items-center md:justify-between rounded-md border bg-white p-3 shadow-sm">
-          {date && heure && (
-            <span className="inline-flex items-center gap-1 text-sm whitespace-nowrap md:mr-auto lg:mr-8">
-              <span className="inline-flex items-center gap-1">
-                <Calendar className="h-5 w-5 text-cyan-600" />
-                {date}
-              </span>
-              <span className="text-gray-400">•</span>
-              <span className="inline-flex items-center gap-1">
-                <Clock9 className="h-5 w-5 text-cyan-600" />
-                {heure}
-              </span>
-            </span>
-          )}
+        {alert?.show && (
+          <Alert
+            variant={alert.type === "error" ? "destructive" : "default"}
+            className={`mb-6 ${
+              alert.type === "success"
+                ? "border-green-200 bg-green-50 text-green-900"
+                : ""
+            }`}
+            role="status"
+            aria-live="polite"
+          >
+            <div className="flex items-start gap-3">
+              {alert.type === "success" ? (
+                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
+              ) : (
+                <AlertCircle className="h-4 w-4 mt-0.5" />
+              )}
+              <div className="flex-1">
+                <AlertTitle className="font-semibold">{alert.title}</AlertTitle>
+                <AlertDescription>
+                  {alert.type === "error"
+                    ? alert.message ||
+                      "Une erreur est survenue. Veuillez essayer ultérieurement."
+                    : alert.message}
+                </AlertDescription>
+              </div>
+              <button
+                onClick={() => setAlert(null)}
+                className={` w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
+                  alert.type === "error"
+                    ? "bg-red-100 text-red-600 hover:bg-red-200"
+                    : "bg-green-100 text-green-600 hover:bg-green-200"
+                }`}
+                aria-label="Fermer l’alerte"
+              >
+                ×
+              </button>
+            </div>
+          </Alert>
+        )}
 
-          <div className="flex flex-col gap-2 md:flex-row md:gap-2 w-full md:w-auto md:ml-auto">
-            <Button
-              type="button"
-              className="h-auto py-1 px-3 w-full md:w-auto bg-cyan-300 text-black hover:bg-cyan-500 whitespace-nowrap text-sm"
-            >
-              {t("reservation.details.addToCalendar")}
-            </Button>
-            <CancelReservationAlertDialog reservationId={reservationId} />
-          </div>
-        </div>
-      </div>
+        <ReservationHeader
+          date={date}
+          heure={heure}
+          reservationId={reservationId}
+          consoleName={console.nom}
+          station={station}
+          onCancelSuccess={handleCancelSuccess}
+          onCancelError={handleCancelError}
+        />
 
-      <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <div className="space-y-4">
-          <h3 className="text-2xl font-semibold mb-4">{t("reservation.details.selectedGames")}</h3>
-          {jeux.map((jeu, index) => (
-            <CarteJeu key={`${jeu.nom}-${index}`} nom={jeu.nom} picture={jeu.picture} biblio={jeu.biblio} />
-          ))}
-        </div>
-
-        <div className="space-y-4">
-          <h3 className="text-2xl font-semibold mb-4">{t("reservation.details.selectedConsole")}</h3>
-          <CarteConsole nom={console.nom} />
-        </div>
-      </div>
-
-      {!!accessoires?.length && (
-        <div className="rounded-lg border p-6 shadow-sm bg-[white]">
-          <div className="flex items-start gap-3">
-            <Gamepad2 className="h-6 w-6 text-cyan-600" />
-            <div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                {t("reservation.details.accessoriesIncluded")}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {accessoires.map((acc) => (
-                  <span
-                    key={acc.nom}
-                    className="inline-flex items-center rounded-full bg-[white] px-4 py-1.5 text-sm font-medium text-gray-700 shadow-lg border"
-                  >
-                    {acc.nom}
-                  </span>
+        {/* CONTAINER */}
+        <div className="md:mx-5 flex flex-col gap-10">
+          {/* JEUX */}
+          <div>
+            {/* TEXTE DE SECTION */}
+            <div className="flex items-center gap-3 mb-6">
+              <Gamepad2 className="h-6 w-6 text-cyan-600" />
+              <h2 className="text-2xl font-bold text-gray-900">{t("reservation.details.selectedGames")}</h2>
+            </div>
+            {/* LAYOUT DES CARTES */}
+            {jeux.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {jeux.map((jeu, index) => (
+                  <div key={jeu.biblio ?? `game-${index}`} className="mb-6 last:mb-0">
+                    <GameCard game={jeu} />
+                  </div>
                 ))}
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-[70%_30%] gap-6">
-        {station !== "null" && (
-          <div className="rounded-lg border p-6 shadow-xl bg-[white]">
-            <div className="flex items-start gap-3">
-              <Monitor className="h-6 w-6 text-cyan-600" />
+            ) : (
               <div>
-                <h3 className="text-xl font-semibold mb-2 text-gray-800">
-                  {t("reservation.details.stationAssigned")}
-                </h3>
-                <p className="font-medium text-gray-700">{station}</p>
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <Gamepad2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 font-medium">
+                      {t("reservation.details.noGames")}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+          {/* CONSOLE ET ACCESSOIRS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* CONSOLES */}
+            <div>
+              {/* TEXTE DE SECTION */}
+              <div className="flex items-center gap-3 mb-6">
+                <Monitor className="h-6 w-6 text-cyan-600" />
+                <h2 className="text-2xl font-bold text-gray-900">{t("reservation.details.selectedConsole")}</h2>
+              </div>
+              {/* CONSOLES */}
+              <div>
+                <ConsoleCard item={console} />
+              </div>
+            </div>
+            {/* ACCESSOIRS */}
+            <div>
+              {/* TEXTE DE SECTION */}
+              <div className="flex items-center gap-3 mb-6">
+                <Cable className="h-6 w-6 text-cyan-600" />
+                <h2 className="text-2xl font-bold text-gray-900">{t("reservation.details.selectedAccessory")}</h2>
+              </div>
+              {/* CARTE */}
+              <div>
+                <AccessoriesSection accessories={accessoires} />
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
