@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
+import type { RowDataPacket } from "mysql2";
 
 export async function GET(req: NextRequest) {
   try {
@@ -26,25 +27,29 @@ export async function GET(req: NextRequest) {
     `,
       [limit, offset]
     );
-
     const reservationsWithNames = await Promise.all(
-      (rows as any[]).map(async (resv) => {
+      (rows as RowDataPacket[]).map(async (resv) => {
         let gamesArray: number[] = [];
         try {
           gamesArray = Array.isArray(resv.games) ? resv.games : JSON.parse(resv.games);
         } catch {}
 
-        const gamesTitles = gamesArray.length > 0
-          ? ((await pool.query(`SELECT titre FROM games WHERE id IN (?)`, [gamesArray]))[0] as any[]).map(g => g.titre)
-          : [];
+        let gamesTitles: string[] = [];
+        if (gamesArray.length > 0) {
+          const [gameRows] = await pool.query<RowDataPacket[]>(
+            `SELECT titre FROM games WHERE id IN (?)`,
+            [gamesArray]
+          );
+          gamesTitles = (gameRows as Array<{ titre: string }>).map((g) => g.titre);
+        }
 
         let consoleName = "";
         if (resv.console_id) {
-          const [consoleRows] = await pool.query(
+          const [consoleRows] = await pool.query<Array<RowDataPacket & { name: string }>>(
             `SELECT name FROM console_stock WHERE id = ?`,
             [resv.console_id]
           );
-          consoleName = (consoleRows as any[])[0]?.name || "";
+          consoleName = consoleRows[0]?.name || "";
         }
 
         return {
