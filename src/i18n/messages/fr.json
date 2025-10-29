@@ -167,7 +167,7 @@
           "console": "Console",
           "games": "Jeux",
           "date": "Date",
-          "createdAt": "Créé le",
+          "createdAt": "Date de création",
           "actions": "Actions",
           "no_games": "Aucun jeu",
           "station": "Station"

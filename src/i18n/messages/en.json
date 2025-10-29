@@ -159,7 +159,7 @@
           "console": "Console",
           "games": "Games",
           "date": "Date",
-          "createdAt": "Created At",
+          "createdAt": "Creation date",
           "actions": "Actions",
           "no_games": "No Games",
           "station": "Station"
