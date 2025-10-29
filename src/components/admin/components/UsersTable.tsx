@@ -30,7 +30,6 @@ import { useTranslations } from "next-intl";
 type User = {
   id: number;
   email: string;
-  createdAt: string;
   firstName: string;
   lastName: string;
   isAdmin: boolean;
@@ -86,7 +85,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
   if (totalPages === 0) totalPages = 1;
 
   const handleDelete = async (userId: number, email: string) => {
-    if (!confirm(`Supprimer l’utilisateur ${email} ?`)) return;
+    if (!confirm(`Supprimer l'utilisateur ${email} ?`)) return;
     try {
       const res = await fetch(`/api/admin/delete-user?userId=${userId}`, {
         method: "DELETE",
@@ -171,24 +170,35 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Email</TableHead>
-                <TableHead>Prénom</TableHead>
-                <TableHead>Nom</TableHead>
-                <TableHead>Administrateur</TableHead>
-                  <TableHead>Date de création</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-center">Email</TableHead>
+                <TableHead className="text-center">Prénom</TableHead>
+                <TableHead className="text-center">Nom</TableHead>
+                <TableHead className="text-center">Administrateur</TableHead>
+                <TableHead className="text-center">Date de création</TableHead>
+                <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
               {users.length > 0 ? (
                 users.map((user) => (
                   <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.email}</TableCell>
-                    <TableCell>{user.firstName}</TableCell>
-                    <TableCell>{user.lastName}</TableCell>
-                    <TableCell>{user.isAdmin ? "Oui" : "Non"}</TableCell>
-                      <TableCell>{new Date(user.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-center font-medium">
+                      {user.email}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {user.firstName}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {user.lastName}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {user.isAdmin ? "Oui" : "Non"}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell className="text-center space-x-2">
                       {user.id !== currentUserId && (
                         <>
                           <Button
@@ -216,7 +226,7 @@ export default function UsersTable({ refreshKey }: { refreshKey: number }) {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={6}
                     className="text-center text-muted-foreground"
                   >
                     Aucun utilisateur trouvé

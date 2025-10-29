@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
         createdAt,
         firstname AS firstName,
         lastname AS lastName,
-        isAdmin As isAdmin,
+        isAdmin As isAdmin
       FROM users
       ORDER BY createdAt DESC
       LIMIT ? OFFSET ?
@@ -23,9 +23,9 @@ export async function GET(req: NextRequest) {
       [limit, offset]
     );
 
-    const [countRows] = await pool.query(`
+    const [countRows] = (await pool.query(`
       SELECT COUNT(*) AS total FROM users
-    `) as [Array<{ total: number }>, unknown];
+    `)) as [Array<{ total: number }>, unknown];
     const total = countRows[0].total;
 
     return NextResponse.json({ rows, total });
