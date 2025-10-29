@@ -70,7 +70,7 @@ export default function ReservationsTable({ refreshKey }: { refreshKey: number }
     };
 
     fetchReservations();
-  }, [refreshKey, localRefreshKey, page, limit]);
+  }, [refreshKey, localRefreshKey, page, limit, t]);
 
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
