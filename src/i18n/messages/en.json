@@ -64,6 +64,23 @@
       "consoleSelection": "Console selection",
       "modify": "Modify"
     },
+    "games" : {
+      "error" : {
+        "games_restore": "Error restoring games:",
+        "max_3_games": "A maximum of 3 games can be selected",
+        "selecte_at_least_one": "Select at least one game",
+        "no_active_reservation": "No active reservation",
+        "save_failed" : "Error saving",
+        "select_console_first": "Select a console first"
+      },
+      "your_games": "Your games",
+      "selected_platform": "Selected platform",
+      "select_up_to_3": "Select up to 3 games",
+      "go_through_library": "Browse through the library to choose",
+      "saving..." : "Saving...",
+      "continue": "Continue",
+      "game_library": "Game library"
+    },
     "course": {
       "selectionTitle": "Course selection",
       "instruction": "Please provide the course code for which you are making the reservation:",

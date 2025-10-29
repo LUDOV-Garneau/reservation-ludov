@@ -8,12 +8,15 @@ export async function GET() {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;
-    try {
-      const token = sessionCookie?.value;
-      if (token) user = verifyToken(token);
-    } catch {
-      // token invalide/expiré
-    }
+      try {
+          const token  = sessionCookie?.value;
+          if (token) user = verifyToken(token);
+      } catch{
+          return NextResponse.json(
+              { success: false, message: "Invalid or expired token" },
+              { status: 401 }
+          );
+      }
     if (!user?.id) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },

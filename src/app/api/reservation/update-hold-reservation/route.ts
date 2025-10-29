@@ -26,7 +26,10 @@ export async function POST(req: Request) {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
     } catch {
-      // token invalide/expiré
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     if (!user?.id) {
@@ -73,7 +76,6 @@ export async function POST(req: Request) {
     try {
       await conn.beginTransaction();
 
-      // Vérifier la réservation et récupérer l'état actuel
       const [rows] = await conn.query<RowDataPacket[]>(
         `SELECT 
           console_id, 
@@ -99,7 +101,6 @@ export async function POST(req: Request) {
 
       const reservation = rows[0];
 
-      // Vérifier si la réservation n'a pas expiré
       if (new Date(reservation.expireAt) < new Date()) {
         await conn.rollback();
         return NextResponse.json(
@@ -110,11 +111,9 @@ export async function POST(req: Request) {
 
       const currentConsoleId = reservation.console_id;
 
-      // --- Construction dynamique des updates ---
       const updates: string[] = [];
       const values: unknown[] = [];
 
-      //Check la disponibilité des jeux
       const gameIdsToCheck = [
         { id: game1Id, field: "game1_id" as const },
         { id: game2Id, field: "game2_id" as const },
@@ -191,13 +190,11 @@ export async function POST(req: Request) {
         }
       }
 
-      // Cours
       if (coursId !== undefined) {
         updates.push("cours = ?");
         values.push(coursId || null);
       }
 
-      // Date et heure
       if (date !== undefined) {
         updates.push("date = ?");
         values.push(date);
@@ -207,15 +204,13 @@ export async function POST(req: Request) {
         values.push(time);
       }
 
-      // --- Changement de console ---
       let finalConsoleId = currentConsoleId;
 
       if (newConsoleId && newConsoleId !== currentConsoleId) {
-        // Vérifier disponibilité de la nouvelle console
 
         const [unitsNewConsole] = await conn.query<RowDataPacket[]>(
         `
-        SELECT cs.id AS consoleStockId
+        SELECT cs.id AS consoleStockId, cs.console_type_id AS consoleTypeId
         FROM console_stock cs
         WHERE cs.console_type_id = ?
           AND cs.is_active = 1
@@ -238,13 +233,11 @@ export async function POST(req: Request) {
           );
         }
 
-        // Libérer l'ancienne console
         await conn.query(
           `UPDATE console_stock SET holding = 0 WHERE id = ?`,
           [currentConsoleId]
         );
 
-        // Réserver la nouvelle console
         await conn.query(
           `UPDATE console_stock SET holding = 1 WHERE id = ?`,
           [unitsNewConsole[0].consoleStockId]
@@ -252,10 +245,27 @@ export async function POST(req: Request) {
 
         updates.push("console_id = ?");
         values.push(unitsNewConsole[0].consoleStockId);
+        updates.push("console_type_id = ?");
+        values.push(unitsNewConsole[0].consoleTypeId);
         finalConsoleId = unitsNewConsole[0].consoleStockId;
+
+        updates.push("game1_id = ?");
+        updates.push("game2_id = ?");
+        updates.push("game3_id = ?");
+        values.push(null, null, null);
+
+        updates.push("accessoirs = ?");
+        values.push(null);
+
+        updates.push("cours = ?");
+        values.push(null);
+
+        updates.push("date = ?");
+        updates.push("time = ?");
+        values.push(null, null);
       }
 
-      // --- Mise à jour en DB seulement si nécessaire ---
+
       if (updates.length > 0) {
         const sql = `UPDATE reservation_hold SET ${updates.join(", ")} WHERE id = ?`;
         values.push(reservationId);
@@ -264,7 +274,6 @@ export async function POST(req: Request) {
 
       await conn.commit();
 
-      // Récupérer les données mises à jour pour la réponse
       const [updatedRows] = await conn.query<RowDataPacket[]>(
         `SELECT 
           id,
