@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Token invalide" }, { status: 401 });
   }
 
-  if (!currentUser.isAdmin) {
+  if (!currentUser || !currentUser.isAdmin) {
     return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
   }
 
