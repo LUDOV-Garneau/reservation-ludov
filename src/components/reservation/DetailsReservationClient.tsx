@@ -14,6 +14,7 @@ type Reservation = {
   console: { nom: string; picture?: string };
   jeux: { nom: string; picture: string; biblio: number }[];
   accessoires?: { id: number; nom: string }[];
+  archived: boolean;
 };
 
 type ReservationState = {
@@ -159,7 +160,8 @@ export default function DetailsReservationClient({ id }: { id: string }) {
     <DetailsReservation
       reservationId={reservation.id.toString()}
       jeux={reservation.jeux}
-      console={reservation.console}
+      console={{ ...reservation.console, picture: reservation.console.picture ?? "" }}
+      archived={reservation.archived}
       accessoires={reservation.accessoires ?? []}
       station={reservation.station}
       date={reservation.date}

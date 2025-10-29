@@ -162,7 +162,7 @@ export async function GET(request: NextRequest) {
     const [reservations] = await pool.query<ReservationRow[]>(
       `SELECT time, console_id, game1_id, game2_id, game3_id, accessory_ids 
        FROM reservation 
-       WHERE date = ?`,
+       WHERE date = ? AND archived = 0`,
       [date]
     );
 

@@ -1,7 +1,6 @@
 // app/api/reservations/upcoming/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
-import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import { RowDataPacket } from "mysql2";
 
@@ -14,46 +13,43 @@ type ReservationRow = RowDataPacket & {
   game3_title: string | null;
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("SESSION");
-    let user = null;
-
-    try {
-      const token = sessionCookie?.value;
-      if (token) user = verifyToken(token);
-    } catch (error) {
-      console.error("Token verification error:", error);
-    }
-
-    if (!user?.id) {
+    const token = request.cookies.get("SESSION")?.value;
+    if(!token) {
       return NextResponse.json(
-        { error: "User not authenticated" },
+        { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const userId = Number(user.id);
-    // const userId = 1;
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const userId = user.id;
 
     const [rows] = await pool.query<ReservationRow[]>(
       `
       SELECT 
-        rh.id,
-        DATE(rh.date) AS date,
-        rh.time,
+        r.id,
+        DATE(r.date) AS date,
+        r.time,
         c.name AS console_name,
         g1.titre AS game1_title,
         g2.titre AS game2_title,
         g3.titre AS game3_title
-      FROM reservation_hold rh
-      JOIN console_type c ON c.id = rh.console_type_id
-      LEFT JOIN games g1 ON g1.id = rh.game1_id
-      LEFT JOIN games g2 ON g2.id = rh.game2_id
-      LEFT JOIN games g3 ON g3.id = rh.game3_id
-      WHERE rh.user_id = ?  AND TIMESTAMP(rh.date, rh.time) >= NOW()
-      ORDER BY TIMESTAMP(rh.date, rh.time) DESC`,
+      FROM reservation r
+      JOIN console_type c ON c.id = r.console_type_id
+      LEFT JOIN games g1 ON g1.id = r.game1_id
+      LEFT JOIN games g2 ON g2.id = r.game2_id
+      LEFT JOIN games g3 ON g3.id = r.game3_id
+      WHERE r.user_id = ?  AND TIMESTAMP(r.date, r.time) >= NOW() AND r.archived = 0
+      ORDER BY TIMESTAMP(r.date, r.time) DESC`,
       [userId]
     );
 

@@ -51,6 +51,7 @@ interface ReservationDetailsProps {
   station?: string | null;
   date: string;
   heure: string;
+  archived: boolean;
 }
 
 type AlertState =
@@ -217,12 +218,13 @@ export function ConsoleCard({ item }: { item: Console }) {
 }
 
 function AccessoriesSection({ accessories }: { accessories: Accessory[] }) {
+  const t = useTranslations();
   if (!accessories?.length) {
     return (
       <Card className="w-full h-full">
         <CardContent className="p-6 flex flex-col items-center justify-center min-h-[160px]">
           <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-lg text-gray-400 italic">Aucun accessoire</p>
+          <p className="text-lg text-gray-400 italic">{t("reservation.details.noAccessory")}</p>
         </CardContent>
       </Card>
     );
@@ -254,7 +256,7 @@ function ReservationHeader({
   heure,
   reservationId,
   consoleName,
-  station,
+  archived,
   onCancelSuccess,
   onCancelError,
 }: {
@@ -262,7 +264,7 @@ function ReservationHeader({
   heure: string;
   reservationId: string;
   consoleName: string;
-  station?: string | null;
+  archived: boolean;
   onCancelSuccess: () => void;
   onCancelError: (error: Error) => void;
 }) {
@@ -272,18 +274,16 @@ function ReservationHeader({
     downloadICS({
       title: t("reservation.details.pageDetailsTitle"),
       description: `${t("reservation.details.selectedConsole")}: ${consoleName}`,
-      location: station || "",
       date,
       time: heure,
       uid: reservationId,
     });
-  }, [consoleName, date, heure, reservationId, station, t]);
+  }, [consoleName, date, heure, reservationId, t]);
 
   return (
     <div className="relative overflow-hidden rounded-xl border bg-[white] shadow-sm p-8 mb-8 text-center md:text-left">
       <div className="relative">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-          {/* Contenu principal */}
           <div className="flex-1 space-y-4">
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
               {t("reservation.details.pageDetailsTitle")}
@@ -312,25 +312,27 @@ function ReservationHeader({
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 font-medium"
-              aria-label={t("reservation.details.addToCalendar")}
-              onClick={handleAddToCalendar}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              {t("reservation.details.addToCalendar")}
-            </Button>
+          {!archived && (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 font-medium"
+                aria-label={t("reservation.details.addToCalendar")}
+                onClick={handleAddToCalendar}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                {t("reservation.details.addToCalendar")}
+              </Button>
 
-            <CancelReservationAlertDialog
-              reservationId={reservationId}
-              onSuccess={onCancelSuccess}
-              onError={onCancelError}
-            />
-          </div>
+              <CancelReservationAlertDialog
+                reservationId={reservationId}
+                onSuccess={onCancelSuccess}
+                onError={onCancelError}
+              />
+
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -345,6 +347,7 @@ export default function DetailsReservation({
   station,
   date,
   heure,
+  archived,
 }: ReservationDetailsProps) {
   const t = useTranslations();
   const router = useRouter();
@@ -374,7 +377,6 @@ export default function DetailsReservation({
   return (
     <div className="sm:bg-[white] rounded-lg mb-10">
       <div className="sm:px-4 sm:py-8 lg:px-8">
-        {/* Breadcrumb */}
         <nav className="mb-6" aria-label="Breadcrumb">
           <Breadcrumb>
             <BreadcrumbList>
@@ -404,29 +406,30 @@ export default function DetailsReservation({
             role="status"
             aria-live="polite"
           >
-            <div className="flex items-start gap-3">
-              {alert.type === "success" ? (
-                <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5" />
-              ) : (
-                <AlertCircle className="h-4 w-4 mt-0.5" />
-              )}
-              <div className="flex-1">
-                <AlertTitle className="font-semibold">{alert.title}</AlertTitle>
-                <AlertDescription>
-                  {alert.type === "error"
-                    ? alert.message ||
-                      "Une erreur est survenue. Veuillez essayer ultérieurement."
-                    : alert.message}
-                </AlertDescription>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 flex-1">
+                {alert.type === "success" ? (
+                  <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                )}
+                <div className="flex-1">
+                  <AlertTitle className="font-semibold">{alert.title}</AlertTitle>
+                  <AlertDescription>
+                    {alert.type === "error"
+                      ? alert.message || "Une erreur est survenue. Veuillez essayer ultérieurement."
+                      : alert.message}
+                  </AlertDescription>
+                </div>
               </div>
               <button
                 onClick={() => setAlert(null)}
-                className={` w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
+                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
                   alert.type === "error"
                     ? "bg-red-100 text-red-600 hover:bg-red-200"
                     : "bg-green-100 text-green-600 hover:bg-green-200"
                 }`}
-                aria-label="Fermer l’alerte"
+                aria-label="Fermer l'alerte"
               >
                 ×
               </button>
@@ -439,7 +442,7 @@ export default function DetailsReservation({
           heure={heure}
           reservationId={reservationId}
           consoleName={console.nom}
-          station={station}
+          archived={archived}
           onCancelSuccess={handleCancelSuccess}
           onCancelError={handleCancelError}
         />

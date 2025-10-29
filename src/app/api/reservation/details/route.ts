@@ -61,12 +61,13 @@ export async function GET(request: NextRequest) {
     const [rows] = await pool.query<ReservationHoldRow[]>(
       `
       SELECT 
-        rh.id,
-        rh.user_id,
-        rh.station_id,
-        DATE(rh.date) AS date,
-        rh.time,
+        r.id,
+        r.user_id,
+        r.station,
+        DATE(r.date) AS date,
+        r.time,
         c.name AS console_name,
+        r.archived,
 
         g1.titre AS game1_title, g1.biblio_id AS game1_biblio_id, g1.picture AS game1_picture,
         g2.titre AS game2_title, g2.biblio_id AS game2_biblio_id, g2.picture AS game2_picture,
@@ -76,21 +77,21 @@ export async function GET(request: NextRequest) {
           JSON_OBJECT('id', a.id, 'name', a.name)
         ) AS accessoires_json
 
-      FROM reservation_hold rh
-      JOIN console_type c ON c.id = rh.console_type_id
-      LEFT JOIN games g1 ON g1.id = rh.game1_id
-      LEFT JOIN games g2 ON g2.id = rh.game2_id
-      LEFT JOIN games g3 ON g3.id = rh.game3_id
+      FROM reservation r
+      JOIN console_type c ON c.id = r.console_type_id
+      LEFT JOIN games g1 ON g1.id = r.game1_id
+      LEFT JOIN games g2 ON g2.id = r.game2_id
+      LEFT JOIN games g3 ON g3.id = r.game3_id
 
       LEFT JOIN JSON_TABLE(
-        rh.accessoirs, '$[*]'
+        r.accessory_ids, '$[*]'
         COLUMNS(accessoir_id INT PATH '$')
       ) jt ON TRUE
       LEFT JOIN accessoires a ON a.id = jt.accessoir_id
 
-      WHERE rh.id = ?
+      WHERE r.id = ?
       GROUP BY
-        rh.id, rh.user_id, rh.station_id, DATE(rh.date), rh.time,
+        r.id, r.user_id, r.station, DATE(r.date), r.time,
         c.name,
         g1.titre, g1.biblio_id, g1.picture,
         g2.titre, g2.biblio_id, g2.picture,
@@ -124,6 +125,7 @@ export async function GET(request: NextRequest) {
       console: { nom: row.console_name },
       jeux,
       accessoires,
+      archived: row.archived,
       station: String(row.station_id),
       date: toYMD(row.date),
       heure: row.time.slice(0, 5),
@@ -137,7 +139,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Delete une réservation
 export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -150,10 +151,10 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    const idReservation = Number(idString);
+    const idReservation = idString;
 
     const [rows] = await pool.query<RowDataPacket[]>(
-      "SELECT id FROM reservation_hold WHERE id = ?",
+      "SELECT id FROM reservation WHERE id = ?",
       [idReservation]
     );
 
@@ -164,7 +165,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    await pool.query("DELETE FROM reservation_hold WHERE id = ?", [
+    await pool.query("UPDATE reservation SET archived = 1 WHERE id = ?", [
       idReservation,
     ]);
 

@@ -270,7 +270,7 @@ export function ReservationProvider({
   const startTimer = async (consoleId?: number) => {
     const consoleTypeId = consoleId ?? selectedConsole?.id;
     if (!consoleTypeId) {
-      setError("Aucune console sélectionnée");
+      setError("Aucune plateforme sélectionnée");
       return;
     }
     if (isTimerActive && timeRemaining > 0) return;
@@ -399,14 +399,14 @@ const updateReservationConsole = async (newConsoleId: number) => {
       body: JSON.stringify({ reservationId, newConsoleId }),
     });
 
-    if (!res.ok) throw new Error("Erreur modification console");
+    if (!res.ok) throw new Error("Erreur modification plateforme");
 
     const data = await res.json();
     if (data.success) {
       setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
     }
   } catch (e) {
-    setError(e instanceof Error ? e.message : "Erreur update console");
+    setError(e instanceof Error ? e.message : "Erreur update plateforme");
   }
 };
 
@@ -421,12 +421,12 @@ const updateReservationConsole = async (newConsoleId: number) => {
     }
 
     if (!selectedConsole) {
-      setError("Aucune console sélectionnée");
+      setError("Aucune plateforme sélectionnée");
       return;
     }
 
     if (!selectedConsoleId) {
-      setError("Aucune console en stock sélectionnée");
+      setError("Aucune plateforme en stock sélectionnée");
       return;
     }
 

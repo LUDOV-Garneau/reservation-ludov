@@ -3,7 +3,6 @@ import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
-import { error } from "console";
 
 type Body = {
   reservationHoldId: string;
@@ -386,7 +385,7 @@ export async function POST(req: Request) {
           }
         } else {
           console.error(
-            "❌ Unexpected accessoirs type:",
+            "Unexpected accessoirs type:",
             typeof hold.accessoirs
           );
           await connection.rollback();

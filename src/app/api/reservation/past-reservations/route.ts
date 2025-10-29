@@ -41,20 +41,21 @@ export async function GET() {
     const [rows] = await pool.query<ReservationRow[]>(
       `
       SELECT 
-        rh.id,
-        DATE(rh.date) AS date,
-        rh.time,
+        r.id,
+        DATE(r.date) AS date,
+        r.time,
         c.name AS console_name,
         g1.titre AS game1_title,
         g2.titre AS game2_title,
         g3.titre AS game3_title
-      FROM reservation_hold rh
-      JOIN console_type c ON c.id = rh.console_type_id
-      LEFT JOIN games g1 ON g1.id = rh.game1_id
-      LEFT JOIN games g2 ON g2.id = rh.game2_id
-      LEFT JOIN games g3 ON g3.id = rh.game3_id
-      WHERE rh.user_id = ?  AND TIMESTAMP(rh.date, rh.time) < NOW()
-      ORDER BY TIMESTAMP(rh.date, rh.time) DESC`,
+      FROM reservation r
+      JOIN console_type c ON c.id = r.console_type_id
+      LEFT JOIN games g1 ON g1.id = r.game1_id
+      LEFT JOIN games g2 ON g2.id = r.game2_id
+      LEFT JOIN games g3 ON g3.id = r.game3_id
+      WHERE r.user_id = ?  AND TIMESTAMP(r.date, r.time) < NOW() OR
+      r.archived = 1
+      ORDER BY TIMESTAMP(r.date, r.time) DESC`,
       [userId]
     );
 
@@ -86,9 +87,9 @@ export async function GET() {
 
     return NextResponse.json(reservations);
   } catch (error) {
-    console.error("🔴 ERREUR PAST RÉSERVATIONS:", error);
+    console.error("Error fetching past reservations:", error);
     return NextResponse.json(
-      { error: "Erreur lors de la récupération de l'historique." },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }
