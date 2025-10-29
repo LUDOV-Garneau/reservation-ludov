@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   let currentUser;
   try {
     currentUser = verifyToken(token);
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: "Token invalide" }, { status: 401 });
   }
 
