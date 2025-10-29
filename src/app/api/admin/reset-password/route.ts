@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const [result] = (await pool.query(
-      "UPDATE users SET password = '' WHERE id = ?",
+      "UPDATE users SET password = NULL WHERE id = ?",
       [userId]
     )) as [ResultSetHeader, unknown];
 
