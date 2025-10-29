@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { verifyToken } from "@/lib/jwt";
 
 type HourRange = {
   id: number;
@@ -46,8 +47,18 @@ type HoursRows = RowDataPacket & {
   end_minute: string;
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const token = request.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     const [weeklyRows] = await pool.query<WeeklyRows[]>(
       "SELECT * FROM weekly_availabilities"
     );
@@ -159,6 +170,19 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const token = request.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    if (!user.isAdmin) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     const body = await request.json();
 
     if (!body.weekly || !body.dateRange || !body.exceptions) {

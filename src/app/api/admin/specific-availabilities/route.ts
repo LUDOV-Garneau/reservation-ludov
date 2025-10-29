@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { verifyToken } from "@/lib/jwt";
 
 type HourRange = {
   id: number;
@@ -12,6 +13,19 @@ type Exception = { date: Date; timeRange: HourRange };
 
 export async function POST(request: NextRequest) {
   try {
+    const token = request.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    if (!user.isAdmin) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
+
     const body = (await request.json()) as Exception[];
 
     if (!body) {

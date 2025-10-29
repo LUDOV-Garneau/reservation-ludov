@@ -10,7 +10,6 @@ type ConsoleRow = RowDataPacket & {
 
 export async function POST(req: Request) {
   try {
-
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;
@@ -18,12 +17,21 @@ export async function POST(req: Request) {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
     } catch {
-      // token invalide/expiré
+      return NextResponse.json(
+        { success: false, message: "Invalid token" },
+        { status: 401 }
+      );
     }
     if (!user?.id) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
+      );
+    }
+    if (!user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
       );
     }
 
