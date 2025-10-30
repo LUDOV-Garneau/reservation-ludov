@@ -4,7 +4,16 @@ import { useState, useEffect } from "react";
 import AccessorySelectionGrid from "@/components/reservation/components/AccessoriesSelectionGrid";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShoppingBag, Trash2, CheckCircle2, XCircle, Joystick, Cable, MoveLeft } from "lucide-react";
+import {
+  Loader2,
+  ShoppingBag,
+  Trash2,
+  CheckCircle2,
+  XCircle,
+  Joystick,
+  Cable,
+  MoveLeft,
+} from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
 
 type Accessory = {
@@ -13,13 +22,13 @@ type Accessory = {
 };
 
 export default function AccessoriesSelection() {
-  const { 
-    selectedAccessories, 
-    setSelectedAccessories, 
+  const {
+    selectedAccessories,
+    setSelectedAccessories,
     updateReservationAccessories,
     setCurrentStep,
     selectedConsole,
-    currentStep
+    currentStep,
   } = useReservation();
 
   const [allAccessories, setAllAccessories] = useState<Accessory[]>([]);
@@ -41,21 +50,22 @@ export default function AccessoriesSelection() {
           method: "GET",
           cache: "no-store",
           signal: controller.signal,
-          headers: { "Accept": "application/json" },
+          headers: { Accept: "application/json" },
         });
 
         const payload = (await res.json()) as ApiResponse<Accessory[]>;
 
         if (!res.ok || !payload.success) {
-          throw new Error(payload.message || "Failed to fetch accessories");
+          throw new Error(payload.message || t("reservation.accessory.error"));
         }
 
         setAllAccessories(payload.data ?? []);
       } catch (err: unknown) {
         if (err instanceof Error && err.name === "AbortError") return;
-        console.error("Erreur chargement accessoires:", err);
         setAllAccessories([]);
-        setError(err instanceof Error ? err.message : "Impossible de charger les accessoires");
+        setError(
+          err instanceof Error ? err.message : t("reservation.accessory.error")
+        );
       } finally {
         setIsLoading(false);
       }
@@ -63,12 +73,12 @@ export default function AccessoriesSelection() {
 
     fetchAccessories();
     return () => controller.abort();
-  }, []);
+  }, [t]);
 
   const handleSelect = (accessory: Accessory) => {
     setSelectedAccessories((prev: number[]) => {
       if (prev.includes(accessory.id)) {
-        return prev.filter(id => id !== accessory.id);
+        return prev.filter((id) => id !== accessory.id);
       } else {
         return [...prev, accessory.id];
       }
@@ -76,7 +86,9 @@ export default function AccessoriesSelection() {
   };
 
   const handleRemove = (accessoryId: number) => {
-    setSelectedAccessories((prev: number[]) => prev.filter(id => id !== accessoryId));
+    setSelectedAccessories((prev: number[]) =>
+      prev.filter((id) => id !== accessoryId)
+    );
   };
 
   const handleClearAll = () => {
@@ -89,17 +101,18 @@ export default function AccessoriesSelection() {
 
     try {
       await updateReservationAccessories(selectedAccessories);
-      
       setCurrentStep(4);
     } catch (err) {
       console.error("Erreur sauvegarde accessoires:", err);
-      setError(err instanceof Error ? err.message : "Impossible de sauvegarder les accessoires");
+      setError(
+        err instanceof Error ? err.message : t("reservation.accessory.error")
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
-  const selectedAccessoriesData = allAccessories.filter(a => 
+  const selectedAccessoriesData = allAccessories.filter((a) =>
     selectedAccessories.includes(a.id)
   );
 
@@ -112,7 +125,9 @@ export default function AccessoriesSelection() {
               <Joystick className="h-6 w-6 text-cyan-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-500">{t("reservation.accessory.header_info")}</p>
+              <p className="text-sm text-gray-500">
+                {t("reservation.accessory.header_info")}
+              </p>
               <p className="font-bold text-lg">{selectedConsole.name}</p>
             </div>
           </div>
@@ -122,24 +137,29 @@ export default function AccessoriesSelection() {
           <div className="lg:col-span-1">
             <div className="bg-[white] rounded-2xl shadow-lg sticky top-6">
               <div className="p-6 border-b border-gray-200">
-                <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mb-8 w-fit">
-                  <MoveLeft className="h-6 w-6 mr-2"/>
+                <div
+                  onClick={() => setCurrentStep(currentStep - 1)}
+                  className="cursor-pointer flex flex-row items-center mb-8 w-fit"
+                >
+                  <MoveLeft className="h-6 w-6 mr-2" />
                   <p>{t("reservation.layout.previousStep")}</p>
                 </div>
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-2xl font-bold flex items-center gap-2">
                     <ShoppingBag className="h-6 w-6 text-cyan-500" />
-                    Sélection
+                    {t("reservation.accessory.selection")}
                   </h2>
                   <div className="bg-cyan-500 text-white text-sm font-bold px-3 py-1 rounded-full">
                     {selectedAccessories.length}
                   </div>
                 </div>
                 <p className="text-sm text-gray-500">
-                  {selectedAccessories.length === 0 
-                    ? "Aucun accessoire sélectionné"
-                    : `${selectedAccessories.length} accessoire${selectedAccessories.length > 1 ? 's' : ''} sélectionné${selectedAccessories.length > 1 ? 's' : ''}`
-                  }
+                  {selectedAccessories.length === 0
+                    ? t("reservation.accessory.empty_selection")
+                    : t("reservation.accessory.selected_count", {
+                        count: selectedAccessories.length,
+                        plural: selectedAccessories.length > 1 ? "s" : "",
+                      })}
                 </p>
               </div>
 
@@ -147,7 +167,9 @@ export default function AccessoriesSelection() {
                 <div className="mx-6 mt-4 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
                   <XCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-red-800">{t("reservation.accessory.error")}</p>
+                    <p className="text-sm font-medium text-red-800">
+                      {t("reservation.accessory.error")}
+                    </p>
                     <p className="text-sm text-red-600">{error}</p>
                   </div>
                 </div>
@@ -157,7 +179,9 @@ export default function AccessoriesSelection() {
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-cyan-500 mb-2" />
-                    <p className="text-sm text-gray-500">{t("reservation.accessory.loading_text")}</p>
+                    <p className="text-sm text-gray-500">
+                      {t("reservation.accessory.loading_text")}
+                    </p>
                   </div>
                 ) : selectedAccessoriesData.length === 0 ? (
                   <div className="text-center py-12">
@@ -190,7 +214,9 @@ export default function AccessoriesSelection() {
                         <button
                           onClick={() => handleRemove(accessory.id)}
                           className="h-8 w-8 flex items-center justify-center rounded-lg bg-[white] border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                          aria-label="Retirer"
+                          aria-label={t(
+                            "reservation.accessory.remove_aria_label"
+                          )}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -230,7 +256,9 @@ export default function AccessoriesSelection() {
                 </Button>
 
                 <p className="text-xs text-center text-gray-500">
-                  {t("reservation.accessory.help_text_continue_without_accessory")}
+                  {t(
+                    "reservation.accessory.help_text_continue_without_accessory"
+                  )}
                 </p>
               </div>
             </div>
@@ -250,7 +278,9 @@ export default function AccessoriesSelection() {
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-20">
                   <Loader2 className="h-12 w-12 animate-spin text-cyan-500 mb-4" />
-                  <p className="text-gray-500">{t("reservation.accessory.loading_accessory")}</p>
+                  <p className="text-gray-500">
+                    {t("reservation.accessory.loading_accessory")}
+                  </p>
                 </div>
               ) : allAccessories.length === 0 ? (
                 <div className="text-center py-20">

@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Console } from "@/types/console";
 
@@ -103,7 +103,9 @@ export function ReservationProvider({
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAccessories, setSelectedAccessories] = useState<number[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(
+    undefined
+  );
   const [selectedCours, setSelectedCours] = useState<number | null>(null);
   const [selectedConsoleId, setSelectedConsoleId] = useState<number>(0);
 
@@ -191,14 +193,15 @@ export function ReservationProvider({
 
         setSelectedAccessories(data.accessories || []);
 
-        setSelectedDate(data.selectedDate ? new Date(data.selectedDate) : undefined);
+        setSelectedDate(
+          data.selectedDate ? new Date(data.selectedDate) : undefined
+        );
         setSelectedTime(data.selectedTime || undefined);
 
         setCurrentStep(data.currentStep || 1);
 
         setIsTimerActive(true);
         setTimeRemaining(computeRemaining(data.expiresAt));
-
       } catch (e) {
         console.error("Erreur restauration réservation:", e);
         clearStorage();
@@ -292,7 +295,7 @@ export function ReservationProvider({
       const data = await res.json();
       setSelectedConsoleId(data.consoleStockId);
       const expires = data.expiresAt || data.expires_at || data.expireAt;
-      
+
       if (!data.reservationId && !data.holdId) {
         throw new Error("Réponse invalide du serveur (reservationId manquant)");
       }
@@ -300,10 +303,10 @@ export function ReservationProvider({
         throw new Error("Réponse invalide du serveur (expiresAt manquant)");
       }
 
-    setReservationId(String(data.reservationId ?? data.holdId));
-    setExpiresAt(String(expires));
-    setIsTimerActive(true);
-    setTimeRemaining(computeRemaining(String(expires)));
+      setReservationId(String(data.reservationId ?? data.holdId));
+      setExpiresAt(String(expires));
+      setIsTimerActive(true);
+      setTimeRemaining(computeRemaining(String(expires)));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur inconnue");
       setIsTimerActive(false);
@@ -387,33 +390,33 @@ export function ReservationProvider({
     }
   };
 
-const updateReservationConsole = async (newConsoleId: number) => {
-  if (!reservationId) return;
+  const updateReservationConsole = async (newConsoleId: number) => {
+    if (!reservationId) return;
 
-  setSelectedGames([]);
+    setSelectedGames([]);
 
-  try {
-    const res = await fetch(`/api/reservation/update-hold-reservation`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reservationId, newConsoleId }),
-    });
+    try {
+      const res = await fetch(`/api/reservation/update-hold-reservation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId, newConsoleId }),
+      });
 
-    if (!res.ok) throw new Error("Erreur modification plateforme");
+      if (!res.ok) throw new Error("Erreur modification plateforme");
 
-    const data = await res.json();
-    if (data.success) {
-      setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
+      const data = await res.json();
+      if (data.success) {
+        setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur update plateforme");
     }
-  } catch (e) {
-    setError(e instanceof Error ? e.message : "Erreur update plateforme");
-  }
-};
+  };
 
   /** Finalise la réservation côté serveur */
-// Extrait de la fonction completeReservation corrigée pour le ReservationContext
+  // Extrait de la fonction completeReservation corrigée pour le ReservationContext
 
-/** Finalise la réservation côté serveur */
+  /** Finalise la réservation côté serveur */
   const completeReservation = async () => {
     if (!reservationId) {
       setError("Aucune réservation à finaliser");
@@ -449,11 +452,10 @@ const updateReservationConsole = async (newConsoleId: number) => {
       setError("Aucune heure sélectionnée");
       return;
     }
-    
+
     setIsLoading(true);
     setError(null);
 
-    
     try {
       const res = await fetch(`/api/reservation/confirm-reservation`, {
         method: "POST",
@@ -467,38 +469,43 @@ const updateReservationConsole = async (newConsoleId: number) => {
           game3Id: selectedGames[2] ? Number(selectedGames[2]) : null,
           accessoryIds: selectedAccessories,
           coursId: selectedCours,
-          date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
+          date: selectedDate ? selectedDate.toISOString().split("T")[0] : null,
           time: selectedTime || null,
         }),
       });
-      
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
         throw new Error(errorData?.message || "Erreur lors de la finalisation");
       }
-      
+
       const data = await res.json();
-      
+
       // Sauvegarder les détails pour la page de succès
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('last_reservation', JSON.stringify({
-          reservationId: data.reservationId || reservationId,
-          finalReservationId: data.finalReservationId,
-          console: selectedConsole,
-          games: selectedGames,
-          date: new Date().toLocaleDateString('fr-CA'),
-          heure: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
-        }));
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(
+          "last_reservation",
+          JSON.stringify({
+            reservationId: data.reservationId || reservationId,
+            finalReservationId: data.finalReservationId,
+            console: selectedConsole,
+            games: selectedGames,
+            date: new Date().toLocaleDateString("fr-CA"),
+            heure: new Date().toLocaleTimeString("fr-CA", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          })
+        );
       }
-      
+
       // Réinitialiser le contexte
       setIsTimerActive(false);
       setReservationId(null);
       setExpiresAt(null);
       clearStorage();
-      
+
       return data;
-      
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur finalisation");
       throw e; // Re-throw pour que le composant puisse gérer l'erreur
@@ -575,4 +582,3 @@ export function useReservation() {
   }
   return context;
 }
-

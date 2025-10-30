@@ -1,3 +1,5 @@
+"use client";
+
 import { Calendar } from "@/components/ui/calendar";
 import { frCA, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
