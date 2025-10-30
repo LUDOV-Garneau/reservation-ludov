@@ -97,6 +97,7 @@
     },
     "accessory": {
       "header_info": "Console sélectionnée",
+      "header_info": "Accessoires pour",
       "error": "Erreur",
       "loading_text": "Chargement des accessoires...",
       "empty_selection": "Aucun accessoire sélectionné",
@@ -116,6 +117,8 @@
       "remove_aria_label": "Retirer",
       "accessoryName": "Nom de l'accessoire...",
       "noAccessoryFound": "Aucun accessoire trouvé"
+      "no_accessory_available": "Il n'y a pas d'accessoire disponible pour cette plateforme.",
+      "skip_step": "Passer cette étape"
     },
     "calendar": {
       "title": "Réservation",
@@ -216,6 +219,27 @@
       "games": "Jeux réservés",
       "console": "Plateforme",
       "cancelled": "annulée"
+      "console": "Plateforme"
+    },
+    "reminder": {
+      "modifyReminder": "Modifier le rappel",
+      "emailReminder": "Rappel par courriel",
+      "modify": "Modifier",
+      "reminder": "Rappel",
+      "enableReminder": "Activer le rappel",
+      "receiveEmail": "Recevoir un courriel",
+      "whenToReceive": "Quand souhaitez-vous recevoir le rappel ?",
+      "whatContainsTitle": "Que contient le rappel ?",
+      "whatContainsDesc": "Date, heure, console, jeux sélectionnés et numéro de station.",
+      "cancel": "Annuler",
+      "configure": "Configurer le rappel",
+      "confirm": "Confirmer",
+      "configuring": "Configuration...",
+      "sending": "Envoi...",
+      "configureEmailReminder": "Configurer le rappel par courriel",
+      "receiveEmailReminder": "Recevez un courriel de rappel avant votre réservation",
+      "configFailure": "Échec de la configuration du rappel",
+      "unknownError": "Erreur inconnue"
     }
   },
   "auth": {
