@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
              reminder_hours_before = ?,
              reminder_sent = 0,
              reminder_sent_at = NULL,
-             lastUpdatedAt = NOW()
+             lastUpdatedAt = UTC_TIMESTAMP()
          WHERE id = ? AND user_id = ?`,
         [
           enabled ? 1 : 0,

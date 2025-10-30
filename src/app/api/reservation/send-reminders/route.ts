@@ -162,8 +162,8 @@ export async function GET(request: NextRequest) {
         await connection.query(
           `UPDATE reservation 
            SET reminder_sent = 1, 
-               reminder_sent_at = NOW(),
-               lastUpdatedAt = NOW()
+               reminder_sent_at = UTC_TIMESTAMP(),
+               lastUpdatedAt = UTC_TIMESTAMP()
            WHERE id = ?`,
           [reservation.id]
         );
@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
         try {
           await connection.query(
             `INSERT INTO email_logs (reservation_id, email_type, recipient, status, error_message, created_at)
-             VALUES (?, 'reminder', ?, 'failed', ?, NOW())`,
+             VALUES (?, 'reminder', ?, 'failed', ?, UTC_TIMESTAMP())`,
             [reservation.id, reservation.email, errorMessage]
           );
         } catch (logError) {

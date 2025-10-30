@@ -6,7 +6,7 @@ type NowRow = RowDataPacket & { now: string };
 
 export async function GET() {
   try {
-    const [rows] = await pool.query<NowRow[]>("SELECT NOW() as now");
+    const [rows] = await pool.query<NowRow[]>("SELECT UTC_TIMESTAMP() as now");
     return NextResponse.json(
       { success: true, time: rows[0].now },
       { status: 200 }

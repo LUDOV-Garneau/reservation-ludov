@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       await connection.query(
         `
         INSERT INTO reservation_hold (id, user_id, console_id, console_type_id, expireAt, createdAt)
-        VALUES (?, ?, ?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? MINUTE), UTC_TIMESTAMP())
+        VALUES (?, ?, ?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? MINUTE), UTC_TIMESTAMP())
         `,
         [reservationId, userId, consoleStockId, consoleTypeId, minutes]
       );
