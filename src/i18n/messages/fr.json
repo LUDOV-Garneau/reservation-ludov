@@ -96,8 +96,7 @@
       "errorLoading": "Erreur lors du chargement des jeux"
     },
     "accessory": {
-      "header_info": "Console sélectionnée",
-      "header_info": "Accessoires pour",
+      "header_info": "Plateforme sélectionnée",
       "error": "Erreur",
       "loading_text": "Chargement des accessoires...",
       "empty_selection": "Aucun accessoire sélectionné",
@@ -109,14 +108,12 @@
       "subtitle_accessory": "Choisissez les accessoires que vous souhaitez ajouter à votre réservation.",
       "loading_accessory": "Chargement des accessoires...",
       "title_no_accessory_available": "Aucun accessoire disponible",
-      "no_accessory_available": "Aucun accessoire n'est actuellement disponible.",
-      "skip_step": "Passer cette étape",
       "previousStep": "Étape précédente",
       "selection": "Sélection",
       "selected_count": "{count} accessoire sélectionné{plural}",
       "remove_aria_label": "Retirer",
       "accessoryName": "Nom de l'accessoire...",
-      "noAccessoryFound": "Aucun accessoire trouvé"
+      "noAccessoryFound": "Aucun accessoire trouvé",
       "no_accessory_available": "Il n'y a pas d'accessoire disponible pour cette plateforme.",
       "skip_step": "Passer cette étape"
     },
@@ -219,7 +216,6 @@
       "games": "Jeux réservés",
       "console": "Plateforme",
       "cancelled": "annulée"
-      "console": "Plateforme"
     },
     "reminder": {
       "modifyReminder": "Modifier le rappel",
@@ -230,7 +226,7 @@
       "receiveEmail": "Recevoir un courriel",
       "whenToReceive": "Quand souhaitez-vous recevoir le rappel ?",
       "whatContainsTitle": "Que contient le rappel ?",
-      "whatContainsDesc": "Date, heure, console, jeux sélectionnés et numéro de station.",
+      "whatContainsDesc": "Date, heure, plateforme, jeux sélectionnés et numéro de station.",
       "cancel": "Annuler",
       "configure": "Configurer le rappel",
       "confirm": "Confirmer",

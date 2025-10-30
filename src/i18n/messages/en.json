@@ -113,7 +113,7 @@
       "coursesAvailable": "{count} course available{plural}"
     },
     "accessory": {
-      "header_info": "Selected console",
+      "header_info": "Selected platform",
       "error": "Error",
       "loading_text": "Loading accessories...",
       "empty_selection": "No accessories selected",
@@ -217,7 +217,6 @@
       "games": "Reserved games",
       "console": "Platform",
       "cancelled": "cancelled"
-      "console": "Platform"
     },
     "reminder": {
       "modifyReminder": "Modify Reminder",
@@ -228,7 +227,7 @@
       "receiveEmail": "Receive an email",
       "whenToReceive": "When do you want to receive the reminder?",
       "whatContainsTitle": "What does the reminder contain?",
-      "whatContainsDesc": "Date, time, console, selected games and station number.",
+      "whatContainsDesc": "Date, time, platform, selected games and station number.",
       "cancel": "Cancel",
       "configure": "Configure Reminder",
       "confirm": "Confirm",
