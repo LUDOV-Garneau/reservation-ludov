@@ -13,7 +13,7 @@ console.log('━━━━━━━━━━━━━━━━━━━━━━�
 console.log('LUDOV - Envoi automatique de rappels');
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 console.log(`Fréquence : ${CRON_SCHEDULE}`);
-console.log(`URL de l'API : ${APP_URL}/api/reservation/cron/send-reminders`);
+console.log(`URL de l'API : ${APP_URL}/api/reservation/send-reminders`);
 console.log(`Secret configuré : ${CRON_SECRET ? 'Oui ✓' : 'Non ✗'}`);
 console.log(`Démarré le : ${new Date().toLocaleString('fr-CA')}`);
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
