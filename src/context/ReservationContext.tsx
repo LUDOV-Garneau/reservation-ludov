@@ -82,7 +82,7 @@ const STORAGE_KEY = "reservation_hold"; // clé pour sessionStorage
  */
 export function ReservationProvider({
   children,
-  timerDuration = 54,
+  timerDuration = 15,
 }: ReservationProviderProps) {
   /**
    * --- États globaux ---
@@ -127,7 +127,9 @@ export function ReservationProvider({
 
   const computeRemaining = (expiry: string): number => {
     const now = Date.now();
-    const end = new Date(expiry).getTime();
+    // Force l'interprétation en UTC si le 'Z' n'est pas présent
+    const expiryUTC = expiry.endsWith('Z') ? expiry : expiry + 'Z';
+    const end = new Date(expiryUTC).getTime();
     return Math.max(0, Math.floor((end - now) / 1000));
   };
 
