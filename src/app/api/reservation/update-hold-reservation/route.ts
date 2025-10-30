@@ -101,7 +101,11 @@ export async function POST(req: Request) {
 
       const reservation = rows[0];
 
-      if (new Date(reservation.expireAt) < new Date()) {
+      const expiryUTC = reservation.expireAt.endsWith('Z') 
+        ? reservation.expireAt 
+        : reservation.expireAt + 'Z';
+
+      if (new Date(expiryUTC) < new Date()) {
         await conn.rollback();
         return NextResponse.json(
           { success: false, message: "Réservation expirée" },
