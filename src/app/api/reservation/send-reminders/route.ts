@@ -3,9 +3,8 @@ import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
 import { sendReminderEmail } from "@/lib/sendEmail";
 
-// Force dynamic pour éviter le cache
 export const dynamic = "force-dynamic";
-export const maxDuration = 300; // 5 minutes max
+export const maxDuration = 300;
 
 interface ReservationToRemind extends RowDataPacket {
   id: string;
@@ -22,14 +21,13 @@ interface ReservationToRemind extends RowDataPacket {
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
-  console.log("🕐 [CRON] Starting reminder job at", new Date().toISOString());
+  console.log("[CRON] Starting reminder job at", new Date().toISOString());
 
-  // Vérifier l'authentification
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
 
   if (!cronSecret) {
-    console.error("❌ [CRON] CRON_SECRET not configured");
+    console.error("[CRON] CRON_SECRET not configured");
     return NextResponse.json(
       { error: "Server misconfiguration" },
       { status: 500 }
@@ -37,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (authHeader !== `Bearer ${cronSecret}`) {
-    console.error("❌ [CRON] Unauthorized access attempt");
+    console.error("[CRON] Unauthorized access attempt");
     console.error("   Received:", authHeader);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -45,9 +43,8 @@ export async function GET(request: NextRequest) {
   const connection = await pool.getConnection();
 
   try {
-    console.log("📊 [CRON] Querying database for pending reminders...");
+    console.log("[CRON] Querying database for pending reminders...");
 
-    // Récupérer les réservations nécessitant un rappel
     const [reservations] = await connection.query<ReservationToRemind[]>(
       `SELECT 
         r.id,
@@ -72,11 +69,11 @@ export async function GET(request: NextRequest) {
       LIMIT 50`
     );
 
-    console.log(`📧 [CRON] Found ${reservations.length} reminders to send`);
+    console.log(`[CRON] Found ${reservations.length} reminders to send`);
 
     if (reservations.length === 0) {
       const duration = Date.now() - startTime;
-      console.log(`✅ [CRON] No reminders to send. Completed in ${duration}ms`);
+      console.log(`[CRON] No reminders to send. Completed in ${duration}ms`);
       return NextResponse.json(
         {
           success: true,
@@ -94,20 +91,17 @@ export async function GET(request: NextRequest) {
     let errorCount = 0;
     const errors: Array<{ id: string; error: string }> = [];
 
-    // Envoyer les rappels
     for (const reservation of reservations) {
       try {
         console.log(
-          `📨 [CRON] Sending reminder for reservation ${reservation.id} to ${reservation.email}`
+          `[CRON] Sending reminder for reservation ${reservation.id} to ${reservation.email}`
         );
 
-        // Formater la date
         const dateFormatted =
           reservation.date instanceof Date
             ? reservation.date.toISOString().split("T")[0]
             : String(reservation.date).split("T")[0];
 
-        // Envoyer l'email
         await sendReminderEmail({
           to: reservation.email,
           userName: `${reservation.firstname} ${reservation.lastname}`,
@@ -117,7 +111,6 @@ export async function GET(request: NextRequest) {
           consoleName: reservation.console_name,
         });
 
-        // Marquer comme envoyé
         await connection.query(
           `UPDATE reservation 
            SET reminder_sent = 1, 
@@ -128,7 +121,7 @@ export async function GET(request: NextRequest) {
         );
 
         sentCount++;
-        console.log(`✅ [CRON] Reminder sent successfully for ${reservation.id}`);
+        console.log(`[CRON] Reminder sent successfully for ${reservation.id}`);
       } catch (error) {
         errorCount++;
         const errorMessage =
@@ -136,11 +129,10 @@ export async function GET(request: NextRequest) {
         errors.push({ id: reservation.id, error: errorMessage });
 
         console.error(
-          `❌ [CRON] Error sending reminder for reservation ${reservation.id}:`,
+          `[CRON] Error sending reminder for reservation ${reservation.id}:`,
           error
         );
 
-        // Logger l'erreur en base (optionnel)
         try {
           await connection.query(
             `INSERT INTO email_logs (reservation_id, email_type, recipient, status, error_message, created_at)
@@ -148,14 +140,14 @@ export async function GET(request: NextRequest) {
             [reservation.id, reservation.email, errorMessage]
           );
         } catch (logError) {
-          console.error("❌ [CRON] Failed to log error:", logError);
+          console.error("[CRON] Failed to log error:", logError);
         }
       }
     }
 
     const duration = Date.now() - startTime;
-    console.log(`✅ [CRON] Job completed in ${duration}ms`);
-    console.log(`📊 [CRON] Results: Sent=${sentCount}, Errors=${errorCount}, Total=${reservations.length}`);
+    console.log(`[CRON] Job completed in ${duration}ms`);
+    console.log(`[CRON] Results: Sent=${sentCount}, Errors=${errorCount}, Total=${reservations.length}`);
 
     return NextResponse.json(
       {
@@ -170,7 +162,7 @@ export async function GET(request: NextRequest) {
     );
   } catch (error) {
     const duration = Date.now() - startTime;
-    console.error("❌ [CRON] Fatal error in reminder job:", error);
+    console.error("[CRON] Fatal error in reminder job:", error);
 
     return NextResponse.json(
       {
