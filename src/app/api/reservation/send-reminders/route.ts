@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
 import { sendReminderEmail } from "@/lib/sendEmail";
+import { connect } from "http2";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -17,6 +18,19 @@ interface ReservationToRemind extends RowDataPacket {
   lastname: string;
   console_name: string;
   station: number | null;
+}
+
+const TZ = 'America/Toronto';
+function getOffsetFor(zone: string): string {
+  const now = new Date();
+  const localStr = now.toLocaleString('en-CA', { timeZone: zone }); // "MM/DD/YYYY, HH:MM:SS AM/PM"
+  const local = new Date(localStr);
+  const diffMin = Math.round((local.getTime() - now.getTime()) / 60000);
+  const sign = diffMin >= 0 ? '+' : '-';
+  const abs = Math.abs(diffMin);
+  const hh = String(Math.floor(abs / 60)).padStart(2, '0');
+  const mm = String(abs % 60).padStart(2, '0');
+  return `${sign}${hh}:${mm}`;
 }
 
 export async function GET(request: NextRequest) {
@@ -43,6 +57,15 @@ export async function GET(request: NextRequest) {
   const connection = await pool.getConnection();
 
   try {
+
+    const offset = getOffsetFor(TZ);
+    try {
+      await connection.query('SET time_zone = ?', [offset]);
+      console.log(`[CRON] MySQL session time_zone set to ${offset} for ${TZ}`);
+    } catch (e) {
+      console.warn('[CRON] Failed to set session time_zone, continuing in server default:', e);
+    }
+    
     console.log("[CRON] Querying database for pending reminders...");
 
     const [reservations] = await connection.query<ReservationToRemind[]>(
