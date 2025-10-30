@@ -53,7 +53,7 @@ export default function SelectedConsoleCard({
     setSuccess(false);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setSuccess(true);
 
       if (onSuccess) {
@@ -85,7 +85,6 @@ export default function SelectedConsoleCard({
             <Monitor className="h-16 w-16" />
           </div>
         )}
-
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 

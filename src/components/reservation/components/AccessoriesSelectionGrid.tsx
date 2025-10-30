@@ -11,7 +11,7 @@ export interface Accessory {
 }
 
 interface AccessorySelectionGridProps {
-  accessories: Accessory[];       // <- fourni par le parent
+  accessories: Accessory[];
   selectedIds: number[];
   onSelect: (a: Accessory) => void;
 }
@@ -34,7 +34,6 @@ export default function AccessorySelectionGrid({
 
   return (
     <div className="space-y-4">
-      {/* Recherche */}
       <div className="relative">
         <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
@@ -45,9 +44,10 @@ export default function AccessorySelectionGrid({
         />
       </div>
 
-      {/* Grille */}
       {filtered.length === 0 ? (
-        <p className="text-gray-500 text-center">Aucun accessoire trouvé</p>
+        <p className="text-gray-500 text-center">
+          {t("reservation.accessory.noAccessoryFound")}
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((a) => (

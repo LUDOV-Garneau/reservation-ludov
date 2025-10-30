@@ -28,7 +28,11 @@ function generateAllTimeSlots(): string[] {
 
   const slots: string[] = [];
 
-  for (let hour = OPENING_HOUR; hour <= CLOSING_HOUR - SESSION_DURATION; hour++) {
+  for (
+    let hour = OPENING_HOUR;
+    hour <= CLOSING_HOUR - SESSION_DURATION;
+    hour++
+  ) {
     const timeString = `${hour.toString().padStart(2, "0")}:00:00`;
     slots.push(timeString);
   }
@@ -43,10 +47,16 @@ function checkSlotAvailability(
   requestedGameIds: number[],
   requestedAccessoryIds: number[]
 ): { available: boolean; conflicts?: unknown } {
-  const conflicts: { console?: boolean; games?: number[]; accessories?: number[] } = {};
+  const conflicts: {
+    console?: boolean;
+    games?: number[];
+    accessories?: number[];
+  } = {};
   let hasConflict = false;
 
-  const reservationsAtThisTime = reservations.filter((res) => res.time === time);
+  const reservationsAtThisTime = reservations.filter(
+    (res) => res.time === time
+  );
 
   const consoleConflict = reservationsAtThisTime.some(
     (res) => res.console_id === requestedConsoleId
@@ -76,11 +86,11 @@ function checkSlotAvailability(
   const conflictingAccessories: number[] = [];
   for (const res of reservationsAtThisTime) {
     let reservedAccessories: number[] = [];
-    
+
     if (res.accessoirs) {
       if (Array.isArray(res.accessoirs)) {
         reservedAccessories = res.accessoirs;
-      } else if (typeof res.accessoirs === 'string') {
+      } else if (typeof res.accessoirs === "string") {
         try {
           reservedAccessories = JSON.parse(res.accessoirs);
         } catch {
@@ -153,10 +163,16 @@ export async function GET(request: NextRequest) {
 
     const requestedConsoleId = parseInt(consoleId, 10);
     const requestedGameIds = gameIds
-      ? gameIds.split(",").map((id) => parseInt(id.trim(), 10)).filter((id) => !isNaN(id))
+      ? gameIds
+          .split(",")
+          .map((id) => parseInt(id.trim(), 10))
+          .filter((id) => !isNaN(id))
       : [];
     const requestedAccessoryIds = accessoryIds
-      ? accessoryIds.split(",").map((id) => parseInt(id.trim(), 10)).filter((id) => !isNaN(id))
+      ? accessoryIds
+          .split(",")
+          .map((id) => parseInt(id.trim(), 10))
+          .filter((id) => !isNaN(id))
       : [];
 
     const [reservations] = await pool.query<ReservationRow[]>(
@@ -200,7 +216,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const availableCount = finalAvailability.filter((slot) => slot.available).length;
+    const availableCount = finalAvailability.filter(
+      (slot) => slot.available
+    ).length;
 
     return NextResponse.json({
       success: true,

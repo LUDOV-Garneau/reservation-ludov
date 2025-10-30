@@ -29,7 +29,8 @@
       "previousStep": "Étape précédente",
       "stepNotFound": "Étape non trouvée",
       "backToStart": "Retour au début",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "manuallyCancelled": "Votre réservation a été annulée"
     },
     "console": {
       "error": "Une erreur est survenue",
@@ -64,52 +65,101 @@
       "consoleSelection": "Sélection de la plateforme",
       "modify": "Modifier"
     },
-    "games" : {
-      "error" : {
+    "games": {
+      "error": {
         "games_restore": "Erreur restauration jeux:",
         "max_3_games": "Maximum 3 jeux peuvent être sélectionnés",
         "selecte_at_least_one": "Sélectionnez au moins un jeu",
         "no_active_reservation": "Aucune réservation active",
-        "save_failed" : "Erreur lors de la sauvegarde",
+        "save_failed": "Erreur lors de la sauvegarde",
         "select_console_first": "Sélectionner une plateforme d'abord"
       },
       "your_games": "Vos jeux",
       "selected_platform": "Plateforme sélectionnée",
       "select_up_to_3": "Sélectionnez jusqu'à 3 jeux",
       "go_through_library": "Parcourez la liste pour choisir",
-      "saving" : "Sauvegarde...",
+      "saving": "Sauvegarde...",
       "continue": "Continuer",
-      "game_library": "Bibliothèque de jeux"
+      "game_library": "Bibliothèque de jeux",
+      "searchPlaceholder": "Rechercher un jeu...",
+      "searching": "Recherche...",
+      "gamesAvailable": "{count} jeu{plural} disponible{plural}",
+      "displayed": "Affiché: {count}",
+      "loading": "Chargement des jeux...",
+      "noResult": "Aucun jeu trouvé pour \"{search}\"",
+      "noGames": "Aucun jeu disponible",
+      "clearSearch": "Effacer la recherche",
+      "details": "Plus de détails",
+      "loadingMore": "Chargement de plus de jeux...",
+      "listEnd": "Fin de la liste • {count} jeux affichés",
+      "loadMore": "Charger plus de résultats",
+      "errorLoading": "Erreur lors du chargement des jeux"
     },
     "accessory": {
-      "header_info" : "Accessoires pour",
+      "header_info": "Console sélectionnée",
       "error": "Erreur",
-      "loading_text": "Chargement...",
+      "loading_text": "Chargement des accessoires...",
       "empty_selection": "Aucun accessoire sélectionné",
-      "button_clear_all": "Tout effacer",
+      "button_clear_all": "Tout supprimer",
       "button_state_loading_saving": "Enregistrement...",
       "button_continue": "Continuer",
       "help_text_continue_without_accessory": "Vous pouvez continuer sans sélectionner d'accessoire.",
-      "accessoryName": "Nom de l'accessoire",
-      "title_accessory_selection": "Sélectionnez vos accessoires",
-      "subtitle_accessory": "Sélectionnez les accessoires que vous souhaitez ajouter à votre réservation.",
+      "title_accessory_selection": "Sélection des accessoires",
+      "subtitle_accessory": "Choisissez les accessoires que vous souhaitez ajouter à votre réservation.",
       "loading_accessory": "Chargement des accessoires...",
       "title_no_accessory_available": "Aucun accessoire disponible",
-      "no_accessory_available": "Il n'y a pas d'accessoire disponible pour cette plateforme.",
-      "skip_step" : "Passer cette étape"
+      "no_accessory_available": "Aucun accessoire n'est actuellement disponible.",
+      "skip_step": "Passer cette étape",
+      "previousStep": "Étape précédente",
+      "selection": "Sélection",
+      "selected_count": "{count} accessoire sélectionné{plural}",
+      "remove_aria_label": "Retirer",
+      "accessoryName": "Nom de l'accessoire...",
+      "noAccessoryFound": "Aucun accessoire trouvé"
     },
     "calendar": {
-      "title": "Sélection de la date",
+      "title": "Réservation",
+      "noValidDate": "Aucune plage horaire disponible",
       "continueBtn": "Continuer",
-      "noValidDate": "Aucune plage horaire disponible pour cette journée."
+      "errorLoadTimes": "Erreur chargement des horaires",
+      "errorServer": "Erreur serveur",
+      "allSlotsTaken": "Toutes les plages horaires sont réservées pour cette date",
+      "selectDate": "Sélectionnez une date et une heure pour votre réservation",
+      "reservationDate": "Date de réservation",
+      "startTime": "Heure de début",
+      "selectDateFirst": "Veuillez d'abord sélectionner une date",
+      "errorSummary": "Erreur",
+      "selectDateError": "Veuillez sélectionner une date",
+      "selectTimeError": "Veuillez sélectionner une heure",
+      "noActiveReservationError": "Aucune réservation active",
+      "saveError": "Erreur lors de la sauvegarde",
+      "saveFailed": "Échec de la sauvegarde",
+      "saveReservationError": "Erreur lors de la sauvegarde de la réservation",
+      "saveLoading": "Sauvegarde...",
+      "selectionSummaryTitle": "Résumé de votre sélection",
+      "selectionSummary": "{date} à {time}",
+      "noValidTimeSlot": "Aucune plage horaire disponible",
+      "nSlotsAvailable": "{count} plage{plural} disponible{plural} (2h de jeu)",
+      "durationLabel": "Durée",
+      "durationValue": "2 heures",
+      "endLabel": "Fin"
     },
     "course": {
       "selectionTitle": "Sélection du cours",
-      "instruction": "Veuillez fournir le sigle du cours pour lequel vous effectuez la réservation :",
+      "instruction": "Veuillez choisir le cours auquel vous souhaitez vous inscrire.",
       "courseLabel": "Cours",
       "loading": "Chargement...",
-      "chooseCourse": "Choisir un cours",
-      "continue": "Continuer"
+      "chooseCourse": "Choisissez un cours",
+      "noCourseAvailable": "Aucun cours disponible",
+      "error": "Erreur",
+      "selectCourseError": "Veuillez sélectionner un cours",
+      "saveError": "Erreur sauvegarde",
+      "saveFailed": "Échec de la sauvegarde",
+      "saveLoading": "Enregistrement...",
+      "continue": "Continuer",
+      "selectedCourseLabel": "Cours sélectionné",
+      "return": "Retour",
+      "coursesAvailable": "{count} cours disponible{plural}"
     },
     "confirm": {
       "loadingReservation": "Chargement de votre réservation...",
@@ -120,13 +170,20 @@
       "selectedConsole": "Plateforme",
       "noGameSelected": "Aucun jeu sélectionné",
       "noConsoleSelected": "Aucune plateforme sélectionnée",
-      "accessories": "Accessoires :",
-      "courses": "Cours :",
-      "yourReservation": "Votre réservation"
+      "accessories": "Accessoires",
+      "courses": "Cours",
+      "yourReservation": "Votre réservation",
+      "date": "date",
+      "hour": "heure",
+      "confirmationError": "Erreur lors de la confirmation",
+      "missingData": "Données manquantes",
+      "loadingError": "Erreur chargement",
+      "noActiveReservation": "Aucune réservation active",
+      "return": "Retour"
     },
     "details": {
       "cancelButton": "Annuler",
-      "cancelConfirmationTitle": "Confirmer l’annulation",
+      "cancelConfirmationTitle": "Confirmer l'annulation",
       "cancelConfirmation": "Cette action est irréversible. Voulez-vous annuler cette réservation?",
       "deleteReservationFailed": "Échec de la suppression de la réservation.",
       "returnButton": "Retour",
@@ -139,10 +196,10 @@
       "stationAssigned": "Station assignée",
       "titleSection": "Détails de la réservation",
       "noAccessory": "Aucun accessoire sélectionné",
-      "cancelWarningTitle" : "Action irréversible",
-      "cancelWarning" : "Cette action ne peut pas être annulée. Vous devrez créer une nouvelle réservation si vous changez d'avis.",
-      "cancelConfirmButton" : "Confirmer l'annulation",
-      "canceling" : "Annulation en cours..."
+      "cancelWarningTitle": "Action irréversible",
+      "cancelWarning": "Cette action ne peut pas être annulée. Vous devrez créer une nouvelle réservation si vous changez d'avis.",
+      "cancelConfirmButton": "Confirmer l'annulation",
+      "canceling": "Annulation en cours..."
     },
     "accueil": {
       "upcomingReservations": "Réservations à venir",
@@ -157,7 +214,8 @@
       "date": "Date",
       "time": "Heure",
       "games": "Jeux réservés",
-      "console": "Plateforme"
+      "console": "Plateforme",
+      "cancelled": "annulée"
     }
   },
   "auth": {

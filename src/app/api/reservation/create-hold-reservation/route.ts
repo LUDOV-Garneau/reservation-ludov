@@ -19,7 +19,10 @@ export async function POST(req: Request) {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
     } catch {
-      // token invalide/expiré
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired token" },
+        { status: 401 }
+      );
     }
     if (!user?.id) {
       return NextResponse.json(
@@ -122,7 +125,7 @@ export async function POST(req: Request) {
       await connection.query(
         `UPDATE console_stock SET holding = 1 WHERE id = ?`,
         [consoleStockId]
-      )
+      );
 
       await connection.commit();
 

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Search, Check, Gamepad2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 type Game = {
   id: number;
@@ -26,12 +27,14 @@ interface GameSelectionGridProps {
 
 const ITEMS_PER_PAGE = 12;
 
-export default function GameSelectionGrid({ 
-  selectedIds, 
-  onSelect, 
+export default function GameSelectionGrid({
+  selectedIds,
+  onSelect,
   maxReached,
-  consoleSelectedId
+  consoleSelectedId,
 }: GameSelectionGridProps) {
+  const t = useTranslations();
+
   const [games, setGames] = useState<Game[]>([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -40,49 +43,51 @@ export default function GameSelectionGrid({
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchDebounce, setSearchDebounce] = useState("");
   const [totalGames, setTotalGames] = useState(0);
-  const [consoleId] = useState<number | null>(consoleSelectedId || null);
-  
-  // Ref pour l'intersection observer
+  const consoleId = consoleSelectedId || null;
+
   const observerTarget = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fonction pour charger les jeux
-  const loadGames = useCallback(async (pageNum: number, searchQuery: string, reset: boolean = false, consoleId: number | null) => {
-    if (loading || (!hasMore && !reset)) return;
+  // Only depend on `t` and `consoleId`
+  const loadGames = useCallback(
+    async (pageNum: number, searchQuery: string, reset: boolean = false) => {
+      // Don't use loading or hasMore as dependency here
+      if (loading || (!hasMore && !reset)) return;
 
-    
-    setLoading(true);
-    
-    try {
-      const params = new URLSearchParams({
-        page: String(pageNum),
-        limit: String(ITEMS_PER_PAGE),
-        ...(searchQuery && { search: searchQuery }),
-      });
+      setLoading(true);
 
-      const res = await fetch(`/api/reservation/games?${params}&consoleId=${consoleId}`);
-      if (!res.ok) throw new Error("Erreur lors du chargement des jeux");
-      
-      const data = await res.json();
+      try {
+        const params = new URLSearchParams({
+          page: String(pageNum),
+          limit: String(ITEMS_PER_PAGE),
+          ...(searchQuery && { search: searchQuery }),
+        });
 
-      
-      if (reset) {
-        setGames(data.games || []);
-        setPage(1);
-      } else {
-        setGames(prev => [...prev, ...(data.games || [])]);
+        const res = await fetch(
+          `/api/reservation/games?${params}&consoleId=${consoleId}`
+        );
+        if (!res.ok) throw new Error(t("reservation.games.errorLoading"));
+
+        const data = await res.json();
+
+        if (reset) {
+          setGames(data.games || []);
+          setPage(1);
+        } else {
+          setGames((prev) => [...prev, ...(data.games || [])]);
+        }
+
+        setHasMore(data.hasMore || false);
+        setTotalGames(data.pagination?.total || 0);
+      } catch (err) {
+        console.error(t("reservation.games.errorLoading"), err);
+      } finally {
+        setLoading(false);
+        setInitialLoading(false);
       }
-      
-      setHasMore(data.hasMore || false);
-      setTotalGames(data.pagination?.total || 0);
-      
-    } catch (err) {
-      console.error("Erreur chargement jeux:", err);
-    } finally {
-      setLoading(false);
-      setInitialLoading(false);
-    }
-  }, [loading, hasMore]);
+    },
+    [t, consoleId, loading, hasMore]
+  );
 
   useEffect(() => {
     if (searchTimeoutRef.current) {
@@ -100,24 +105,31 @@ export default function GameSelectionGrid({
     };
   }, [search]);
 
+  // MAIN FETCH: Only reset cursor/pagination on search change
   useEffect(() => {
     setGames([]);
     setPage(1);
     setHasMore(true);
-    loadGames(1, searchDebounce, true, consoleId);
-  }, [searchDebounce]);
+    loadGames(1, searchDebounce, true);
+    // Only dependencies that can change: searchDebounce, t, consoleId
+    // loading/hasMore are excluded as they're managed in effect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchDebounce, t, consoleId]);
 
-  // Intersection Observer pour l'infinite scroll
+  // Intersection observer: only fetch on explicit page increments
   useEffect(() => {
     const observer = new IntersectionObserver(
-      entries => {
-      if (entries[0].isIntersecting && hasMore && !loading && !search){
-        setPage(prev => {
-          const next = prev + 1;
-          loadGames(next, searchDebounce, false, consoleId);
-          return next;
-        });
-      }},
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasMore &&
+          !loading &&
+          !search &&
+          page > 1
+        ) {
+          loadGames(page, searchDebounce, false);
+        }
+      },
       { threshold: 0.1 }
     );
 
@@ -133,12 +145,10 @@ export default function GameSelectionGrid({
     };
   }, [page, hasMore, loading, search, searchDebounce, loadGames]);
 
-  // Gestion du scroll manuel pour la recherche
+  // Manual "Load more" : only change page when not loading, not finished
   const handleLoadMore = () => {
     if (!loading && hasMore) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      loadGames(nextPage, searchDebounce, false, consoleId);
+      setPage((prev) => prev + 1);
     }
   };
 
@@ -148,55 +158,60 @@ export default function GameSelectionGrid({
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
           <Input
-            placeholder="Rechercher un jeu..."
+            placeholder={t("reservation.games.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 h-11 text-base rounded-lg"
           />
         </div>
-        
-        {/* Statistiques */}
         <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
           <div>
             {search && loading ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Recherche...
+                {t("reservation.games.searching")}
               </span>
             ) : totalGames > 0 ? (
-              <span>{totalGames} jeu{totalGames > 1 ? 'x' : ''} disponible{totalGames > 1 ? 's' : ''}</span>
+              <span>
+                {t("reservation.games.gamesAvailable", {
+                  count: totalGames,
+                  plural: totalGames > 1 ? "s" : "",
+                })}
+              </span>
             ) : null}
           </div>
           {games.length > 0 && (
-            <span>Affiché: {games.length}</span>
+            <span>
+              {t("reservation.games.displayed", { count: games.length })}
+            </span>
           )}
         </div>
       </div>
 
-      {/* État de chargement initial */}
       {initialLoading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="h-10 w-10 animate-spin text-cyan-500 mb-4" />
-          <p className="text-gray-600">Chargement des jeux...</p>
+          <p className="text-gray-600">{t("reservation.games.loading")}</p>
         </div>
       ) : games.length === 0 ? (
         <div className="text-center py-12">
           <Gamepad2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-600 font-medium">
-            {search ? `Aucun jeu trouvé pour "${search}"` : "Aucun jeu disponible"}
+            {search
+              ? t("reservation.games.noResult", { search })
+              : t("reservation.games.noGames")}
           </p>
           {search && (
             <button
               onClick={() => setSearch("")}
               className="mt-3 text-cyan-500 hover:text-cyan-600 text-sm underline"
             >
-              Effacer la recherche
+              {t("reservation.games.clearSearch")}
             </button>
           )}
         </div>
       ) : (
         <>
-          {/* Grille des jeux */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
             {games.map((game) => {
               const isSelected = selectedIds.includes(game.id);
@@ -213,11 +228,14 @@ export default function GameSelectionGrid({
                   className={`
                     relative group rounded-xl overflow-hidden shadow-md
                     transition-all duration-200
-                    ${isSelected ? 'ring-2 ring-cyan-500 scale-[0.98]' : ''}
-                    ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-xl hover:scale-[1.02]'}
+                    ${isSelected ? "ring-2 ring-cyan-500 scale-[0.98]" : ""}
+                    ${
+                      isDisabled
+                        ? "opacity-60 cursor-not-allowed"
+                        : "cursor-pointer hover:shadow-xl hover:scale-[1.02]"
+                    }
                   `}
                 >
-                  {/* Image du jeu */}
                   <div className="relative h-96">
                     {game.picture === null ? (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -233,72 +251,77 @@ export default function GameSelectionGrid({
                           loading="lazy"
                         />
                       </div>
-
                     )}
-                    
-                    {/* Overlay au hover */}
-                    <div className={`${game.picture !== null && "2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity"} absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`} />
 
-                    {/* Badge sélectionné */}
+                    <div
+                      className={`${
+                        game.picture !== null &&
+                        "2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity"
+                      } absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`}
+                    />
                     {isSelected && (
                       <div className="absolute top-2 right-1 bg-cyan-500 rounded-full p-2 shadow-lg animate-in zoom-in-50">
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       </div>
                     )}
-
-                    <div className={`${game.picture !== null && ("2xl:group-hover:opacity-100 2xl:transition-opacity 2xl:opacity-0")} absolute bottom-0 left-0 right-0 p-4`}>
+                    <div
+                      className={`${
+                        game.picture !== null &&
+                        "2xl:group-hover:opacity-100 2xl:transition-opacity 2xl:opacity-0"
+                      } absolute bottom-0 left-0 right-0 p-4`}
+                    >
                       <div className="flex flex-col gap-4 items-center">
                         <p className="text-white text-lg font-bold line-clamp-2">
                           {game.titre}
                         </p>
-                        <Link href={`https://ludov.inlibro.net/cgi-bin/koha/opac-detail.pl?biblionumber=${game.biblio_id}`} target="_blank" rel="noopener noreferrer">
-                          <Button   
+                        <Link
+                          href={`https://ludov.inlibro.net/cgi-bin/koha/opac-detail.pl?biblionumber=${game.biblio_id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
-                            className="bg-cyan-500 hover:bg-cyan-600 text-white text-xs lg:text-sm">
-                              Plus de détails
+                            className="bg-cyan-500 hover:bg-cyan-600 text-white text-xs lg:text-sm"
+                          >
+                            {t("reservation.games.details")}
                           </Button>
                         </Link>
-
                       </div>
                     </div>
                   </div>
-
                 </div>
               );
             })}
           </div>
 
-          {/* Observer target pour l'infinite scroll */}
+          {/* Infinite scroll only triggers when ref comes into view and page > 1 */}
           {!search && (
-            <div 
-              ref={observerTarget} 
-              className="flex justify-center py-4"
-            >
+            <div ref={observerTarget} className="flex justify-center py-4">
               {loading && hasMore && (
                 <div className="flex items-center gap-2 text-gray-500">
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Chargement de plus de jeux...</span>
+                  <span>{t("reservation.games.loadingMore")}</span>
                 </div>
               )}
-              
+
               {!hasMore && games.length > 0 && (
                 <p className="text-sm text-gray-500 text-center">
-                  Fin de la liste • {games.length} jeux affichés
+                  {t("reservation.games.listEnd", { count: games.length })}
                 </p>
               )}
             </div>
           )}
 
-          {/* Bouton "Charger plus" pour la recherche */}
+          {/* Manual load more button */}
           {search && hasMore && !loading && (
             <div className="flex justify-center pt-4">
               <button
                 onClick={handleLoadMore}
                 className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors font-medium"
               >
-                Charger plus de résultats
+                {t("reservation.games.loadMore")}
               </button>
             </div>
           )}

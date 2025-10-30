@@ -5,7 +5,7 @@ import { DatePicker } from "@/components/reservation/components/DatePicker";
 import { TimePicker } from "@/components/reservation/components/TimePicker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useReservation } from "@/context/ReservationContext";
 import { Loader2, AlertCircle, Calendar, Clock, MoveLeft } from "lucide-react";
 
@@ -16,6 +16,7 @@ type TimeSlot = {
 
 export default function DateSelection() {
   const t = useTranslations();
+  const locale = useLocale();
 
   const {
     setSelectedDate,
@@ -62,13 +63,15 @@ export default function DateSelection() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Erreur chargement des horaires");
+        throw new Error(
+          errorData.error || t("reservation.calendar.errorLoadTimes")
+        );
       }
 
       const data = await response.json();
 
       if (!data.success) {
-        throw new Error(data.error || "Erreur serveur");
+        throw new Error(data.error || t("reservation.calendar.errorServer"));
       }
 
       setAvailableTimes(data.availability || []);
@@ -81,7 +84,7 @@ export default function DateSelection() {
       setError(
         err instanceof Error
           ? err.message
-          : "Impossible de charger les horaires disponibles"
+          : t("reservation.calendar.errorLoadTimes")
       );
       setAvailableTimes([]);
     } finally {
@@ -115,17 +118,17 @@ export default function DateSelection() {
 
   const handleContinue = async () => {
     if (!date) {
-      setError("Veuillez sélectionner une date");
+      setError(t("reservation.calendar.selectDateError"));
       return;
     }
 
     if (!time) {
-      setError("Veuillez sélectionner une heure");
+      setError(t("reservation.calendar.selectTimeError"));
       return;
     }
 
     if (!reservationId) {
-      setError("Aucune réservation active");
+      setError(t("reservation.calendar.noActiveReservationError"));
       return;
     }
 
@@ -147,7 +150,9 @@ export default function DateSelection() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Erreur lors de la sauvegarde");
+        throw new Error(
+          errorData.message || t("reservation.calendar.saveError")
+        );
       }
 
       const data = await response.json();
@@ -155,13 +160,13 @@ export default function DateSelection() {
       if (data.success) {
         setCurrentStep(currentStep + 1);
       } else {
-        throw new Error(data.message || "Échec de la sauvegarde");
+        throw new Error(data.message || t("reservation.calendar.saveFailed"));
       }
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
-          : "Erreur lors de la sauvegarde de la réservation"
+          : t("reservation.calendar.saveReservationError")
       );
     } finally {
       setIsSaving(false);
@@ -183,7 +188,7 @@ export default function DateSelection() {
             {t("reservation.calendar.title")}
           </h2>
           <p className="text-gray-600">
-            Sélectionnez une date et une heure pour votre réservation
+            {t("reservation.calendar.selectDate")}
           </p>
         </div>
 
@@ -192,7 +197,9 @@ export default function DateSelection() {
             <div className="flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-red-800">Erreur</p>
+                <p className="text-sm font-medium text-red-800">
+                  {t("reservation.calendar.errorSummary")}
+                </p>
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             </div>
@@ -203,7 +210,9 @@ export default function DateSelection() {
           <div className="col-span-2 md:col-span-1 mx-auto lg:mx-0">
             <div className="mb-4 flex items-center gap-2">
               <Calendar className="h-5 w-5 text-cyan-600" />
-              <h3 className="text-lg font-semibold">Date de réservation</h3>
+              <h3 className="text-lg font-semibold">
+                {t("reservation.calendar.reservationDate")}
+              </h3>
             </div>
             <DatePicker selected={date} onSelect={onSelectDate} />
           </div>
@@ -211,14 +220,16 @@ export default function DateSelection() {
           <div className="col-span-2 md:col-span-1">
             <div className="mb-4 flex items-center gap-2">
               <Clock className="h-5 w-5 text-cyan-600" />
-              <h3 className="text-lg font-semibold">Heure de début</h3>
+              <h3 className="text-lg font-semibold">
+                {t("reservation.calendar.startTime")}
+              </h3>
             </div>
 
             {!date ? (
               <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                 <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
                 <p className="text-gray-600">
-                  Veuillez d&apos;abord sélectionner une date
+                  {t("reservation.calendar.selectDateFirst")}
                 </p>
               </div>
             ) : isLoading ? (
@@ -239,7 +250,7 @@ export default function DateSelection() {
                   {t("reservation.calendar.noValidDate")}
                 </p>
                 <p className="text-sm text-gray-500">
-                  Toutes les plages horaires sont réservées pour cette date
+                  {t("reservation.calendar.allSlotsTaken")}
                 </p>
               </div>
             ) : (
@@ -255,16 +266,18 @@ export default function DateSelection() {
         {date && time && (
           <div className="mb-6 p-4 bg-cyan-50 border border-cyan-200 rounded-lg">
             <p className="text-sm font-medium text-cyan-900 mb-1">
-              Résumé de votre sélection
+              {t("reservation.calendar.selectionSummaryTitle")}
             </p>
             <p className="text-cyan-700">
-              {date.toLocaleDateString("fr-FR", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}{" "}
-              à {time.slice(0, 5)}
+              {t("reservation.calendar.selectionSummary", {
+                date: date.toLocaleDateString(locale, {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                }),
+                time: time.slice(0, 5),
+              })}
             </p>
           </div>
         )}
@@ -275,7 +288,7 @@ export default function DateSelection() {
             onClick={() => setCurrentStep(currentStep - 1)}
             disabled={isSaving}
           >
-            Retour
+            {t("reservation.layout.previousStep")}
           </Button>
           <Button
             onClick={handleContinue}
@@ -285,7 +298,7 @@ export default function DateSelection() {
             {isSaving ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sauvegarde...
+                {t("reservation.calendar.saveLoading")}
               </>
             ) : (
               <>{t("reservation.calendar.continueBtn")}</>
