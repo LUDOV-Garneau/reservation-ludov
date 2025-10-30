@@ -61,7 +61,7 @@ export async function POST(req: Request) {
       await connection.beginTransaction();
 
       await connection.query(
-        `DELETE FROM reservation_hold WHERE expireAt <= UTC_TIMESTAMP`
+        `DELETE FROM reservation_hold WHERE expireAt <= UTC_TIMESTAMP()`
       );
 
       const [existing] = await connection.query<RowDataPacket[]>(

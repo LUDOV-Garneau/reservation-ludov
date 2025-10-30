@@ -101,11 +101,11 @@ export async function POST(req: Request) {
 
       const reservation = rows[0];
 
-      const expiryUTC = reservation.expireAt.endsWith('Z') 
-        ? reservation.expireAt 
-        : reservation.expireAt + 'Z';
-
-      if (new Date(expiryUTC) < new Date()) {
+        const expiryDate = reservation.expireAt instanceof Date 
+          ? reservation.expireAt 
+          : new Date(reservation.expireAt);
+          
+        if (expiryDate < new Date()) {
         await conn.rollback();
         return NextResponse.json(
           { success: false, message: "Réservation expirée" },
@@ -327,7 +327,7 @@ export async function POST(req: Request) {
         coursId: updated.cours || null,
         date: updated.date,
         time: updated.time,
-        expireAt: updated.expireAt,
+        expireAt: new Date(updated.expireAt).toISOString(),
       });
     } catch (err) {
       await conn.rollback();

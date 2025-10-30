@@ -202,15 +202,19 @@ export async function POST(req: Request) {
       );
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (dateObj < today) {
+    const nowUTC = new Date();
+    const todayUTC = new Date(Date.UTC(
+      nowUTC.getUTCFullYear(), 
+      nowUTC.getUTCMonth(), 
+      nowUTC.getUTCDate()
+    ));
+
+    if (dateObj < todayUTC) {
       return NextResponse.json(
         { success: false, message: "Date cannot be in the past" },
         { status: 400 }
       );
     }
-
     const timeStr = String(body.time).trim();
     const timeRegex = /^\d{2}:\d{2}(:\d{2})?$/;
     if (!timeRegex.test(timeStr)) {
@@ -424,25 +428,25 @@ export async function POST(req: Request) {
         }
       }
 
-      if (hold.cours !== reservationData.coursId) {
-        await connection.rollback();
-        return NextResponse.json(
-          { success: false, message: "Cours ID does not match the hold" },
-          { status: 400 }
-        );
-      }
+      // if (hold.cours !== reservationData.coursId) {
+      //   await connection.rollback();
+      //   return NextResponse.json(
+      //     { success: false, message: "Cours ID does not match the hold" },
+      //     { status: 400 }
+      //   );
+      // }
 
-      const [cours] = await connection.query<RowDataPacket[]>(
-        `SELECT id FROM cours WHERE id = ?`,
-        [reservationData.coursId]
-      );
-      if (cours.length === 0) {
-        await connection.rollback();
-        return NextResponse.json(
-          { success: false, message: "Selected cours does not exist" },
-          { status: 400 }
-        );
-      }
+      // const [cours] = await connection.query<RowDataPacket[]>(
+      //   `SELECT id FROM cours WHERE id = ?`,
+      //   [reservationData.coursId]
+      // );
+      // if (cours.length === 0) {
+      //   await connection.rollback();
+      //   return NextResponse.json(
+      //     { success: false, message: "Selected cours does not exist" },
+      //     { status: 400 }
+      //   );
+      // }
 
       if (
         hold.date.toISOString().split("T")[0] !==
