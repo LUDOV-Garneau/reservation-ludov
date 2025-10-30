@@ -207,7 +207,16 @@ export function ReservationProvider({
         setCurrentStep(data.currentStep || 1);
 
         setIsTimerActive(true);
-        setTimeRemaining(computeRemaining(data.expiresAt));
+        if (typeof data.expiresIn === "number" && !Number.isNaN(data.expiresIn)) {
+          // TTL côté serveur → on s'y fie en priorité
+          setTimeRemaining(Math.max(0, Math.min(timerDuration * 60, data.expiresIn)));
+        } else if (data.expiresAt) {
+          // Fallback (ancien backend)
+          setTimeRemaining(computeRemaining(String(data.expiresAt)));
+        } else {
+          // Si rien n'est fourni (cas extrême), évite un état incohérent
+          setTimeRemaining(timerDuration * 60);
+        }
       } catch (e) {
         console.error("Erreur restauration réservation:", e);
         clearStorage();
@@ -277,49 +286,69 @@ export function ReservationProvider({
 
   /** Crée une réservation temporaire */
   const startTimer = async (consoleId?: number) => {
-    const consoleTypeId = consoleId ?? selectedConsole?.id;
-    if (!consoleTypeId) {
-      setError("Aucune plateforme sélectionnée");
-      return;
+  const consoleTypeId = consoleId ?? selectedConsole?.id;
+  if (!consoleTypeId) {
+    setError("Aucune plateforme sélectionnée");
+    return;
+  }
+  if (isTimerActive && timeRemaining > 0) return;
+
+  setIsLoading(true);
+  try {
+    const res = await fetch(`/api/reservation/create-hold-reservation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ consoleTypeId, minutes: timerDuration }),
+      signal:
+        "AbortSignal" in window && "timeout" in AbortSignal
+          ? AbortSignal.timeout(10000)
+          : (() => {
+              const ctrl = new AbortController();
+              setTimeout(() => ctrl.abort(), 10000);
+              return ctrl.signal;
+            })(),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message || "Erreur création réservation");
     }
-    if (isTimerActive && timeRemaining > 0) return;
 
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/reservation/create-hold-reservation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ consoleTypeId, minutes: timerDuration }),
-        signal: AbortSignal.timeout(10000),
-      });
+    const data = await res.json();
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.message || "Erreur création réservation");
-      }
+    // on lit tout ce qui peut arriver depuis le backend
+    const expiresAtIso = String(
+      data.expiresAt ?? data.expires_at ?? data.expireAt ?? ""
+    );
+    const expiresInSrv = Number(data.expiresIn); // <<< TTL côté serveur (en secondes)
 
-      const data = await res.json();
-      setSelectedConsoleId(data.consoleStockId);
-      const expires = data.expiresAt || data.expires_at || data.expireAt;
-
-      if (!data.reservationId && !data.holdId) {
-        throw new Error("Réponse invalide du serveur (reservationId manquant)");
-      }
-      if (!expires) {
-        throw new Error("Réponse invalide du serveur (expiresAt manquant)");
-      }
-
-      setReservationId(String(data.reservationId ?? data.holdId));
-      setExpiresAt(String(expires));
-      setIsTimerActive(true);
-      setTimeRemaining(computeRemaining(String(expires)));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur inconnue");
-      setIsTimerActive(false);
-    } finally {
-      setIsLoading(false);
+    if (!data.reservationId && !data.holdId) {
+      throw new Error("Réponse invalide du serveur (reservationId manquant)");
     }
-  };
+    if (!expiresAtIso && !Number.isFinite(expiresInSrv)) {
+      throw new Error("Réponse invalide du serveur (expiresAt/expiresIn manquant)");
+    }
+
+    setSelectedConsoleId(Number(data.consoleStockId));
+    setReservationId(String(data.reservationId ?? data.holdId));
+    setExpiresAt(expiresAtIso || null);
+    setIsTimerActive(true);
+
+    // <<< NE PLUS DÉPENDRE DE L'HORLOGE DU NAVIGATEUR
+    if (Number.isFinite(expiresInSrv)) {
+      setTimeRemaining(Math.max(0, Math.min(timerDuration * 60, expiresInSrv)));
+    } else {
+      // Fallback si jamais expiresIn n’est pas renvoyé (ancien backend)
+      setTimeRemaining(computeRemaining(expiresAtIso));
+    }
+  } catch (e) {
+    setError(e instanceof Error ? e.message : "Erreur inconnue");
+    setIsTimerActive(false);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const updateReservationAccessories = async (accessories: number[]) => {
     if (!reservationId) return;
