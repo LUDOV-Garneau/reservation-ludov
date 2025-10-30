@@ -8,7 +8,7 @@
     "start": "next start -p 3000",
     "lint": "eslint",
     "test": "vitest run",
-    "cron": "node src/scripts/cron-scheduler.js"
+    "cron": "node scripts/cron-scheduler.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
