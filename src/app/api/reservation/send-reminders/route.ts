@@ -21,16 +21,41 @@ interface ReservationToRemind extends RowDataPacket {
 }
 
 const TZ = 'America/Toronto';
+
 function getOffsetFor(zone: string): string {
   const now = new Date();
-  const localStr = now.toLocaleString('en-CA', { timeZone: zone }); // "MM/DD/YYYY, HH:MM:SS AM/PM"
-  const local = new Date(localStr);
-  const diffMin = Math.round((local.getTime() - now.getTime()) / 60000);
+
+  // Obtenir les "parts" de la date/heure dans le fuseau demandé (sans parsing de string)
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: zone,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit',
+    hour12: false,
+  }).formatToParts(now);
+
+  const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  const y = Number(map.year);
+  const M = Number(map.month);
+  const d = Number(map.day);
+  const h = Number(map.hour);
+  const m = Number(map.minute);
+  const s = Number(map.second);
+
+  // Reconstitue "l’instant" local comme s’il était en UTC
+  const localAsUTCms = Date.UTC(y, M - 1, d, h, m, s);
+  const nowUTCms = now.getTime();
+
+  // Différence (minutes) entre l'heure locale du fuseau et l'UTC réelle (now)
+  const diffMin = Math.round((localAsUTCms - nowUTCms) / 60000); // ex: -240 pour HAE
+  if (!Number.isFinite(diffMin)) {
+    throw new Error('offset computation failed');
+  }
+
   const sign = diffMin >= 0 ? '+' : '-';
   const abs = Math.abs(diffMin);
   const hh = String(Math.floor(abs / 60)).padStart(2, '0');
   const mm = String(abs % 60).padStart(2, '0');
-  return `${sign}${hh}:${mm}`;
+  return `${sign}${hh}:${mm}`; // e.g. "-04:00" ou "-05:00"
 }
 
 export async function GET(request: NextRequest) {
@@ -65,7 +90,7 @@ export async function GET(request: NextRequest) {
     } catch (e) {
       console.warn('[CRON] Failed to set session time_zone, continuing in server default:', e);
     }
-    
+
     console.log("[CRON] Querying database for pending reminders...");
 
     const [reservations] = await connection.query<ReservationToRemind[]>(
