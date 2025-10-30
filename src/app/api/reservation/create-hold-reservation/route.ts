@@ -61,13 +61,13 @@ export async function POST(req: Request) {
       await connection.beginTransaction();
 
       await connection.query(
-        `DELETE FROM reservation_hold WHERE expireAt <= UTC_TIMESTAMP()`
+        `DELETE FROM reservation_hold WHERE expireAt <= NOW()`
       );
 
       const [existing] = await connection.query<RowDataPacket[]>(
         `SELECT id AS holdId, console_id AS consoleStockId, expireAt AS expiresAt
          FROM reservation_hold
-         WHERE user_id = ? AND expireAt > UTC_TIMESTAMP()
+         WHERE user_id = ? AND expireAt > NOW()
          LIMIT 1`,
         [userId]
       );
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
           AND NOT EXISTS (
             SELECT 1 FROM reservation_hold h
             WHERE h.console_id = cs.id
-              AND h.expireAt > UTC_TIMESTAMP()
+              AND h.expireAt > NOW()
           )
         LIMIT 1
         FOR UPDATE
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       await connection.query(
         `
         INSERT INTO reservation_hold (id, user_id, console_id, console_type_id, expireAt, createdAt)
-        VALUES (?, ?, ?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? MINUTE), UTC_TIMESTAMP())
+        VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())
         `,
         [reservationId, userId, consoleStockId, consoleTypeId, minutes]
       );

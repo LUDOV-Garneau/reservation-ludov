@@ -480,7 +480,7 @@ export async function POST(req: Request) {
       const [result] = await connection.query(
         `INSERT INTO reservation
                     (id, user_id, console_id, console_type_id, game1_id, game2_id, game3_id, accessory_ids, cours_id, date, time, createdAt)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, UTC_TIMESTAMP())`,
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
           reservationId,
           user.id,

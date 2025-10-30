@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     }
 
     const [rows] = await pool.query<ValidCodeRow[]>(
-      `SELECT id, (otp_code = ? AND is_used = 0 AND expires_at > UTC_TIMESTAMP()) AS is_valid
+      `SELECT id, (otp_code = ? AND is_used = 0 AND expires_at > NOW()) AS is_valid
       FROM otp
       WHERE user_id = (SELECT id FROM users WHERE email = ? LIMIT 1)
       ORDER BY created_at DESC
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
 
     await pool.query(
       `INSERT INTO otp (user_id, otp_code, created_at, expires_at, is_used)
-      SELECT id, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL 15 MINUTE), false
+      SELECT id, ?, NOW(), DATE_ADD(NOW(), INTERVAL 15 MINUTE), false
       FROM users WHERE email = ? LIMIT 1`,
       [otp.toString().padStart(6, "0"), email]
     );

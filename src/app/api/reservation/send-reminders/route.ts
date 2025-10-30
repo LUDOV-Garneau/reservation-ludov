@@ -111,8 +111,8 @@ export async function GET(request: NextRequest) {
       WHERE r.reminder_enabled = 1
         AND r.reminder_sent = 0
         AND r.archived = 0
-        AND TIMESTAMPDIFF(HOUR, UTC_TIMESTAMP(), CONCAT(r.date, ' ', r.time)) <= r.reminder_hours_before
-        AND CONCAT(r.date, ' ', r.time) > UTC_TIMESTAMP()
+        AND TIMESTAMPDIFF(HOUR, NOW(), CONCAT(r.date, ' ', r.time)) <= r.reminder_hours_before
+        AND CONCAT(r.date, ' ', r.time) > NOW()
       ORDER BY r.date ASC, r.time ASC
       LIMIT 50`
     );
@@ -162,8 +162,8 @@ export async function GET(request: NextRequest) {
         await connection.query(
           `UPDATE reservation 
            SET reminder_sent = 1, 
-               reminder_sent_at = UTC_TIMESTAMP(),
-               lastUpdatedAt = UTC_TIMESTAMP()
+               reminder_sent_at = NOW(),
+               lastUpdatedAt = NOW()
            WHERE id = ?`,
           [reservation.id]
         );
@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
         try {
           await connection.query(
             `INSERT INTO email_logs (reservation_id, email_type, recipient, status, error_message, created_at)
-             VALUES (?, 'reminder', ?, 'failed', ?, UTC_TIMESTAMP())`,
+             VALUES (?, 'reminder', ?, 'failed', ?, NOW())`,
             [reservation.id, reservation.email, errorMessage]
           );
         } catch (logError) {
