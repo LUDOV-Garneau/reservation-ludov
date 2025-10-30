@@ -77,6 +77,9 @@ interface MinimalReservationState {
 
 const STORAGE_KEY = "reservation_hold"; // clé pour sessionStorage
 
+const toLocalYmd = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
 /**
  * Provider principal pour gérer tout le cycle de vie d'une réservation
  */
@@ -125,11 +128,12 @@ export function ReservationProvider({
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   };
 
+  const tzAwareIso = (s: string) =>
+    /Z$|[+-]\d{2}:\d{2}$/.test(s) ? s : `${s}Z`;
+
   const computeRemaining = (expiry: string): number => {
     const now = Date.now();
-    // Force l'interprétation en UTC si le 'Z' n'est pas présent
-    const expiryUTC = expiry.endsWith('Z') ? expiry : expiry + 'Z';
-    const end = new Date(expiryUTC).getTime();
+    const end = new Date(tzAwareIso(expiry)).getTime();
     return Math.max(0, Math.floor((end - now) / 1000));
   };
 
@@ -471,7 +475,7 @@ export function ReservationProvider({
           game3Id: selectedGames[2] ? Number(selectedGames[2]) : null,
           accessoryIds: selectedAccessories,
           coursId: selectedCours,
-          date: selectedDate ? selectedDate.toISOString().split("T")[0] : null,
+          date: selectedDate ? toLocalYmd(selectedDate) : null,
           time: selectedTime || null,
         }),
       });
