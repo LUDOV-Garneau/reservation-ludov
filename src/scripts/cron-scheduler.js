@@ -19,7 +19,7 @@ console.log('━━━━━━━━━━━━━━━━━━━━━━�
 console.log(`Fréquence : ${CRON_SCHEDULE}`);
 console.log(`URL de l'API : ${APP_URL}/api/reservation/send-reminders`);
 console.log(`Secret configuré : ${CRON_SECRET ? 'Oui ✓' : 'Non ✗'}`);
-console.log(`Démarré le : ${new Date().toLocaleString('fr-CA')}`);
+console.log(`Démarré le : ${fmt()}`);
 console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
 if (!CRON_SECRET) {
