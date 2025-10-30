@@ -245,20 +245,21 @@ export function ReservationProvider({
    * --- Effet Timer ---
    */
   useEffect(() => {
-    if (!isTimerActive || !expiresAt) return;
+    if (!isTimerActive) return;
 
-    const tick = () => {
-      const remaining = computeRemaining(expiresAt);
-      setTimeRemaining(remaining);
-      if (remaining <= 0) {
-        handleTimeExpired();
-      }
-    };
+    const interval = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          handleTimeExpired();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-    tick(); // première exécution immédiate
-    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [isTimerActive, expiresAt]);
+  }, [isTimerActive]);
 
   /**
    * --- Gestion expiration ---
