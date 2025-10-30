@@ -61,7 +61,7 @@ export default function CancelReservationAlertDialog({
         <Button
           type="button"
           variant="destructive"
-          size="default"
+          size="lg"
           className="group relative overflow-hidden transition-all hover:shadow-lg hover:shadow-red-500/30"
         >
           <span className="flex items-center gap-2">

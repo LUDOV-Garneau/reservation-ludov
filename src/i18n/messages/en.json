@@ -64,20 +64,20 @@
       "consoleSelection": "Platform selection",
       "modify": "Modify"
     },
-    "games" : {
-      "error" : {
+    "games": {
+      "error": {
         "games_restore": "Error restoring games:",
         "max_3_games": "A maximum of 3 games can be selected",
         "selecte_at_least_one": "Select at least one game",
         "no_active_reservation": "No active reservation",
-        "save_failed" : "Error saving",
+        "save_failed": "Error saving",
         "select_console_first": "Select a platform first"
       },
       "your_games": "Your games",
       "selected_platform": "Selected platform",
       "select_up_to_3": "Select up to 3 games",
       "go_through_library": "Browse through the library to choose",
-      "saving" : "Saving...",
+      "saving": "Saving...",
       "continue": "Continue",
       "game_library": "Game library"
     },
@@ -133,11 +133,10 @@
       "titleSection": "Reservation details",
       "selectedAccessory": "Selected accessories",
       "noAccessory": "No accessories selected",
-      "cancelWarningTitle" : "Irreversible action",
-      "cancelWarning" : "This action cannot be undone. You will need to create a new reservation if you change your mind.",
-      "cancelConfirmButton" : "Confirm cancellation",
-      "canceling" : "Cancelling..."
-
+      "cancelWarningTitle": "Irreversible action",
+      "cancelWarning": "This action cannot be undone. You will need to create a new reservation if you change your mind.",
+      "cancelConfirmButton": "Confirm cancellation",
+      "canceling": "Cancelling..."
     },
     "accueil": {
       "upcomingReservations": "Upcoming reservations",
@@ -153,6 +152,26 @@
       "time": "Time",
       "games": "Reserved games",
       "console": "Platform"
+    },
+    "reminder": {
+      "modifyReminder": "Modify Reminder",
+      "emailReminder": "Email Reminder",
+      "modify": "Modify",
+      "reminder": "Reminder",
+      "enableReminder": "Enable Reminder",
+      "receiveEmail": "Receive an email",
+      "whenToReceive": "When do you want to receive the reminder?",
+      "whatContainsTitle": "What does the reminder contain?",
+      "whatContainsDesc": "Date, time, console, selected games and station number.",
+      "cancel": "Cancel",
+      "configure": "Configure Reminder",
+      "confirm": "Confirm",
+      "configuring": "Configuring...",
+      "sending": "Sending...",
+      "configureEmailReminder": "Configure Email Reminder",
+      "receiveEmailReminder": "Receive an email reminder before your reservation",
+      "configFailure": "Failed to configure reminder",
+      "unknownError": "Unknown error"
     }
   },
   "auth": {
