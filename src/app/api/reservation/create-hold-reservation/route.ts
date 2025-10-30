@@ -61,13 +61,13 @@ export async function POST(req: Request) {
       await connection.beginTransaction();
 
       await connection.query(
-        `DELETE FROM reservation_hold WHERE expireAt <= CURRENT_TIMESTAMP`
+        `DELETE FROM reservation_hold WHERE expireAt <= UTC_TIMESTAMP`
       );
 
       const [existing] = await connection.query<RowDataPacket[]>(
         `SELECT id AS holdId, console_id AS consoleStockId, expireAt AS expiresAt
          FROM reservation_hold
-         WHERE user_id = ? AND expireAt > CURRENT_TIMESTAMP
+         WHERE user_id = ? AND expireAt > UTC_TIMESTAMP()
          LIMIT 1`,
         [userId]
       );
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
           AND NOT EXISTS (
             SELECT 1 FROM reservation_hold h
             WHERE h.console_id = cs.id
-              AND h.expireAt > CURRENT_TIMESTAMP
+              AND h.expireAt > UTC_TIMESTAMP()
           )
         LIMIT 1
         FOR UPDATE
@@ -111,7 +111,7 @@ export async function POST(req: Request) {
       await connection.query(
         `
         INSERT INTO reservation_hold (id, user_id, console_id, console_type_id, expireAt, createdAt)
-        VALUES (?, ?, ?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? MINUTE), NOW())
+        VALUES (?, ?, ?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? MINUTE), UTC_TIMESTAMP())
         `,
         [reservationId, userId, consoleStockId, consoleTypeId, minutes]
       );
@@ -133,7 +133,9 @@ export async function POST(req: Request) {
         {
           success: true,
           reservationId,
-          ...created[0],
+          holdId: created[0].holdId,
+          consoleStockId: created[0].consoleStockId,
+          expiresAt: new Date(created[0].expiresAt).toISOString(),
           message: "Réservation temporaire créée avec succès",
         },
         { status: 201 }

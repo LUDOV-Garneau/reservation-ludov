@@ -111,8 +111,8 @@ export async function GET(request: NextRequest) {
       WHERE r.reminder_enabled = 1
         AND r.reminder_sent = 0
         AND r.archived = 0
-        AND TIMESTAMPDIFF(HOUR, NOW(), CONCAT(r.date, ' ', r.time)) <= r.reminder_hours_before
-        AND CONCAT(r.date, ' ', r.time) > NOW()
+        AND TIMESTAMPDIFF(HOUR, UTC_TIMESTAMP(), CONCAT(r.date, ' ', r.time)) <= r.reminder_hours_before
+        AND CONCAT(r.date, ' ', r.time) > UTC_TIMESTAMP()
       ORDER BY r.date ASC, r.time ASC
       LIMIT 50`
     );
