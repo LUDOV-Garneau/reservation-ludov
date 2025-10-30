@@ -290,7 +290,31 @@
       "title": "Users"
     },
     "reservations": {
-      "title": "Reservations"
+      "title": "Reservations",
+      "ReservationTable": {
+        "headers": {
+          "user": "User",
+          "console": "Console",
+          "games": "Games",
+          "date": "Date",
+          "createdAt": "Creation date",
+          "actions": "Actions",
+          "no_games": "No Games",
+          "station": "Station"
+        },
+        "alert": {
+          "delete_failed": "Error deleting reservation",
+          "delete_success": "Reservation deleted",
+          "confirm_delete": "Delete this reservation?",
+          "loading_error": "Error loading reservations:"
+        },
+        "delete": "Delete",
+        "no_reservations": "No reservations found.",
+        "Previous": "Previous",
+        "Next": "Next",
+        "confirm_title": "Confirm Deletion",
+        "cancel": "Cancel"
+      }
     },
     "stations": {
       "title": "Stations"

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
+import ReservationsTable from "@/components/admin/components/ReservationTable"
 
 export default function ReservationsTab() {
   const t = useTranslations();
@@ -18,7 +19,7 @@ export default function ReservationsTab() {
         <CardHeader>
           <CardTitle>{t("admin.reservations.title")}</CardTitle>
           <CardDescription>
-            Ajouter la gestion des réservations.
+            <ReservationsTable refreshKey={0} />
           </CardDescription>
         </CardHeader>
       </Card>
