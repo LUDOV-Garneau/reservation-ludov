@@ -64,25 +64,25 @@
       "consoleSelection": "Sélection de la plateforme",
       "modify": "Modifier"
     },
-    "games" : {
-      "error" : {
+    "games": {
+      "error": {
         "games_restore": "Erreur restauration jeux:",
         "max_3_games": "Maximum 3 jeux peuvent être sélectionnés",
         "selecte_at_least_one": "Sélectionnez au moins un jeu",
         "no_active_reservation": "Aucune réservation active",
-        "save_failed" : "Erreur lors de la sauvegarde",
+        "save_failed": "Erreur lors de la sauvegarde",
         "select_console_first": "Sélectionner une plateforme d'abord"
       },
       "your_games": "Vos jeux",
       "selected_platform": "Plateforme sélectionnée",
       "select_up_to_3": "Sélectionnez jusqu'à 3 jeux",
       "go_through_library": "Parcourez la liste pour choisir",
-      "saving" : "Sauvegarde...",
+      "saving": "Sauvegarde...",
       "continue": "Continuer",
       "game_library": "Bibliothèque de jeux"
     },
     "accessory": {
-      "header_info" : "Accessoires pour",
+      "header_info": "Accessoires pour",
       "error": "Erreur",
       "loading_text": "Chargement...",
       "empty_selection": "Aucun accessoire sélectionné",
@@ -96,7 +96,7 @@
       "loading_accessory": "Chargement des accessoires...",
       "title_no_accessory_available": "Aucun accessoire disponible",
       "no_accessory_available": "Il n'y a pas d'accessoire disponible pour cette plateforme.",
-      "skip_step" : "Passer cette étape"
+      "skip_step": "Passer cette étape"
     },
     "calendar": {
       "title": "Sélection de la date",
@@ -139,10 +139,10 @@
       "stationAssigned": "Station assignée",
       "titleSection": "Détails de la réservation",
       "noAccessory": "Aucun accessoire sélectionné",
-      "cancelWarningTitle" : "Action irréversible",
-      "cancelWarning" : "Cette action ne peut pas être annulée. Vous devrez créer une nouvelle réservation si vous changez d'avis.",
-      "cancelConfirmButton" : "Confirmer l'annulation",
-      "canceling" : "Annulation en cours..."
+      "cancelWarningTitle": "Action irréversible",
+      "cancelWarning": "Cette action ne peut pas être annulée. Vous devrez créer une nouvelle réservation si vous changez d'avis.",
+      "cancelConfirmButton": "Confirmer l'annulation",
+      "canceling": "Annulation en cours..."
     },
     "accueil": {
       "upcomingReservations": "Réservations à venir",
@@ -158,6 +158,26 @@
       "time": "Heure",
       "games": "Jeux réservés",
       "console": "Plateforme"
+    },
+    "reminder": {
+      "modifyReminder": "Modifier le rappel",
+      "emailReminder": "Rappel par courriel",
+      "modify": "Modifier",
+      "reminder": "Rappel",
+      "enableReminder": "Activer le rappel",
+      "receiveEmail": "Recevoir un courriel",
+      "whenToReceive": "Quand souhaitez-vous recevoir le rappel ?",
+      "whatContainsTitle": "Que contient le rappel ?",
+      "whatContainsDesc": "Date, heure, console, jeux sélectionnés et numéro de station.",
+      "cancel": "Annuler",
+      "configure": "Configurer le rappel",
+      "confirm": "Confirmer",
+      "configuring": "Configuration...",
+      "sending": "Envoi...",
+      "configureEmailReminder": "Configurer le rappel par courriel",
+      "receiveEmailReminder": "Recevez un courriel de rappel avant votre réservation",
+      "configFailure": "Échec de la configuration du rappel",
+      "unknownError": "Erreur inconnue"
     }
   },
   "auth": {

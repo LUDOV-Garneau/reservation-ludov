@@ -17,6 +17,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Mail, Send, Loader2, Clock, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface ReservationReminderDialogProps {
   reservationId: string;
@@ -39,6 +40,8 @@ export default function ReservationReminderDialog({
   onSendReminder,
   onError,
 }: ReservationReminderDialogProps) {
+  const t = useTranslations();
+
   const [open, setOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,8 +52,10 @@ export default function ReservationReminderDialog({
     const fetchReminderStatus = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/reservation/${reservationId}/reminder`);
-        
+        const response = await fetch(
+          `/api/reservation/reminder?reservationId=${reservationId}`
+        );
+
         if (response.ok) {
           const data = await response.json();
           setReminderEnabled(data.reminderEnabled || false);
@@ -88,7 +93,7 @@ export default function ReservationReminderDialog({
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
-          errorData.error || "Échec de la configuration du rappel"
+          errorData.error || t("reservation.reminder.configFailure")
         );
       }
 
@@ -96,7 +101,11 @@ export default function ReservationReminderDialog({
       onSendReminder?.();
     } catch (error) {
       console.error("❌ Error setting up reminder:", error);
-      onError?.(error instanceof Error ? error : new Error("Erreur inconnue"));
+      onError?.(
+        error instanceof Error
+          ? error
+          : new Error(t("reservation.reminder.unknownError"))
+      );
     } finally {
       setIsSending(false);
     }
@@ -121,10 +130,14 @@ export default function ReservationReminderDialog({
             <Mail className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
           )}
           <span className="hidden sm:inline">
-            {reminderEnabled ? "Modifier le rappel" : "Rappel par courriel"}
+            {reminderEnabled
+              ? t("reservation.reminder.modifyReminder")
+              : t("reservation.reminder.emailReminder")}
           </span>
           <span className="sm:hidden">
-            {reminderEnabled ? "Modifier" : "Rappel"}
+            {reminderEnabled
+              ? t("reservation.reminder.modify")
+              : t("reservation.reminder.reminder")}
           </span>
         </Button>
       </AlertDialogTrigger>
@@ -138,16 +151,16 @@ export default function ReservationReminderDialog({
           </div>
 
           <AlertDialogTitle className="text-center text-xl sm:text-2xl font-bold text-gray-900 px-2">
-            Configurer le rappel par courriel
+            {t("reservation.reminder.configureEmailReminder")}
           </AlertDialogTitle>
 
           <AlertDialogDescription className="text-center text-sm sm:text-base text-gray-600 leading-relaxed px-2">
-            Recevez un courriel de rappel avant votre réservation
+            {t("reservation.reminder.receiveEmailReminder")}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="space-y-4 sm:space-y-6 py-4 px-4 sm:px-6">
-          {/* Switch d'activation */}
+          {/* Switch */}
           <div className="flex items-center justify-between rounded-lg sm:rounded-xl border-2 border-gray-200 bg-gray-50 p-3 sm:p-4 gap-3">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
               <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-green-100 flex-shrink-0">
@@ -158,10 +171,10 @@ export default function ReservationReminderDialog({
                   htmlFor="reminder-switch"
                   className="text-sm sm:text-base font-semibold text-gray-900 cursor-pointer block"
                 >
-                  Activer le rappel
+                  {t("reservation.reminder.enableReminder")}
                 </Label>
                 <p className="text-xs sm:text-sm text-gray-500 truncate">
-                  Recevoir un courriel
+                  {t("reservation.reminder.receiveEmail")}
                 </p>
               </div>
             </div>
@@ -174,13 +187,13 @@ export default function ReservationReminderDialog({
             />
           </div>
 
-          {/* Sélection du délai */}
+          {/* Delay selection */}
           {reminderEnabled && (
             <div className="space-y-3 sm:space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-700">
                 <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-green-600 flex-shrink-0" />
                 <span className="line-clamp-2">
-                  Quand souhaitez-vous recevoir le rappel ?
+                  {t("reservation.reminder.whenToReceive")}
                 </span>
               </div>
 
@@ -211,7 +224,7 @@ export default function ReservationReminderDialog({
             </div>
           )}
 
-          {/* Info supplémentaire */}
+          {/* Additional Info */}
           {reminderEnabled && (
             <div className="rounded-lg sm:rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-green-50/50 p-3 sm:p-4 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex items-start gap-2 sm:gap-3">
@@ -220,11 +233,10 @@ export default function ReservationReminderDialog({
                 </div>
                 <div className="flex-1 space-y-1 min-w-0">
                   <p className="text-xs sm:text-sm font-semibold text-green-900">
-                    Que contient le rappel ?
+                    {t("reservation.reminder.whatContainsTitle")}
                   </p>
                   <p className="text-xs sm:text-sm text-green-700 leading-relaxed">
-                    Date, heure, console, jeux sélectionnés et numéro de
-                    station.
+                    {t("reservation.reminder.whatContainsDesc")}
                   </p>
                 </div>
               </div>
@@ -239,7 +251,7 @@ export default function ReservationReminderDialog({
               disabled={isSending}
               className="w-full sm:flex-1 rounded-lg sm:rounded-xl border-2 hover:bg-gray-50 transition-colors h-11 sm:h-auto"
             >
-              Annuler
+              {t("reservation.reminder.cancel")}
             </Button>
           </AlertDialogCancel>
 
@@ -259,17 +271,25 @@ export default function ReservationReminderDialog({
               {isSending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  <span className="hidden sm:inline">Configuration...</span>
-                  <span className="sm:hidden">Envoi...</span>
+                  <span className="hidden sm:inline">
+                    {t("reservation.reminder.configuring")}
+                  </span>
+                  <span className="sm:hidden">
+                    {t("reservation.reminder.sending")}
+                  </span>
                 </>
               ) : (
                 <>
                   <Send className="mr-2 h-4 w-4" />
                   <span className="hidden sm:inline">
-                    {reminderEnabled ? "Configurer le rappel" : "Confirmer"}
+                    {reminderEnabled
+                      ? t("reservation.reminder.configure")
+                      : t("reservation.reminder.confirm")}
                   </span>
                   <span className="sm:hidden">
-                    {reminderEnabled ? "Configurer" : "OK"}
+                    {reminderEnabled
+                      ? t("reservation.reminder.configure")
+                      : t("reservation.reminder.confirm")}
                   </span>
                 </>
               )}
