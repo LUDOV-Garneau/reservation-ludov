@@ -5,6 +5,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+const TZ = 'America/Toronto';
+const fmt = (d = new Date()) =>
+  new Intl.DateTimeFormat('fr-CA', { dateStyle: 'short', timeStyle: 'long', timeZone: TZ }).format(d);
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 const CRON_SECRET = process.env.CRON_SECRET;
 const CRON_SCHEDULE = process.env.CRON_SCHEDULE || '*/1 * * * *';
@@ -25,7 +29,7 @@ if (!CRON_SECRET) {
 }
 
 async function envoyerRappels() {
-  const maintenant = new Date().toLocaleString('fr-CA');
+  const maintenant = fmt();
   console.log(`\n [${maintenant}] Vérification des rappels à envoyer...`);
 
   try {
@@ -38,7 +42,7 @@ async function envoyerRappels() {
     });
 
     const data = await response.json();
-    const fin = new Date().toLocaleString('fr-CA');
+    const fin = fmt();
 
     if (response.ok) {
       console.log(` [${fin}] Terminé avec succès !`);
@@ -85,14 +89,19 @@ async function envoyerRappels() {
     process.exit(1);
   }
 
-  cron.schedule(CRON_SCHEDULE, async () => {
-    try {
-      await envoyerRappels();
-    } catch (error) {
-      console.error(' Erreur lors de l\'exécution :', error.message);
-    }
-  });
+  cron.schedule(
+    CRON_SCHEDULE,
+    async () => {
+      try {
+        await envoyerRappels();
+      } catch (error) {
+        console.error(' Erreur lors de l\'exécution :', error?.message || error);
+      }
+    },
+    { timezone: TZ }
+  );
 
+  console.log(` Démarrage du planificateur avec : ${CRON_SCHEDULE} (TZ=${TZ})\n`);
   console.log(' Le planificateur est actif !');
   console.log(' En attente de la prochaine exécution...\n');
   console.log(' Pour arrêter : Ctrl+C\n');
