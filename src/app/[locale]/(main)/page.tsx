@@ -1,10 +1,6 @@
 "use client";
 
 import AccueilReservations from "@/components/reservation/AccueilReservation";
-import { Button } from "@/components/ui/button";
-import { Metadata } from "next";
-import { useTranslations } from "next-intl";
-import Link from "next/link";
 
 // export const metadata: Metadata = {
 //   title: "Module de réservation LUDOV",
@@ -13,9 +9,8 @@ import Link from "next/link";
 // };
 
 export default function HomePage() {
-
   return (
-    <div >
+    <div>
       <AccueilReservations />
     </div>
   );
