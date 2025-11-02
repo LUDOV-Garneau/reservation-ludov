@@ -37,6 +37,7 @@ interface ReservationContextType {
   selectedTime: string | undefined; // heure sélectionnée
   selectedCours: number | null;
   selectedAccessories: number[];
+  selectedConsoleId: number;
 
   // Mutateurs
   setUserId: (id: number) => void; // définit l'ID utilisateur
@@ -47,7 +48,6 @@ interface ReservationContextType {
   setSelectedTime: (time: string | undefined) => void; // définit l'heure sélectionnée
   setSelectedCours: (coursId: number | null) => void; // définit le cours sélectionné
   setSelectedAccessories: React.Dispatch<React.SetStateAction<number[]>>;
-
 
   // Actions Réservation
   cancelReservation: () => Promise<void>; // annule la réservation côté serveur
@@ -82,7 +82,7 @@ const STORAGE_KEY = "reservation_hold"; // clé pour sessionStorage
  */
 export function ReservationProvider({
   children,
-  timerDuration = 15,
+  timerDuration = 54,
 }: ReservationProviderProps) {
   /**
    * --- États globaux ---
@@ -105,6 +105,7 @@ export function ReservationProvider({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
   const [selectedCours, setSelectedCours] = useState<number | null>(null);
+  const [selectedConsoleId, setSelectedConsoleId] = useState<number>(0);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -180,6 +181,8 @@ export function ReservationProvider({
             active_units: Number(data.console.active_units || 0),
             picture: data.console.picture,
           });
+
+          setSelectedConsoleId(data.consoleStockId);
         }
 
         setSelectedCours(data.cours || null);
@@ -267,7 +270,7 @@ export function ReservationProvider({
   const startTimer = async (consoleId?: number) => {
     const consoleTypeId = consoleId ?? selectedConsole?.id;
     if (!consoleTypeId) {
-      setError("Aucune console sélectionnée");
+      setError("Aucune plateforme sélectionnée");
       return;
     }
     if (isTimerActive && timeRemaining > 0) return;
@@ -287,6 +290,7 @@ export function ReservationProvider({
       }
 
       const data = await res.json();
+      setSelectedConsoleId(data.consoleStockId);
       const expires = data.expiresAt || data.expires_at || data.expireAt;
       
       if (!data.reservationId && !data.holdId) {
@@ -386,6 +390,8 @@ export function ReservationProvider({
 const updateReservationConsole = async (newConsoleId: number) => {
   if (!reservationId) return;
 
+  setSelectedGames([]);
+
   try {
     const res = await fetch(`/api/reservation/update-hold-reservation`, {
       method: "POST",
@@ -393,14 +399,14 @@ const updateReservationConsole = async (newConsoleId: number) => {
       body: JSON.stringify({ reservationId, newConsoleId }),
     });
 
-    if (!res.ok) throw new Error("Erreur modification console");
+    if (!res.ok) throw new Error("Erreur modification plateforme");
 
     const data = await res.json();
     if (data.success) {
       setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
     }
   } catch (e) {
-    setError(e instanceof Error ? e.message : "Erreur update console");
+    setError(e instanceof Error ? e.message : "Erreur update plateforme");
   }
 };
 
@@ -413,19 +419,56 @@ const updateReservationConsole = async (newConsoleId: number) => {
       setError("Aucune réservation à finaliser");
       return;
     }
+
+    if (!selectedConsole) {
+      setError("Aucune plateforme sélectionnée");
+      return;
+    }
+
+    if (!selectedConsoleId) {
+      setError("Aucune plateforme en stock sélectionnée");
+      return;
+    }
+
+    if (selectedGames.length === 0) {
+      setError("Aucun jeu sélectionné");
+      return;
+    }
+
+    if (!selectedCours) {
+      setError("Aucun cours sélectionné");
+      return;
+    }
+
+    if (!selectedDate) {
+      setError("Aucune date sélectionnée");
+      return;
+    }
+
+    if (!selectedTime) {
+      setError("Aucune heure sélectionnée");
+      return;
+    }
     
     setIsLoading(true);
     setError(null);
+
     
     try {
-      const res = await fetch(`/api/reservation/complete-reservation`, {
+      const res = await fetch(`/api/reservation/confirm-reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          reservationId,
-          userId: userId || null,
-          consoleId: selectedConsole?.id || null,
-          games: selectedGames
+          reservationHoldId: reservationId,
+          consoleId: selectedConsoleId,
+          consoleTypeId: selectedConsole?.id,
+          game1Id: selectedGames[0] ? Number(selectedGames[0]) : null,
+          game2Id: selectedGames[1] ? Number(selectedGames[1]) : null,
+          game3Id: selectedGames[2] ? Number(selectedGames[2]) : null,
+          accessoryIds: selectedAccessories,
+          coursId: selectedCours,
+          date: selectedDate ? selectedDate.toISOString().split('T')[0] : null,
+          time: selectedTime || null,
         }),
       });
       
@@ -454,7 +497,6 @@ const updateReservationConsole = async (newConsoleId: number) => {
       setExpiresAt(null);
       clearStorage();
       
-      // La navigation sera gérée par le composant appelant
       return data;
       
     } catch (e) {
@@ -502,6 +544,7 @@ const updateReservationConsole = async (newConsoleId: number) => {
     setSelectedTime,
     selectedCours,
     setSelectedCours,
+    selectedConsoleId,
   };
 
   if (isRestoring) {

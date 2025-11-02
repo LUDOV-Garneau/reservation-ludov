@@ -401,11 +401,7 @@ export default function AvailabilitiesTab() {
             </div>
           )}
           <Button
-            disabled={
-              isLoading ||
-              specificDates.length == 0 ||
-              specificDatesErrors.length > 0
-            }
+            disabled={isLoading || specificDatesErrors.length > 0}
             type="submit"
             className="mt-4 w-fit mx-auto font-semibold text-base"
             onClick={handleSubmitSpecificDates}
