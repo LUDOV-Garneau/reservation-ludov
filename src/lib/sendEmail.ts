@@ -125,6 +125,25 @@ export async function sendReminderEmail({
                       </td>
                     </tr>
                   </table>
+
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="width:100%; background-color:#fef3c7; border:2px solid #f59e0b; border-radius:12px; margin-bottom:30px;">
+                    <tr>
+                      <td style="padding:20px;">
+                        <p style="margin:0 0 10px 0; color:#92400e; font-size:15px; font-weight:600;">
+                          <strong>Informations utiles:</strong>
+                        </p>
+                        <ul style="margin:0; padding-left:20px; color:#92400e; font-size:15px; line-height:1.5;">
+                          <li style="margin:0 0 6px 0;">
+                            N'oubliez pas d'apporter une pièce d'identité valide lors de votre réservation (permis de conduire, carte étudiante, etc.).
+                          </li>
+                          <li style="margin:0;">
+                            Nous vous encourageons à apporter votre propre casque d'écoute, si possible, afin de profiter pleinement de votre réservation.
+                          </li>
+                        </ul>
+                      </td>
+                    </tr>
+                  </table>
+
                   <p style="margin: 0; color: #6b7280; font-size: 14px;">
                     Si vous avez des questions, n'hésitez pas à nous contacter.
                   </p>

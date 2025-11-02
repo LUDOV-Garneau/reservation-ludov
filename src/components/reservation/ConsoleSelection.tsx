@@ -37,8 +37,8 @@ export default function ConsolesSelection() {
         }
       }
       else if (selectedConsole.id !== consoleToUse.id) {
-        await updateReservationConsole(consoleToUse.id);
         setSelectedConsole(consoleToUse);
+        await updateReservationConsole(consoleToUse.id);
       }
       else {
         setSelectedConsole(consoleToUse);
