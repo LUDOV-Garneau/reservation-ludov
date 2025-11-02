@@ -1,9 +1,22 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
 import type { RowDataPacket } from "mysql2";
+import { verifyToken } from "@/lib/jwt";
 
 export async function POST(req: NextRequest) {
   try {
+    const token = req.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    if (!user.isAdmin) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
     const body = await req.json();
     const { firstname, lastname, email, isAdmin = 0 } = body;
 

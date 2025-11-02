@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
 import { parse } from "csv-parse/sync";
+import { verifyToken } from "@/lib/jwt";
 
 const EXPECTED_COLUMNS = [
   "Username",
@@ -13,15 +14,27 @@ const EXPECTED_COLUMNS = [
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type CsvUserRecord = {
-      Username: string;
-      "First Name": string;
-      "Last Name": string;
-      "Date Created": string;
-      [key: string]: unknown;
-    };
+  Username: string;
+  "First Name": string;
+  "Last Name": string;
+  "Date Created": string;
+  [key: string]: unknown;
+};
 
 export async function POST(req: NextRequest) {
   try {
+    const token = req.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    if (!user.isAdmin) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
@@ -53,12 +66,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validRecords = records.filter((r) =>
-      EMAIL_REGEX.test(r.Username)
-    );
-    const invalidRecords = records.filter(
-      (r) => !EMAIL_REGEX.test(r.Username)
-    );
+    const validRecords = records.filter((r) => EMAIL_REGEX.test(r.Username));
+    const invalidRecords = records.filter((r) => !EMAIL_REGEX.test(r.Username));
 
     if (validRecords.length === 0) {
       return NextResponse.json(
@@ -73,7 +82,6 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date();
-    
 
     const users = (validRecords as CsvUserRecord[]).map((r) => ({
       username: r["Username"],
@@ -133,8 +141,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         inserted: newUsers.length,
-        skipped:
-          invalidRecords.length + (users.length - newUsers.length),
+        skipped: invalidRecords.length + (users.length - newUsers.length),
       });
     } catch (err) {
       await conn.rollback();
