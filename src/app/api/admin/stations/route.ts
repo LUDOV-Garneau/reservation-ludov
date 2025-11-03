@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
+import { RowDataPacket } from "mysql2/promise";
 
 export async function GET(req: NextRequest) {
   try {
@@ -26,7 +27,9 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const [rows] = await pool.query(
+    const conn = await pool.getConnection();
+
+    const [stationRows] = await conn.query(
       `
       SELECT 
         id,
@@ -38,16 +41,50 @@ export async function GET(req: NextRequest) {
     `
     );
 
-    const stations = (rows as { id: number; name: string; consoles: unknown; createdAt: string }[]).map((row) => ({
+    const stations = (
+      stationRows as {
+        id: number;
+        name: string;
+        consoles: unknown;
+        createdAt: string;
+      }[]
+    ).map((row) => ({
       ...row,
       consoles: safeParseJSON(row.consoles),
     }));
 
+    const stationWithNames = await Promise.all(
+      stations.map(async (station) => {
+        let consolesArray: number[] = [];
+        try {
+          consolesArray = Array.isArray(station.consoles)
+            ? station.consoles
+            : JSON.parse(station.consoles);
+        } catch {}
+
+        let consolesTitles: string[] = [];
+        if (consolesArray.length > 0) {
+          const [consoleRows] = await conn.query<RowDataPacket[]>(
+            `SELECT name FROM console_stock WHERE id IN (?)`,
+            [consolesArray]
+          );
+          consolesTitles = (consoleRows as Array<{ name: string }>).map(
+            (g) => g.name
+          );
+        }
+
+        return {
+          ...station,
+          consoles: consolesTitles,
+        };
+      })
+    );
+    conn.release();
     return NextResponse.json(
       {
         success: true,
         message: "Stations récupérées avec succès",
-        data: stations,
+        data: stationWithNames,
       },
       { status: 200 }
     );
