@@ -43,15 +43,20 @@ export default function GameSelectionGrid({
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchDebounce, setSearchDebounce] = useState("");
   const [totalGames, setTotalGames] = useState(0);
-  const consoleId = consoleSelectedId || null;
+  const [consoleId] = useState<number | null>(consoleSelectedId || null);
 
+  // Ref pour l'intersection observer
   const observerTarget = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Only depend on `t` and `consoleId`
+  // Fonction pour charger les jeux
   const loadGames = useCallback(
-    async (pageNum: number, searchQuery: string, reset: boolean = false) => {
-      // Don't use loading or hasMore as dependency here
+    async (
+      pageNum: number,
+      searchQuery: string,
+      reset: boolean = false,
+      consoleId: number | null
+    ) => {
       if (loading || (!hasMore && !reset)) return;
 
       setLoading(true);
@@ -86,7 +91,7 @@ export default function GameSelectionGrid({
         setInitialLoading(false);
       }
     },
-    [t, consoleId, loading, hasMore]
+    [loading, hasMore]
   );
 
   useEffect(() => {
@@ -105,29 +110,23 @@ export default function GameSelectionGrid({
     };
   }, [search]);
 
-  // MAIN FETCH: Only reset cursor/pagination on search change
   useEffect(() => {
     setGames([]);
     setPage(1);
     setHasMore(true);
-    loadGames(1, searchDebounce, true);
-    // Only dependencies that can change: searchDebounce, t, consoleId
-    // loading/hasMore are excluded as they're managed in effect
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchDebounce, t, consoleId]);
+    loadGames(1, searchDebounce, true, consoleId);
+  }, [searchDebounce]);
 
-  // Intersection observer: only fetch on explicit page increments
+  // Intersection Observer pour l'infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasMore &&
-          !loading &&
-          !search &&
-          page > 1
-        ) {
-          loadGames(page, searchDebounce, false);
+        if (entries[0].isIntersecting && hasMore && !loading && !search) {
+          setPage((prev) => {
+            const next = prev + 1;
+            loadGames(next, searchDebounce, false, consoleId);
+            return next;
+          });
         }
       },
       { threshold: 0.1 }
@@ -145,10 +144,12 @@ export default function GameSelectionGrid({
     };
   }, [page, hasMore, loading, search, searchDebounce, loadGames]);
 
-  // Manual "Load more" : only change page when not loading, not finished
+  // Gestion du scroll manuel pour la recherche
   const handleLoadMore = () => {
     if (!loading && hasMore) {
-      setPage((prev) => prev + 1);
+      const nextPage = page + 1;
+      setPage(nextPage);
+      loadGames(nextPage, searchDebounce, false, consoleId);
     }
   };
 
@@ -164,6 +165,8 @@ export default function GameSelectionGrid({
             className="pl-10 h-11 text-base rounded-lg"
           />
         </div>
+
+        {/* Statistiques */}
         <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
           <div>
             {search && loading ? (
@@ -188,6 +191,7 @@ export default function GameSelectionGrid({
         </div>
       </div>
 
+      {/* État de chargement initial */}
       {initialLoading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="h-10 w-10 animate-spin text-cyan-500 mb-4" />
@@ -212,6 +216,7 @@ export default function GameSelectionGrid({
         </div>
       ) : (
         <>
+          {/* Grille des jeux */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
             {games.map((game) => {
               const isSelected = selectedIds.includes(game.id);
@@ -236,6 +241,7 @@ export default function GameSelectionGrid({
                     }
                   `}
                 >
+                  {/* Image du jeu */}
                   <div className="relative h-96">
                     {game.picture === null ? (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -253,17 +259,21 @@ export default function GameSelectionGrid({
                       </div>
                     )}
 
+                    {/* Overlay au hover */}
                     <div
                       className={`${
                         game.picture !== null &&
                         "2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity"
                       } absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`}
                     />
+
+                    {/* Badge sélectionné */}
                     {isSelected && (
                       <div className="absolute top-2 right-1 bg-cyan-500 rounded-full p-2 shadow-lg animate-in zoom-in-50">
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       </div>
                     )}
+
                     <div
                       className={`${
                         game.picture !== null &&
@@ -296,7 +306,7 @@ export default function GameSelectionGrid({
             })}
           </div>
 
-          {/* Infinite scroll only triggers when ref comes into view and page > 1 */}
+          {/* Observer target pour l'infinite scroll */}
           {!search && (
             <div ref={observerTarget} className="flex justify-center py-4">
               {loading && hasMore && (
@@ -314,7 +324,7 @@ export default function GameSelectionGrid({
             </div>
           )}
 
-          {/* Manual load more button */}
+          {/* Bouton "Charger plus" pour la recherche */}
           {search && hasMore && !loading && (
             <div className="flex justify-center pt-4">
               <button
