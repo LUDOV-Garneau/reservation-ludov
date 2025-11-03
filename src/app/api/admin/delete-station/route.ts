@@ -1,9 +1,8 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
-import { ResultSetHeader } from "mysql2";
+import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { verifyToken } from "@/lib/jwt";
 
-//IMPORTANT: + Comment gérer la suppression des réservations associées à cette station ? ou Empêcher la suppression si des réservations existent ?
 export async function DELETE(req: NextRequest) {
     const token = req.cookies.get("SESSION")?.value;
 
@@ -29,7 +28,19 @@ export async function DELETE(req: NextRequest) {
 
     const stationId = Number(stationIdRaw);
 
-    try {
+try {
+        const [reservations] = (await pool.query(
+            "SELECT COUNT(*) AS total FROM reservations WHERE stationId = ?",
+            [stationId]
+        )) as [RowDataPacket[], unknown];
+
+        if (reservations[0]?.total > 0) {
+            return NextResponse.json(
+                { error: "Impossible de supprimer une station avec des réservations actives. Veuillez annuler les réservations avant de supprimer la station." },
+                { status: 400 }
+            );
+        }
+
         const [result] = (await pool.query(
             "DELETE FROM stations WHERE id = ?",
             [stationId]
