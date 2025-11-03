@@ -29,7 +29,8 @@
       "previousStep": "Previous step",
       "stepNotFound": "Step not found",
       "backToStart": "Back to start",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "manuallyCancelled": "Reservation cancelled"
     },
     "console": {
       "error": "An error has occurred",
@@ -64,45 +65,101 @@
       "consoleSelection": "Platform selection",
       "modify": "Modify"
     },
-    "games" : {
-      "error" : {
+    "games": {
+      "error": {
         "games_restore": "Error restoring games:",
         "max_3_games": "A maximum of 3 games can be selected",
         "selecte_at_least_one": "Select at least one game",
         "no_active_reservation": "No active reservation",
-        "save_failed" : "Error saving",
+        "save_failed": "Error saving",
         "select_console_first": "Select a platform first"
       },
       "your_games": "Your games",
       "selected_platform": "Selected platform",
       "select_up_to_3": "Select up to 3 games",
       "go_through_library": "Browse through the library to choose",
-      "saving" : "Saving...",
+      "saving": "Saving...",
       "continue": "Continue",
-      "game_library": "Game library"
+      "game_library": "Game library",
+      "searchPlaceholder": "Search for a game...",
+      "searching": "Searching...",
+      "gamesAvailable": "{count} game{plural} available{plural}",
+      "displayed": "Displayed: {count}",
+      "loading": "Loading games...",
+      "noResult": "No game found for \"{search}\"",
+      "noGames": "No games available",
+      "clearSearch": "Clear search",
+      "details": "More details",
+      "loadingMore": "Loading more games...",
+      "listEnd": "End of list • {count} games displayed",
+      "loadMore": "Load more results",
+      "errorLoading": "Error loading games"
     },
     "course": {
-      "selectionTitle": "Course selection",
-      "instruction": "Please provide the course code for which you are making the reservation:",
+      "selectionTitle": "Course Selection",
+      "instruction": "Please choose the course you want to enroll in.",
       "courseLabel": "Course",
       "loading": "Loading...",
       "chooseCourse": "Choose a course",
-      "continue": "Continue"
+      "noCourseAvailable": "No courses available",
+      "error": "Error",
+      "selectCourseError": "Please select a course",
+      "saveError": "Save error",
+      "saveFailed": "Save failed",
+      "saveLoading": "Saving...",
+      "continue": "Continue",
+      "selectedCourseLabel": "Selected course",
+      "return": "Back",
+      "coursesAvailable": "{count} course available{plural}"
     },
     "accessory": {
-      "noneSelected": "No accessory selected",
-      "postError": "Failed to save the selected accessory.",
-      "networkError": "Network error, please try again. {error}",
-      "sending": "Sending...",
-      "continue": "Continue",
-      "selectedAccessories": "Selected accessories",
-      "accessorySelection": "Accessory selection",
-      "accessoryName": "Accessory name"
+      "header_info": "Selected platform",
+      "error": "Error",
+      "loading_text": "Loading accessories...",
+      "empty_selection": "No accessories selected",
+      "button_clear_all": "Clear all",
+      "button_state_loading_saving": "Saving...",
+      "button_continue": "Continue",
+      "help_text_continue_without_accessory": "You can continue without selecting accessories.",
+      "title_accessory_selection": "Accessory Selection",
+      "subtitle_accessory": "Choose the accessories you want to add to your reservation.",
+      "loading_accessory": "Loading accessories...",
+      "title_no_accessory_available": "No accessories available",
+      "no_accessory_available": "No accessories are currently available.",
+      "skip_step": "Skip this step",
+      "previousStep": "Previous step",
+      "selection": "Selection",
+      "selected_count": "{count} accessory selected{plural}",
+      "remove_aria_label": "Remove",
+      "accessoryName": "Accessory name...",
+      "noAccessoryFound": "No accessory found"
     },
     "calendar": {
-      "title": "Date selection",
+      "title": "Reservation",
+      "noValidDate": "No available timeslots",
       "continueBtn": "Continue",
-      "noValidDate": "No time slots available for this day."
+      "errorLoadTimes": "Error loading times",
+      "errorServer": "Server error",
+      "allSlotsTaken": "All timeslots are booked for this date",
+      "selectDate": "Select a date and time for your reservation",
+      "reservationDate": "Reservation date",
+      "startTime": "Start time",
+      "selectDateFirst": "Please select a date first",
+      "errorSummary": "Error",
+      "selectDateError": "Please select a date",
+      "selectTimeError": "Please select a time",
+      "noActiveReservationError": "No active reservation",
+      "saveError": "Error while saving",
+      "saveFailed": "Save failed",
+      "saveReservationError": "Error while saving the reservation",
+      "saveLoading": "Saving...",
+      "selectionSummaryTitle": "Your selection summary",
+      "selectionSummary": "{date} at {time}",
+      "noValidTimeSlot": "No available timeslot",
+      "nSlotsAvailable": "{count} slot{plural} available{plural} (2h session)",
+      "durationLabel": "Duration",
+      "durationValue": "2 hours",
+      "endLabel": "End"
     },
     "confirm": {
       "loadingReservation": "Loading your reservation...",
@@ -113,9 +170,16 @@
       "selectedConsole": "Platform",
       "noGameSelected": "No game selected",
       "noConsoleSelected": "No platform selected",
-      "accessories": "Accessories:",
-      "courses": "Courses:",
-      "yourReservation": "Your reservation"
+      "accessories": "Accessories",
+      "courses": "Course",
+      "yourReservation": "Your reservation",
+      "date": "date",
+      "hour": "hour",
+      "confirmationError": "Error during confirmation",
+      "missingData": "Missing data",
+      "loadingError": "Loading error",
+      "noActiveReservation": "No active reservation",
+      "return": "Back"
     },
     "details": {
       "cancelButton": "Cancel",
@@ -133,11 +197,10 @@
       "titleSection": "Reservation details",
       "selectedAccessory": "Selected accessories",
       "noAccessory": "No accessories selected",
-      "cancelWarningTitle" : "Irreversible action",
-      "cancelWarning" : "This action cannot be undone. You will need to create a new reservation if you change your mind.",
-      "cancelConfirmButton" : "Confirm cancellation",
-      "canceling" : "Cancelling..."
-
+      "cancelWarningTitle": "Irreversible action",
+      "cancelWarning": "This action cannot be undone. You will need to create a new reservation if you change your mind.",
+      "cancelConfirmButton": "Confirm cancellation",
+      "canceling": "Cancelling..."
     },
     "accueil": {
       "upcomingReservations": "Upcoming reservations",
@@ -152,7 +215,28 @@
       "date": "Date",
       "time": "Time",
       "games": "Reserved games",
-      "console": "Platform"
+      "console": "Platform",
+      "cancelled": "cancelled"
+    },
+    "reminder": {
+      "modifyReminder": "Modify Reminder",
+      "emailReminder": "Email Reminder",
+      "modify": "Modify",
+      "reminder": "Reminder",
+      "enableReminder": "Enable Reminder",
+      "receiveEmail": "Receive an email",
+      "whenToReceive": "When do you want to receive the reminder?",
+      "whatContainsTitle": "What does the reminder contain?",
+      "whatContainsDesc": "Date, time, platform, selected games and station number.",
+      "cancel": "Cancel",
+      "configure": "Configure Reminder",
+      "confirm": "Confirm",
+      "configuring": "Configuring...",
+      "sending": "Sending...",
+      "configureEmailReminder": "Configure Email Reminder",
+      "receiveEmailReminder": "Receive an email reminder before your reservation",
+      "configFailure": "Failed to configure reminder",
+      "unknownError": "Unknown error"
     }
   },
   "auth": {

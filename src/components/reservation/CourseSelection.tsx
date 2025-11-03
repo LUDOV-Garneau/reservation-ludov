@@ -13,12 +13,20 @@ import {
 import { useTranslations } from "next-intl";
 import { useReservation } from "@/context/ReservationContext";
 import { Cours } from "@/types/cours";
-import { BookOpen, Loader2, AlertCircle, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react";
+import {
+  BookOpen,
+  Loader2,
+  AlertCircle,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
+} from "lucide-react";
 
 export default function CourseSelection() {
   const t = useTranslations();
-  const { 
-    reservationId, 
+
+  const {
+    reservationId,
     setCurrentStep,
     setSelectedCours,
     selectedCours,
@@ -34,22 +42,22 @@ export default function CourseSelection() {
     async function fetchCours() {
       try {
         const res = await fetch("/api/reservation/cours");
-        if (!res.ok) throw new Error("Erreur lors du chargement des cours");
+        if (!res.ok) throw new Error(t("reservation.course.saveError"));
         const data = await res.json();
         setCours(data);
       } catch (error) {
         console.error("Erreur chargement cours:", error);
-        setError("Impossible de charger les cours");
+        setError(t("reservation.course.noCourseAvailable"));
       } finally {
         setLoading(false);
       }
     }
     fetchCours();
-  }, []);
+  }, [t]);
 
   const handleSave = async () => {
     if (!selectedCours || !reservationId) {
-      setError("Veuillez sélectionner un cours");
+      setError(t("reservation.course.selectCourseError"));
       return;
     }
 
@@ -62,18 +70,18 @@ export default function CourseSelection() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           reservationId,
-          coursId: selectedCours
+          coursId: selectedCours,
         }),
       });
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "Erreur sauvegarde");
+        throw new Error(data.message || t("reservation.course.saveError"));
       }
 
       setCurrentStep(currentStep + 1);
     } catch (err) {
-      setError("Impossible de sauvegarder le cours.");
+      setError(t("reservation.course.saveFailed"));
       console.error(err);
     } finally {
       setSaving(false);
@@ -85,7 +93,7 @@ export default function CourseSelection() {
     setError(null);
   };
 
-  const selectedCoursDetails = cours.find(c => c.id === selectedCours);
+  const selectedCoursDetails = cours.find((c) => c.id === selectedCours);
 
   return (
     <div className="bg-[white] rounded-3xl p-4 sm:p-6 lg:p-8">
@@ -105,7 +113,9 @@ export default function CourseSelection() {
               <div className="flex items-start gap-2 sm:gap-3">
                 <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs sm:text-sm font-bold text-red-800 mb-1">Erreur</p>
+                  <p className="text-xs sm:text-sm font-bold text-red-800 mb-1">
+                    {t("reservation.course.error")}
+                  </p>
                   <p className="text-xs sm:text-sm text-red-700">{error}</p>
                 </div>
               </div>
@@ -113,17 +123,20 @@ export default function CourseSelection() {
           )}
 
           <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-            <Label htmlFor="cours" className="text-base sm:text-lg font-semibold text-gray-900">
+            <Label
+              htmlFor="cours"
+              className="text-base sm:text-lg font-semibold text-gray-900"
+            >
               {t("reservation.course.courseLabel")}
             </Label>
-            
-            <Select 
-              onValueChange={handleSelectedCours} 
-              disabled={loading || saving} 
+
+            <Select
+              onValueChange={handleSelectedCours}
+              disabled={loading || saving}
               value={selectedCours ? String(selectedCours) : undefined}
             >
-              <SelectTrigger 
-                id="cours" 
+              <SelectTrigger
+                id="cours"
                 className="w-full h-12 sm:h-14 lg:h-16 text-sm sm:text-base border-2 border-gray-200 hover:border-cyan-400 focus:border-cyan-500 rounded-lg sm:rounded-xl transition-all"
               >
                 <SelectValue
@@ -139,25 +152,35 @@ export default function CourseSelection() {
                   <SelectItem value="loading" disabled>
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                      <span className="text-sm sm:text-base">{t("reservation.course.loading")}</span>
+                      <span className="text-sm sm:text-base">
+                        {t("reservation.course.loading")}
+                      </span>
                     </div>
                   </SelectItem>
                 ) : cours.length === 0 ? (
                   <SelectItem value="empty" disabled>
-                    <span className="text-sm sm:text-base">Aucun cours disponible</span>
+                    <span className="text-sm sm:text-base">
+                      {t("reservation.course.noCourseAvailable")}
+                    </span>
                   </SelectItem>
                 ) : (
                   cours.map((c) => (
-                    <SelectItem 
-                      key={c.id} 
+                    <SelectItem
+                      key={c.id}
                       value={String(c.id)}
                       className="text-sm sm:text-base py-2 sm:py-3 cursor-pointer hover:bg-cyan-50"
                     >
                       <div className="flex items-center gap-2 flex-wrap">
                         <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-cyan-600 flex-shrink-0" />
-                        <span className="font-semibold text-cyan-700">{c.code_cours}</span>
-                        <span className="text-gray-600 hidden sm:inline">-</span>
-                        <span className="text-gray-900 break-words">{c.nom_cours}</span>
+                        <span className="font-semibold text-cyan-700">
+                          {c.code_cours}
+                        </span>
+                        <span className="text-gray-600 hidden sm:inline">
+                          -
+                        </span>
+                        <span className="text-gray-900 break-words">
+                          {c.nom_cours}
+                        </span>
                       </div>
                     </SelectItem>
                   ))
@@ -172,7 +195,7 @@ export default function CourseSelection() {
                 <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-white flex-shrink-0 mt-0.5 sm:mt-1" />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs sm:text-sm font-semibold text-white/90 mb-1">
-                    Cours sélectionné
+                    {t("reservation.course.selectedCourseLabel")}
                   </p>
                   <p className="text-white text-lg sm:text-xl font-bold break-words">
                     {selectedCoursDetails.code_cours}
@@ -194,7 +217,7 @@ export default function CourseSelection() {
               className="w-full sm:flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg sm:rounded-xl border-2 hover:bg-gray-50"
             >
               <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              Retour
+              {t("reservation.course.return")}
             </Button>
             <Button
               size="lg"
@@ -205,11 +228,15 @@ export default function CourseSelection() {
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                  <span className="truncate">Enregistrement...</span>
+                  <span className="truncate">
+                    {t("reservation.course.saveLoading")}
+                  </span>
                 </>
               ) : (
                 <>
-                  <span className="truncate">{t("reservation.course.continue")}</span>
+                  <span className="truncate">
+                    {t("reservation.course.continue")}
+                  </span>
                   <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                 </>
               )}
@@ -219,7 +246,10 @@ export default function CourseSelection() {
 
         {!loading && cours.length > 0 && (
           <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-500">
-            {cours.length} cours disponible{cours.length > 1 ? "s" : ""}
+            {t("reservation.course.coursesAvailable", {
+              count: cours.length,
+              plural: cours.length > 1 ? "s" : "",
+            })}
           </div>
         )}
       </div>

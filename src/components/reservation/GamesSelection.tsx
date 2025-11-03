@@ -17,15 +17,15 @@ type Game = {
 };
 
 export default function GamesSelection() {
-  const { 
+  const {
     selectedGames,
-    setSelectedGames, 
+    setSelectedGames,
     setCurrentStep,
     selectedConsole,
     reservationId,
     error,
     clearError,
-    currentStep
+    currentStep,
   } = useReservation();
 
   const [selectedGameObjects, setSelectedGameObjects] = useState<Game[]>([]);
@@ -48,7 +48,9 @@ export default function GamesSelection() {
       setIsLoadingSelected(true);
       try {
         const gameIds = selectedGames.join(",");
-        const res = await fetch(`/api/reservation/games/details?ids=${gameIds}`);
+        const res = await fetch(
+          `/api/reservation/games/details?ids=${gameIds}`
+        );
         if (res.ok) {
           const games = await res.json();
           setSelectedGameObjects(games);
@@ -64,31 +66,29 @@ export default function GamesSelection() {
   }, [reservationId, selectedGames]);
 
   const toggleSelect = (game: Game) => {
-    const isSelected = selectedGameObjects.find(g => g.id === game.id);
-    
+    const isSelected = selectedGameObjects.find((g) => g.id === game.id);
+
     if (isSelected) {
-      const newSelection = selectedGameObjects.filter(g => g.id !== game.id);
+      const newSelection = selectedGameObjects.filter((g) => g.id !== game.id);
       setSelectedGameObjects(newSelection);
-      setSelectedGames(newSelection.map(g => String(g.id)));
+      setSelectedGames(newSelection.map((g) => String(g.id)));
     } else if (selectedGameObjects.length < 3) {
       const newSelection = [...selectedGameObjects, game];
       setSelectedGameObjects(newSelection);
-      setSelectedGames(newSelection.map(g => String(g.id)));
+      setSelectedGames(newSelection.map((g) => String(g.id)));
     } else {
       setLocalError(t("games.error.max_3_games"));
     }
     clearError();
   };
 
-
   const clearGame = (gameId: number) => {
-    const newSelection = selectedGameObjects.filter(g => g.id !== gameId);
+    const newSelection = selectedGameObjects.filter((g) => g.id !== gameId);
     setSelectedGameObjects(newSelection);
-    setSelectedGames(newSelection.map(g => String(g.id)));
+    setSelectedGames(newSelection.map((g) => String(g.id)));
     clearError();
     setLocalError(null);
   };
-
 
   const handleContinue = async () => {
     if (selectedGameObjects.length === 0) {
@@ -105,7 +105,7 @@ export default function GamesSelection() {
     setLocalError(null);
 
     try {
-      const gameIds = selectedGameObjects.map(g => g.id);
+      const gameIds = selectedGameObjects.map((g) => g.id);
       const res = await fetch("/api/reservation/update-hold-reservation", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -123,9 +123,8 @@ export default function GamesSelection() {
       if (data.success) {
         setCurrentStep(3);
       }
-    } catch (err) {
+    } catch {
       setLocalError(t("games.error.save_failed"));
-      console.error(err);
     } finally {
       setIsSaving(false);
     }
@@ -151,27 +150,38 @@ export default function GamesSelection() {
     <div className="grid xl:grid-cols-4 grid-cols-2 gap-6">
       <div className="col-span-2 xl:col-span-1">
         <div className="bg-[white] sticky top-10 rounded-2xl p-6 shadow-lg max-h-[100vh] overflow-y-auto">
-          { currentStep > 1 && (
-            <div onClick={() => setCurrentStep(currentStep - 1)} className="cursor-pointer flex flex-row items-center mb-3 w-fit">
-              <MoveLeft className="h-6 w-6 mr-2"/>
+          {currentStep > 1 && (
+            <div
+              onClick={() => setCurrentStep(currentStep - 1)}
+              className="cursor-pointer flex flex-row items-center mb-3 w-fit"
+            >
+              <MoveLeft className="h-6 w-6 mr-2" />
               <p>{t("reservation.layout.previousStep")}</p>
             </div>
           )}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-800">{t("reservation.games.your_games")}</h2>
-            <span className={`text-sm font-medium px-2 py-1 rounded-full ${
-              selectedGameObjects.length === 3 
-                ? 'bg-green-50 text-green-700' 
-                : 'bg-cyan-50 text-cyan-700'
-            }`}>
+            <h2 className="text-xl font-bold text-gray-800">
+              {t("reservation.games.your_games")}
+            </h2>
+            <span
+              className={`text-sm font-medium px-2 py-1 rounded-full ${
+                selectedGameObjects.length === 3
+                  ? "bg-green-50 text-green-700"
+                  : "bg-cyan-50 text-cyan-700"
+              }`}
+            >
               {selectedGameObjects.length}/3
             </span>
           </div>
 
           {selectedConsole && (
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">{t("reservation.games.selected_platform")}</p>
-              <p className="text-sm font-medium text-gray-700">{selectedConsole.name}</p>
+              <p className="text-xs text-gray-500 mb-1">
+                {t("reservation.games.selected_platform")}
+              </p>
+              <p className="text-sm font-medium text-gray-700">
+                {selectedConsole.name}
+              </p>
             </div>
           )}
 
@@ -202,8 +212,8 @@ export default function GamesSelection() {
             ) : (
               <div className="space-y-2">
                 {selectedGameObjects.map((game) => (
-                  <div 
-                    key={game.id} 
+                  <div
+                    key={game.id}
                     className="bg-white border border-gray-200 rounded-lg p-3 flex items-center gap-3 group hover:shadow-md transition-shadow"
                   >
                     <div className="relative w-16 h-20 rounded overflow-hidden flex-shrink-0 bg-gray-100">
@@ -211,14 +221,14 @@ export default function GamesSelection() {
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                           <Gamepad2 className="h-10 w-10 text-gray-400" />
                         </div>
-                      ): (
-                          <Image
-                            src={game.picture}
-                            alt={game.titre}
-                            fill
-                            className="object-cover"
-                            sizes="64px"
-                          />
+                      ) : (
+                        <Image
+                          src={game.picture}
+                          alt={game.titre}
+                          fill
+                          className="object-cover"
+                          sizes="64px"
+                        />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -231,8 +241,18 @@ export default function GamesSelection() {
                       className="2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded"
                       aria-label={`Retirer ${game.titre}`}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -254,9 +274,10 @@ export default function GamesSelection() {
             ) : (
               <>
                 {t("reservation.games.continue")}
-                {selectedGameObjects.length > 0 && 
-                  ` (${selectedGameObjects.length} jeu${selectedGameObjects.length > 1 ? 'x' : ''})`
-                }
+                {selectedGameObjects.length > 0 &&
+                  ` (${selectedGameObjects.length} jeu${
+                    selectedGameObjects.length > 1 ? "x" : ""
+                  })`}
               </>
             )}
           </Button>
@@ -271,14 +292,13 @@ export default function GamesSelection() {
                 {t("reservation.games.game_library")}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                Choisissez jusqu&#39;à 3 jeux pour votre réservation
+                {t("reservation.games.select_up_to_3")}
               </p>
             </div>
-            
           </div>
 
           <GameSelectionGrid
-            selectedIds={selectedGameObjects.map(g => g.id)}
+            selectedIds={selectedGameObjects.map((g) => g.id)}
             onSelect={toggleSelect}
             maxReached={selectedGameObjects.length >= 3}
             consoleSelectedId={selectedConsole ? selectedConsole.id : null}
