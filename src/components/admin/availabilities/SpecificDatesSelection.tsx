@@ -18,16 +18,9 @@ import {
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
 import { Copy, Trash2 } from "lucide-react";
+import { DateSelection } from "@/types/availabilities";
 
 type TimeKey = "startHour" | "startMinute" | "endHour" | "endMinute";
-
-export type DateSelection = {
-  date: Date;
-  startHour: string;
-  startMinute: string;
-  endHour: string;
-  endMinute: string;
-};
 
 type Props = {
   exceptions?: DateSelection[];

@@ -4,27 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import SpecificDatesSelection from "./SpecificDatesSelection";
 import { useTranslations } from "next-intl";
-
-type HourRange = {
-  id: number;
-  startHour: string;
-  startMinute: string;
-  endHour: string;
-  endMinute: string;
-};
-
-type Exception = {
-  date: Date;
-  timeRange: HourRange;
-};
-
-type DateSelection = {
-  date: Date;
-  startHour: string;
-  startMinute: string;
-  endHour: string;
-  endMinute: string;
-};
+import { Exception, DateSelection } from "@/types/availabilities";
 
 type Props = {
   blockEnabled: boolean;
