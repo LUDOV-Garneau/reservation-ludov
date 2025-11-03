@@ -122,6 +122,7 @@
       "noValidDate": "Aucune plage horaire disponible",
       "continueBtn": "Continuer",
       "errorLoadTimes": "Erreur chargement des horaires",
+      "errorLoadDates": "Erreur chargement des dates indisponibles",
       "errorServer": "Erreur serveur",
       "allSlotsTaken": "Toutes les plages horaires sont réservées pour cette date",
       "selectDate": "Sélectionnez une date et une heure pour votre réservation",

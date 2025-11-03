@@ -139,6 +139,7 @@
       "noValidDate": "No available timeslots",
       "continueBtn": "Continue",
       "errorLoadTimes": "Error loading times",
+      "errorLoadDates": "Error loading unavailable dates",
       "errorServer": "Server error",
       "allSlotsTaken": "All timeslots are booked for this date",
       "selectDate": "Select a date and time for your reservation",

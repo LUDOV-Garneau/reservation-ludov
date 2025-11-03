@@ -38,3 +38,9 @@ export type DateSelection = {
   endHour: string;
   endMinute: string;
 };
+
+export type DatesBlocked = {
+  dayOfWeek: number[];
+  before: Date | null;
+  after: Date | null;
+};

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useLocale, useTranslations } from "next-intl";
 import { useReservation } from "@/context/ReservationContext";
 import { Loader2, AlertCircle, Calendar, Clock, MoveLeft } from "lucide-react";
+import { DatesBlocked } from "@/types/availabilities";
 
 type TimeSlot = {
   time: string;
@@ -31,28 +32,59 @@ export default function DateSelection() {
     selectedAccessories,
   } = useReservation();
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingTimes, setIsLoadingTimes] = useState<boolean>(false);
+  const [isLoadingDates, setIsLoadingDates] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [date, setDate] = useState<Date | undefined>(selectedDate);
   const [time, setTime] = useState<string>(selectedTime || "");
   const [availableTimes, setAvailableTimes] = useState<TimeSlot[]>([]);
+  const [unavailableDates, setUnavailableDates] = useState<DatesBlocked | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (date) {
-      loadAvailableTimes(date);
-    }
+    const loadUnavailableDates = async () => {
+      setIsLoadingDates(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/reservation/calendar-dates");
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || t("reservation.calendar.errorLoadDates")
+          );
+        }
+
+        const data = await response.json();
+
+        setUnavailableDates(data.unavailableDates || null);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : t("reservation.calendar.errorLoadDates")
+        );
+        setUnavailableDates(null);
+      } finally {
+        setIsLoadingDates(false);
+      }
+    };
+
+    loadUnavailableDates();
   }, []);
 
   const loadAvailableTimes = async (selectedDate: Date) => {
-    setIsLoading(true);
+    setIsLoadingTimes(true);
     setError(null);
 
     try {
       const dateString = selectedDate.toISOString().split("T")[0];
 
       const response = await fetch(
-        `/api/reservation/calendar?date=${encodeURIComponent(
+        `/api/reservation/calendar-times?date=${encodeURIComponent(
           dateString
         )}&consoleId=${encodeURIComponent(
           selectedConsoleId
@@ -88,7 +120,7 @@ export default function DateSelection() {
       );
       setAvailableTimes([]);
     } finally {
-      setIsLoading(false);
+      setIsLoadingTimes(false);
     }
   };
 
@@ -214,7 +246,17 @@ export default function DateSelection() {
                 {t("reservation.calendar.reservationDate")}
               </h3>
             </div>
-            <DatePicker selected={date} onSelect={onSelectDate} />
+            {isLoadingDates ? (
+              <div className="w-[320px] h-[360px]">
+                <Skeleton className="w-full h-full rounded-2xl bg-gradient-to-r from-gray-200 to-gray-300 animate-pulse" />
+              </div>
+            ) : (
+              <DatePicker
+                selected={date}
+                onSelect={onSelectDate}
+                unavailableDates={unavailableDates}
+              />
+            )}
           </div>
 
           <div className="col-span-2 md:col-span-1">
@@ -232,7 +274,7 @@ export default function DateSelection() {
                   {t("reservation.calendar.selectDateFirst")}
                 </p>
               </div>
-            ) : isLoading ? (
+            ) : isLoadingTimes ? (
               <div className="grid grid-cols-3 gap-3">
                 {Array(9)
                   .fill(0)
