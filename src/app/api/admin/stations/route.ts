@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
       `
       SELECT 
         id,
+        name,
         consoles,
         createdAt
       FROM stations
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
     `
     );
 
-    const stations = (rows as { id: number; consoles: unknown; createdAt: string }[]).map((row) => ({
+    const stations = (rows as { id: number; name: string; consoles: unknown; createdAt: string }[]).map((row) => ({
       ...row,
       consoles: safeParseJSON(row.consoles),
     }));
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
       { status: 200 }
     );
   } catch (err) {
-    console.error("Erreur lors de la récupération des utilisateurs :", err);
+    console.error("Erreur lors de la récupération des stations :", err);
     return NextResponse.json(
       { success: false, message: "Erreur serveur" },
       { status: 500 }
