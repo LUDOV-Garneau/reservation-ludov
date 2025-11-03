@@ -18,10 +18,18 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { stationId, consoles } = body;
+    const { name, stationId, consoles } = body;
+
+    if (!name || name.trim() === "") {
+      return NextResponse.json(
+        { error: "Le nom de la station est requis." },
+        { status: 400 }
+      );
+    }
+
     if (!stationId) {
       return NextResponse.json(
-        { error: "Aucun identifiant de station donné." },
+        { error: "L'identifiant de la station est requis." },
         { status: 400 }
       );
     }
@@ -53,10 +61,10 @@ export async function POST(req: NextRequest) {
     try {
       await conn.query(
         `
-        UPDATE stations SET consoles = ?, updateAt = ?
+        UPDATE stations SET name = ?, consoles = ?, updateAt = ?
         WHERE id = ?
         `,
-        [JSON.stringify(consoles), now, stationId]
+        [name, JSON.stringify(consoles), now, stationId]
       );
       conn.release();
 
@@ -66,7 +74,7 @@ export async function POST(req: NextRequest) {
       );
     } catch (err) {
       conn.release();
-      console.error("Erreur lors de l'insertion :", err);
+      console.error("Erreur lors de la modification :", err);
       return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
     }
   } catch (error) {
