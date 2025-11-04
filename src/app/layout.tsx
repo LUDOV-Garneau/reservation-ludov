@@ -21,10 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${inter.variable} ${nunito.variable}`}>
-      <body className="font-body">
-        {children}
-        <Toaster position="bottom-right" />
-      </body>
+      <body className="font-body">{children}</body>
     </html>
   );
 }
