@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     for (const weekAvailability of weeklyAvailabilities) {
       if (!weekAvailability.enabled) {
-        unavailableDates.dayOfWeek.push(weekAvailability.weekly_id);
+        unavailableDates.dayOfWeek.push(weekAvailability.weekly_id - 1);
       }
     }
 

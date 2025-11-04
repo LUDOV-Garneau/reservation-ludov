@@ -4,11 +4,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { DatesBlocked } from "@/types/availabilities";
 import { frCA, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
-
-type DisabledMatcher =
-  | [{ before: Date }, { after: Date }, { dayOfWeek: number[] }]
-  | [{ before: Date }, { after: Date }]
-  | [{ dayOfWeek: number[] }];
+import { Matcher } from "react-day-picker";
 
 type DatePickerProps = {
   selected: Date | undefined;
@@ -22,28 +18,31 @@ export function DatePicker({
   unavailableDates,
 }: DatePickerProps) {
   const locale = useLocale();
-  const datesBlocked: DisabledMatcher | null = () => {
+  const datesBlocked = getDatesBlocked();
+
+  function getDatesBlocked(): Matcher[] | boolean {
+    const blocks: Matcher[] = [];
+
     if (!unavailableDates) {
-      return null;
+      return true;
     }
 
-    const matcher = [];
+    if (unavailableDates.before && unavailableDates.before > new Date()) {
+      blocks.push({ before: unavailableDates.before });
+    } else {
+      blocks.push({ before: new Date(Date.now() + 60 * 60 * 24 * 1000) });
+    }
 
-    if (unavailableDates.after && unavailableDates.before) {
-      if (unavailableDates.after > new Date()) {
-        matcher.push({ after: unavailableDates.after });
-      } else {
-        matcher.push({ after: new Date() });
-      }
-      matcher.push({ before: unavailableDates.before });
+    if (unavailableDates.after) {
+      blocks.push({ after: unavailableDates.after });
     }
 
     if (unavailableDates.dayOfWeek.length > 0) {
-      matcher.push({ dayOfWeek: unavailableDates.dayOfWeek });
+      blocks.push({ dayOfWeek: unavailableDates.dayOfWeek });
     }
 
-    return matcher;
-  };
+    return blocks;
+  }
 
   return (
     <Calendar
