@@ -1,28 +1,62 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
 import type { RowDataPacket } from "mysql2";
+import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
+
+type Body = {
+  firstname: string;
+  lastname: string;
+  email: string;
+  isAdmin?: number;
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.cookies.get("SESSION")?.value;
-    if (!token) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("SESSION");
+    let user = null;
+    
+    try {
+      const token = sessionCookie?.value;
+      if (token) user = verifyToken(token);
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+    if (!user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    if (!user?.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
     }
 
-    const user = verifyToken(token);
-    if (!user?.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    let body: Partial<Body> = {};
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Body JSON invalide" },
+        { status: 400 }
+      );
     }
-    if (!user.isAdmin) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    }
-    const body = await req.json();
-    const { firstname, lastname, email, isAdmin = 0 } = body;
+
+    const firstname = body.firstname?.trim();
+    const lastname = body.lastname?.trim();
+    const email = body.email?.trim();
+    const isAdmin = body.isAdmin === 1 ? 1 : 0;
 
     if (!firstname || !lastname || !email) {
       return NextResponse.json(
-        { error: "Champs requis manquants (firstname, lastname, email)." },
+        { error: "Prénom, nom de famille et email sont requis." },
         { status: 400 }
       );
     }
@@ -30,7 +64,7 @@ export async function POST(req: NextRequest) {
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!EMAIL_REGEX.test(email)) {
       return NextResponse.json(
-        { error: "Format de courriel invalide." },
+        { error: "Format d'email invalide." },
         { status: 400 }
       );
     }
@@ -61,18 +95,23 @@ export async function POST(req: NextRequest) {
       );
 
       conn.release();
-
       return NextResponse.json(
         { success: true, message: "Utilisateur ajouté avec succès." },
         { status: 201 }
       );
     } catch (err) {
       conn.release();
-      console.error("Erreur lors de l'insertion :", err);
-      return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
+      console.error("Erreur lors de l'ajout de l'utilisateur :", err);
+      return NextResponse.json(
+        { error: "Erreur serveur" },
+        { status: 500 }
+      );
     }
   } catch (error) {
-    console.error("Erreur lors de l'ajout de l'utilisateur :", error);
-    return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
+    console.error("Erreur lors du traitement de la requête :", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

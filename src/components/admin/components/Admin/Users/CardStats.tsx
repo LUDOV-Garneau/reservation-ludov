@@ -1,0 +1,68 @@
+"use client";
+import { Card, CardContent } from "@/components/ui/card";
+import { User } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface CardUserStatsProps {
+  totalUser?: number;
+  totalUserNotBoarded?: number;
+  totalUserWithReservation?: number;
+  loading?: boolean;
+}
+
+export default function CardUserStats({
+  totalUser,
+  totalUserNotBoarded,
+  totalUserWithReservation,
+  loading = false,
+}: CardUserStatsProps) {
+  const isLoading = loading || totalUser === undefined || totalUserNotBoarded === undefined || totalUserWithReservation === undefined;
+
+  const Stat = ({
+    label,
+    value,
+    accent,
+    hideIconOnSmall = false,
+  }: {
+    label: string;
+    value?: number;
+    accent: "cyan" | "orange" | "green";
+    hideIconOnSmall?: boolean;
+  }) => {
+    const colorMap = {
+      cyan: { ring: "border-l-cyan-500", dot: "bg-cyan-500", text: "text-cyan-600", tint: "bg-cyan-100" },
+      orange: { ring: "border-l-orange-500", dot: "bg-orange-500", text: "text-orange-600", tint: "bg-orange-100" },
+      green: { ring: "border-l-green-500", dot: "bg-green-500", text: "text-green-600", tint: "bg-green-100" },
+    }[accent];
+
+    console.log("Rendering Stat:", { label, value, accent, isLoading });
+
+    return (
+      <Card className={`border-l-4 ${colorMap.ring}`}>
+        <CardContent className="flex items-center gap-4">
+          <div className={`${hideIconOnSmall ? "hidden sm:flex" : "flex"} h-16 w-16 items-center justify-center rounded-full ${colorMap.tint}`}>
+            <div className={`rounded-full ${colorMap.dot} p-3 shadow-lg`}>
+              <User className="h-6 w-6 text-white" />
+            </div>
+          </div>
+          <div>
+            <p>{label}</p>
+            {isLoading ? (
+              <Skeleton className="h-6 sm:h-8 w-12 sm:w-16" />
+            ) : (
+              <div className={`text-2xl sm:text-3xl font-bold ${colorMap.text}`}>{value ?? 0}</div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <Stat label="Nombre d'utilisateurs" value={totalUser} accent="cyan" />
+      <Stat label="Utilisateur non configuré" value={totalUserNotBoarded} accent="orange" />
+      <Stat label="Utilisateur avec réservation" value={totalUserWithReservation} accent="green" hideIconOnSmall />
+    </div>
+  );
+}
