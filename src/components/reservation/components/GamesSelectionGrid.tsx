@@ -177,8 +177,7 @@ export default function GameSelectionGrid({
             ) : totalGames > 0 ? (
               <span>
                 {t("reservation.games.gamesAvailable", {
-                  count: totalGames,
-                  plural: totalGames > 1 ? "s" : "",
+                  count: totalGames
                 })}
               </span>
             ) : null}
