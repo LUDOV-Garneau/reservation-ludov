@@ -146,7 +146,7 @@
     },
     "course": {
       "selectionTitle": "Sélection du cours",
-      "instruction": "Veuillez choisir le cours auquel vous souhaitez vous inscrire.",
+      "instruction": "Veuillez choisir le cours pour lequel vous effectuez une réservation.",
       "courseLabel": "Cours",
       "loading": "Chargement...",
       "chooseCourse": "Choisissez un cours",

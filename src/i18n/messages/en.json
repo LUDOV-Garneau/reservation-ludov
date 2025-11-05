@@ -97,7 +97,7 @@
     },
     "course": {
       "selectionTitle": "Course Selection",
-      "instruction": "Please choose the course you want to enroll in.",
+      "instruction": "Please select the course for which you are making a reservation.",
       "courseLabel": "Course",
       "loading": "Loading...",
       "chooseCourse": "Choose a course",
