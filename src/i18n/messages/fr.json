@@ -110,7 +110,7 @@
       "title_no_accessory_available": "Aucun accessoire disponible",
       "previousStep": "Étape précédente",
       "selection": "Sélection",
-      "selected_count": "{count} accessoire sélectionné{plural}",
+      "selected_count": "{count, plural, =0 {Aucun accessoire sélectionné} one {# accessoire sélectionné} other {# accessoires sélectionnés}}",
       "remove_aria_label": "Retirer",
       "accessoryName": "Nom de l'accessoire...",
       "noAccessoryFound": "Aucun accessoire trouvé",

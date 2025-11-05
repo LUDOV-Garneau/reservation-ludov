@@ -129,7 +129,7 @@
       "skip_step": "Skip this step",
       "previousStep": "Previous step",
       "selection": "Selection",
-      "selected_count": "{count} accessory selected{plural}",
+      "selected_count": "{count, plural, =0 {No accessories selected} one {# accessory selected} other {# accessories selected}}",
       "remove_aria_label": "Remove",
       "accessoryName": "Accessory name...",
       "noAccessoryFound": "No accessory found"
