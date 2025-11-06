@@ -12,10 +12,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import CardUserStats from "./Admin/Users/CardStats";
+import CardUserStats from "./CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import ActionBar from "./Admin/Users/ActionBar";
-import PaginationControls from "./Admin/Pagination";
+import ActionBar from "./ActionBar";
+import PaginationControls from "./Pagination";
+import ResetPasswordAction from "./DialogConfirmationResetsPassword";
 
 type User = {
   id: number;
@@ -112,12 +113,14 @@ function UserTableRow({
   user,
   isCurrentUser,
   onDelete,
-  onResetPassword,
+  onAlert,
+  onSuccess,
 }: {
   user: User;
   isCurrentUser: boolean;
   onDelete: (userId: number, email: string) => void;
-  onResetPassword: (userId: number, email: string) => void;
+  onAlert: (type: "success" | "error" | "info" | "warning", message: string, title?: string) => void;
+  onSuccess: () => void;
 }) {
   const t = useTranslations();
   return (
@@ -135,23 +138,34 @@ function UserTableRow({
         {!isCurrentUser ? (
           <div className="">
             <div className="hidden sm:flex gap-2">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onResetPassword(user.id, user.email)}
-                      className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
-                    >
-                      <KeyRound className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{t("admin.users.table.ActionToolTips.resetPassword")}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <ResetPasswordAction
+                targetUser={{ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }}
+                onAlert={onAlert}
+                onSuccess={onSuccess}
+              >
+                {({ open, loading }) => (
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={open}
+                          disabled={loading}
+                          className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
+                          aria-label={t("admin.users.table.ActionToolTips.resetPassword")}
+                        >
+                          <KeyRound className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{t("admin.users.table.ActionToolTips.resetPassword")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </ResetPasswordAction>
+
 
               <TooltipProvider>
                 <Tooltip>
@@ -180,10 +194,27 @@ function UserTableRow({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => onResetPassword(user.id, user.email)}>
-                    <KeyRound className="h-4 w-4 mr-2 text-blue-500" />
-                    {t("admin.users.table.ActionToolTips.resetPassword")}
-                  </DropdownMenuItem>
+                  <ResetPasswordAction
+                    targetUser={{ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }}
+                    onAlert={onAlert}
+                    onSuccess={onSuccess}
+                  >
+                    {({ open }) => (
+                      <DropdownMenuItem 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          open();
+                        }}
+                        onSelect={(e) => {
+                          e.preventDefault();
+                        }}
+                      >
+                        <KeyRound className="h-4 w-4 mr-2 text-blue-500" />
+                        {t("admin.users.table.ActionToolTips.resetPassword")}
+                      </DropdownMenuItem>
+                    )}
+                  </ResetPasswordAction>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => onDelete(user.id, user.email)}
@@ -261,22 +292,22 @@ export function ModernAlert({
   if (!alert) return null;
 
   const icon =
-    alert.type === "success" ? <CheckCircle2 className="h-4 w-4 text-green-600" /> :
-    alert.type === "error"   ? <XCircle className="h-4 w-4 text-red-600" /> :
-    alert.type === "warning" ? <AlertTriangle className="h-4 w-4 text-yellow-600" /> :
-                               <Info className="h-4 w-4 text-blue-600" />;
+    alert.type === "success" ? <CheckCircle2 className="h-8 w-8 lg:h-6 lg:w-6 text-green-600" /> :
+    alert.type === "error"   ? <XCircle className="h-8 w-8 lg:h-6 lg:w-6 text-red-600" /> :
+    alert.type === "warning" ? <AlertTriangle className="h-8 w-8 lg:h-6 lg:w-6 text-yellow-600" /> :
+                               <Info className="h-8 w-8 lg:h-6 lg:w-6 text-blue-600" />;
 
   return (
     <Alert
       className="mb-4"
       variant={
-        alert.type === "success" ? "default" :
+        alert.type === "success" ? "success" :
         alert.type === "error"   ? "destructive" :
         "default"
       }
     >
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex gap-2">
+      <div className="flex items-center gap-2 w-full">
+        <div className="flex items-center gap-2">
           {icon}
           <div>
             {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
@@ -284,7 +315,7 @@ export function ModernAlert({
           </div>
         </div>
 
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6 p-0">
+        <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6 p-0 ml-auto">
           <XCircle className="h-4 w-4" />
         </Button>
       </div>
@@ -499,7 +530,8 @@ export default function UsersTable() {
                         user={user}
                         isCurrentUser={currentUserId !== null && user.id === currentUserId}
                         onDelete={() => console.log("Delete user", user.id)}
-                        onResetPassword={() => console.log("Reset password", user.id)}
+                        onAlert={showAlert}
+                        onSuccess={handleRefresh}
                       />
                     ))}
                   </TableBody>
