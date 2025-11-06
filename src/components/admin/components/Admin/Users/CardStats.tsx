@@ -35,8 +35,6 @@ export default function CardUserStats({
       green: { ring: "border-l-green-500", dot: "bg-green-500", text: "text-green-600", tint: "bg-green-100" },
     }[accent];
 
-    console.log("Rendering Stat:", { label, value, accent, isLoading });
-
     return (
       <Card className={`border-l-4 ${colorMap.ring}`}>
         <CardContent className="flex items-center gap-4">
