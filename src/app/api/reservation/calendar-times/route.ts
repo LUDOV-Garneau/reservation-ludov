@@ -11,6 +11,17 @@ interface ReservationRow extends RowDataPacket {
   accessoirs: string;
 }
 
+type WeeklyHoursRow = RowDataPacket & {
+  start_hour: string;
+  start_minute: string;
+  end_hour: string;
+  end_minute: string;
+};
+
+type SpecificHoursRow = WeeklyHoursRow & { is_exception: boolean };
+
+type Range = { start: number; end: number };
+
 interface TimeSlotAvailability {
   time: string;
   available: boolean;
@@ -21,14 +32,103 @@ interface TimeSlotAvailability {
   };
 }
 
+function toMinutes(h: string, m: string) {
+  return parseInt(h) * 60 + parseInt(m);
+}
+
+function fromMinutes(minutes: number) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return {
+    hour: h.toString().padStart(2, "0"),
+    minute: m.toString().padStart(2, "0"),
+  };
+}
+
+function subtractRange(base: Range[], toRemove: Range): Range[] {
+  const result: Range[] = [];
+  for (const r of base) {
+    if (toRemove.end <= r.start || toRemove.start >= r.end) {
+      result.push(r);
+      continue;
+    }
+    if (toRemove.start > r.start) {
+      result.push({ start: r.start, end: toRemove.start });
+    }
+    if (toRemove.end < r.end) {
+      result.push({ start: toRemove.end, end: r.end });
+    }
+  }
+  return result;
+}
+
+function mergeRanges(ranges: Range[]): Range[] {
+  if (ranges.length === 0) return [];
+  const sorted = [...ranges].sort((a, b) => a.start - b.start);
+  const merged: Range[] = [sorted[0]];
+
+  for (let i = 1; i < sorted.length; i++) {
+    const last = merged[merged.length - 1];
+    const current = sorted[i];
+
+    if (current.start <= last.end) {
+      last.end = Math.max(last.end, current.end);
+    } else if (current.start === last.end) {
+      last.end = current.end;
+    } else {
+      merged.push(current);
+    }
+  }
+
+  return merged;
+}
+
+function computeValidRanges(
+  weeklyHours: WeeklyHoursRow[],
+  specificHours: SpecificHoursRow[]
+) {
+  let validRanges: Range[] = weeklyHours.map((r) => ({
+    start: toMinutes(r.start_hour, r.start_minute),
+    end: toMinutes(r.end_hour, r.end_minute),
+  }));
+
+  for (const r of specificHours) {
+    const range = {
+      start: toMinutes(r.start_hour, r.start_minute),
+      end: toMinutes(r.end_hour, r.end_minute),
+    };
+
+    if (r.is_exception === true) {
+      validRanges = subtractRange(validRanges, range);
+    } else {
+      validRanges.push(range);
+    }
+  }
+
+  validRanges = mergeRanges(validRanges);
+
+  return validRanges;
+}
+
+function formatRanges(ranges: Range[]) {
+  return ranges.map((r) => ({
+    start: fromMinutes(r.start),
+    end: fromMinutes(r.end),
+  }));
+}
+
 function generateAllTimeSlots(): string[] {
-  const OPENING_HOUR = 8;
-  const CLOSING_HOUR = 18;
+  const OPENING_HOUR = 9;
+  const CLOSING_HOUR = 17;
   const SESSION_DURATION = 2;
 
   const slots: string[] = [];
 
-  for (let hour = OPENING_HOUR; hour <= CLOSING_HOUR - SESSION_DURATION; hour++) {
+  for (
+    let hour = OPENING_HOUR;
+    hour <= CLOSING_HOUR - SESSION_DURATION;
+    hour++
+  ) {
     const timeString = `${hour.toString().padStart(2, "0")}:00:00`;
     slots.push(timeString);
   }
@@ -43,10 +143,16 @@ function checkSlotAvailability(
   requestedGameIds: number[],
   requestedAccessoryIds: number[]
 ): { available: boolean; conflicts?: unknown } {
-  const conflicts: { console?: boolean; games?: number[]; accessories?: number[] } = {};
+  const conflicts: {
+    console?: boolean;
+    games?: number[];
+    accessories?: number[];
+  } = {};
   let hasConflict = false;
 
-  const reservationsAtThisTime = reservations.filter((res) => res.time === time);
+  const reservationsAtThisTime = reservations.filter(
+    (res) => res.time === time
+  );
 
   const consoleConflict = reservationsAtThisTime.some(
     (res) => res.console_id === requestedConsoleId
@@ -76,11 +182,11 @@ function checkSlotAvailability(
   const conflictingAccessories: number[] = [];
   for (const res of reservationsAtThisTime) {
     let reservedAccessories: number[] = [];
-    
+
     if (res.accessoirs) {
       if (Array.isArray(res.accessoirs)) {
         reservedAccessories = res.accessoirs;
-      } else if (typeof res.accessoirs === 'string') {
+      } else if (typeof res.accessoirs === "string") {
         try {
           reservedAccessories = JSON.parse(res.accessoirs);
         } catch {
@@ -153,10 +259,16 @@ export async function GET(request: NextRequest) {
 
     const requestedConsoleId = parseInt(consoleId, 10);
     const requestedGameIds = gameIds
-      ? gameIds.split(",").map((id) => parseInt(id.trim(), 10)).filter((id) => !isNaN(id))
+      ? gameIds
+          .split(",")
+          .map((id) => parseInt(id.trim(), 10))
+          .filter((id) => !isNaN(id))
       : [];
     const requestedAccessoryIds = accessoryIds
-      ? accessoryIds.split(",").map((id) => parseInt(id.trim(), 10)).filter((id) => !isNaN(id))
+      ? accessoryIds
+          .split(",")
+          .map((id) => parseInt(id.trim(), 10))
+          .filter((id) => !isNaN(id))
       : [];
 
     const [reservations] = await pool.query<ReservationRow[]>(
@@ -166,7 +278,73 @@ export async function GET(request: NextRequest) {
       [date]
     );
 
-    const allSlots = generateAllTimeSlots();
+    const [specificHours] = await pool.query<SpecificHoursRow[]>(
+      `SELECT start_hour, start_minute, end_hour, end_minute, is_exception FROM specific_dates WHERE date = ?`,
+      [date]
+    );
+
+    const dayNames = [
+      "monday",
+      "tuesday",
+      "wednesday",
+      "thursday",
+      "friday",
+      "saturday",
+      "sunday",
+    ];
+    const dayName = dayNames[new Date(date).getDay()];
+
+    const [weeklyHours] = await pool.query<WeeklyHoursRow[]>(
+      `
+        SELECT h.start_hour, h.start_minute, h.end_hour, h.end_minute
+        FROM hour_ranges h
+        INNER JOIN weekly_availabilities w
+          ON h.weekly_id = w.weekly_id
+        WHERE w.day_of_week = ?
+          AND w.enabled = 1
+          AND (w.always_available = 1 OR (? >= w.start_date AND ? <= w.end_date))
+      `,
+      [dayName, date, date]
+    );
+
+    console.log("specificHours: ", specificHours);
+    console.log("weeklyHours: ", weeklyHours);
+
+    const validRanges = computeValidRanges(weeklyHours, specificHours);
+
+    const SESSION_DURATION_HOURS = 2;
+    const SESSION_DURATION_MINUTES = SESSION_DURATION_HOURS * 60;
+
+    function timeToMinutes(t: string): number {
+      const [h, m] = t.split(":").map(Number);
+      return h * 60 + m;
+    }
+
+    const reservationRanges = reservations.map((r) => {
+      const start = timeToMinutes(r.time);
+      return {
+        start,
+        end: start + SESSION_DURATION_MINUTES,
+      };
+    });
+
+    const allSlots = generateAllTimeSlots().filter((time) => {
+      const [hour, minute] = time.split(":").map(Number);
+      const slotStart = hour * 60 + minute;
+      const slotEnd = slotStart + SESSION_DURATION_MINUTES;
+
+      const fitsOpenHours = validRanges.some(
+        (r) => slotStart >= r.start && slotEnd <= r.end
+      );
+      if (!fitsOpenHours) return false;
+
+      const overlaps = reservationRanges.some(
+        (res) => !(slotEnd <= res.start || slotStart >= res.end)
+      );
+      if (overlaps) return false;
+
+      return true;
+    });
 
     const availability: TimeSlotAvailability[] = allSlots.map((time) => {
       const check = checkSlotAvailability(
@@ -200,7 +378,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const availableCount = finalAvailability.filter((slot) => slot.available).length;
+    const availableCount = finalAvailability.filter(
+      (slot) => slot.available
+    ).length;
 
     return NextResponse.json({
       success: true,

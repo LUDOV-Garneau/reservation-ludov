@@ -1,7 +1,7 @@
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { Toaster } from "@/components/ui/sonner" // tu archivo sonner.tsx
+import { Toaster } from "@/components/ui/sonner";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

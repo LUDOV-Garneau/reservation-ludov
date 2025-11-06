@@ -14,13 +14,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 
-import ConsoleSelection from "@/components/reservation/ConsoleSelection"
-import GamesSelection from "@/components/reservation/GamesSelection"
-import AccessoriesSelection from "@/components/reservation/AccessoriesSelection"
+import ConsoleSelection from "@/components/reservation/ConsoleSelection";
+import GamesSelection from "@/components/reservation/GamesSelection";
+import AccessoriesSelection from "@/components/reservation/AccessoriesSelection";
 import CourseSelection from "@/components/reservation/CourseSelection";
 import ConfirmReservation from "@/components/reservation/ConfirmReservation";
 import { useTranslations } from "next-intl";
 import DateSelection from "./DateSelection";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function ReservationLayout() {
   const {
@@ -32,49 +34,51 @@ export default function ReservationLayout() {
     resetTimer,
     cancelReservation,
   } = useReservation();
+  const router = useRouter();
+  const t = useTranslations();
 
-    const t = useTranslations();
+  const [reservationCancelledManually, setReservationCancelledManually] =
+    useState(false);
 
-    const formatTimeRemaining = (seconds: number): string => {
-      const mins = Math.floor(seconds / 60);
-      const secs = seconds % 60;
-      return `${mins.toString().padStart(2, "0")}:${secs
-        .toString()
-        .padStart(2, "0")}`;
-    };
+  const formatTimeRemaining = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
+  };
 
-    const handleBackHome = () => {
-        resetTimer();
-        window.location.href = "/";
-    };
+  const handleBackHome = () => {
+    resetTimer();
+    router.push("/");
+  };
 
-    const steps = [
-      {
-        id: 1,
-        component: <ConsoleSelection />
-      },
-      {
-        id: 2,
-        component: <GamesSelection />
-      },
-      {
-        id: 3,
-        component: <AccessoriesSelection />
-      },
-      {
-        id: 4,
-        component: <DateSelection />
-      },
-      {
-        id: 5,
-        component: <CourseSelection />
-      },
-      {
-        id: 6,
-        component: <ConfirmReservation />
-      }
-    ];
-
+  const steps = [
+    {
+      id: 1,
+      component: <ConsoleSelection />,
+    },
+    {
+      id: 2,
+      component: <GamesSelection />,
+    },
+    {
+      id: 3,
+      component: <AccessoriesSelection />,
+    },
+    {
+      id: 4,
+      component: <DateSelection />,
+    },
+    {
+      id: 5,
+      component: <CourseSelection />,
+    },
+    {
+      id: 6,
+      component: <ConfirmReservation />,
+    },
+  ];
 
   const currentStepConfig = steps.find((step) => step.id === currentStep);
 
@@ -83,11 +87,15 @@ export default function ReservationLayout() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center p-8 bg-red-50 border border-red-200 rounded-lg shadow-lg max-w-md">
           <h1 className="text-3xl font-bold text-red-600 mb-4">
-            {t("reservation.layout.timeElapsed")}
+            {reservationCancelledManually
+              ? t("reservation.layout.manuallyCancelled")
+              : t("reservation.layout.timeElapsed")}
           </h1>
-          <p className="text-lg text-red-700 mb-6">
-            {t("reservation.layout.reservationCancelled")}
-          </p>
+          {!reservationCancelledManually && (
+            <p className="text-lg text-red-700 mb-6">
+              {t("reservation.layout.reservationCancelled")}
+            </p>
+          )}
           <Button
             onClick={handleBackHome}
             className="bg-red-600 hover:bg-red-700 text-white"
@@ -118,10 +126,6 @@ export default function ReservationLayout() {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-      </div>
-
-      <div className="mx-5 text-3xl decoration-cyan-400 underline underline-offset-8 md:hidden">
-        <h1>{t("reservation.layout.newReservation")}</h1>
       </div>
 
       <div className="mb-10">
@@ -157,6 +161,7 @@ export default function ReservationLayout() {
                   variant={"destructive"}
                   className="rounded-full hover:bg-red-900"
                   onClick={() => {
+                    setReservationCancelledManually(true);
                     cancelReservation();
                   }}
                 >

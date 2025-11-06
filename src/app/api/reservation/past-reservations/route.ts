@@ -7,6 +7,7 @@ import { RowDataPacket } from "mysql2";
 
 type ReservationRow = RowDataPacket & {
   id: number;
+  archived: boolean;
   date: string | Date;
   time: string;
   console_name: string;
@@ -47,7 +48,8 @@ export async function GET() {
         c.name AS console_name,
         g1.titre AS game1_title,
         g2.titre AS game2_title,
-        g3.titre AS game3_title
+        g3.titre AS game3_title,
+        r.archived
       FROM reservation r
       JOIN console_type c ON c.id = r.console_type_id
       LEFT JOIN games g1 ON g1.id = r.game1_id
@@ -63,21 +65,23 @@ export async function GET() {
       return NextResponse.json([]);
     }
     const reservations = rows.map((row) => {
-      const games = [row.game1_title, row.game2_title, row.game3_title]
-        .filter(Boolean) as string[];
+      const games = [row.game1_title, row.game2_title, row.game3_title].filter(
+        Boolean
+      ) as string[];
 
       let formattedDate: string;
       if (row.date instanceof Date) {
         const year = row.date.getFullYear();
-        const month = String(row.date.getMonth() + 1).padStart(2, '0');
-        const day = String(row.date.getDate()).padStart(2, '0');
+        const month = String(row.date.getMonth() + 1).padStart(2, "0");
+        const day = String(row.date.getDate()).padStart(2, "0");
         formattedDate = `${year}-${month}-${day}`;
       } else {
-        formattedDate = String(row.date).split('T')[0];
+        formattedDate = String(row.date).split("T")[0];
       }
 
       return {
         id: String(row.id),
+        archived: Boolean(row.archived),
         games,
         console: row.console_name,
         date: formattedDate,

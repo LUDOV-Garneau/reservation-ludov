@@ -10,6 +10,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Cable,
+  Mail,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,6 +27,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import CancelReservationAlertDialog from "./components/CancelReservationAlertDialog";
+import ReservationReminderDialog from "./components/ReservationReminderDialog";
 
 interface Game {
   nom: string;
@@ -313,24 +315,31 @@ function ReservationHeader({
           </div>
 
           {!archived && (
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 font-medium"
-                aria-label={t("reservation.details.addToCalendar")}
-                onClick={handleAddToCalendar}
-              >
-                <Calendar className="mr-2 h-4 w-4" />
-                {t("reservation.details.addToCalendar")}
-              </Button>
+            <div className="flex flex-col sm:items-center gap-4">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 font-medium"
+                  aria-label={t("reservation.details.addToCalendar")}
+                  onClick={handleAddToCalendar}
+                >
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {t("reservation.details.addToCalendar")}
+                </Button>
 
-              <CancelReservationAlertDialog
+                <CancelReservationAlertDialog
+                  reservationId={reservationId}
+                  onSuccess={onCancelSuccess}
+                  onError={onCancelError}
+                />
+              </div>
+
+              <ReservationReminderDialog
                 reservationId={reservationId}
-                onSuccess={onCancelSuccess}
-                onError={onCancelError}
+                onSendReminder={() => {}}
+                onError={() => {}}
               />
-
             </div>
           )}
         </div>
@@ -344,7 +353,6 @@ export default function DetailsReservation({
   jeux = [],
   console,
   accessoires = [],
-  station,
   date,
   heure,
   archived,

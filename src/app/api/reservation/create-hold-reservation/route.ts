@@ -10,11 +10,20 @@ type Body = {
   minutes?: number;
 };
 
+interface HoldRow extends RowDataPacket {
+  holdId: string;
+  consoleStockId: number;
+  expiresAt: Date | string;
+  expiresIn: number; // secondes
+}
+
 export async function POST(req: Request) {
   try {
+    // cookies() est synchrone
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;
+
     try {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
@@ -30,14 +39,8 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
-    const userId = Number(user.id);
-    if (!Number.isFinite(userId)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid user ID" },
-        { status: 400 }
-      );
-    }
 
+    // Body
     let body: Partial<Body> = {};
     try {
       body = await req.json();
@@ -47,6 +50,15 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    const userId = Number(user.id);
+    if (!Number.isFinite(userId)) {
+      return NextResponse.json(
+        { success: false, message: "Invalid user ID" },
+        { status: 400 }
+      );
+    }
+
     const consoleTypeId = Number(body.consoleTypeId);
     const minutes = Math.max(1, Number(body.minutes ?? 15));
     if (!Number.isFinite(consoleTypeId) || consoleTypeId <= 0) {
@@ -60,25 +72,43 @@ export async function POST(req: Request) {
     try {
       await connection.beginTransaction();
 
+      // Nettoyage des holds expirés
       await connection.query(
-        `DELETE FROM reservation_hold WHERE expireAt <= CURRENT_TIMESTAMP`
+        `DELETE FROM reservation_hold WHERE expireAt <= NOW()`
       );
 
-      const [existing] = await connection.query<RowDataPacket[]>(
-        `SELECT id AS holdId, console_id AS consoleStockId, expireAt AS expiresAt
-         FROM reservation_hold
-         WHERE user_id = ? AND expireAt > CURRENT_TIMESTAMP
-         LIMIT 1`,
+      // Si l'utilisateur a déjà un hold actif, on le renvoie DIRECT avec expiresIn
+      const [existing] = await connection.query<HoldRow[]>(
+        `
+        SELECT
+          id AS holdId,
+          console_id AS consoleStockId,
+          expireAt AS expiresAt,
+          GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expireAt)) AS expiresIn
+        FROM reservation_hold
+        WHERE user_id = ?
+          AND expireAt > NOW()
+        LIMIT 1
+        `,
         [userId]
       );
       if (existing.length > 0) {
         await connection.commit();
         return NextResponse.json(
-          { success: true, ...existing[0] },
+          {
+            success: true,
+            reservationId: existing[0].holdId, // alias pratique côté front
+            holdId: existing[0].holdId,
+            consoleStockId: existing[0].consoleStockId,
+            expiresAt: new Date(existing[0].expiresAt).toISOString(),
+            expiresIn: Number(existing[0].expiresIn), // <<< TTL serveur
+            message: "Hold existant récupéré",
+          },
           { status: 200 }
         );
       }
 
+      // Choisir une unité dispo
       const [units] = await connection.query<RowDataPacket[]>(
         `
         SELECT cs.id AS consoleStockId
@@ -89,7 +119,7 @@ export async function POST(req: Request) {
           AND NOT EXISTS (
             SELECT 1 FROM reservation_hold h
             WHERE h.console_id = cs.id
-              AND h.expireAt > CURRENT_TIMESTAMP
+              AND h.expireAt > NOW()
           )
         LIMIT 1
         FOR UPDATE
@@ -108,32 +138,47 @@ export async function POST(req: Request) {
       const consoleStockId = Number(units[0].consoleStockId);
       const reservationId = `HOLD-${crypto.randomUUID()}`;
 
+      // Création du hold (expireAt basé sur NOW() serveur)
       await connection.query(
         `
-        INSERT INTO reservation_hold (id, user_id, console_id, console_type_id, expireAt, createdAt)
-        VALUES (?, ?, ?, ?, DATE_ADD(CURRENT_TIMESTAMP, INTERVAL ? MINUTE), NOW())
+        INSERT INTO reservation_hold
+          (id, user_id, console_id, console_type_id, expireAt, createdAt)
+        VALUES
+          (?,  ?,       ?,         ?,               DATE_ADD(NOW(), INTERVAL ? MINUTE), NOW())
         `,
         [reservationId, userId, consoleStockId, consoleTypeId, minutes]
       );
 
-      const [created] = await connection.query<RowDataPacket[]>(
-        `SELECT id AS holdId, console_id AS consoleStockId, expireAt AS expiresAt
-         FROM reservation_hold WHERE id = ?`,
+      // Relire d'un coup: infos + TTL serveur
+      const [created] = await connection.query<HoldRow[]>(
+        `
+        SELECT
+          id AS holdId,
+          console_id AS consoleStockId,
+          expireAt AS expiresAt,
+          GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expireAt)) AS expiresIn
+        FROM reservation_hold
+        WHERE id = ?
+        LIMIT 1
+        `,
         [reservationId]
       );
 
-      await connection.query(
-        `UPDATE console_stock SET holding = 1 WHERE id = ?`,
-        [consoleStockId]
-      )
+      // Marquer l'unité en "holding"
+      await connection.query(`UPDATE console_stock SET holding = 1 WHERE id = ?`, [
+        consoleStockId,
+      ]);
 
       await connection.commit();
 
       return NextResponse.json(
         {
           success: true,
-          reservationId,
-          ...created[0],
+          reservationId,                      // pour cohérence front
+          holdId: created[0].holdId,
+          consoleStockId: created[0].consoleStockId,
+          expiresAt: new Date(created[0].expiresAt).toISOString(),
+          expiresIn: Number(created[0].expiresIn), // <<< TTL serveur
           message: "Réservation temporaire créée avec succès",
         },
         { status: 201 }

@@ -4,20 +4,7 @@ import { useTranslations } from "next-intl";
 import { Switch } from "../../ui/switch";
 import { Label } from "../../ui/label";
 import HourRangeSelection from "./HourRangeSelection";
-
-type HourRange = {
-  id: number;
-  startHour: string;
-  startMinute: string;
-  endHour: string;
-  endMinute: string;
-};
-
-type WeekDay = {
-  label: string;
-  enabled: boolean;
-  hoursRanges: HourRange[];
-};
+import { HourRange, WeekDay } from "@/types/availabilities";
 
 type Props = {
   weekly: Record<string, WeekDay>;

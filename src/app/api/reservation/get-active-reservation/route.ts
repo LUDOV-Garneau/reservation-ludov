@@ -13,7 +13,7 @@ interface ReservationRow extends RowDataPacket {
   game2_id: number | null;
   game3_id: number | null;
   accessoirs: string | null;
-  expireAt: string;
+  expireAt: string;      // DATETIME/TIMESTAMP en base
   createdAt: string;
   date: string | null;
   time: string | null;
@@ -22,6 +22,9 @@ interface ReservationRow extends RowDataPacket {
   ct_id: number;
   ct_name: string;
   ct_picture: string | null;
+
+  // nouveau: TTL calculé par MySQL
+  expiresIn: number;     // secondes restantes = GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expireAt))
 }
 
 export async function GET(request: NextRequest) {
@@ -34,6 +37,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // cookies() est synchrone
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;
@@ -56,17 +60,21 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // On lit le hold + le TTL (expiresIn) calculé par MySQL
     const [rows] = await pool.query<ReservationRow[]>(
-      `SELECT 
+      `
+      SELECT 
         r.*,
-        ct.id as ct_id,
-        ct.name as ct_name,
-        ct.picture as ct_picture
-       FROM reservation_hold r
-       JOIN console_stock cs ON r.console_id = cs.id
-       JOIN console_type ct ON cs.console_type_id = ct.id
-       WHERE r.id = ? AND r.user_id = ?
-       LIMIT 1`,
+        ct.id   AS ct_id,
+        ct.name AS ct_name,
+        ct.picture AS ct_picture,
+        GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), r.expireAt)) AS expiresIn
+      FROM reservation_hold r
+      JOIN console_stock cs ON r.console_id = cs.id
+      JOIN console_type ct  ON cs.console_type_id = ct.id
+      WHERE r.id = ? AND r.user_id = ?
+      LIMIT 1
+      `,
       [reservationId, Number(user.id)]
     );
 
@@ -83,10 +91,8 @@ export async function GET(request: NextRequest) {
 
     const reservation = rows[0];
 
-    const now = new Date();
-    const expiry = new Date(reservation.expireAt);
-
-    if (expiry <= now) {
+    // Si déjà expiré pour MySQL (expiresIn == 0), on nettoie et on retourne 410
+    if (Number(reservation.expiresIn) <= 0) {
       const conn = await pool.getConnection();
       try {
         await conn.beginTransaction();
@@ -110,7 +116,6 @@ export async function GET(request: NextRequest) {
         }
 
         await conn.query(`DELETE FROM reservation_hold WHERE id = ?`, [reservationId]);
-
         await conn.commit();
       } catch (e) {
         await conn.rollback();
@@ -140,9 +145,8 @@ export async function GET(request: NextRequest) {
         } else if (Array.isArray(reservation.accessoirs)) {
           accessories = reservation.accessoirs;
         }
-
         if (!Array.isArray(accessories)) {
-          console.warn(" Accessories is not an array, resetting to empty");
+          console.warn("Accessories is not an array, resetting to empty");
           accessories = [];
         }
       } catch (e) {
@@ -151,26 +155,21 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Calcul de l’étape UI
     let currentStep = 1;
-
     if (reservation.console_id) currentStep = 2;
     if (gameIds.length > 0) currentStep = 3;
     if (accessories.length > 0) currentStep = 4;
     if (reservation.date && reservation.time) currentStep = 5;
     if (reservation.cours !== null) currentStep = 6;
-
-    if (
-      reservation.console_id &&
-      reservation.cours !== null &&
-      gameIds.length === 0
-    ) {
+    if (reservation.console_id && reservation.cours !== null && gameIds.length === 0) {
       currentStep = 3;
     }
 
-    const timeRemaining = Math.max(
-      0,
-      Math.floor((expiry.getTime() - now.getTime()) / 1000)
-    );
+    // On s’aligne sur l’API front : timeRemaining = expiresIn (pour compat)
+    const expiresAtIso = new Date(reservation.expireAt).toISOString();
+    const expiresIn = Number(reservation.expiresIn);
+    const timeRemaining = Math.max(0, expiresIn);
 
     return NextResponse.json({
       success: true,
@@ -189,10 +188,12 @@ export async function GET(request: NextRequest) {
       selectedDate: reservation.date,
       selectedTime: reservation.time,
       cours: reservation.cours,
-      expiresAt: expiry.toISOString(),
+      expiresAt: expiresAtIso,
       createdAt: new Date(reservation.createdAt).toISOString(),
       currentStep,
-      timeRemaining,
+      // compat + nouveau champ
+      timeRemaining,     // = expiresIn
+      expiresIn,         // <<< à utiliser côté front pour initialiser le compteur
     });
   } catch (err: unknown) {
     console.error("Error fetching active reservation:", err);
