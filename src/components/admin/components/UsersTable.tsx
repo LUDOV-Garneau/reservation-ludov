@@ -182,15 +182,15 @@ function UserTableRow({
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem onClick={() => onResetPassword(user.id, user.email)}>
                     <KeyRound className="h-4 w-4 mr-2 text-blue-500" />
-                    Réinitialiser MDP
+                    {t("admin.users.table.ActionToolTips.resetPassword")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => onDelete(user.id, user.email)}
                     className="text-red-600 focus:text-red-600 focus:bg-red-50"
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Supprimer
+                    <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                    {t("admin.users.table.ActionToolTips.deleteUser")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
