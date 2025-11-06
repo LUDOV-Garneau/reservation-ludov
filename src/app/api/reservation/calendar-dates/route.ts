@@ -51,9 +51,21 @@ export async function GET(request: NextRequest) {
       unavailableDates.after = weeklyAvailabilities[0].end_date;
     }
 
+    const dayNameToIndex: Record<string, number> = {
+      sunday: 0,
+      monday: 1,
+      tuesday: 2,
+      wednesday: 3,
+      thursday: 4,
+      friday: 5,
+      saturday: 6,
+    };
+
     for (const weekAvailability of weeklyAvailabilities) {
       if (!weekAvailability.enabled) {
-        unavailableDates.dayOfWeek.push(weekAvailability.weekly_id - 1);
+        const dayIndex =
+          dayNameToIndex[weekAvailability.day_of_week.toLowerCase()];
+        unavailableDates.dayOfWeek.push(dayIndex);
       }
     }
 
