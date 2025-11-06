@@ -38,13 +38,13 @@ export async function POST(request: NextRequest) {
 
     const user = rows[0] as User;
 
-    // const passwordMatch = await bcrypt.compare(password, user.password_hash);
-    // if (!passwordMatch) {
-    //   return NextResponse.json(
-    //     { message: "Identifiants invalides." },
-    //     { status: 401 }
-    //   );
-    // }
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { message: "Identifiants invalides." },
+        { status: 401 }
+      );
+    }
 
     const token = signToken({
       id: user.id,
