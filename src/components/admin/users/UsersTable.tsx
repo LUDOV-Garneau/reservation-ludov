@@ -6,17 +6,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Trash2, KeyRound, Users, Shield, User, Calendar, XCircle, Menu, CheckCircle2, AlertTriangle, Info } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
-import { cn } from "@/lib/utils";
 import CardUserStats from "./CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "./Pagination";
 import ResetPasswordAction from "./DialogConfirmationResetsPassword";
+import DeleteUserAction from "./DialogConfirmationDeleteUser";
 
 type User = {
   id: number;
@@ -31,15 +30,6 @@ type AlertState = {
   type: "success" | "error" | "info" | "warning";
   message: string;
   title?: string;
-} | null;
-
-type ConfirmDialogState = {
-  open: boolean;
-  title: string;
-  description: string;
-  confirmText: string;
-  confirmVariant: "default" | "destructive";
-  onConfirm: () => void;
 } | null;
 
 const ITEMS_PER_PAGE = 10;
@@ -112,13 +102,11 @@ function RoleBadge({ isAdmin }: { isAdmin: boolean }) {
 function UserTableRow({
   user,
   isCurrentUser,
-  onDelete,
   onAlert,
   onSuccess,
 }: {
   user: User;
   isCurrentUser: boolean;
-  onDelete: (userId: number, email: string) => void;
   onAlert: (type: "success" | "error" | "info" | "warning", message: string, title?: string) => void;
   onSuccess: () => void;
 }) {
@@ -166,24 +154,33 @@ function UserTableRow({
                 )}
               </ResetPasswordAction>
 
-
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onDelete(user.id, user.email)}
-                      className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{t("admin.users.table.ActionToolTips.deleteUser")}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <DeleteUserAction
+                targetUser={{ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }}
+                onAlert={onAlert}
+                onSuccess={onSuccess}
+              >
+                {({ open, loading }) => (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={open}
+                          disabled={loading}
+                          className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
+                          aria-label={t("admin.users.table.ActionToolTips.deleteUser")}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{t("admin.users.table.ActionToolTips.deleteUser")}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </DeleteUserAction>
             </div>
 
             <div className="sm:hidden">
@@ -216,13 +213,26 @@ function UserTableRow({
                     )}
                   </ResetPasswordAction>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => onDelete(user.id, user.email)}
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  <DeleteUserAction
+                    targetUser={{ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }}
+                    onAlert={onAlert}
+                    onSuccess={onSuccess}
                   >
-                    <Trash2 className="h-4 w-4 mr-2 text-red-600" />
-                    {t("admin.users.table.ActionToolTips.deleteUser")}
-                  </DropdownMenuItem>
+                    {({ open }) => (
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          open();
+                        }}
+                        onSelect={(e) => e.preventDefault()}
+                        className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                        {t("admin.users.table.ActionToolTips.deleteUser")}
+                      </DropdownMenuItem>
+                    )}
+                  </DeleteUserAction>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -232,53 +242,6 @@ function UserTableRow({
         )}
       </TableCell>
     </TableRow>
-  );
-}
-
-function ConfirmDialog({
-  open,
-  title,
-  description,
-  confirmText,
-  confirmVariant,
-  onConfirm,
-  onCancel,
-}: {
-  open: boolean;
-  title: string;
-  description: string;
-  confirmText: string;
-  confirmVariant: "default" | "destructive";
-  onConfirm: () => void;
-  onCancel: () => void;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onCancel}>
-      <DialogContent className="sm:max-w-[425px] max-w-[calc(100vw-2rem)]">
-        <DialogHeader>
-          <DialogTitle className="text-lg sm:text-xl">{title}</DialogTitle>
-          <DialogDescription className="text-sm sm:text-base pt-2">
-            {description}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="mt-4 sm:mt-6 flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={onCancel} className="hover:bg-gray-100 w-full sm:w-auto">
-            Annuler
-          </Button>
-          <Button
-            variant={confirmVariant}
-            onClick={onConfirm}
-            className={cn(
-              "w-full sm:w-auto",
-              confirmVariant === "destructive" &&
-                "bg-red-600 hover:bg-red-700 shadow-md"
-            )}
-          >
-            {confirmText}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
   );
 }
 
@@ -358,18 +321,12 @@ function TableSkeleton() {
   );
 }
 
-
-// ============================================================================
-// MAIN COMPONENT
-// ============================================================================
-
 export default function UsersTable() {
   const t = useTranslations();
   const { alert, showAlert, clearAlert } = useAlert();
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
 
   const [totalUser, setTotalUser] = useState(0);
   const [totalUserNotBoarded, setTotalUserNotBoarded] = useState(0);
@@ -529,7 +486,6 @@ export default function UsersTable() {
                         key={user.id}
                         user={user}
                         isCurrentUser={currentUserId !== null && user.id === currentUserId}
-                        onDelete={() => console.log("Delete user", user.id)}
                         onAlert={showAlert}
                         onSuccess={handleRefresh}
                       />
@@ -567,18 +523,6 @@ export default function UsersTable() {
           )}
         </CardContent>
       </Card>
-
-      {confirmDialog && (
-        <ConfirmDialog
-          open={confirmDialog.open}
-          title={confirmDialog.title}
-          description={confirmDialog.description}
-          confirmText={confirmDialog.confirmText}
-          confirmVariant={confirmDialog.confirmVariant}
-          onConfirm={confirmDialog.onConfirm}
-          onCancel={() => setConfirmDialog(null)}
-        />
-      )}
     </div>
   );
 }
