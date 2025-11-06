@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trash2, KeyRound, Users, ChevronLeft, ChevronRight, Shield, User, Calendar, XCircle, Menu, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { Trash2, KeyRound, Users, Shield, User, Calendar, XCircle, Menu, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import CardUserStats from "./Admin/Users/CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./Admin/Users/ActionBar";
+import PaginationControls from "./Admin/Pagination";
 
 type User = {
   id: number;
@@ -90,28 +91,23 @@ function usePagination(totalItems: number, itemsPerPage: number = ITEMS_PER_PAGE
   };
 }
 
-/**
- * Badge de rôle utilisateur
- */
 function RoleBadge({ isAdmin }: { isAdmin: boolean }) {
+  const t = useTranslations();
   return isAdmin ? (
     <Badge className="bg-cyan-700 text-white border-0 text-xs">
       <Shield className="h-3 w-3 mr-1" />
-      <span className="hidden sm:inline">Admin</span>
+      <span className="hidden sm:inline">{t("admin.users.badge.admin")}</span>
       <span className="sm:hidden">A</span>
     </Badge>
   ) : (
     <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 text-xs">
       <User className="h-3 w-3 mr-1" />
-      <span className="hidden sm:inline">User</span>
+      <span className="hidden sm:inline">{t("admin.users.badge.user")}</span>
       <span className="sm:hidden">U</span>
     </Badge>
   );
 }
 
-/**
- * Ligne de tableau utilisateur - Responsive
- */
 function UserTableRow({
   user,
   isCurrentUser,
@@ -123,27 +119,21 @@ function UserTableRow({
   onDelete: (userId: number, email: string) => void;
   onResetPassword: (userId: number, email: string) => void;
 }) {
+  const t = useTranslations();
   return (
     <TableRow key={user.id} className="hover:bg-gray-200">
-      <TableCell>{user.email}</TableCell>
-
-      <TableCell>{user.firstName}</TableCell>
-
-      <TableCell className="hidden md:table-cell">{user.lastName}</TableCell>
-
-      <TableCell><RoleBadge isAdmin={user.isAdmin} /></TableCell>
-
+      <TableCell className="hidden lg:table-cell">{user.email}</TableCell>
+      <TableCell>{user.firstName} {user.lastName}</TableCell>
+      <TableCell className="hidden md:table-cell"><RoleBadge isAdmin={user.isAdmin} /></TableCell>
       <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(user.createdAt).toLocaleDateString("fr-FR")}</span>
         </div>
       </TableCell>
-
       <TableCell>
         {!isCurrentUser ? (
           <div className="">
-            {/* Version Desktop - Boutons séparés */}
             <div className="hidden sm:flex gap-2">
               <TooltipProvider>
                 <Tooltip>
@@ -158,7 +148,7 @@ function UserTableRow({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Réinitialiser MDP</p>
+                    <p>{t("admin.users.table.ActionToolTips.resetPassword")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -176,13 +166,12 @@ function UserTableRow({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Supprimer</p>
+                    <p>{t("admin.users.table.ActionToolTips.deleteUser")}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </div>
 
-            {/* Version Mobile - Menu Dropdown */}
             <div className="sm:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -212,134 +201,6 @@ function UserTableRow({
         )}
       </TableCell>
     </TableRow>
-  );
-}
-
-/**
- * Contrôles de pagination - Responsive
- */
-function PaginationControls({
-  page,
-  totalPages,
-  totalItems,
-  itemsPerPage,
-  isFirstPage,
-  isLastPage,
-  onPrevious,
-  onNext,
-  onGoToPage,
-}: {
-  page: number;
-  totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
-  isFirstPage: boolean;
-  isLastPage: boolean;
-  onPrevious: () => void;
-  onNext: () => void;
-  onGoToPage: (page: number) => void;
-}) {
-  const startItem = (page - 1) * itemsPerPage + 1;
-  const endItem = Math.min(page * itemsPerPage, totalItems);
-
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 3;
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (page <= 2) {
-        for (let i = 1; i <= Math.min(3, totalPages); i++) pages.push(i);
-        if (totalPages > 3) {
-          pages.push(-1);
-          pages.push(totalPages);
-        }
-      } else if (page >= totalPages - 1) {
-        pages.push(1);
-        pages.push(-1);
-        for (let i = Math.max(totalPages - 2, 2); i <= totalPages; i++) pages.push(i);
-      } else {
-        pages.push(1);
-        pages.push(-1);
-        pages.push(page);
-        pages.push(-1);
-        pages.push(totalPages);
-      }
-    }
-
-    return pages;
-  };
-
-  return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 border-t">
-      <div className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
-        <span className="hidden sm:inline">
-          Affichage de <span className="font-medium text-gray-900">{startItem}</span> à{" "}
-          <span className="font-medium text-gray-900">{endItem}</span> sur{" "}
-          <span className="font-medium text-gray-900">{totalItems}</span> utilisateurs
-        </span>
-        <span className="sm:hidden">
-          {startItem}-{endItem} sur {totalItems}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-1 sm:gap-2 order-1 sm:order-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onPrevious}
-          disabled={isFirstPage}
-          className="h-8 hover:bg-gray-100"
-        >
-          <ChevronLeft className="h-4 w-4 sm:mr-1" />
-          <span className="hidden sm:inline">Précédent</span>
-        </Button>
-
-        <div className="hidden sm:flex items-center gap-1">
-          {getPageNumbers().map((pageNum, idx) =>
-            pageNum === -1 ? (
-              <span key={`ellipsis-${idx}`} className="px-2 text-muted-foreground">
-                ...
-              </span>
-            ) : (
-              <Button
-                key={pageNum}
-                variant={page === pageNum ? "default" : "outline"}
-                size="sm"
-                className={cn(
-                  "h-8 w-8 p-0",
-                  page === pageNum
-                    ? "bg-cyan-500 hover:bg-cyan-600 text-white shadow-md"
-                    : "hover:bg-gray-100"
-                )}
-                onClick={() => onGoToPage(pageNum)}
-              >
-                {pageNum}
-              </Button>
-            )
-          )}
-        </div>
-
-        {/* Indicateur de page pour mobile */}
-        <div className="sm:hidden px-3 py-1 bg-gray-100 rounded text-sm font-medium">
-          {page}/{totalPages}
-        </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onNext}
-          disabled={isLastPage}
-          className="h-8 hover:bg-gray-100"
-        >
-          <span className="hidden sm:inline">Suivant</span>
-          <ChevronRight className="h-4 w-4 sm:ml-1" />
-        </Button>
-      </div>
-    </div>
   );
 }
 
@@ -489,8 +350,6 @@ export default function UsersTable() {
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
 
-  const [error, setError] = useState<string | null>(null);
-
   const pagination = usePagination(total, ITEMS_PER_PAGE);
 
   useEffect(() => {
@@ -589,7 +448,7 @@ export default function UsersTable() {
           {t("admin.users.title")}
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base">
-          Gérez les comptes utilisateurs et permissions
+          {t("admin.users.subtitle")}
         </p>
       </div>
 
@@ -625,12 +484,11 @@ export default function UsersTable() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Prénom</TableHead>
-                      <TableHead className="hidden md:table-cell">Nom</TableHead>
-                      <TableHead>Rôle</TableHead>
-                      <TableHead className="hidden lg:table-cell">Date de création</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead className="hidden lg:table-cell">{t("admin.users.table.header.email")}</TableHead>
+                      <TableHead>{t("admin.users.table.header.name")}</TableHead>
+                      <TableHead className="hidden md:table-cell">{t("admin.users.table.header.role")}</TableHead>
+                      <TableHead className="hidden lg:table-cell">{t("admin.users.table.header.createdAt")}</TableHead>
+                      <TableHead>{t("admin.users.table.header.actions")}</TableHead>
                     </TableRow>
                   </TableHeader>
 
@@ -652,14 +510,10 @@ export default function UsersTable() {
                 <div className="px-4 sm:px-6 pb-3 sm:pb-4">
                   <PaginationControls
                     page={pagination.page}
-                    totalPages={Math.max(1, Math.ceil(total / ITEMS_PER_PAGE))}
                     totalItems={total}
-                    itemsPerPage={ITEMS_PER_PAGE}
-                    isFirstPage={pagination.isFirstPage}
-                    isLastPage={pagination.isLastPage}
-                    onPrevious={pagination.goToPrevPage}
-                    onNext={pagination.goToNextPage}
-                    onGoToPage={pagination.goToPage}
+                    pageSize={ITEMS_PER_PAGE}
+                    onPageChange={pagination.goToPage}
+                    siblingCount={1}
                   />
                 </div>
               )}
@@ -670,12 +524,12 @@ export default function UsersTable() {
                 <Users className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-                Aucun utilisateur trouvé
+                {t("admin.users.searchResult.noUsersFound")}
               </h3>
-              <p className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6 max-w-sm mx-auto">
+              <p className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6 mx-auto">
                 {searchQuery
-                  ? "Aucun résultat ne correspond à votre recherche."
-                  : "Commencez par ajouter votre premier utilisateur."}
+                  ? t("admin.users.searchResult.noMatch")
+                  : t("admin.users.searchResult.startByAdding")}
               </p>
             </div>
           )}

@@ -2,6 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { User } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations } from "next-intl";
 
 interface CardUserStatsProps {
   totalUser?: number;
@@ -17,6 +18,7 @@ export default function CardUserStats({
   loading = false,
 }: CardUserStatsProps) {
   const isLoading = loading || totalUser === undefined || totalUserNotBoarded === undefined || totalUserWithReservation === undefined;
+  const t = useTranslations();
 
   const Stat = ({
     label,
@@ -58,9 +60,9 @@ export default function CardUserStats({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-      <Stat label="Nombre d'utilisateurs" value={totalUser} accent="cyan" />
-      <Stat label="Utilisateur non configuré" value={totalUserNotBoarded} accent="orange" />
-      <Stat label="Utilisateur avec réservation" value={totalUserWithReservation} accent="green" />
+      <Stat label={t("admin.users.stats.totalUsers")} value={totalUser} accent="cyan" />
+      <Stat label={t("admin.users.stats.userNotBoarded")} value={totalUserNotBoarded} accent="orange" />
+      <Stat label={t("admin.users.stats.userWithReservations")} value={totalUserWithReservation} accent="green" />
     </div>
   );
 }

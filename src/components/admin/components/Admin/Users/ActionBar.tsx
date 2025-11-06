@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import AddUserForm from "@/components/admin/components/AddUserForm";
 import UsersForm from "@/components/admin/components/UsersForm";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface ActionBarProps {
     searchQuery: string;
@@ -29,13 +30,14 @@ export default function CardUserStats({
   isRefreshing,
 }: ActionBarProps) {
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const t = useTranslations();
 
     return (
         <div className="flex gap-3">
             <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                    placeholder="Rechercher..."
+                    placeholder={t("admin.users.actionBar.searchPlaceholder")}
                     value={searchQuery}
                     onChange={(e) => onSearchChange(e.target.value)}
                     className="pl-10 border-gray-300 focus:border-cyan-500 focus:ring-cyan-500 w-full"
@@ -59,7 +61,7 @@ export default function CardUserStats({
                             </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                            <p>Actualiser</p>
+                            <p>{t("admin.users.actionBar.toolTipRefresh")}</p>
                         </TooltipContent>
                     </Tooltip>
                 </TooltipProvider>
@@ -67,9 +69,8 @@ export default function CardUserStats({
                 <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
                     <DropdownMenuTrigger asChild>
                         <Button className="bg-cyan-500 hover:bg-cyan-700 text-white shadow-md hover:shadow-lg transition-all flex-1 sm:flex-initial">
-                            <Plus className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Ajouter un utilisateur</span>
-                            <span className="sm:hidden">Ajouter</span>
+                            <Plus className="h-4 w-4" />
+                            <span className="hidden md:inline">{t("admin.users.actionBar.addUser")}</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
@@ -79,15 +80,13 @@ export default function CardUserStats({
                         <ScrollArea className="max-h-[calc(100vh-10rem)]">
                             <div className="p-4 space-y-6">
                                 <div>
-                                    <DropdownMenuLabel className="text-base font-semibold px-0 pb-2">
-                                        Import CSV
-                                    </DropdownMenuLabel>
+                                    <DropdownMenuLabel className="text-base font-semibold px-0 pb-2">{t("admin.users.actionBar.dropDownMenuAddUser.importCSV")}</DropdownMenuLabel>
                                     <p className="text-xs text-muted-foreground mb-3 px-0">
-                                        Importez plusieurs utilisateurs à partir dun fichier CSV
+                                        {t("admin.users.actionBar.dropDownMenuAddUser.importCSVDescription")}
                                     </p>
                                     <UsersForm 
                                         onSuccess={() => {
-                                            onAlert("success", "Import CSV réussi");
+                                            onAlert("success", t("admin.users.actionBar.dropDownMenuAddUser.importCSVSuccess"));
                                             onSuccess();
                                             setDropdownOpen(false);
                                         }} 
@@ -99,14 +98,14 @@ export default function CardUserStats({
 
                                 <div>
                                     <DropdownMenuLabel className="text-base font-semibold px-0 pb-2">
-                                        Ajout Manuel
+                                        {t("admin.users.actionBar.dropDownMenuAddUser.addSingleUser")}
                                     </DropdownMenuLabel>
                                     <p className="text-xs text-muted-foreground mb-3 px-0">
-                                        Créez un compte utilisateur individuellement
+                                        {t("admin.users.actionBar.dropDownMenuAddUser.addSingleUserDescription")}
                                     </p>
                                     <AddUserForm 
                                         onSuccess={() => {
-                                            onAlert("success", "Utilisateur ajouté");
+                                            onAlert("success", t("admin.users.actionBar.dropDownMenuAddUser.addSingleUserSuccess"));
                                             onSuccess();
                                             setDropdownOpen(false);
                                         }} 

@@ -210,90 +210,53 @@
   "admin": {
     "users": {
       "title": "Utilisateurs",
-      "subtitle": "Gestion des comptes",
-      "tooltip": {
-        "addUsers": "Ajouter des utilisateurs"
-      },
-      "table": {
-        "email": "Email",
-        "firstname": "Prénom",
-        "lastname": "Nom",
-        "isAdmin": "Administrateur",
-        "createdAt": "Date de création"
-      },
-      "buttons": {
-        "delete": "Supprimer",
-        "resetPassword": "Réinitialiser le mot de passe"
-      },
-      "pagination": {
-        "previous": "Précédent",
-        "next": "Suivant"
-      },
-      "dialogs": {
-        "delete": {
-          "title": "Confirmer la suppression",
-          "description": "Êtes-vous sûr de vouloir supprimer l'utilisateur {email} ?"
-        },
-        "reset": {
-          "title": "Réinitialiser le mot de passe",
-          "description": "Cela réinitialisera le mot de passe de {email}. Continuer ?"
+      "subtitle": "Gérez les utilisateurs de la plateforme LUDOV",
+      "actionBar" : {
+        "searchPlaceholder" : "Rechercher...",
+        "addUser" : "Ajouter",
+        "toolTipRefresh": "Actualiser",
+        "dropDownMenuAddUser" : {
+          "importCSV" : "Importer un fichier CSV",
+          "importCSVDescription" : "Importez plusieurs utilisateurs à partir d'un fichier CSV",
+          "importCSVInput" : "Choisir un fichier CSV",
+          "importCSVSuccess" : "Importation CSV réussie",
+          "addSingleUser" : "Ajouter un utilisateur",
+          "addSingleUserDescription" : "Créez un compte utilisateur manuellement",
+          "addSingleUserSuccess" : "Utilisateur ajouté avec succès"
         }
       },
-      "alerts": {
-        "deleteError": "Erreur lors de la suppression",
-        "deleteSuccess": "Utilisateur {email} supprimé",
-        "resetError": "Erreur lors de la réinitialisation",
-        "resetSuccess": "Mot de passe de {email} réinitialisé",
-        "networkError": "Erreur réseau"
+      "searchResult" : {
+        "noUsersFound" : "Aucun utilisateur(s) trouvé",
+        "noMatch" : "Aucun utilisateur ne correspond à votre recherche.",
+        "startByAdding" : "Commencez par ajouter votre premier utilisateur."
       },
-      "errors": {
-        "userLoad": "Erreur lors du chargement des utilisateurs. Veuillez réessayer ultérieurement.",
-        "currentUserLoad": "Erreur lors du chargement du compte utilisateur connecté."
-      },
-      "noUsersFound": "Aucun utilisateur trouvé",
-      "common": {
-        "yes": "Oui",
-        "no": "Non",
-        "cancel": "Annuler",
-        "confirm": "Confirmer"
-      },
-      "usersForm": {
-        "button": {
-          "importCsv": "Importer un fichier CSV"
+      "table" : {
+        "header" : {
+          "email" : "Email",
+          "name" : "Nom",
+          "role" : "Rôle",
+          "createdAt" : "Date de création",
+          "actions" : "Actions"
         },
-        "success": {
-          "importComplete": "Importation terminée : {inserted} utilisateur(s) ajouté(s), {skipped} ignoré(s)."
-        },
-        "error": {
-          "importFailed": "Impossible d'importer le fichier CSV.",
-          "noUsersAdded": "Aucun utilisateur ajouté. {skipped} ignoré(s).",
-          "uploadException": "Une erreur est survenue lors de l'importation du fichier."
+        "ActionToolTips" : {
+          "resetPassword" : "Réinitialiser MDP",
+          "deleteUser" : "Supprimer l'utilisateur"
         }
       },
-      "addUserForm": {
-        "titles": {
-          "dialogTitle": "Ajouter un utilisateur"
-        },
-        "fields": {
-          "firstname": "Prénom",
-          "lastname": "Nom",
-          "email": "Email",
-          "isAdmin": "Administrateur"
-        },
-        "button": {
-          "openDialog": "Ajouter un utilisateur",
-          "submit": "Ajouter l'utilisateur",
-          "loading": "Ajout en cours..."
-        },
-        "errors": {
-          "missingFields": "Veuillez remplir tous les champs obligatoires.",
-          "invalidEmail": "L'adresse courriel est invalide.",
-          "userExists": "Un utilisateur avec cet e-mail existe déjà."
-        },
-        "alerts": {
-          "addUserSuccess": "Utilisateur ajouté avec succès !",
-          "addUserError": "Erreur lors de l'ajout de l'utilisateur."
-        }
+      "stats": {
+        "totalUsers": "Nombre d'utilisateur(s)",
+        "userNotBoarded": "Utilisateur(s) non configuré(s)",
+        "userWithReservations": "Utilisateur(s) avec réservation"
+      },
+      "badge" : {
+        "admin": "Administrateur",
+        "user": "Utilisateur"
+      },
+      "pagination" : {
+        "affichageDe" : "Affichage de",
+        "a" : "à",
+        "sur" : "sur",
+        "noItem" : "Aucun élément"
       }
     },
     "reservations": {
