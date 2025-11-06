@@ -139,6 +139,7 @@
       "noValidDate": "No available timeslots",
       "continueBtn": "Continue",
       "errorLoadTimes": "Error loading times",
+      "errorLoadDates": "Error loading unavailable dates",
       "errorServer": "Server error",
       "allSlotsTaken": "All timeslots are booked for this date",
       "selectDate": "Select a date and time for your reservation",
@@ -287,7 +288,55 @@
   },
   "admin": {
     "users": {
-      "title": "Users"
+      "title": "Users",
+      "subtitle": "Manage users on the LUDOV platform",
+      "actionBar" : {
+        "searchPlaceholder" : "Search...",
+        "addUser" : "Add",
+        "toolTipRefresh": "Refresh",
+        "dropDownMenuAddUser" : {
+          "importCSV" : "Import CSV file",
+          "importCSVDescription" : "Import multiple users from a CSV file",
+          "importCSVInput" : "Choose a CSV file",
+          "importCSVSuccess" : "CSV import successful",
+          "addSingleUser" : "Add a user",
+          "addSingleUserDescription" : "Manually create a user account",
+          "addSingleUserSuccess" : "User added successfully"
+        }
+      },
+      "searchResult" : {
+        "noUsersFound" : "No user(s) found",
+        "noMatch" : "No user matches your search.",
+        "startByAdding" : "Start by adding your first user."
+      },
+      "table" : {
+        "header" : {
+          "email" : "Email",
+          "name" : "Name",
+          "role" : "Role",
+          "createdAt" : "Creation Date",
+          "actions" : "Actions"
+        },
+        "ActionToolTips" : {
+          "resetPassword" : "Reset Password",
+          "deleteUser" : "Delete User"
+        }
+      },
+      "stats": {
+        "totalUsers": "Number of user(s)",
+        "userNotBoarded": "User(s) not configured",
+        "userWithReservations": "User(s) with reservation"
+      },
+      "badge" : {
+        "admin": "Administrator",
+        "user": "User"
+      },
+      "pagination" : {
+        "affichageDe" : "Displaying",
+        "a" : "to",
+        "sur" : "on",
+        "noItem" : "No item"
+      }
     },
     "reservations": {
       "title": "Reservations"

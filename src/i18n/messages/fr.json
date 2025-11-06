@@ -122,6 +122,7 @@
       "noValidDate": "Aucune plage horaire disponible",
       "continueBtn": "Continuer",
       "errorLoadTimes": "Erreur chargement des horaires",
+      "errorLoadDates": "Erreur chargement des dates indisponibles",
       "errorServer": "Erreur serveur",
       "allSlotsTaken": "Toutes les plages horaires sont réservées pour cette date",
       "selectDate": "Sélectionnez une date et une heure pour votre réservation",
@@ -287,7 +288,55 @@
   },
   "admin": {
     "users": {
-      "title": "Utilisateurs"
+      "title": "Utilisateurs",
+      "subtitle": "Gérez les utilisateurs de la plateforme LUDOV",
+      "actionBar" : {
+        "searchPlaceholder" : "Rechercher...",
+        "addUser" : "Ajouter",
+        "toolTipRefresh": "Actualiser",
+        "dropDownMenuAddUser" : {
+          "importCSV" : "Importer un fichier CSV",
+          "importCSVDescription" : "Importez plusieurs utilisateurs à partir d'un fichier CSV",
+          "importCSVInput" : "Choisir un fichier CSV",
+          "importCSVSuccess" : "Importation CSV réussie",
+          "addSingleUser" : "Ajouter un utilisateur",
+          "addSingleUserDescription" : "Créez un compte utilisateur manuellement",
+          "addSingleUserSuccess" : "Utilisateur ajouté avec succès"
+        }
+      },
+      "searchResult" : {
+        "noUsersFound" : "Aucun utilisateur(s) trouvé",
+        "noMatch" : "Aucun utilisateur ne correspond à votre recherche.",
+        "startByAdding" : "Commencez par ajouter votre premier utilisateur."
+      },
+      "table" : {
+        "header" : {
+          "email" : "Email",
+          "name" : "Nom",
+          "role" : "Rôle",
+          "createdAt" : "Date de création",
+          "actions" : "Actions"
+        },
+        "ActionToolTips" : {
+          "resetPassword" : "Réinitialiser MDP",
+          "deleteUser" : "Supprimer l'utilisateur"
+        }
+      },
+      "stats": {
+        "totalUsers": "Nombre d'utilisateur(s)",
+        "userNotBoarded": "Utilisateur(s) non configuré(s)",
+        "userWithReservations": "Utilisateur(s) avec réservation"
+      },
+      "badge" : {
+        "admin": "Administrateur",
+        "user": "Utilisateur"
+      },
+      "pagination" : {
+        "affichageDe" : "Affichage de",
+        "a" : "à",
+        "sur" : "sur",
+        "noItem" : "Aucun élément"
+      }
     },
     "reservations": {
       "title": "Réservations"
