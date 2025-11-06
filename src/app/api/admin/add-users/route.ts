@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
 import { parse } from "csv-parse/sync";
+import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 
 const EXPECTED_COLUMNS = [
@@ -23,24 +24,38 @@ type CsvUserRecord = {
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.cookies.get("SESSION")?.value;
-    if (!token) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("SESSION");
+    let user = null;
+
+    try {
+      const token = sessionCookie?.value;
+      if (token) user = verifyToken(token);
+    } catch (error) {
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+    if (!user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    if (!user?.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
     }
 
-    const user = verifyToken(token);
-    if (!user?.id) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-    if (!user.isAdmin) {
-      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    }
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
 
     if (!file) {
       return NextResponse.json(
-        { error: "Aucun fichier téléversé." },
+        { error: "Fichier CSV manquant." },
         { status: 400 }
       );
     }
@@ -60,7 +75,7 @@ export async function POST(req: NextRequest) {
     if (missingColumns.length > 0) {
       return NextResponse.json(
         {
-          error: `Colonnes manquantes: ${missingColumns.join(", ")}`,
+          error: `Colonnes manquantes dans le CSV: ${missingColumns.join(", ")}`,
         },
         { status: 400 }
       );
@@ -70,15 +85,12 @@ export async function POST(req: NextRequest) {
     const invalidRecords = records.filter((r) => !EMAIL_REGEX.test(r.Username));
 
     if (validRecords.length === 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Aucun utilisateur valide à insérer.",
-          inserted: 0,
-          skipped: invalidRecords.length,
-        },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: true,
+        message: "Aucun utilisateur valide à insérer.",
+        inserted: 0,
+        skipped: invalidRecords.length,
+      });
     }
 
     const now = new Date();
@@ -110,10 +122,10 @@ export async function POST(req: NextRequest) {
       if (newUsers.length === 0) {
         conn.release();
         return NextResponse.json({
-          success: false,
-          message: "Aucun nouvel utilisateur à insérer (tous déjà existants).",
+          success: true,
+          message: "Aucun nouvel utilisateur à insérer.",
           inserted: 0,
-          skipped: invalidRecords.length + (users.length - newUsers.length),
+          skipped: invalidRecords.length + users.length,
         });
       }
 
@@ -140,17 +152,25 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
+        message: "Utilisateurs insérés avec succès.",
         inserted: newUsers.length,
         skipped: invalidRecords.length + (users.length - newUsers.length),
       });
     } catch (err) {
       await conn.rollback();
-      throw err;
+      console.error("Error inserting users from CSV:", err);
+      return NextResponse.json(
+        { success: false, message: "Erreur lors de l'insertion des utilisateurs." },
+        { status: 500 }
+      );
     } finally {
       conn.release();
     }
   } catch (error) {
-    console.error("Error importing CSV:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error("Error adding users from CSV:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

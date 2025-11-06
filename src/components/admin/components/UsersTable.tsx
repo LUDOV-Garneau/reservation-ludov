@@ -1,39 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import React, { useEffect, useState, useCallback } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Plus, AlertCircle } from "lucide-react";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import AddUserForm from "@/components/admin/components/AddUserForm";
-import UsersForm from "@/components/admin/components/UsersForm";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Trash2, KeyRound, Users, Shield, User, Calendar, XCircle, Menu, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import CardUserStats from "./Admin/Users/CardStats";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ActionBar from "./Admin/Users/ActionBar";
+import PaginationControls from "./Admin/Pagination";
 
 type User = {
   id: number;
@@ -44,333 +26,527 @@ type User = {
   createdAt: string;
 };
 
-export default function UsersTable({ refreshKey }: { refreshKey: number }) {
-  const t = useTranslations("admin.users");
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
+type AlertState = {
+  type: "success" | "error" | "info" | "warning";
+  message: string;
+  title?: string;
+} | null;
+
+type ConfirmDialogState = {
+  open: boolean;
+  title: string;
+  description: string;
+  confirmText: string;
+  confirmVariant: "default" | "destructive";
+  onConfirm: () => void;
+} | null;
+
+const ITEMS_PER_PAGE = 10;
+
+function getCurrentUserIdFromCookie(): number | null {
+  if (typeof document === "undefined") return null;
+  
+  const cookies = document.cookie.split(";");
+  const sessionCookie = cookies.find((c) => c.trim().startsWith("SESSION="));
+  
+  if (!sessionCookie) return null;
+  
+  try {
+    const token = sessionCookie.split("=")[1];
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.id ? Number(payload.id) : null;
+  } catch {
+    return null;
+  }
+}
+
+function usePagination(totalItems: number, itemsPerPage: number = ITEMS_PER_PAGE) {
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [total, setTotal] = useState(0);
-  const [localRefreshKey, setLocalRefreshKey] = useState(0);
-  const handleRefresh = () => setLocalRefreshKey((prev: number) => prev + 1);
-  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [alert, setAlert] = useState<{
-    type: "success" | "error";
-    message: string;
-  } | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{
-    open: boolean;
-    user: User | null;
-  }>({
-    open: false,
-    user: null,
-  });
-  const [resetDialog, setResetDialog] = useState<{
-    open: boolean;
-    user: User | null;
-  }>({
-    open: false,
-    user: null,
-  });
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
-  const handleAlert = (type: "success" | "error", message: string) => {
-    setAlert({ type, message });
-    setTimeout(() => setAlert(null), 5000);
+  const goToNextPage = useCallback(() => {
+    setPage((prev) => Math.min(prev + 1, totalPages));
+  }, [totalPages]);
+
+  const goToPrevPage = useCallback(() => {
+    setPage((prev) => Math.max(prev - 1, 1));
+  }, []);
+
+  const goToPage = useCallback((pageNum: number) => {
+    setPage(Math.max(1, Math.min(pageNum, totalPages)));
+  }, [totalPages]);
+
+  const resetPage = useCallback(() => setPage(1), []);
+
+  return {
+    page,
+    totalPages,
+    itemsPerPage,
+    goToNextPage,
+    goToPrevPage,
+    goToPage,
+    resetPage,
+    isFirstPage: page === 1,
+    isLastPage: page === totalPages,
   };
+}
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const res = await fetch("/api/auth/login");
-        if (!res.ok) return;
-        const data = await res.json();
-        setCurrentUserId(Number(data.user?.id ?? null));
-      } catch {
-        setErrorMessage(t("errors.currentUserLoad"));
-      }
-    };
+function RoleBadge({ isAdmin }: { isAdmin: boolean }) {
+  const t = useTranslations();
+  return isAdmin ? (
+    <Badge className="bg-cyan-700 text-white border-0 text-xs">
+      <Shield className="h-3 w-3 mr-1" />
+      <span className="hidden sm:inline">{t("admin.users.badge.admin")}</span>
+      <span className="sm:hidden">A</span>
+    </Badge>
+  ) : (
+    <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 text-xs">
+      <User className="h-3 w-3 mr-1" />
+      <span className="hidden sm:inline">{t("admin.users.badge.user")}</span>
+      <span className="sm:hidden">U</span>
+    </Badge>
+  );
+}
 
-    fetchCurrentUser();
-  }, [t]);
+function UserTableRow({
+  user,
+  isCurrentUser,
+  onDelete,
+  onResetPassword,
+}: {
+  user: User;
+  isCurrentUser: boolean;
+  onDelete: (userId: number, email: string) => void;
+  onResetPassword: (userId: number, email: string) => void;
+}) {
+  const t = useTranslations();
+  return (
+    <TableRow key={user.id} className="hover:bg-gray-200">
+      <TableCell className="hidden lg:table-cell">{user.email}</TableCell>
+      <TableCell>{user.firstName} {user.lastName}</TableCell>
+      <TableCell className="hidden md:table-cell"><RoleBadge isAdmin={user.isAdmin} /></TableCell>
+      <TableCell className="hidden lg:table-cell">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Calendar className="h-3.5 w-3.5" />
+          <span>{new Date(user.createdAt).toLocaleDateString("fr-FR")}</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        {!isCurrentUser ? (
+          <div className="">
+            <div className="hidden sm:flex gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onResetPassword(user.id, user.email)}
+                      className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
+                    >
+                      <KeyRound className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("admin.users.table.ActionToolTips.resetPassword")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      setErrorMessage(null);
-      try {
-        const res = await fetch(`/api/admin/users?page=${page}&limit=${limit}`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        setUsers(data.rows);
-        setTotal(data.total);
-      } catch {
-        setErrorMessage(t("errors.userLoad"));
-      } finally {
-        setLoading(false);
-      }
-    };
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete(user.id, user.email)}
+                      className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t("admin.users.table.ActionToolTips.deleteUser")}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
 
-    fetchUsers();
-  }, [refreshKey, localRefreshKey, page, limit, t]);
+            <div className="sm:hidden">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <Menu className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => onResetPassword(user.id, user.email)}>
+                    <KeyRound className="h-4 w-4 mr-2 text-blue-500" />
+                    {t("admin.users.table.ActionToolTips.resetPassword")}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => onDelete(user.id, user.email)}
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                    {t("admin.users.table.ActionToolTips.deleteUser")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        ) : (
+          <span className="text-xs sm:text-sm text-muted-foreground px-2">-</span>
+        )}
+      </TableCell>
+    </TableRow>
+  );
+}
 
-  let totalPages = Math.ceil(total / limit);
-  if (totalPages === 0) totalPages = 1;
+function ConfirmDialog({
+  open,
+  title,
+  description,
+  confirmText,
+  confirmVariant,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  description: string;
+  confirmText: string;
+  confirmVariant: "default" | "destructive";
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onCancel}>
+      <DialogContent className="sm:max-w-[425px] max-w-[calc(100vw-2rem)]">
+        <DialogHeader>
+          <DialogTitle className="text-lg sm:text-xl">{title}</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base pt-2">
+            {description}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="mt-4 sm:mt-6 flex-col sm:flex-row gap-2">
+          <Button variant="outline" onClick={onCancel} className="hover:bg-gray-100 w-full sm:w-auto">
+            Annuler
+          </Button>
+          <Button
+            variant={confirmVariant}
+            onClick={onConfirm}
+            className={cn(
+              "w-full sm:w-auto",
+              confirmVariant === "destructive" &&
+                "bg-red-600 hover:bg-red-700 shadow-md"
+            )}
+          >
+            {confirmText}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
-  const handleDelete = async () => {
-    if (!deleteDialog.user) return;
-    const { id, email } = deleteDialog.user;
-    try {
-      const res = await fetch(`/api/admin/delete-user?userId=${id}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) {
-        handleAlert("error", t("alerts.deleteError"));
-        return;
-      }
-      handleAlert("success", `Utilisateur ${email} supprimé`);
-      handleRefresh();
-    } catch {
-      handleAlert("error", t("alerts.deleteSuccess", { email }));
-    } finally {
-      setDeleteDialog({ open: false, user: null });
-    }
-  };
+export function ModernAlert({
+  alert,
+  onClose,
+}: {
+  alert: AlertState;
+  onClose: () => void;
+}) {
+  if (!alert) return null;
 
-  const handleResetPassword = async () => {
-    if (!resetDialog.user) return;
-    const { id, email } = resetDialog.user;
-    try {
-      const res = await fetch(`/api/admin/reset-password?userId=${id}`, {
-        method: "POST",
-      });
-      if (!res.ok) {
-        handleAlert("error", t("alerts.resetError"));
-        return;
-      }
-      handleAlert("success", t("alerts.resetSuccess", { email }));
-      handleRefresh();
-    } catch {
-      handleAlert("error", t("alerts.networkError"));
-    } finally {
-      setResetDialog({ open: false, user: null });
-    }
-  };
+  const icon =
+    alert.type === "success" ? <CheckCircle2 className="h-4 w-4 text-green-600" /> :
+    alert.type === "error"   ? <XCircle className="h-4 w-4 text-red-600" /> :
+    alert.type === "warning" ? <AlertTriangle className="h-4 w-4 text-yellow-600" /> :
+                               <Info className="h-4 w-4 text-blue-600" />;
 
   return (
-    <div className="w-full mx-auto mt-8 bg-white rounded-lg shadow-sm p-6">
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-xl font-semibold">{t("title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+    <Alert
+      className="mb-4"
+      variant={
+        alert.type === "success" ? "default" :
+        alert.type === "error"   ? "destructive" :
+        "default"
+      }
+    >
+      <div className="flex justify-between items-start gap-2">
+        <div className="flex gap-2">
+          {icon}
+          <div>
+            {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
+            <AlertDescription>{alert.message}</AlertDescription>
+          </div>
         </div>
 
-        <Tooltip>
-          <Popover>
-            <TooltipTrigger asChild>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="default"
-                  className="mt-2 bg-cyan-500 hover:bg-cyan-700"
-                >
-                  <Plus className="h-5 w-5" />
-                </Button>
-              </PopoverTrigger>
-            </TooltipTrigger>
+        <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6 p-0">
+          <XCircle className="h-4 w-4" />
+        </Button>
+      </div>
+    </Alert>
+  );
+}
 
-            <TooltipContent>
-              <p>{t("tooltip.addUsers")}</p>
-            </TooltipContent>
+function useAlert() {
+  const [alert, setAlert] = useState<AlertState>(null);
 
-            <PopoverContent className="w-[210px] p-1 space-y-3 rounded-xl shadow-md">
-              <div>
-                <UsersForm onSuccess={handleRefresh} onAlert={handleAlert} />
-                <AddUserForm onSuccess={handleRefresh} onAlert={handleAlert} />
-              </div>
-            </PopoverContent>
-          </Popover>
-        </Tooltip>
+  const showAlert = useCallback(
+    (
+      type: "success" | "error" | "info" | "warning",
+      message: string,
+      title?: string
+    ) => {
+      setAlert({ type, message, title });
+    },
+    []
+  );
+
+  const clearAlert = useCallback(() => setAlert(null), []);
+
+  return { alert, showAlert, clearAlert };
+}
+
+function TableSkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 py-3">
+          <Skeleton className="h-4 flex-1" />
+          <Skeleton className="h-4 w-24 hidden md:block" />
+          <Skeleton className="h-4 w-24 hidden lg:block" />
+          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-24 hidden sm:block" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+
+// ============================================================================
+// MAIN COMPONENT
+// ============================================================================
+
+export default function UsersTable() {
+  const t = useTranslations();
+  const { alert, showAlert, clearAlert } = useAlert();
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
+
+  const [totalUser, setTotalUser] = useState(0);
+  const [totalUserNotBoarded, setTotalUserNotBoarded] = useState(0);
+  const [totalUserWithReservation, setTotalUserWithReservation] = useState(0);
+
+  const [loading, setLoading] = useState(false);
+  const [metricsLoading, setMetricsLoading] = useState(true);
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [total, setTotal] = useState(0);
+
+  const pagination = usePagination(total, ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    const userId = getCurrentUserIdFromCookie();
+    setCurrentUserId(userId);
+
+    if (userId === null) {
+      console.warn("Unable to retrieve current user ID from cookies");
+    }
+
+    fetchMetrics();
+    fetchUsers(pagination.page, ITEMS_PER_PAGE);
+  }, [pagination.page]);
+
+  useEffect(() => {
+    pagination.resetPage();
+  }, [searchQuery]);
+
+  async function fetchMetrics() {
+    try {
+      setMetricsLoading(true);
+      const res = await fetch("/api/admin/users/stats", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch user stats");
+      }
+
+      const data = await res.json();
+      setTotalUser(data.totalUser);
+      setTotalUserNotBoarded(data.totalUserNotBoarded);
+      setTotalUserWithReservation(data.totalUserWithReservation);
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+    } finally {
+      setMetricsLoading(false);
+    }
+  }
+
+  async function fetchUsers(page = 1, limit = ITEMS_PER_PAGE) {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/admin/users?page=${page}&limit=${limit}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || "Erreur API utilisateurs");
+      }
+
+      const data = await res.json();
+      const rows = data.rows ?? data.users ?? [];
+      const totalCount = Number(data.total ?? 0);
+
+      setUsers(rows);
+      setTotal(totalCount);
+    } catch (error) {
+      console.error(error);
+      setUsers([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const filteredUsers = users.filter((user) => {
+    const search = searchQuery.toLowerCase();
+    return (
+      user.email.toLowerCase().includes(search) ||
+      user.firstName.toLowerCase().includes(search) ||
+      user.lastName.toLowerCase().includes(search)
+    );
+  });
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await Promise.all([
+      fetchMetrics(),
+      fetchUsers(pagination.page, pagination.itemsPerPage),
+    ]);
+    setIsRefreshing(false);
+  }, [pagination.page, pagination.itemsPerPage]);
+
+  return (
+    <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
+      <div className="flex flex-col gap-1 sm:gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          {t("admin.users.title")}
+        </h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          {t("admin.users.subtitle")}
+        </p>
       </div>
 
-      {alert && (
-        <Alert
-          variant={alert.type === "success" ? "default" : "destructive"}
-          className="mb-4"
-        >
-          <AlertDescription>{alert.message}</AlertDescription>
-        </Alert>
-      )}
+      <CardUserStats
+        loading={metricsLoading}
+        totalUser={totalUser ?? 0}
+        totalUserNotBoarded={totalUserNotBoarded ?? 0}
+        totalUserWithReservation={totalUserWithReservation ?? 0}
+      />
 
-      {errorMessage && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{errorMessage}</AlertDescription>
-        </Alert>
-      )}
+      <ModernAlert alert={alert} onClose={clearAlert} />
 
-      {loading ? (
-        <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full rounded-md" />
-          ))}
-        </div>
-      ) : (
-        <>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center">
-                  {t("table.email")}
-                </TableHead>
-                <TableHead className="text-center">
-                  {t("table.firstname")}
-                </TableHead>
-                <TableHead className="text-center">
-                  {t("table.lastname")}
-                </TableHead>
-                <TableHead className="text-center">
-                  {t("table.isAdmin")}
-                </TableHead>
-                <TableHead className="text-center">
-                  {t("table.createdAt")}
-                </TableHead>
-                <TableHead className="text-center">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
+      <Card className="shadow-md border-gray-200">
+        <CardHeader className="pb-3 sm:pb-4 border-b p-4 sm:p-6">
+          <ActionBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onRefresh={handleRefresh}
+            onSuccess={handleRefresh}
+            onAlert={showAlert}
+            isRefreshing={isRefreshing}
+          />
+        </CardHeader>
 
-            <TableBody>
-              {users.length > 0 ? (
-                users.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="text-center font-medium">
-                      {user.email}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {user.firstName}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {user.lastName}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {user.isAdmin ? t("common.yes") : t("common.no")}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {new Date(user.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell className="text-center space-x-2">
-                      {user.id !== currentUserId && (
-                        <>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() =>
-                              setDeleteDialog({ open: true, user })
-                            }
-                          >
-                            {t("buttons.delete")}
-                          </Button>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-4 sm:p-6">
+              <TableSkeleton />
+            </div>
+          ) : filteredUsers.length > 0 ? (
+            <>
+              <div className="px-6">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="hidden lg:table-cell">{t("admin.users.table.header.email")}</TableHead>
+                      <TableHead>{t("admin.users.table.header.name")}</TableHead>
+                      <TableHead className="hidden md:table-cell">{t("admin.users.table.header.role")}</TableHead>
+                      <TableHead className="hidden lg:table-cell">{t("admin.users.table.header.createdAt")}</TableHead>
+                      <TableHead>{t("admin.users.table.header.actions")}</TableHead>
+                    </TableRow>
+                  </TableHeader>
 
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setResetDialog({ open: true, user })}
-                          >
-                            {t("buttons.resetPassword")}
-                          </Button>
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="text-center text-muted-foreground"
-                  >
-                    {t("noUsersFound")}
-                  </TableCell>
-                </TableRow>
+                  <TableBody>
+                    {filteredUsers.map((user) => (
+                      <UserTableRow
+                        key={user.id}
+                        user={user}
+                        isCurrentUser={currentUserId !== null && user.id === currentUserId}
+                        onDelete={() => console.log("Delete user", user.id)}
+                        onResetPassword={() => console.log("Reset password", user.id)}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {total > ITEMS_PER_PAGE && (
+                <div className="px-4 sm:px-6 pb-3 sm:pb-4">
+                  <PaginationControls
+                    page={pagination.page}
+                    totalItems={total}
+                    pageSize={ITEMS_PER_PAGE}
+                    onPageChange={pagination.goToPage}
+                    siblingCount={1}
+                  />
+                </div>
               )}
-            </TableBody>
-          </Table>
+            </>
+          ) : (
+            <div className="text-center py-12 sm:py-16 px-4 sm:px-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 mb-3 sm:mb-4">
+                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
+              </div>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
+                {t("admin.users.searchResult.noUsersFound")}
+              </h3>
+              <p className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6 mx-auto">
+                {searchQuery
+                  ? t("admin.users.searchResult.noMatch")
+                  : t("admin.users.searchResult.startByAdding")}
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-          <div className="flex justify-between items-center mt-4">
-            <Button
-              variant="outline"
-              disabled={page === 1}
-              onClick={() => setPage((p) => p - 1)}
-            >
-              {t("pagination.previous")}
-            </Button>
-            <span>
-              Page {page} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              disabled={page === totalPages}
-              onClick={() => setPage((p) => p + 1)}
-            >
-              {t("pagination.next")}
-            </Button>
-          </div>
-        </>
+      {confirmDialog && (
+        <ConfirmDialog
+          open={confirmDialog.open}
+          title={confirmDialog.title}
+          description={confirmDialog.description}
+          confirmText={confirmDialog.confirmText}
+          confirmVariant={confirmDialog.confirmVariant}
+          onConfirm={confirmDialog.onConfirm}
+          onCancel={() => setConfirmDialog(null)}
+        />
       )}
-      <Dialog
-        open={deleteDialog.open}
-        onOpenChange={(open) => setDeleteDialog({ open, user: null })}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("dialogs.delete.title")}</DialogTitle>
-            <DialogDescription>
-              {t("dialogs.delete.description", {
-                email: deleteDialog.user?.email ?? "",
-              })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialog({ open: false, user: null })}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              {t("common.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog
-        open={resetDialog.open}
-        onOpenChange={(open) => setResetDialog({ open, user: null })}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("dialogs.reset.title")}</DialogTitle>
-            <DialogDescription>
-              {t("dialogs.reset.description", {
-                email: resetDialog.user?.email ?? "",
-              })}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setResetDialog({ open: false, user: null })}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button variant="default" onClick={handleResetPassword}>
-              {t("common.confirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

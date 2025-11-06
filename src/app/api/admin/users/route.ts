@@ -1,8 +1,36 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
+import { cookies } from "next/headers";
+import { verifyToken } from "@/lib/jwt";
 
 export async function GET(req: NextRequest) {
   try {
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get("SESSION");
+    let user = null;
+
+    try {
+      const token = sessionCookie?.value;
+      if(token) user = verifyToken(token);
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+    if (!user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    if (!user?.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
+    }
+    
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
     const limit = parseInt(searchParams.get("limit") || "10", 10);
@@ -17,7 +45,7 @@ export async function GET(req: NextRequest) {
         lastname AS lastName,
         isAdmin As isAdmin
       FROM users
-      ORDER BY createdAt DESC
+      ORDER BY id ASC
       LIMIT ? OFFSET ?
     `,
       [limit, offset]
@@ -29,8 +57,11 @@ export async function GET(req: NextRequest) {
     const total = countRows[0].total;
 
     return NextResponse.json({ rows, total });
-  } catch (err) {
-    console.error("Erreur lors de la récupération des utilisateurs :", err);
-    return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
