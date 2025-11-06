@@ -288,7 +288,92 @@
   },
   "admin": {
     "users": {
-      "title": "Users"
+      "title": "Users",
+      "subtitle": "Account management",
+      "tooltip": {
+        "addUsers": "Add users"
+      },
+      "table": {
+        "email": "Email",
+        "firstname": "First name",
+        "lastname": "Last name",
+        "isAdmin": "Administrator",
+        "createdAt": "Creation date"
+      },
+      "buttons": {
+        "delete": "Delete",
+        "resetPassword": "Reset password"
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "dialogs": {
+        "delete": {
+          "title": "Confirm deletion",
+          "description": "Are you sure you want to delete the user {email}?"
+        },
+        "reset": {
+          "title": "Reset password",
+          "description": "This will reset the password for {email}. Continue?"
+        }
+      },
+      "alerts": {
+        "deleteError": "Error while deleting",
+        "deleteSuccess": "User {email} deleted",
+        "resetError": "Error while resetting",
+        "resetSuccess": "Password for {email} has been reset",
+        "networkError": "Network error"
+      },
+      "errors": {
+        "userLoad": "Error while loading users. Please try again later.",
+        "currentUserLoad": "Error while loading the connected user account."
+      },
+      "noUsersFound": "No users found",
+      "common": {
+        "yes": "Yes",
+        "no": "No",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "usersForm": {
+        "button": {
+          "importCsv": "Import a CSV file"
+        },
+        "success": {
+          "importComplete": "Import complete: {inserted} user(s) added, {skipped} skipped."
+        },
+        "error": {
+          "importFailed": "Unable to import the CSV file.",
+          "noUsersAdded": "No users added. {skipped} skipped.",
+          "uploadException": "An error occurred while importing the file."
+        }
+      },
+      "addUserForm": {
+        "titles": {
+          "dialogTitle": "Add a user"
+        },
+        "fields": {
+          "firstname": "First name",
+          "lastname": "Last name",
+          "email": "Email",
+          "isAdmin": "Administrator"
+        },
+        "button": {
+          "openDialog": "Add a user",
+          "submit": "Add user",
+          "loading": "Adding..."
+        },
+        "errors": {
+          "missingFields": "Please fill out all required fields.",
+          "invalidEmail": "The email address is invalid.",
+          "userExists": "A user with this email already exists."
+        },
+        "alerts": {
+          "addUserSuccess": "User added successfully!",
+          "addUserError": "Error adding user."
+        }
+      }
     },
     "reservations": {
       "title": "Reservations"
