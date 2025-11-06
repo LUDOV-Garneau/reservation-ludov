@@ -22,12 +22,10 @@ export default function CardUserStats({
     label,
     value,
     accent,
-    hideIconOnSmall = false,
   }: {
     label: string;
     value?: number;
     accent: "cyan" | "orange" | "green";
-    hideIconOnSmall?: boolean;
   }) => {
     const colorMap = {
       cyan: { ring: "border-l-cyan-500", dot: "bg-cyan-500", text: "text-cyan-600", tint: "bg-cyan-100" },
@@ -40,7 +38,7 @@ export default function CardUserStats({
     return (
       <Card className={`border-l-4 ${colorMap.ring}`}>
         <CardContent className="flex items-center gap-4">
-          <div className={`${hideIconOnSmall ? "hidden sm:flex" : "flex"} h-16 w-16 items-center justify-center rounded-full ${colorMap.tint}`}>
+          <div className={`flex h-16 w-16 items-center justify-center rounded-full ${colorMap.tint}`}>
             <div className={`rounded-full ${colorMap.dot} p-3 shadow-lg`}>
               <User className="h-6 w-6 text-white" />
             </div>
@@ -62,7 +60,7 @@ export default function CardUserStats({
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
       <Stat label="Nombre d'utilisateurs" value={totalUser} accent="cyan" />
       <Stat label="Utilisateur non configuré" value={totalUserNotBoarded} accent="orange" />
-      <Stat label="Utilisateur avec réservation" value={totalUserWithReservation} accent="green" hideIconOnSmall />
+      <Stat label="Utilisateur avec réservation" value={totalUserWithReservation} accent="green" />
     </div>
   );
 }

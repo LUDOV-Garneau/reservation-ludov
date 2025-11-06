@@ -5,19 +5,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Plus, Trash2, KeyRound, Users, Search, RefreshCw, ChevronLeft, ChevronRight, Shield, User, Calendar, XCircle, Menu, CheckCircle2, AlertTriangle, Info } from "lucide-react";
+import { Trash2, KeyRound, Users, ChevronLeft, ChevronRight, Shield, User, Calendar, XCircle, Menu, CheckCircle2, AlertTriangle, Info } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import AddUserForm from "@/components/admin/components/AddUserForm";
-import UsersForm from "@/components/admin/components/UsersForm";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import CardUserStats from "./Admin/Users/CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import ActionBar from "./Admin/Users/ActionBar";
 
 type User = {
   id: number;
@@ -93,114 +90,6 @@ function usePagination(totalItems: number, itemsPerPage: number = ITEMS_PER_PAGE
   };
 }
 
-function ActionBar({
-  searchQuery,
-  onSearchChange,
-  onRefresh,
-  onSuccess,
-  onAlert,
-  isRefreshing,
-}: {
-  searchQuery: string;
-  onSearchChange: (value: string) => void;
-  onRefresh: () => void;
-  onSuccess: () => void;
-  onAlert: (type: "success" | "error", message: string) => void;
-  isRefreshing: boolean;
-}) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  return (
-    <div className="flex gap-3">
-      <div className="relative flex-1">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Rechercher..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 border-gray-300 focus:border-cyan-500 focus:ring-cyan-500 w-full"
-        />
-      </div>
-
-      <div className="flex gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={onRefresh}
-                disabled={isRefreshing}
-                className={cn(
-                  "hover:bg-gray-100 flex-shrink-0",
-                  isRefreshing && "animate-spin"
-                )}
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Actualiser</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button className="bg-cyan-500 hover:bg-cyan-700 text-white shadow-md hover:shadow-lg transition-all flex-1 sm:flex-initial">
-              <Plus className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">Ajouter un utilisateur</span>
-              <span className="sm:hidden">Ajouter</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="end" 
-            className="w-screen sm:w-[400px] md:w-[500px] max-w-[calc(100vw-2rem)] p-0"
-          >
-            <ScrollArea className="max-h-[calc(100vh-10rem)]">
-              <div className="p-4 space-y-6">
-                <div>
-                  <DropdownMenuLabel className="text-base font-semibold px-0 pb-2">
-                    Import CSV
-                  </DropdownMenuLabel>
-                  <p className="text-xs text-muted-foreground mb-3 px-0">
-                    Importez plusieurs utilisateurs à partir d'un fichier CSV
-                  </p>
-                  <UsersForm 
-                    onSuccess={() => {
-                      onSuccess();
-                      setDropdownOpen(false);
-                    }} 
-                    onAlert={onAlert} 
-                  />
-                </div>
-
-                <DropdownMenuSeparator />
-
-                <div>
-                  <DropdownMenuLabel className="text-base font-semibold px-0 pb-2">
-                    Ajout Manuel
-                  </DropdownMenuLabel>
-                  <p className="text-xs text-muted-foreground mb-3 px-0">
-                    Créez un compte utilisateur individuellement
-                  </p>
-                  <AddUserForm 
-                    onSuccess={() => {
-                      onSuccess();
-                      setDropdownOpen(false);
-                    }} 
-                    onAlert={onAlert} 
-                  />
-                </div>
-              </div>
-            </ScrollArea>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </div>
-  );
-}
-
 /**
  * Badge de rôle utilisateur
  */
@@ -235,43 +124,15 @@ function UserTableRow({
   onResetPassword: (userId: number, email: string) => void;
 }) {
   return (
-    <TableRow className="hover:bg-gray-50/50 transition-colors text-center">
-      {/* Avatar + Email (toujours visible) */}
-      <TableCell className="font-medium text-center">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 text-center">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="truncate text-sm">{user.email}</span>
-              {isCurrentUser && (
-                <Badge variant="outline" className="text-xs border-cyan-200 text-cyan-700 whitespace-nowrap">
-                  Vous
-                </Badge>
-              )}
-            </div>
-            {/* Nom complet sur mobile sous l'email */}
-            <div className="text-xs text-muted-foreground mt-0.5 md:hidden">
-              {user.firstName} {user.lastName}
-            </div>
-          </div>
-        </div>
-      </TableCell>
+    <TableRow key={user.id} className="hover:bg-gray-200">
+      <TableCell>{user.email}</TableCell>
 
-      {/* Prénom (caché sur mobile) */}
-      <TableCell className="hidden md:table-cell">
-        <span className="text-gray-700 text-sm">{user.firstName}</span>
-      </TableCell>
+      <TableCell>{user.firstName}</TableCell>
 
-      {/* Nom (caché sur mobile) */}
-      <TableCell className="hidden md:table-cell">
-        <span className="text-gray-700 text-sm">{user.lastName}</span>
-      </TableCell>
+      <TableCell className="hidden md:table-cell">{user.lastName}</TableCell>
 
-      {/* Rôle (visible sur tablette+) */}
-      <TableCell className="hidden sm:table-cell">
-        <RoleBadge isAdmin={user.isAdmin} />
-      </TableCell>
+      <TableCell><RoleBadge isAdmin={user.isAdmin} /></TableCell>
 
-      {/* Date (caché sur mobile et tablette) */}
       <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
@@ -279,10 +140,9 @@ function UserTableRow({
         </div>
       </TableCell>
 
-      {/* Actions */}
       <TableCell>
         {!isCurrentUser ? (
-          <div className="flex items-center justify-end gap-1 sm:gap-2">
+          <div className="">
             {/* Version Desktop - Boutons séparés */}
             <div className="hidden sm:flex gap-2">
               <TooltipProvider>
@@ -595,7 +455,6 @@ function TableSkeleton() {
     <div className="space-y-2">
       {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="flex items-center gap-4 py-3">
-          <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
           <Skeleton className="h-4 flex-1" />
           <Skeleton className="h-4 w-24 hidden md:block" />
           <Skeleton className="h-4 w-24 hidden lg:block" />
@@ -744,7 +603,7 @@ export default function UsersTable() {
       <ModernAlert alert={alert} onClose={clearAlert} />
 
       <Card className="shadow-md border-gray-200">
-        <CardHeader className="pb-3 sm:pb-4 border-b bg-gray-50/50 p-4 sm:p-6">
+        <CardHeader className="pb-3 sm:pb-4 border-b p-4 sm:p-6">
           <ActionBar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -762,28 +621,16 @@ export default function UsersTable() {
             </div>
           ) : filteredUsers.length > 0 ? (
             <>
-              <div className="overflow-x-auto">
-                <Table className="text-center">
+              <div className="px-6">
+                <Table>
                   <TableHeader>
-                    <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                      <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm text-center">
-                        Email
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700 hidden md:table-cell text-xs sm:text-sm text-center">
-                        Prénom
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700 hidden md:table-cell text-xs sm:text-sm text-center">
-                        Nom
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700 hidden sm:table-cell text-xs sm:text-sm text-center">
-                        Rôle
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700 hidden lg:table-cell text-xs sm:text-sm text-center">
-                        Date
-                      </TableHead>
-                      <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm text-center">
-                        Actions
-                      </TableHead>
+                    <TableRow>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Prénom</TableHead>
+                      <TableHead className="hidden md:table-cell">Nom</TableHead>
+                      <TableHead>Rôle</TableHead>
+                      <TableHead className="hidden lg:table-cell">Date de création</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
 
