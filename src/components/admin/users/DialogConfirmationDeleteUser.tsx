@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Mail, Loader2, ShieldAlert, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type TargetUser = {
   id: number;
@@ -36,11 +37,13 @@ export default function DeleteUserAction({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const t = useTranslations("admin.users.deleteUserDialog");
+
   async function handleConfirm() {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/users/delete-user", {
-        method: "DELETE", // ou "DELETE" selon ton API; garde POST si tu suis le modèle reset
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ targetUserId: targetUser.id }),
@@ -73,21 +76,18 @@ export default function DeleteUserAction({
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] p-0 overflow-hidden">
-          {/* Header */}
           <div className="border-b px-6 py-4 bg-red-50">
             <div className="flex-1 pt-0.5">
               <DialogTitle className="text-lg text-red-900">
-                Supprimer l’utilisateur
+                {t("deleteUser")}
               </DialogTitle>
               <DialogDescription className="text-sm text-red-700 mt-1">
-                Cette action est définitive. L’utilisateur et ses accès seront supprimés.
+                {t("definitiveAction")}
               </DialogDescription>
             </div>
           </div>
 
-          {/* Body */}
           <form onSubmit={onSubmit} className="px-6 pb-5 pt-5 space-y-5">
-            {/* User card */}
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-gray-900 truncate">
@@ -108,36 +108,34 @@ export default function DeleteUserAction({
 
             <Separator />
 
-            {/* What happens */}
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
                 <ShieldAlert className="h-4 w-4 text-red-600" />
-                Ce qui va se passer :
+                {t("whatGonnaHappen")}
               </h4>
               <ul className="space-y-2.5 text-sm text-gray-700">
                 <li className="flex items-start gap-2.5">
                   <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
                   <span>
-                    Le compte sera <strong className="text-gray-900">supprimé</strong> et l’utilisateur ne pourra plus se connecter.
+                    {t("theAccount")} <strong className="text-gray-900">{t("deleted")}</strong> {t("userWontBeAbleToLogin")}
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
                   <span>
-                    Les réservations à venir seront également supprimées.
+                    {t("reservationDeleted")}
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
                   <span>
-                    Les données associées essentielles seront retirées selon votre politique.
+                    {t("dataDeleteAccordingToPolicy")}
                   </span>
                 </li>
 
               </ul>
             </div>
 
-            {/* Actions */}
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">
               <Button
                 type="button"
@@ -146,7 +144,7 @@ export default function DeleteUserAction({
                 onClick={() => setOpen(false)}
                 disabled={loading}
               >
-                Annuler
+                {t("CancelDelete")}
               </Button>
               <Button
                 type="submit"
@@ -160,12 +158,12 @@ export default function DeleteUserAction({
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Suppression…
+                    {t("deletingState")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-2">
                     <Trash2 className="h-4 w-4" />
-                    Confirmer la suppression
+                    {t("confirmDelete")}
                   </span>
                 )}
               </Button>
