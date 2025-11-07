@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {KeyRound, Mail, Loader2, Shield, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type TargetUser = {
   id: number;
@@ -32,6 +33,8 @@ export default function ResetPasswordAction({
 }: ResetPasswordActionProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const t = useTranslations("admin.users.resetPasswordDialog");
 
   async function handleConfirm() {
     setLoading(true);
@@ -73,10 +76,10 @@ export default function ResetPasswordAction({
           <div className="border-b px-6 py-4 bg-orange-50">
             <div className="flex-1 pt-0.5">
               <DialogTitle className="text-lg text-amber-900">
-                Réinitialiser le mot de passe
+                {t("resetPassword")}
               </DialogTitle>
               <DialogDescription className="text-sm text-amber-700 mt-1">
-                Cette action empêchera l'utilisateur de se connecter jusqu'à ce qu'il définisse un nouveau mot de passe.
+                {t("thisActionPreventLogin")}
               </DialogDescription>
             </div>
           </div>
@@ -105,16 +108,16 @@ export default function ResetPasswordAction({
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
                 <Shield className="h-4 w-4 text-cyan-600" />
-                Ce qui va se passer :
+                {t("whatWillHappen")}
               </h4>
               <ul className="space-y-2.5 text-sm text-gray-700">
                 <li className="flex items-start gap-2.5">
                   <KeyRound className="h-4 w-4 mt-0.5 text-cyan-600 shrink-0" />
-                  <span>Le mot de passe sera <strong className="text-gray-900">réinitialisé</strong> dans la base de données</span>
+                  <span>{t("thePasswordWillBe")} <strong className="text-gray-900">{t("reset")}</strong> {t("inTheDatabase")}</span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Send className="h-4 w-4 mt-0.5 text-cyan-600 shrink-0" />
-                  <span>Un email de réinitialisation sera envoyé à l'utilisateur</span>
+                  <span>{t("emailWillBeSend")}</span>
                 </li>
               </ul>
             </div>
@@ -127,7 +130,7 @@ export default function ResetPasswordAction({
                 onClick={() => setOpen(false)}
                 disabled={loading}
               >
-                Annuler
+                {t("cancelReset")}
               </Button>
               <Button
                 type="submit"
@@ -141,12 +144,12 @@ export default function ResetPasswordAction({
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Réinitialisation…
+                    {t("resetState")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-2">
                     <KeyRound className="h-4 w-4" />
-                    Confirmer la réinitialisation
+                    {t("confirmReset")}
                   </span>
                 )}
               </Button>

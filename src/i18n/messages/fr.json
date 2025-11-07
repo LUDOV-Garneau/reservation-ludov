@@ -349,6 +349,18 @@
         "CancelDelete" : "Annuler la suppression",
         "deletingState" : "Suppression...",
         "confirmDelete" : "Confirmer la suppresion"
+      },
+      "resetPasswordDialog" : {
+        "resetPassword" : "Réinitialiser le mot de passe",
+        "thisActionPreventLogin" : "Cette action empêchera l'utilisateur de se connecter jusqu'à ce qu'il définisse un nouveau mot de passe.",
+        "whatWillHappen" : "Ce qui va se passer :",
+        "thePasswordWillBe" : "Le mot de passe sera",
+        "reset": "réinitialisé",
+        "inTheDatabase" : "dans la base de données.",
+        "emailWillBeSend" : "Un courriel informant l'utilisateur de la réinitialisation de son mot de passe sera envoyé.",
+        "cancelReset" : "Annuler la réinitialisation",
+        "resetState": "Réinitialisation...",
+        "confirmReset" : "Confirmer la réinitialisation"
       }
     },
     "reservations": {

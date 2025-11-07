@@ -349,6 +349,18 @@
         "CancelDelete" : "Cancel",
         "deletingState" : "Deleting…",
         "confirmDelete" : "Confirm Deletion"
+      },
+      "resetPasswordDialog" : {
+        "resetPassword" : "Reset Password",
+        "thisActionPreventLogin" : "This action will prevent the user from logging in until they set a new password.",
+        "whatWillHappen" : "What will happen:",
+        "thePasswordWillBe" : "The password will be",
+        "reset": "reset",
+        "inTheDatabase" : "in the database.",
+        "emailWillBeSend" : "An email informing the user of the password reset will be sent to them.",
+        "cancelReset" : "Cancel",
+        "resetState": "Resetting…",
+        "confirmReset" : "Confirm Reset"
       }
     },
     "reservations": {
