@@ -29,10 +29,12 @@ export default function ConfirmReservation() {
   const {
     reservationId,
     completeReservation,
+    setCurrentStep,
     isLoading: contextLoading,
     selectedConsole,
     selectedDate,
     selectedTime,
+    currentStep,
   } = useReservation();
 
   const router = useRouter();
@@ -353,7 +355,7 @@ export default function ConfirmReservation() {
                 variant="outline"
                 className="w-full h-12"
                 disabled={isProcessing}
-                onClick={() => router.back()}
+                onClick={() => setCurrentStep(currentStep - 1)}
               >
                 {t("reservation.confirm.return")}
               </Button>
