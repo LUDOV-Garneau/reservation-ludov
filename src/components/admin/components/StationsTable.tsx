@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/tooltip";
 import {
   Trash2,
-  KeyRound,
   Computer,
   Calendar,
   XCircle,
@@ -27,6 +26,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
+  Pencil,
 } from "lucide-react";
 import {
   Dialog,
@@ -159,7 +159,7 @@ function StationTableRow({
                     onClick={() => onUpdate(station.id, station.name)}
                     className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
                   >
-                    <KeyRound className="h-4 w-4" />
+                    <Pencil className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -202,7 +202,7 @@ function StationTableRow({
                 <DropdownMenuItem
                   onClick={() => onUpdate(station.id, station.name)}
                 >
-                  <KeyRound className="h-4 w-4 mr-2 text-blue-500" />
+                  <Pencil className="h-4 w-4 mr-2 text-blue-500" />
                   {t("admin.stations.table.ActionToolTips.resetPassword")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
