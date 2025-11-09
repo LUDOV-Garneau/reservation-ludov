@@ -27,6 +27,11 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
+    const offset = (page - 1) * limit;
+
     const conn = await pool.getConnection();
 
     const [stationRows] = await conn.query(
@@ -37,8 +42,10 @@ export async function GET(req: NextRequest) {
         consoles,
         createdAt
       FROM stations
-      ORDER BY createdAt DESC
-    `
+      ORDER BY id ASC
+      LIMIT ? OFFSET ?
+    `,
+      [limit, offset]
     );
 
     const stations = (
@@ -79,12 +86,21 @@ export async function GET(req: NextRequest) {
         };
       })
     );
+
+    const [countRows] = (await conn.query(`
+      SELECT COUNT(*) AS total FROM stations
+    `)) as [Array<{ total: number }>, unknown];
+    const total = countRows[0].total;
+
     conn.release();
     return NextResponse.json(
       {
         success: true,
         message: "Stations récupérées avec succès",
-        data: stationWithNames,
+        data: {
+          stations: stationWithNames,
+          total
+        }
       },
       { status: 200 }
     );
