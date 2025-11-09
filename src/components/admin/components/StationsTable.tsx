@@ -126,6 +126,22 @@ function StationTableRow({
     <TableRow key={station.id} className="hover:bg-gray-200">
       <TableCell className="hidden lg:table-cell">{station.name}</TableCell>
       <TableCell className="hidden lg:table-cell">
+        <div className="flex flex-wrap gap-2">
+          {station.consoles?.length ? (
+            station.consoles.map((console, i) => (
+              <span
+                key={i}
+                className="bg-gray-200 text-sm px-3 py-1 rounded-xl"
+              >
+                {console}
+              </span>
+            ))
+          ) : (
+            <p className="text-gray-500 italic">Aucune plateforme</p>
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(station.createdAt).toLocaleDateString("fr-FR")}</span>
@@ -201,9 +217,6 @@ function StationTableRow({
             </DropdownMenu>
           </div>
         </div>
-        : (
-        <span className="text-xs sm:text-sm text-muted-foreground px-2">-</span>
-        )
       </TableCell>
     </TableRow>
   );
@@ -359,8 +372,8 @@ export default function StationsTable() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
   const [totalActiveStations, setTotalActiveStations] = useState(0);
-  const [totalRecentStations, setTotalRecentStations] = useState(0);
-  const [stationMostReservations, setStationMostReservations] = useState(0);
+  const [recentStationName, setRecentStation] = useState("");
+  const [stationMostReservations, setStationMostReservations] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [metricsLoading, setMetricsLoading] = useState(true);
@@ -391,13 +404,13 @@ export default function StationsTable() {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to fetch user stats");
+        throw new Error("Failed to fetch stations stats");
       }
 
       const data = await res.json();
-      setTotalActiveStations(data.activeStationsCount);
-      setTotalRecentStations(data.recentStation);
-      setStationMostReservations(data.mostUsed);
+      setTotalActiveStations(data.data.totalActiveStations);
+      setRecentStation(data.data.recentStationName);
+      setStationMostReservations(data.mostUsedName);
     } catch (error) {
       console.error("Error fetching stations stats:", error);
     } finally {
@@ -465,12 +478,12 @@ export default function StationsTable() {
         </p>
       </div>
 
-      {/* <CardStationStats
+      <CardStationStats
         loading={metricsLoading}
-        totalActiveStations={totalActiveStations ?? 0}
-        totalRecentStations={totalRecentStations ?? 0}
-        stationMostReservations={stationMostReservations ?? 0}
-      /> */}
+        activeStationsCount={totalActiveStations ?? 0}
+        recentStation={recentStationName ?? "Aucune station"}
+        mostUsed={stationMostReservations ?? "Aucune réservation"}
+      />
 
       <ModernAlert alert={alert} onClose={clearAlert} />
 
@@ -517,7 +530,9 @@ export default function StationsTable() {
                       <StationTableRow
                         key={station.id}
                         station={station}
-                        onDelete={() => console.log("Delete station", station.id)}
+                        onDelete={() =>
+                          console.log("Delete station", station.id)
+                        }
                         onUpdate={() =>
                           console.log("Update station", station.id)
                         }

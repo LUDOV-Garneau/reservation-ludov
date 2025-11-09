@@ -1,23 +1,23 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
-import { User } from "lucide-react";
+import { Computer } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
 
 interface CardUserStatsProps {
-  totalUser?: number;
-  totalUserNotBoarded?: number;
-  totalUserWithReservation?: number;
+  activeStationsCount?: number;
+  recentStation?: string;
+  mostUsed?: string;
   loading?: boolean;
 }
 
-export default function CardUserStats({
-  totalUser,
-  totalUserNotBoarded,
-  totalUserWithReservation,
+export default function CardStationStats({
+  activeStationsCount,
+  recentStation,
+  mostUsed,
   loading = false,
 }: CardUserStatsProps) {
-  const isLoading = loading || totalUser === undefined || totalUserNotBoarded === undefined || totalUserWithReservation === undefined;
+  const isLoading = loading || activeStationsCount === undefined || recentStation === undefined || mostUsed === undefined;
   const t = useTranslations();
 
   const Stat = ({
@@ -26,7 +26,7 @@ export default function CardUserStats({
     accent,
   }: {
     label: string;
-    value?: number;
+    value?: number | string;
     accent: "cyan" | "orange" | "green";
   }) => {
     const colorMap = {
@@ -40,7 +40,7 @@ export default function CardUserStats({
         <CardContent className="flex items-center gap-4">
           <div className={`flex h-16 w-16 items-center justify-center rounded-full ${colorMap.tint}`}>
             <div className={`rounded-full ${colorMap.dot} p-3 shadow-lg`}>
-              <User className="h-6 w-6 text-white" />
+              <Computer className="h-6 w-6 text-white" />
             </div>
           </div>
           <div>
@@ -58,9 +58,9 @@ export default function CardUserStats({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-      <Stat label={t("admin.users.stats.totalUsers")} value={totalUser} accent="cyan" />
-      <Stat label={t("admin.users.stats.userNotBoarded")} value={totalUserNotBoarded} accent="orange" />
-      <Stat label={t("admin.users.stats.userWithReservations")} value={totalUserWithReservation} accent="green" />
+      <Stat label={t("admin.users.stats.totalUsers")} value={activeStationsCount} accent="cyan" />
+      <Stat label={t("admin.users.stats.userNotBoarded")} value={recentStation} accent="orange" />
+      <Stat label={t("admin.users.stats.userWithReservations")} value={mostUsed} accent="green" />
     </div>
   );
 }
