@@ -368,6 +368,7 @@
     },
     "stations": {
       "title": "Stations",
+<<<<<<< HEAD
       "subtitle": "Gérez les stations de la plateforme LUDOV",
       "actionBar": {
         "searchPlaceholder": "Recherche...",
@@ -407,6 +408,35 @@
         "a": "à",
         "sur": "sur",
         "noItem": "Aucun élément"
+=======
+      "addStationForm": {
+        "button": {
+          "openDialog": "Ajouter une station",
+          "loading": "Ajout...",
+          "submit": "Ajouter",
+          "addConsole": "Ajouter une console"
+        },
+        "titles": {
+          "dialogTitle": "Ajouter une station"
+        },
+        "fields": {
+          "name": "Nom",
+          "consoles": "Consoles disponibles",
+          "stationName": "Nom de la station"
+        },
+        "placeholders": {
+          "selectConsole": "Sélectionner une console",
+          "stationName": "Entrez le nom de la station"
+        },
+        "errors": {
+          "missingFields": "Veuillez remplir tous les champs",
+          "invalidConsole": "Console invalide"
+        },
+        "alerts": {
+          "addStationSuccess": "Station ajoutée avec succès",
+          "addStationError": "Erreur lors de l’ajout"
+        }
+>>>>>>> 3b745db (feat: add traduction)
       }
     },
     "availabilities": {
