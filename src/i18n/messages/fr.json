@@ -293,7 +293,35 @@
       "title": "Réservations"
     },
     "stations": {
-      "title": "Stations"
+      "title": "Stations",
+      "addStationForm": {
+        "button": {
+          "openDialog": "Ajouter une station",
+          "loading": "Ajout...",
+          "submit": "Ajouter",
+          "addConsole": "Ajouter une console"
+        },
+        "titles": {
+          "dialogTitle": "Ajouter une station"
+        },
+        "fields": {
+          "name": "Nom",
+          "consoles": "Consoles disponibles",
+          "stationName": "Nom de la station"
+        },
+        "placeholders": {
+          "selectConsole": "Sélectionner une console",
+          "stationName": "Entrez le nom de la station"
+        },
+        "errors": {
+          "missingFields": "Veuillez remplir tous les champs",
+          "invalidConsole": "Console invalide"
+        },
+        "alerts": {
+          "addStationSuccess": "Station ajoutée avec succès",
+          "addStationError": "Erreur lors de l’ajout"
+        }
+      }
     },
     "availabilities": {
       "title": "Disponibilités",
