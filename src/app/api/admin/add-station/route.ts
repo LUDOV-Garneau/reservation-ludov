@@ -2,7 +2,11 @@ import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 
-// IMPORTANT: + Dans l'ajout, avoir une colonne dans la bd pour name ?
+interface StationRequestBody {
+  name: string;
+  consoles: number[];
+}
+
 export async function POST(req: NextRequest) {
   const token = req.cookies.get("SESSION")?.value;
   if (!token) {
@@ -17,23 +21,18 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const body = await req.json();
-    const { name, console } = body;
+    const body: StationRequestBody = await req.json();
+    const { name, consoles } = body;
 
     if (!name || name.trim() === "") {
-      return NextResponse.json(
-        { error: "Le champ nom est requis." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Le champ nom est requis." }, { status: 400 });
     }
 
-    if (!console) {
-      return NextResponse.json(
-        { error: "Le champ console est requis." },
-        { status: 400 }
-      );
+    if (!consoles || !Array.isArray(consoles) || consoles.length === 0) {
+      return NextResponse.json({ error: "Le champ consoles est requis." }, { status: 400 });
     }
 
+    const consolesJson = JSON.stringify(consoles);
     const now = new Date();
 
     const conn = await pool.getConnection();
@@ -43,9 +42,8 @@ export async function POST(req: NextRequest) {
         INSERT INTO stations (name, consoles, lastUpdatedAt, createdAt)
         VALUES (?, ?, ?, ?)
         `,
-        [name, console, now, now]
+        [name, consolesJson, now, now]
       );
-
       conn.release();
 
       return NextResponse.json(
@@ -54,7 +52,7 @@ export async function POST(req: NextRequest) {
       );
     } catch (err) {
       conn.release();
-      console.error("Erreur lors de l'insertion :", err);
+      console.error("Erreur lors de l'insertion SQL :", err);
       return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
     }
   } catch (error) {
