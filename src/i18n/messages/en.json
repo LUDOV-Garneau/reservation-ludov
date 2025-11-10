@@ -315,7 +315,9 @@
         },
         "errors": {
           "missingFields": "Please fill in all fields",
-          "invalidConsole": "Invalid console"
+          "invalidConsole": "Invalid console",
+          "consoleAlreadyAdded": "The console has already been added",
+          "consoleFetch": "Error fetching consoles"
         },
         "alerts": {
           "addStationSuccess": "Station added successfully",
