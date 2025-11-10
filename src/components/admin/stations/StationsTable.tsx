@@ -46,10 +46,10 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import CardStationStats from "./Admin/Stations/CardStats";
+import CardStationStats from "./CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import ActionBar from "./Admin/Stations/ActionBar";
-import PaginationControls from "./Admin/Pagination";
+import ActionBar from "./ActionBar";
+import PaginationControls from "../users/Pagination";
 
 type Station = {
   id: number;

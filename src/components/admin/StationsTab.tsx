@@ -2,7 +2,7 @@
 
 import { TabsContent } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
-import StationsTable from "@/components/admin/components/StationsTable";
+import StationsTable from "@/components/admin/stations/StationsTable";
 
 
 export default function StationsTab() {

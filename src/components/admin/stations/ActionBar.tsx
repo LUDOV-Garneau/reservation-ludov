@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Plus, Search, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import AddStationForm from "@/components/admin/components/AddStationForm";
+import AddStationForm from "@/components/admin/stations/AddStationForm";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
