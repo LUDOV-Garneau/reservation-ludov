@@ -430,7 +430,9 @@
         },
         "errors": {
           "missingFields": "Veuillez remplir tous les champs",
-          "invalidConsole": "Console invalide"
+          "invalidConsole": "Console invalide",
+          "consoleAlreadyAdded": "La console a déjà été ajoutée",
+          "consoleFetch": "Erreur lors de la récupération des consoles"
         },
         "alerts": {
           "addStationSuccess": "Station ajoutée avec succès",
