@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
 
     const inactiveStationsCount =
       (inactiveStationsRows as RowDataPacket[]).length > 0
-        ? (inactiveStationsRows as RowDataPacket[])[0].name
+        ? (inactiveStationsRows as RowDataPacket[])[0].inactiveCount
         : null;
 
     // Fetch station avec le plus de reservation
