@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
       SELECT 
         id,
         name,
+        isActive,
         consoles,
         createdAt
       FROM stations
@@ -52,6 +53,7 @@ export async function GET(req: NextRequest) {
       stationRows as {
         id: number;
         name: string;
+        isActive: boolean;
         consoles: unknown;
         createdAt: string;
       }[]

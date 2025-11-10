@@ -55,6 +55,7 @@ type Station = {
   id: number;
   name: string;
   consoles: string[];
+  isActive: boolean;
   createdAt: string;
 };
 
@@ -140,6 +141,13 @@ function StationTableRow({
             <p className="text-gray-500 italic">{t("admin.stations.table.noPlatforms")}</p>
           )}
         </div>
+      </TableCell>
+      <TableCell className="hidden lg:table-cell">
+        {station.isActive ? (
+          <span className="text-green-600 font-medium">{t("admin.stations.table.active")}</span>
+        ) : (
+          <span className="text-red-600 font-medium">{t("admin.stations.table.inactive")}</span>
+        )}
       </TableCell>
       <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -515,6 +523,9 @@ export default function StationsTable() {
                       </TableHead>
                       <TableHead>
                         {t("admin.stations.table.header.platforms")}
+                      </TableHead>
+                      <TableHead>
+                        {t("admin.stations.table.header.isActive")}
                       </TableHead>
                       <TableHead className="hidden lg:table-cell">
                         {t("admin.stations.table.header.createdAt")}

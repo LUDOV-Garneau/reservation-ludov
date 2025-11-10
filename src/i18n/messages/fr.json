@@ -358,6 +358,7 @@
         "header": {
           "name": "Nom",
           "platforms": "Plateforme(s)",
+          "isActive": "Statut",
           "createdAt": "Date de création",
           "actions": "Actions"
         },
@@ -365,7 +366,9 @@
           "updateStation": "Modifier la station",
           "deleteStation": "Supprimer la station"
         },
-        "noPlatforms": "Aucune plateforme assignée"
+        "noPlatforms": "Aucune plateforme assignée",
+        "active": "Active",
+        "inactive": "Inactive"
       },
       "stats": {
         "activeStations": "Nombre de stations actives",
