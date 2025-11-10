@@ -290,36 +290,36 @@
     "users": {
       "title": "Users",
       "subtitle": "Manage users on the LUDOV platform",
-      "actionBar" : {
-        "searchPlaceholder" : "Search...",
-        "addUser" : "Add",
+      "actionBar": {
+        "searchPlaceholder": "Search...",
+        "addUser": "Add",
         "toolTipRefresh": "Refresh",
-        "dropDownMenuAddUser" : {
-          "importCSV" : "Import CSV file",
-          "importCSVDescription" : "Import multiple users from a CSV file",
-          "importCSVInput" : "Choose a CSV file",
-          "importCSVSuccess" : "CSV import successful",
-          "addSingleUser" : "Add a user",
-          "addSingleUserDescription" : "Manually create a user account",
-          "addSingleUserSuccess" : "User added successfully"
+        "dropDownMenuAddUser": {
+          "importCSV": "Import CSV file",
+          "importCSVDescription": "Import multiple users from a CSV file",
+          "importCSVInput": "Choose a CSV file",
+          "importCSVSuccess": "CSV import successful",
+          "addSingleUser": "Add a user",
+          "addSingleUserDescription": "Manually create a user account",
+          "addSingleUserSuccess": "User added successfully"
         }
       },
-      "searchResult" : {
-        "noUsersFound" : "No user(s) found",
-        "noMatch" : "No user matches your search.",
-        "startByAdding" : "Start by adding your first user."
+      "searchResult": {
+        "noUsersFound": "No user(s) found",
+        "noMatch": "No user matches your search.",
+        "startByAdding": "Start by adding your first user."
       },
-      "table" : {
-        "header" : {
-          "email" : "Email",
-          "name" : "Name",
-          "role" : "Role",
-          "createdAt" : "Creation Date",
-          "actions" : "Actions"
+      "table": {
+        "header": {
+          "email": "Email",
+          "name": "Name",
+          "role": "Role",
+          "createdAt": "Creation Date",
+          "actions": "Actions"
         },
-        "ActionToolTips" : {
-          "resetPassword" : "Reset Password",
-          "deleteUser" : "Delete User"
+        "ActionToolTips": {
+          "resetPassword": "Reset Password",
+          "deleteUser": "Delete User"
         }
       },
       "stats": {
@@ -327,15 +327,15 @@
         "userNotBoarded": "User(s) not configured",
         "userWithReservations": "User(s) with reservation"
       },
-      "badge" : {
+      "badge": {
         "admin": "Administrator",
         "user": "User"
       },
-      "pagination" : {
-        "affichageDe" : "Displaying",
-        "a" : "to",
-        "sur" : "on",
-        "noItem" : "No item"
+      "pagination": {
+        "affichageDe": "Displaying",
+        "a": "to",
+        "sur": "on",
+        "noItem": "No item"
       }
     },
     "reservations": {
@@ -344,28 +344,28 @@
     "stations": {
       "title": "Stations",
       "subtitle": "Manage stations on the LUDOV platform",
-      "actionBar" : {
-        "searchPlaceholder" : "Search...",
-        "addStation" : "Add station",
+      "actionBar": {
+        "searchPlaceholder": "Search...",
+        "addStation": "Add",
         "toolTipRefresh": "Refresh"
       },
-      "searchResult" : {
-        "noStationsFound" : "No station(s) found",
-        "noMatch" : "No station matches your search.",
-        "startByAdding" : "Start by adding your first station."
+      "searchResult": {
+        "noStationsFound": "No station(s) found",
+        "noMatch": "No station matches your search.",
+        "startByAdding": "Start by adding your first station."
       },
-      "table" : {
-        "header" : {
-          "name" : "Name",
-          "platforms" : "Platform(s)",
-          "createdAt" : "Creation Date",
-          "actions" : "Actions"
+      "table": {
+        "header": {
+          "name": "Name",
+          "platforms": "Platform(s)",
+          "createdAt": "Creation Date",
+          "actions": "Actions"
         },
-        "ActionToolTips" : {
-          "updateStation" : "Edit station",
-          "deleteStation" : "Delete station"
+        "ActionToolTips": {
+          "updateStation": "Edit station",
+          "deleteStation": "Delete station"
         },
-          "noPlatforms" : "No platform assigned"
+        "noPlatforms": "No platform assigned"
       },
       "stats": {
         "activeStations": "Number of stations",
@@ -374,11 +374,11 @@
         "noStations": "No stations created",
         "noReservations": "No reservations made"
       },
-      "pagination" : {
-        "affichageDe" : "Displaying",
-        "a" : "to",
-        "sur" : "on",
-        "noItem" : "No item"
+      "pagination": {
+        "affichageDe": "Displaying",
+        "a": "to",
+        "sur": "on",
+        "noItem": "No item"
       }
     },
     "availabilities": {
