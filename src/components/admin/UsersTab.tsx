@@ -1,6 +1,6 @@
 "use client";
 
-import UsersTable from "@/components/admin/components/UsersTable";
+import UsersTable from "@/components/admin/users/UsersTable";
 import { TabsContent } from "@/components/ui/tabs";
 
 export default function UsersTab() {

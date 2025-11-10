@@ -35,7 +35,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
     formData.append("file", fileToUpload);
 
     try {
-      const res = await fetch("/api/admin/add-users", {
+      const res = await fetch("/api/admin/users/add-users", {
         method: "POST",
         body: formData,
       });
