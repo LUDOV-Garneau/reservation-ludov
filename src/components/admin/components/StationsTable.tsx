@@ -137,7 +137,7 @@ function StationTableRow({
               </span>
             ))
           ) : (
-            <p className="text-gray-500 italic">Aucune plateforme</p>
+            <p className="text-gray-500 italic">{t("admin.stations.table.noPlatforms")}</p>
           )}
         </div>
       </TableCell>
@@ -203,7 +203,7 @@ function StationTableRow({
                   onClick={() => onUpdate(station.id, station.name)}
                 >
                   <Pencil className="h-4 w-4 mr-2 text-blue-500" />
-                  {t("admin.stations.table.ActionToolTips.resetPassword")}
+                  {t("admin.stations.table.ActionToolTips.updateStation")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
@@ -211,7 +211,7 @@ function StationTableRow({
                   className="text-red-600 focus:text-red-600 focus:bg-red-50"
                 >
                   <Trash2 className="h-4 w-4 mr-2 text-red-600" />
-                  {t("admin.stations.table.ActionToolTips.deletestation")}
+                  {t("admin.stations.table.ActionToolTips.deleteStation")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -471,18 +471,18 @@ export default function StationsTable() {
     <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
       <div className="flex flex-col gap-1 sm:gap-2">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {t("admin.users.title")}
+          {t("admin.stations.title")}
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base">
-          {t("admin.users.subtitle")}
+          {t("admin.stations.subtitle")}
         </p>
       </div>
 
       <CardStationStats
         loading={metricsLoading}
         activeStationsCount={totalActiveStations ?? 0}
-        recentStation={recentStationName ?? "Aucune station"}
-        mostUsed={stationMostReservations ?? "Aucune réservation"}
+        recentStation={recentStationName ?? t("admin.stations.stats.noStations")}
+        mostUsed={stationMostReservations ?? t("admin.stations.stats.noReservations")}
       />
 
       <ModernAlert alert={alert} onClose={clearAlert} />
@@ -517,10 +517,10 @@ export default function StationsTable() {
                         {t("admin.stations.table.header.platforms")}
                       </TableHead>
                       <TableHead className="hidden lg:table-cell">
-                        {t("admin.users.table.header.createdAt")}
+                        {t("admin.stations.table.header.createdAt")}
                       </TableHead>
                       <TableHead>
-                        {t("admin.users.table.header.actions")}
+                        {t("admin.stations.table.header.actions")}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -560,12 +560,12 @@ export default function StationsTable() {
                 <Computer className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
               </div>
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-                {t("admin.users.searchResult.noUsersFound")}
+                {t("admin.stations.searchResult.noStationsFound")}
               </h3>
               <p className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6 mx-auto">
                 {searchQuery
-                  ? t("admin.users.searchResult.noMatch")
-                  : t("admin.users.searchResult.startByAdding")}
+                  ? t("admin.stations.searchResult.noMatch")
+                  : t("admin.stations.searchResult.startByAdding")}
               </p>
             </div>
           )}

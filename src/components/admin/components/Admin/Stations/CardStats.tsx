@@ -58,9 +58,9 @@ export default function CardStationStats({
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-      <Stat label={t("admin.users.stats.totalUsers")} value={activeStationsCount} accent="cyan" />
-      <Stat label={t("admin.users.stats.userNotBoarded")} value={recentStation} accent="orange" />
-      <Stat label={t("admin.users.stats.userWithReservations")} value={mostUsed} accent="green" />
+      <Stat label={t("admin.stations.stats.activeStations")} value={activeStationsCount} accent="cyan" />
+      <Stat label={t("admin.stations.stats.recentStation")} value={recentStation} accent="orange" />
+      <Stat label={t("admin.stations.stats.mostUsedStation")} value={mostUsed} accent="green" />
     </div>
   );
 }

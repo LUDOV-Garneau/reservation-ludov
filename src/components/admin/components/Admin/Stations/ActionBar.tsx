@@ -9,15 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Plus, Search, RefreshCw } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import AddStationForm from "@/components/admin/components/AddStationForm";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
@@ -52,7 +44,7 @@ export default function CardStationStats({
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder={t("admin.users.actionBar.searchPlaceholder")}
+          placeholder={t("admin.stations.actionBar.searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-10 border-gray-300 focus:border-cyan-500 focus:ring-cyan-500 w-full"
@@ -78,7 +70,7 @@ export default function CardStationStats({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{t("admin.users.actionBar.toolTipRefresh")}</p>
+              <p>{t("admin.stations.actionBar.toolTipRefresh")}</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -88,7 +80,7 @@ export default function CardStationStats({
             onAlert(
               "success",
               t(
-                "admin.users.actionBar.dropDownMenuAddUser.addSingleUserSuccess"
+                "admin.station.actionBar.addStationSuccess"
               )
             );
             onSuccess();

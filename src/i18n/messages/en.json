@@ -342,7 +342,44 @@
       "title": "Reservations"
     },
     "stations": {
-      "title": "Stations"
+      "title": "Stations",
+      "subtitle": "Manage stations on the LUDOV platform",
+      "actionBar" : {
+        "searchPlaceholder" : "Search...",
+        "addStation" : "Add station",
+        "toolTipRefresh": "Refresh"
+      },
+      "searchResult" : {
+        "noStationsFound" : "No station(s) found",
+        "noMatch" : "No station matches your search.",
+        "startByAdding" : "Start by adding your first station."
+      },
+      "table" : {
+        "header" : {
+          "name" : "Name",
+          "platforms" : "Platform(s)",
+          "createdAt" : "Creation Date",
+          "actions" : "Actions"
+        },
+        "ActionToolTips" : {
+          "updateStation" : "Edit station",
+          "deleteStation" : "Delete station"
+        },
+          "noPlatforms" : "No platform assigned"
+      },
+      "stats": {
+        "activeStations": "Number of stations",
+        "recentStation": "Recently added station",
+        "mostUsedStation": "Most reserved station",
+        "noStations": "No stations created",
+        "noReservations": "No reservations made"
+      },
+      "pagination" : {
+        "affichageDe" : "Displaying",
+        "a" : "to",
+        "sur" : "on",
+        "noItem" : "No item"
+      }
     },
     "availabilities": {
       "title": "Availabilities",
