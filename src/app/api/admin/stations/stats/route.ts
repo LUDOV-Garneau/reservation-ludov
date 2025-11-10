@@ -32,23 +32,25 @@ export async function GET(req: NextRequest) {
       `
         SELECT COUNT(*) AS activeCount
         FROM stations
+        WHERE isActive = 1
       `
     );
-    const activeStationsCount = (activeStationsRows as RowDataPacket[])[0]
-      .activeCount;
+    const activeStationsCount = (activeStationsRows as RowDataPacket[]).length > 0
+      ? (activeStationsRows as RowDataPacket[])[0].activeCount
+      : null;
 
     // Fetch station créée récemment
-    const [recentStationRows] = await conn.query(
+    const [inactiveStationsRows] = await conn.query(
       `
-        SELECT name
+        SELECT COUNT(*) AS inactiveCount
         FROM stations
-        ORDER BY createdAt DESC
-        LIMIT 1
+        WHERE isActive = 0
       `
     );
-    const recentStationName =
-      (recentStationRows as RowDataPacket[]).length > 0
-        ? (recentStationRows as RowDataPacket[])[0].name
+
+    const inactiveStationsCount =
+      (inactiveStationsRows as RowDataPacket[]).length > 0
+        ? (inactiveStationsRows as RowDataPacket[])[0].name
         : null;
 
     // Fetch station avec le plus de reservation
@@ -75,7 +77,7 @@ export async function GET(req: NextRequest) {
         success: true,
         data: {
           totalActiveStations: activeStationsCount,
-          recentStationName: recentStationName,
+          totalInactiveStations: inactiveStationsCount,
           mostUsedStationName: mostUsedName,
         },
       },

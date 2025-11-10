@@ -368,8 +368,8 @@
         "noPlatforms": "No platform assigned"
       },
       "stats": {
-        "activeStations": "Number of stations",
-        "recentStation": "Recently added station",
+        "activeStations": "Number of active stations",
+        "inactiveStations": "Number of inactive stations",
         "mostUsedStation": "Most reserved station",
         "noStations": "No stations created",
         "noReservations": "No reservations made"

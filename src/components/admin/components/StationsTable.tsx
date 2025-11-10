@@ -372,7 +372,7 @@ export default function StationsTable() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
   const [totalActiveStations, setTotalActiveStations] = useState(0);
-  const [recentStationName, setRecentStation] = useState("");
+  const [totalInactiveStations, setTotalInactiveStations] = useState(0);
   const [stationMostReservations, setStationMostReservations] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -409,7 +409,7 @@ export default function StationsTable() {
 
       const data = await res.json();
       setTotalActiveStations(data.data.totalActiveStations);
-      setRecentStation(data.data.recentStationName);
+      setTotalInactiveStations(data.data.totalInactiveStations);
       setStationMostReservations(data.mostUsedName);
     } catch (error) {
       console.error("Error fetching stations stats:", error);
@@ -481,7 +481,7 @@ export default function StationsTable() {
       <CardStationStats
         loading={metricsLoading}
         activeStationsCount={totalActiveStations ?? 0}
-        recentStation={recentStationName ?? t("admin.stations.stats.noStations")}
+        inactiveStationsCount={totalInactiveStations ?? 0}
         mostUsed={stationMostReservations ?? t("admin.stations.stats.noReservations")}
       />
 
