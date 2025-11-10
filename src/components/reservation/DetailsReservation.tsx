@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Calendar,
@@ -10,7 +10,6 @@ import {
   AlertCircle,
   CheckCircle2,
   Cable,
-  Mail,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

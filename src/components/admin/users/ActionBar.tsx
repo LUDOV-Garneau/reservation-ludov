@@ -7,8 +7,8 @@ import { Plus, Search, RefreshCw } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import AddUserForm from "@/components/admin/components/AddUserForm";
-import UsersForm from "@/components/admin/components/UsersForm";
+import AddUserForm from "@/components/admin/users/AddUserForm";
+import UsersForm from "@/components/admin/users/UsersForm";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
