@@ -49,7 +49,9 @@ export default function DateSelection() {
       setError(null);
 
       try {
-        const response = await fetch("/api/reservation/calendar-dates");
+        const response = await fetch("/api/reservation/calendar-dates", {
+          credentials: "include",
+        });
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -92,7 +94,10 @@ export default function DateSelection() {
           selectedConsoleId
         )}&gameIds=${encodeURIComponent(
           selectedGames.join(",")
-        )}&accessoryIds=${encodeURIComponent(selectedAccessories.join(","))}`
+        )}&accessoryIds=${encodeURIComponent(selectedAccessories.join(","))}`,
+        {
+          credentials: "include",
+        }
       );
 
       if (!response.ok) {

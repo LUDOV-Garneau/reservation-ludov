@@ -30,7 +30,7 @@ export function DatePicker({
     if (unavailableDates.before && unavailableDates.before > new Date()) {
       blocks.push({ before: unavailableDates.before });
     } else {
-      blocks.push({ before: new Date(Date.now() + 60 * 60 * 24 * 1000) });
+      blocks.push({ before: new Date(Date.now() + 60 * 60 * 48 * 1000) });
     }
 
     if (unavailableDates.after) {

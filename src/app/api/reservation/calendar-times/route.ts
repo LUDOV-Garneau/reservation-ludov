@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
+import { verifyToken } from "@/lib/jwt";
 
 interface ReservationRow extends RowDataPacket {
   time: string;
@@ -36,13 +37,9 @@ function toMinutes(h: string, m: string) {
   return parseInt(h) * 60 + parseInt(m);
 }
 
-function fromMinutes(minutes: number) {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return {
-    hour: h.toString().padStart(2, "0"),
-    minute: m.toString().padStart(2, "0"),
-  };
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
 }
 
 function subtractRange(base: Range[], toRemove: Range): Range[] {
@@ -108,13 +105,6 @@ function computeValidRanges(
   validRanges = mergeRanges(validRanges);
 
   return validRanges;
-}
-
-function formatRanges(ranges: Range[]) {
-  return ranges.map((r) => ({
-    start: fromMinutes(r.start),
-    end: fromMinutes(r.end),
-  }));
 }
 
 function generateAllTimeSlots(): string[] {
@@ -219,6 +209,16 @@ function isSlotInFuture(time: string, currentHour: number): boolean {
 
 export async function GET(request: NextRequest) {
   try {
+    const token = request.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date");
     const consoleId = searchParams.get("consoleId");
@@ -307,18 +307,10 @@ export async function GET(request: NextRequest) {
       [dayName, date, date]
     );
 
-    console.log("specificHours: ", specificHours);
-    console.log("weeklyHours: ", weeklyHours);
-
     const validRanges = computeValidRanges(weeklyHours, specificHours);
 
     const SESSION_DURATION_HOURS = 2;
     const SESSION_DURATION_MINUTES = SESSION_DURATION_HOURS * 60;
-
-    function timeToMinutes(t: string): number {
-      const [h, m] = t.split(":").map(Number);
-      return h * 60 + m;
-    }
 
     const reservationRanges = reservations.map((r) => {
       const start = timeToMinutes(r.time);
