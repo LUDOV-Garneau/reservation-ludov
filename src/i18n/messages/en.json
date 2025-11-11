@@ -435,6 +435,34 @@
         "a": "to",
         "sur": "on",
         "noItem": "No item"
+      },
+      "updateStationForm": {
+        "button": {
+          "openDialog": "Modify",
+          "saveChanges": "Save",
+          "loading": "Loading...",
+          "addConsole": "Add consoles",
+          "submit": "Modify"
+        },
+        "titles": {
+          "dialogTitle": "Modify Station"
+        },
+        "fields": {
+          "stationName": "Station Name",
+          "consoles": "Consoles",
+          "isActive": "Active"
+        },
+        "select": {
+          "placeholder": "Select consoles"
+        },
+        "errors": {
+          "missingFields": "Please fill in all required fields.",
+          "consoleFetch": "Error fetching consoles."
+        },
+        "alerts": {
+          "updateSuccess": "Station updated successfully!",
+          "updateError": "Error updating station."
+        }
       }
     },
     "availabilities": {

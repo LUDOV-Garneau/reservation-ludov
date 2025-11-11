@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest) {
   const token = req.cookies.get("SESSION")?.value;
   if (!token) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { name, stationId, consoles } = body;
+    const { name, stationId, consoles, isActive } = body;
 
     if (!name || name.trim() === "") {
       return NextResponse.json(
@@ -37,6 +37,13 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(consoles) || consoles.length === 0) {
       return NextResponse.json(
         { error: "Aucune plateforme fournie pour la station." },
+        { status: 400 }
+      );
+    }
+
+    if (typeof isActive !== "boolean" || isActive === null) {
+      return NextResponse.json(
+        { error: "Le statut actif de la station est requis." },
         { status: 400 }
       );
     }
@@ -61,10 +68,10 @@ export async function POST(req: NextRequest) {
     try {
       await conn.query(
         `
-        UPDATE stations SET name = ?, consoles = ?, updateAt = ?
+        UPDATE stations SET name = ?, consoles = ?, isActive = ?, updateAt = ?
         WHERE id = ?
         `,
-        [name, JSON.stringify(consoles), now, stationId]
+        [name, JSON.stringify(consoles), isActive, now, stationId]
       );
       conn.release();
 
