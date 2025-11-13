@@ -9,16 +9,32 @@ type Body = {
   game1Id?: number | null;
   game2Id?: number | null;
   game3Id?: number | null;
-  newConsoleId?: number;
+  newConsoleId?: number;      // << attendu: console_type_id (comme dans ton code existant)
   accessories?: number[] | null;
   coursId?: number | null;
-  date?: string | null;
-  time?: string | null;
+  date?: string | null;       // YYYY-MM-DD
+  time?: string | null;       // HH:MM[:SS]
 };
 
-export async function POST(req: Request) {
+interface HoldRow extends RowDataPacket {
+  id: string;
+  user_id: number;
+  console_id: number;
+  console_type_id: number;
+  game1_id: number | null;
+  game2_id: number | null;
+  game3_id: number | null;
+  accessoirs: string | null;
+  cours: number | null;
+  date: string | null;
+  time: string | null;
+  expireAt: string;
+  expiresIn: number; // TIMESTAMPDIFF(SECOND, NOW(), expireAt)
+}
 
+export async function POST(req: Request) {
   try {
+    // --- Auth ---
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;
@@ -26,23 +42,20 @@ export async function POST(req: Request) {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
     } catch {
-      // token invalide/expiré
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
-
-    if (!user?.id) {
+    if (!user?.id || !Number.isFinite(Number(user.id))) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
     const userId = Number(user.id);
-    if (!Number.isFinite(userId)) {
-      return NextResponse.json(
-        { success: false, message: "Invalid user ID" },
-        { status: 400 }
-      );
-    }
 
+    // --- Body ---
     let body: Partial<Body> = {};
     try {
       body = await req.json();
@@ -52,16 +65,8 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    const reservationId = String(body.reservationId);
-    const game1Id = body.game1Id !== undefined ? (body.game1Id !== null ? Number(body.game1Id) : null) : undefined;
-    const game2Id = body.game2Id !== undefined ? (body.game2Id !== null ? Number(body.game2Id) : null) : undefined;
-    const game3Id = body.game3Id !== undefined ? (body.game3Id !== null ? Number(body.game3Id) : null) : undefined;
-    const newConsoleId = body.newConsoleId !== undefined ? Number(body.newConsoleId) : undefined;
-    const accessories = body.accessories; 
-    const coursId = body.coursId;
-    const date = body.date;
-    const time = body.time;
 
+    const reservationId = String(body.reservationId || "");
     if (!reservationId) {
       return NextResponse.json(
         { success: false, message: "reservationId manquant" },
@@ -69,135 +74,115 @@ export async function POST(req: Request) {
       );
     }
 
+    const game1Id = body.game1Id === undefined ? undefined : (body.game1Id === null ? null : Number(body.game1Id));
+    const game2Id = body.game2Id === undefined ? undefined : (body.game2Id === null ? null : Number(body.game2Id));
+    const game3Id = body.game3Id === undefined ? undefined : (body.game3Id === null ? null : Number(body.game3Id));
+    const newConsoleTypeId = body.newConsoleId === undefined ? undefined : Number(body.newConsoleId);
+    const accessories = body.accessories; // peut être undefined | null | number[]
+    const coursId = body.coursId === undefined ? undefined : (body.coursId === null ? null : Number(body.coursId));
+    const date = body.date === undefined ? undefined : (body.date ?? null);
+    const time = body.time === undefined ? undefined : (body.time ?? null);
+
     const conn = await pool.getConnection();
     try {
       await conn.beginTransaction();
 
-      // Vérifier la réservation et récupérer l'état actuel
-      const [rows] = await conn.query<RowDataPacket[]>(
-        `SELECT 
-          console_id, 
-          game1_id, 
-          game2_id, 
-          game3_id,
-          date,
-          time,
-          expireAt
-        FROM reservation_hold 
-        WHERE id = ? 
-        FOR UPDATE`,
-        [reservationId]
+      // 🔒 On verrouille ET on laisse MySQL décider si c'est expiré
+      const [rows] = await conn.query<HoldRow[]>(
+        `
+        SELECT 
+          r.*,
+          GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), r.expireAt)) AS expiresIn
+        FROM reservation_hold r
+        WHERE r.id = ?
+          AND r.user_id = ?
+          AND r.expireAt > NOW()        -- <= clé: si expiré, pas de ligne retournée
+        FOR UPDATE
+        `,
+        [reservationId, userId]
       );
 
       if (!rows || rows.length === 0) {
         await conn.rollback();
         return NextResponse.json(
-          { success: false, message: "Réservation introuvable" },
-          { status: 404 }
-        );
-      }
-
-      const reservation = rows[0];
-
-      // Vérifier si la réservation n'a pas expiré
-      if (new Date(reservation.expireAt) < new Date()) {
-        await conn.rollback();
-        return NextResponse.json(
-          { success: false, message: "Réservation expirée" },
+          { success: false, message: "Réservation expirée", status: "expired" },
           { status: 410 }
         );
       }
 
+      const reservation = rows[0];
       const currentConsoleId = reservation.console_id;
 
-      // --- Construction dynamique des updates ---
       const updates: string[] = [];
       const values: unknown[] = [];
 
-      //Check la disponibilité des jeux
-      const gameIdsToCheck = [
-        { id: game1Id, field: "game1_id" as const },
-        { id: game2Id, field: "game2_id" as const },
-        { id: game3Id, field: "game3_id" as const },
+      // --- Jeux: on gère hold/unhold avec granularité ---
+      const gameFields = [
+        { incoming: game1Id, field: "game1_id" as const },
+        { incoming: game2Id, field: "game2_id" as const },
+        { incoming: game3Id, field: "game3_id" as const },
       ];
 
-      for (const game of gameIdsToCheck) {
-        const currentGameId = reservation[game.field];
-        
-        if (game.id !== undefined && game.id !== null) {
-          
-          if (currentGameId === game.id) {
-            continue;
-          }
-          
-          const [gameCheck] = await conn.query<RowDataPacket[]>(
-            `SELECT id 
-            FROM games 
-            WHERE id = ? 
-            AND holding = 0
-            FOR UPDATE`,
-            [game.id]
-          );
+      for (const g of gameFields) {
+        const current = reservation[g.field];
 
-          if (!gameCheck || gameCheck.length === 0) {
-            await conn.rollback();
-            return NextResponse.json(
-              { success: false, message: `Jeu ${game.id} indisponible` },
-              { status: 400 }
+        if (g.incoming !== undefined && g.incoming !== null) {
+          if (current === g.incoming) {
+            // rien à faire pour ce slot
+          } else {
+            // vérifier que le jeu demandé est libre
+            const [chk] = await conn.query<RowDataPacket[]>(
+              `SELECT id FROM games WHERE id = ? AND holding = 0 FOR UPDATE`,
+              [g.incoming]
             );
+            if (!chk || chk.length === 0) {
+              await conn.rollback();
+              return NextResponse.json(
+                { success: false, message: `Jeu ${g.incoming} indisponible` },
+                { status: 400 }
+              );
+            }
+            // hold le nouveau
+            await conn.query(`UPDATE games SET holding = 1 WHERE id = ?`, [g.incoming]);
+            // un-hold l'ancien si existait
+            if (current !== null) {
+              await conn.query(`UPDATE games SET holding = 0 WHERE id = ?`, [current]);
+            }
+            updates.push(`${g.field} = ?`);
+            values.push(g.incoming);
           }
-
-          await conn.query(
-            `UPDATE games SET holding = 1 WHERE id = ?`,
-            [game.id]
-          );
-
-          if (currentGameId !== null) {
-            await conn.query(
-              `UPDATE games SET holding = 0 WHERE id = ?`,
-              [currentGameId]
-            );
+        } else if (g.incoming === null) {
+          // demande d'effacer ce slot => un-hold si nécessaire
+          if (current !== null) {
+            await conn.query(`UPDATE games SET holding = 0 WHERE id = ?`, [current]);
           }
-        } 
-        else if (game.id === null) {
-          if (currentGameId !== null) {
-            await conn.query(
-              `UPDATE games SET holding = 0 WHERE id = ?`,
-              [currentGameId]
-            );
-          }
+          updates.push(`${g.field} = NULL`);
         }
       }
 
-      if (game1Id !== undefined) {
-        updates.push("game1_id = ?");
-        values.push(game1Id);
-      }
-      if (game2Id !== undefined) {
-        updates.push("game2_id = ?");
-        values.push(game2Id);
-      }
-      if (game3Id !== undefined) {
-        updates.push("game3_id = ?");
-        values.push(game3Id);
-      }
-
-      if (accessories !== undefined) { 
-        if (accessories === null || accessories.length === 0) {
+      // --- Accessoires JSON ---
+      if (accessories !== undefined) {
+        if (accessories === null || (Array.isArray(accessories) && accessories.length === 0)) {
           updates.push("accessoirs = NULL");
         } else if (Array.isArray(accessories)) {
           updates.push("accessoirs = CAST(? AS JSON)");
           values.push(JSON.stringify(accessories));
+        } else {
+          await conn.rollback();
+          return NextResponse.json(
+            { success: false, message: "accessories doit être un tableau ou null" },
+            { status: 400 }
+          );
         }
       }
 
-      // Cours
+      // --- Cours ---
       if (coursId !== undefined) {
         updates.push("cours = ?");
-        values.push(coursId || null);
+        values.push(coursId);
       }
 
-      // Date et heure
+      // --- Date/Heure ---
       if (date !== undefined) {
         updates.push("date = ?");
         values.push(date);
@@ -207,30 +192,23 @@ export async function POST(req: Request) {
         values.push(time);
       }
 
-      // --- Changement de console ---
+      // --- Changement de type de console (newConsoleId = console_type_id) ---
       let finalConsoleId = currentConsoleId;
-
-      if (newConsoleId && newConsoleId !== currentConsoleId) {
-        // Vérifier disponibilité de la nouvelle console
-
+      if (newConsoleTypeId !== undefined && newConsoleTypeId !== reservation.console_type_id) {
+        // Trouver une unité libre pour ce type
         const [unitsNewConsole] = await conn.query<RowDataPacket[]>(
-        `
-        SELECT cs.id AS consoleStockId
-        FROM console_stock cs
-        WHERE cs.console_type_id = ?
-          AND cs.is_active = 1
-          AND cs.holding = 0
-        LIMIT 1
-        `,
-          [newConsoleId]
+          `
+          SELECT cs.id AS consoleStockId, cs.console_type_id AS consoleTypeId, cs.holding
+          FROM console_stock cs
+          WHERE cs.console_type_id = ?
+            AND cs.is_active = 1
+            AND cs.holding = 0
+          LIMIT 1
+          `,
+          [newConsoleTypeId]
         );
 
-        const [checkNew] = await conn.query<RowDataPacket[]>(
-          `SELECT holding FROM console_stock WHERE id = ? FOR UPDATE`,
-          [unitsNewConsole[0].consoleStockId]
-        );
-
-        if (!checkNew || checkNew.length === 0 || checkNew[0].holding === 1) {
+        if (!unitsNewConsole || unitsNewConsole.length === 0) {
           await conn.rollback();
           return NextResponse.json(
             { success: false, message: "Nouvelle console indisponible" },
@@ -238,37 +216,47 @@ export async function POST(req: Request) {
           );
         }
 
-        // Libérer l'ancienne console
-        await conn.query(
-          `UPDATE console_stock SET holding = 0 WHERE id = ?`,
-          [currentConsoleId]
-        );
+        const stockId = Number(unitsNewConsole[0].consoleStockId);
 
-        // Réserver la nouvelle console
-        await conn.query(
-          `UPDATE console_stock SET holding = 1 WHERE id = ?`,
-          [unitsNewConsole[0].consoleStockId]
-        );
+        // Libérer l’ancienne
+        await conn.query(`UPDATE console_stock SET holding = 0 WHERE id = ?`, [currentConsoleId]);
+        // Occuper la nouvelle
+        await conn.query(`UPDATE console_stock SET holding = 1 WHERE id = ?`, [stockId]);
 
         updates.push("console_id = ?");
-        values.push(unitsNewConsole[0].consoleStockId);
-        finalConsoleId = unitsNewConsole[0].consoleStockId;
+        values.push(stockId);
+        updates.push("console_type_id = ?");
+        values.push(newConsoleTypeId);
+
+        finalConsoleId = stockId;
+
+        // Réinitialiser la sélection quand on change de type
+        updates.push("game1_id = NULL", "game2_id = NULL", "game3_id = NULL");
+        updates.push("accessoirs = NULL");
+        updates.push("cours = NULL");
+        updates.push("date = NULL", "time = NULL");
       }
 
-      // --- Mise à jour en DB seulement si nécessaire ---
+      // --- Appliquer l’UPDATE si nécessaire
       if (updates.length > 0) {
-        const sql = `UPDATE reservation_hold SET ${updates.join(", ")} WHERE id = ?`;
-        values.push(reservationId);
+        const sql = `UPDATE reservation_hold SET ${updates.join(", ")} WHERE id = ? AND user_id = ?`;
+        values.push(reservationId, userId);
         await conn.query(sql, values);
       }
 
+      // (Optionnel) rafraîchir le TTL côté DB si tu veux “prolonger” le hold à chaque interaction
+      // await conn.query(`UPDATE reservation_hold SET expireAt = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE id = ?`, [reservationId]);
+
       await conn.commit();
 
-      // Récupérer les données mises à jour pour la réponse
-      const [updatedRows] = await conn.query<RowDataPacket[]>(
-        `SELECT 
+      // Relecture (sans FOR UPDATE) pour répondre
+      const [updatedRows] = await conn.query<HoldRow[]>(
+        `
+        SELECT 
           id,
+          user_id,
           console_id,
+          console_type_id,
           game1_id,
           game2_id,
           game3_id,
@@ -276,23 +264,33 @@ export async function POST(req: Request) {
           cours,
           date,
           time,
-          expireAt
-        FROM reservation_hold 
-        WHERE id = ?`,
-        [reservationId]
+          expireAt,
+          GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expireAt)) AS expiresIn
+        FROM reservation_hold
+        WHERE id = ? AND user_id = ?
+        `,
+        [reservationId, userId]
       );
+
+      if (!updatedRows || updatedRows.length === 0) {
+        // très improbable juste après commit, mais au cas où…
+        return NextResponse.json(
+          { success: false, message: "Réservation introuvable après mise à jour" },
+          { status: 500 }
+        );
+      }
 
       const updated = updatedRows[0];
 
       let accessoriesArray: number[] = [];
       if (updated.accessoirs) {
         try {
-          if (typeof updated.accessoirs === 'string') {
+          if (typeof updated.accessoirs === "string") {
             accessoriesArray = JSON.parse(updated.accessoirs);
           } else if (Array.isArray(updated.accessoirs)) {
-            accessoriesArray = updated.accessoirs;
+            accessoriesArray = updated.accessoirs as unknown as number[];
           }
-        } catch (e) {
+        } catch {
           return NextResponse.json(
             { success: false, message: "Erreur lors de la récupération des accessoires" },
             { status: 500 }
@@ -300,36 +298,32 @@ export async function POST(req: Request) {
         }
       }
 
-
       return NextResponse.json({
         success: true,
         reservationId,
-        consoleId: finalConsoleId,
-        games: [
-          updated.game1_id,
-          updated.game2_id,
-          updated.game3_id
-        ].filter(id => id !== null),
+        consoleId: Number(updated.console_id),
+        consoleTypeId: Number(updated.console_type_id),
+        games: [updated.game1_id, updated.game2_id, updated.game3_id].filter((id): id is number => id !== null),
         accessories: accessoriesArray,
-        coursId: updated.cours || null,
+        coursId: updated.cours ?? null,
         date: updated.date,
         time: updated.time,
-        expireAt: updated.expireAt,
+        expiresAt: new Date(updated.expireAt).toISOString(),
+        expiresIn: Number(updated.expiresIn), // <<< pour ton timer côté front
       });
     } catch (err) {
-      await conn.rollback();
+      await pool.query("ROLLBACK");
       console.error("Erreur update reservation:", err);
       return NextResponse.json(
         { success: false, message: "Erreur serveur", error: err instanceof Error ? err.message : "Unknown error" },
         { status: 500 }
       );
     } finally {
-      conn.release();
+      if (conn) conn.release();
     }
   } catch (err) {
     console.error("update-hold-reservation error:", err);
-    const message =
-      err instanceof Error ? err.message : "Erreur lors de la mise à jour du hold";
+    const message = err instanceof Error ? err.message : "Erreur lors de la mise à jour du hold";
     return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }

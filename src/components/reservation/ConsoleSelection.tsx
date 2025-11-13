@@ -18,7 +18,7 @@ export default function ConsolesSelection() {
     updateReservationConsole,
     isTimerActive,
     setCurrentStep,
-    selectedConsole, // console déjà réservée en BD
+    selectedConsole,
   } = useReservation();
 
   const handleConsoleSelect = (console: Console) => {
@@ -30,20 +30,19 @@ export default function ConsolesSelection() {
     if (!consoleToUse) return;
 
     try {
-      // Cas 1 : aucune réservation encore en BD → création
       if (!selectedConsole) {
         setSelectedConsole(selected);
         if (!isTimerActive) {
           await startTimer(consoleToUse.id);
         }
       }
-      // Cas 2 : une réservation existe déjà et on change de console → update
       else if (selectedConsole.id !== consoleToUse.id) {
         await updateReservationConsole(consoleToUse.id);
-        setSelectedConsole(consoleToUse); // update local
+        setSelectedConsole(consoleToUse);
       }
       else {
-        setSelectedConsole(consoleToUse); // même console, juste pour s'assurer
+        setSelectedConsole(consoleToUse);
+
       }
 
       setCurrentStep(2);
@@ -52,14 +51,13 @@ export default function ConsolesSelection() {
     }
   };
 
-  // Détermine si on doit afficher "Continuer" ou "Modifier"
   const isModification =
     selected && selectedConsole && selected.id !== selectedConsole.id;
 
   const displayedConsole = selected || selectedConsole;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <div className="lg:col-span-1">
         <div className="bg-[white] sticky top-10 rounded-2xl p-6 shadow-lg">
           <h2 className="text-3xl font-bold mb-4 text-center">

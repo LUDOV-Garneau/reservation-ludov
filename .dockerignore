@@ -1,6 +1,7 @@
 node_modules
 .git
 .next
-dist
-coverage
-.env
+Dockerfile
+# keep scripts
+!scripts/
+!scripts/**

@@ -1,6 +1,5 @@
 "use client";
 
-// Composants et hooks importés
 import { Console } from "@/types/console";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
@@ -11,18 +10,16 @@ import {
   AlertCircle,
   Check,
   RefreshCw,
-  Gamepad2,
+  Monitor,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-// Contexte de réservation
 interface ConsoleSelectionGridProps {
-  selectedId: number | null; // ID de la console sélectionnée
-  reservedId?: number | null; // ID de la console en cours (optionnel)
-  onSelect: (console: Console) => void; // Fonction pour gérer la sélection d'une console
+  selectedId: number | null;
+  reservedId?: number | null;
+  onSelect: (console: Console) => void;
 }
 
-// État de chargement
 type LoadingState = "idle" | "loading" | "success" | "error";
 
 export default function ConsoleSelectionGrid({
@@ -32,49 +29,40 @@ export default function ConsoleSelectionGrid({
 }: ConsoleSelectionGridProps) {
   const t = useTranslations();
 
-  // États locaux
-  const [consoles, setConsoles] = useState<Console[]>([]); // Liste des consoles
-  const [search, setSearch] = useState(""); // Terme de recherche
-  const [loadingState, setLoadingState] = useState<LoadingState>("idle"); // État de chargement
-  const [error, setError] = useState<string | null>(null); // Message d'erreur
-  const [retryCount, setRetryCount] = useState(0); // Compteur de tentatives de rechargement
+  const [consoles, setConsoles] = useState<Console[]>([]);
+  const [search, setSearch] = useState("");
+  const [loadingState, setLoadingState] = useState<LoadingState>("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const [selectedConsoleId, setSelectedConsoleId] = useState<number | null>(
     selectedId || null
-  ); // ID de la console sélectionnée
+  );
 
-  // Fonction pour récupérer les consoles depuis l'API
   const fetchConsoles = useCallback(async () => {
-    // Timeout pour la requête
     const controller = new AbortController();
-    // Timeout de 10 secondes
     const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
-      setLoadingState("loading"); // Début du chargement
-      setError(null); // Réinitialise les erreurs
+      setLoadingState("loading");
+      setError(null);
 
-      // Requête fetch avec signal d'abandon
       const res = await fetch("/api/reservation/consoles", {
-        signal: controller.signal, // Utilise le signal d'abandon
-        headers: { "Content-Type": "application/json" }, // En-têtes
+        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
       });
 
-      // Parse une seule fois
       const data = await res.json().catch(() => null);
 
-      // Gestion des erreurs HTTP
       if (!res.ok) {
         throw new Error(
           data?.message || `Erreur ${res.status}: ${res.statusText}`
         );
       }
 
-      // Validation des données
       if (!Array.isArray(data)) {
         throw new Error("Format de données invalide");
       }
 
-      // Valide et nettoie les données reçues
       const validatedConsoles: Console[] = data
         .map((c: Console) => ({
           id: Number(c.id) || 0,
@@ -84,9 +72,9 @@ export default function ConsoleSelectionGrid({
         }))
         .filter((c) => c.id > 0);
 
-      setSelectedConsoleId(selectedId || null); // Met à jour l'ID de la console sélectionnée
-      setConsoles(validatedConsoles); // Met à jour la liste des consoles
-      setLoadingState("success"); // Chargement réussi
+      setSelectedConsoleId(selectedId || null);
+      setConsoles(validatedConsoles);
+      setLoadingState("success");
 
     } catch (err) {
       console.error("Erreur lors du chargement:", err);
@@ -107,13 +95,11 @@ export default function ConsoleSelectionGrid({
     }
   }, []);
 
-  // Fonction pour réessayer le chargement
   const retry = useCallback(() => {
     setRetryCount((prev) => prev + 1);
     fetchConsoles();
   }, [fetchConsoles]);
 
-  // Récupère les consoles au montage du composant
   useEffect(() => {
     fetchConsoles();
   }, [fetchConsoles]);
@@ -122,7 +108,6 @@ export default function ConsoleSelectionGrid({
     setSelectedConsoleId(selectedId);
   }, [selectedId]);
 
-  // Filtre les consoles en fonction de la recherche
   const filteredConsoles = useMemo(() => {
     if (!search.trim()) return consoles;
 
@@ -130,7 +115,6 @@ export default function ConsoleSelectionGrid({
     return consoles.filter((c) => c.name.toLowerCase().includes(searchLower));
   }, [consoles, search]);
 
-  // Gère la sélection d'une console
   const handleSelect = useCallback(
     (console: Console) => {
       setSelectedConsoleId(console.id);
@@ -139,7 +123,6 @@ export default function ConsoleSelectionGrid({
     [onSelect]
   );
 
-  // Rendu conditionnel en fonction de l'état de chargement
   if (loadingState === "loading" && consoles.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-4">
@@ -179,7 +162,7 @@ export default function ConsoleSelectionGrid({
   if (consoles.length === 0 && loadingState === "success") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-4">
-        <Gamepad2 className="h-12 w-12 text-gray-400" />
+        <Monitor className="h-12 w-12 text-gray-400" />
         <p className="text-gray-600 font-medium">
           {t("reservation.console.noConsoleAvailable")}
         </p>
@@ -226,7 +209,7 @@ export default function ConsoleSelectionGrid({
 
       {availableConsoles.length === 0 && search && (
         <div className="text-center py-12">
-          <Gamepad2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+          <Monitor className="h-12 w-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-600 font-medium">
             {t("reservation.console.noConsoleForSearch", { search })}
           </p>
@@ -268,14 +251,21 @@ export default function ConsoleSelectionGrid({
               `}
             >
               <div className="relative w-full h-48 bg-gray-100">
-                <Image
-                  src={console.picture || "/placeholder_consoles.jpg"}
-                  alt={console.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                {console.picture ? (
+                  <Image
+                    src={console.picture}
+                    alt={console.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    <Monitor className="h-12 w-12" />
+                  </div>
+                )}
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
                 {console.id === reservedId && (
                   <div className="absolute top-3 left-3 bg-cyan-600 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md">

@@ -10,6 +10,15 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const email = searchParams.get("email");
 
+    if (!email) {
+      return NextResponse.json(
+        {
+          message: "Le courriel est requis.",
+        },
+        { status: 400 }
+      );
+    }
+
     const [rows] = await pool.query<ValidEmailRow[]>(
       "SELECT COUNT(*) as valid_email FROM users WHERE email = ? AND password IS NULL",
       [email]
@@ -27,7 +36,7 @@ export async function GET(request: NextRequest) {
       );
     }
   } catch (error) {
-    console.error("🔴 ERREUR INSCRIPTION:", error);
+    console.error("ERREUR INSCRIPTION:", error);
     return NextResponse.json(
       { message: "Une erreur s'est produite." },
       { status: 500 }
@@ -40,6 +49,15 @@ type PwdRow = RowDataPacket & { hasPassword: boolean };
 export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
+
+    if (!email || !password) {
+      return NextResponse.json(
+        {
+          message: "Le courriel et le mot de passe sont requis.",
+        },
+        { status: 400 }
+      );
+    }
 
     const [rows] = await pool.query<PwdRow[]>(
       "SELECT password != '' AS has_password FROM users WHERE email = ?",

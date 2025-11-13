@@ -1,5 +1,5 @@
 export interface JwtPayload {
-  id: string;
+  id: number;
   name: string;
   email: string;
   isAdmin: boolean;

@@ -8,12 +8,15 @@ export async function GET() {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;
-    try {
-      const token = sessionCookie?.value;
-      if (token) user = verifyToken(token);
-    } catch {
-      // token invalide/expiré
-    }
+      try {
+          const token  = sessionCookie?.value;
+          if (token) user = verifyToken(token);
+      } catch{
+          return NextResponse.json(
+              { success: false, message: "Invalid or expired token" },
+              { status: 401 }
+          );
+      }
     if (!user?.id) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -28,7 +31,6 @@ export async function GET() {
       );
     }
 
-    // Dernier hold -> console_type_id directement
     const [holdRows] = await pool.query(
       `SELECT console_type_id
          FROM reservation_hold
@@ -47,14 +49,14 @@ export async function GET() {
       );
     }
 
-    // Accessoires pour ce console_type_id
     const [rows] = await pool.query(
       `SELECT id, name
          FROM accessoires
         WHERE consoles IS NOT NULL
+          AND hidden = 0
           AND JSON_VALID(consoles)
           AND JSON_CONTAINS(consoles, CAST(? AS JSON), '$')`,
-      [String(consoleTypeId)] // passer l'ID en JSON
+      [String(consoleTypeId)]
     );
 
     const accessories = (rows as { id: number; name: string }[]) || [];

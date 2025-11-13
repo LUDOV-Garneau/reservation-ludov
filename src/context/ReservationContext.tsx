@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { Console } from "@/types/console";
 
@@ -37,6 +37,7 @@ interface ReservationContextType {
   selectedTime: string | undefined; // heure sélectionnée
   selectedCours: number | null;
   selectedAccessories: number[];
+  selectedConsoleId: number;
 
   // Mutateurs
   setUserId: (id: number) => void; // définit l'ID utilisateur
@@ -47,7 +48,6 @@ interface ReservationContextType {
   setSelectedTime: (time: string | undefined) => void; // définit l'heure sélectionnée
   setSelectedCours: (coursId: number | null) => void; // définit le cours sélectionné
   setSelectedAccessories: React.Dispatch<React.SetStateAction<number[]>>;
-
 
   // Actions Réservation
   cancelReservation: () => Promise<void>; // annule la réservation côté serveur
@@ -77,6 +77,9 @@ interface MinimalReservationState {
 
 const STORAGE_KEY = "reservation_hold"; // clé pour sessionStorage
 
+const toLocalYmd = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+
 /**
  * Provider principal pour gérer tout le cycle de vie d'une réservation
  */
@@ -103,8 +106,11 @@ export function ReservationProvider({
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedAccessories, setSelectedAccessories] = useState<number[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(
+    undefined
+  );
   const [selectedCours, setSelectedCours] = useState<number | null>(null);
+  const [selectedConsoleId, setSelectedConsoleId] = useState<number>(0);
 
   const [isHydrated, setIsHydrated] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
@@ -122,9 +128,12 @@ export function ReservationProvider({
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   };
 
+  const tzAwareIso = (s: string) =>
+    /Z$|[+-]\d{2}:\d{2}$/.test(s) ? s : `${s}Z`;
+
   const computeRemaining = (expiry: string): number => {
     const now = Date.now();
-    const end = new Date(expiry).getTime();
+    const end = new Date(tzAwareIso(expiry)).getTime();
     return Math.max(0, Math.floor((end - now) / 1000));
   };
 
@@ -180,6 +189,8 @@ export function ReservationProvider({
             active_units: Number(data.console.active_units || 0),
             picture: data.console.picture,
           });
+
+          setSelectedConsoleId(data.consoleStockId);
         }
 
         setSelectedCours(data.cours || null);
@@ -188,14 +199,24 @@ export function ReservationProvider({
 
         setSelectedAccessories(data.accessories || []);
 
-        setSelectedDate(data.selectedDate ? new Date(data.selectedDate) : undefined);
+        setSelectedDate(
+          data.selectedDate ? new Date(data.selectedDate) : undefined
+        );
         setSelectedTime(data.selectedTime || undefined);
 
         setCurrentStep(data.currentStep || 1);
 
         setIsTimerActive(true);
-        setTimeRemaining(computeRemaining(data.expiresAt));
-
+        if (typeof data.expiresIn === "number" && !Number.isNaN(data.expiresIn)) {
+          // TTL côté serveur → on s'y fie en priorité
+          setTimeRemaining(Math.max(0, Math.min(timerDuration * 60, data.expiresIn)));
+        } else if (data.expiresAt) {
+          // Fallback (ancien backend)
+          setTimeRemaining(computeRemaining(String(data.expiresAt)));
+        } else {
+          // Si rien n'est fourni (cas extrême), évite un état incohérent
+          setTimeRemaining(timerDuration * 60);
+        }
       } catch (e) {
         console.error("Erreur restauration réservation:", e);
         clearStorage();
@@ -224,20 +245,21 @@ export function ReservationProvider({
    * --- Effet Timer ---
    */
   useEffect(() => {
-    if (!isTimerActive || !expiresAt) return;
+    if (!isTimerActive) return;
 
-    const tick = () => {
-      const remaining = computeRemaining(expiresAt);
-      setTimeRemaining(remaining);
-      if (remaining <= 0) {
-        handleTimeExpired();
-      }
-    };
+    const interval = setInterval(() => {
+      setTimeRemaining(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          handleTimeExpired();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-    tick(); // première exécution immédiate
-    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [isTimerActive, expiresAt]);
+  }, [isTimerActive]);
 
   /**
    * --- Gestion expiration ---
@@ -265,48 +287,69 @@ export function ReservationProvider({
 
   /** Crée une réservation temporaire */
   const startTimer = async (consoleId?: number) => {
-    const consoleTypeId = consoleId ?? selectedConsole?.id;
-    if (!consoleTypeId) {
-      setError("Aucune console sélectionnée");
-      return;
+  const consoleTypeId = consoleId ?? selectedConsole?.id;
+  if (!consoleTypeId) {
+    setError("Aucune plateforme sélectionnée");
+    return;
+  }
+  if (isTimerActive && timeRemaining > 0) return;
+
+  setIsLoading(true);
+  try {
+    const res = await fetch(`/api/reservation/create-hold-reservation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ consoleTypeId, minutes: timerDuration }),
+      signal:
+        "AbortSignal" in window && "timeout" in AbortSignal
+          ? AbortSignal.timeout(10000)
+          : (() => {
+              const ctrl = new AbortController();
+              setTimeout(() => ctrl.abort(), 10000);
+              return ctrl.signal;
+            })(),
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      throw new Error(err?.message || "Erreur création réservation");
     }
-    if (isTimerActive && timeRemaining > 0) return;
 
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/reservation/create-hold-reservation`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ consoleTypeId, minutes: timerDuration }),
-        signal: AbortSignal.timeout(10000),
-      });
+    const data = await res.json();
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => null);
-        throw new Error(err?.message || "Erreur création réservation");
-      }
+    // on lit tout ce qui peut arriver depuis le backend
+    const expiresAtIso = String(
+      data.expiresAt ?? data.expires_at ?? data.expireAt ?? ""
+    );
+    const expiresInSrv = Number(data.expiresIn); // <<< TTL côté serveur (en secondes)
 
-      const data = await res.json();
-      const expires = data.expiresAt || data.expires_at || data.expireAt;
-      
-      if (!data.reservationId && !data.holdId) {
-        throw new Error("Réponse invalide du serveur (reservationId manquant)");
-      }
-      if (!expires) {
-        throw new Error("Réponse invalide du serveur (expiresAt manquant)");
-      }
+    if (!data.reservationId && !data.holdId) {
+      throw new Error("Réponse invalide du serveur (reservationId manquant)");
+    }
+    if (!expiresAtIso && !Number.isFinite(expiresInSrv)) {
+      throw new Error("Réponse invalide du serveur (expiresAt/expiresIn manquant)");
+    }
 
+    setSelectedConsoleId(Number(data.consoleStockId));
     setReservationId(String(data.reservationId ?? data.holdId));
-    setExpiresAt(String(expires));
+    setExpiresAt(expiresAtIso || null);
     setIsTimerActive(true);
-    setTimeRemaining(computeRemaining(String(expires)));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erreur inconnue");
-      setIsTimerActive(false);
-    } finally {
-      setIsLoading(false);
+
+    // <<< NE PLUS DÉPENDRE DE L'HORLOGE DU NAVIGATEUR
+    if (Number.isFinite(expiresInSrv)) {
+      setTimeRemaining(Math.max(0, Math.min(timerDuration * 60, expiresInSrv)));
+    } else {
+      // Fallback si jamais expiresIn n’est pas renvoyé (ancien backend)
+      setTimeRemaining(computeRemaining(expiresAtIso));
     }
-  };
+  } catch (e) {
+    setError(e instanceof Error ? e.message : "Erreur inconnue");
+    setIsTimerActive(false);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const updateReservationAccessories = async (accessories: number[]) => {
     if (!reservationId) return;
@@ -383,80 +426,122 @@ export function ReservationProvider({
     }
   };
 
-const updateReservationConsole = async (newConsoleId: number) => {
-  if (!reservationId) return;
+  const updateReservationConsole = async (newConsoleId: number) => {
+    if (!reservationId) return;
 
-  try {
-    const res = await fetch(`/api/reservation/update-hold-reservation`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reservationId, newConsoleId }),
-    });
+    setSelectedGames([]);
 
-    if (!res.ok) throw new Error("Erreur modification console");
+    try {
+      const res = await fetch(`/api/reservation/update-hold-reservation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reservationId, newConsoleId }),
+      });
 
-    const data = await res.json();
-    if (data.success) {
-      setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
+      if (!res.ok) throw new Error("Erreur modification plateforme");
+
+      const data = await res.json();
+      if (data.success) {
+        setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur update plateforme");
     }
-  } catch (e) {
-    setError(e instanceof Error ? e.message : "Erreur update console");
-  }
-};
+  };
 
   /** Finalise la réservation côté serveur */
-// Extrait de la fonction completeReservation corrigée pour le ReservationContext
+  // Extrait de la fonction completeReservation corrigée pour le ReservationContext
 
-/** Finalise la réservation côté serveur */
+  /** Finalise la réservation côté serveur */
   const completeReservation = async () => {
     if (!reservationId) {
       setError("Aucune réservation à finaliser");
       return;
     }
-    
+
+    if (!selectedConsole) {
+      setError("Aucune plateforme sélectionnée");
+      return;
+    }
+
+    if (!selectedConsoleId) {
+      setError("Aucune plateforme en stock sélectionnée");
+      return;
+    }
+
+    if (selectedGames.length === 0) {
+      setError("Aucun jeu sélectionné");
+      return;
+    }
+
+    if (!selectedCours) {
+      setError("Aucun cours sélectionné");
+      return;
+    }
+
+    if (!selectedDate) {
+      setError("Aucune date sélectionnée");
+      return;
+    }
+
+    if (!selectedTime) {
+      setError("Aucune heure sélectionnée");
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      const res = await fetch(`/api/reservation/complete-reservation`, {
+      const res = await fetch(`/api/reservation/confirm-reservation`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          reservationId,
-          userId: userId || null,
-          consoleId: selectedConsole?.id || null,
-          games: selectedGames
+          reservationHoldId: reservationId,
+          consoleId: selectedConsoleId,
+          consoleTypeId: selectedConsole?.id,
+          game1Id: selectedGames[0] ? Number(selectedGames[0]) : null,
+          game2Id: selectedGames[1] ? Number(selectedGames[1]) : null,
+          game3Id: selectedGames[2] ? Number(selectedGames[2]) : null,
+          accessoryIds: selectedAccessories,
+          coursId: selectedCours,
+          date: selectedDate ? toLocalYmd(selectedDate) : null,
+          time: selectedTime || null,
         }),
       });
-      
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => null);
         throw new Error(errorData?.message || "Erreur lors de la finalisation");
       }
-      
+
       const data = await res.json();
-      
+
       // Sauvegarder les détails pour la page de succès
-      if (typeof window !== 'undefined') {
-        sessionStorage.setItem('last_reservation', JSON.stringify({
-          reservationId: data.reservationId || reservationId,
-          finalReservationId: data.finalReservationId,
-          console: selectedConsole,
-          games: selectedGames,
-          date: new Date().toLocaleDateString('fr-CA'),
-          heure: new Date().toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' })
-        }));
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(
+          "last_reservation",
+          JSON.stringify({
+            reservationId: data.reservationId || reservationId,
+            finalReservationId: data.finalReservationId,
+            console: selectedConsole,
+            games: selectedGames,
+            date: new Date().toLocaleDateString("fr-CA"),
+            heure: new Date().toLocaleTimeString("fr-CA", {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          })
+        );
       }
-      
+
       // Réinitialiser le contexte
       setIsTimerActive(false);
       setReservationId(null);
       setExpiresAt(null);
       clearStorage();
-      
-      // La navigation sera gérée par le composant appelant
+
       return data;
-      
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur finalisation");
       throw e; // Re-throw pour que le composant puisse gérer l'erreur
@@ -502,6 +587,7 @@ const updateReservationConsole = async (newConsoleId: number) => {
     setSelectedTime,
     selectedCours,
     setSelectedCours,
+    selectedConsoleId,
   };
 
   if (isRestoring) {
@@ -532,4 +618,3 @@ export function useReservation() {
   }
   return context;
 }
-

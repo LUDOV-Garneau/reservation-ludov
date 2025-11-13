@@ -5,9 +5,7 @@ import { TabsContent } from "@/components/ui/tabs";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "../../ui/button";
-import SpecificDatesSelection, {
-  DateSelection,
-} from "./SpecificDatesSelection";
+import SpecificDatesSelection from "./SpecificDatesSelection";
 import WeekAvailabilitiesSelection from "./WeekAvailabilitiesSelection";
 import AvailabilitiesTypeSelection from "./AvailabilitiesTypeSelection";
 import DateRangeSelection from "./DateRangeSelection";
@@ -16,39 +14,14 @@ import BlockSpecificDatesSelection, {
   groupDateSelectionsToExceptions,
 } from "./BlockSpecificDatesSelection";
 import { toast } from "sonner";
-
-type HourRange = {
-  id: number;
-  startHour: string;
-  startMinute: string;
-  endHour: string;
-  endMinute: string;
-};
-
-type WeekDay = {
-  label: string;
-  enabled: boolean;
-  hoursRanges: HourRange[];
-};
-
-type Exception = {
-  date: Date;
-  timeRange: HourRange;
-};
-
-type AvailabilityState = {
-  weekly: Record<string, WeekDay>;
-  dateRange: {
-    alwaysApplies: boolean;
-    range: { startDate: Date | null; endDate: Date | null } | null;
-  };
-  exceptions: { enabled: boolean; dates: Exception[] };
-};
-
-type fetchAvailabilities = {
-  availability: AvailabilityState;
-  specificDates: Exception[];
-};
+import {
+  HourRange,
+  WeekDay,
+  Exception,
+  AvailabilityState,
+  fetchAvailabilities,
+  DateSelection,
+} from "@/types/availabilities";
 
 const defaultHR: HourRange = {
   id: 0,
@@ -79,7 +52,6 @@ export default function AvailabilitiesTab() {
       exceptions: { enabled: false, dates: [] },
     }
   );
-
   const [specificDates, setSpecificDates] = useState<Exception[]>([]);
   const [selectedCard, setSelectedCard] = useState<string>("weekly");
   const [errors, setErrors] = useState<string[]>([]);
@@ -90,7 +62,8 @@ export default function AvailabilitiesTab() {
   const handleSpecificDatesChange = (newSelections: DateSelection[]) =>
     setSpecificDates(groupDateSelectionsToExceptions(newSelections));
 
-  const toMinutes = (h: string, m: string) => parseInt(h) * 60 + parseInt(m);
+  const toMinutes = (hour: string, minute: string) =>
+    parseInt(hour) * 60 + parseInt(minute);
 
   function validateHourRanges(ranges: HourRange[]) {
     const sorted = [...ranges].sort(
@@ -98,18 +71,25 @@ export default function AvailabilitiesTab() {
         toMinutes(a.startHour, a.startMinute) -
         toMinutes(b.startHour, b.startMinute)
     );
+
     for (let i = 0; i < sorted.length; i++) {
       const start = toMinutes(sorted[i].startHour, sorted[i].startMinute);
       const end = toMinutes(sorted[i].endHour, sorted[i].endMinute);
-      if (end <= start) return t("admin.availabilities.errors.invalidRange");
+      if (end <= start) {
+        return t("admin.availabilities.errors.invalidRange");
+      }
+
       if (i > 0) {
         const prevEnd = toMinutes(
           sorted[i - 1].endHour,
           sorted[i - 1].endMinute
         );
-        if (start < prevEnd) return t("admin.availabilities.errors.overlap");
+        if (start < prevEnd) {
+          return t("admin.availabilities.errors.overlap");
+        }
       }
     }
+
     return null;
   }
 
@@ -152,19 +132,25 @@ export default function AvailabilitiesTab() {
           data.availability.weekly &&
           Object.keys(data.availability.weekly).length > 0
         ) {
-          const filledWeekly: Record<string, WeekDay> = Object.fromEntries(
-            Object.entries(data.availability.weekly).map(([day, w]) => [
-              day,
-              {
-                ...w,
-                hoursRanges:
-                  Array.isArray(w.hoursRanges) && w.hoursRanges.length > 0
-                    ? w.hoursRanges
-                    : [defaultHR],
-              },
-            ])
-          );
-          parsedAvailability.weekly = filledWeekly;
+          const days = Object.keys(data.availability.weekly);
+
+          const newWeekly: Record<string, WeekDay> = {};
+
+          for (const day of days) {
+            const weekDay = data.availability.weekly[day];
+
+            let hoursRanges = weekDay.hoursRanges;
+            if (!Array.isArray(hoursRanges) || hoursRanges.length === 0) {
+              hoursRanges = [defaultHR];
+            }
+
+            newWeekly[day] = {
+              ...weekDay,
+              hoursRanges: hoursRanges,
+            };
+          }
+
+          parsedAvailability.weekly = newWeekly;
         }
 
         setAvailabilityState((defaultAvailabilities) => ({
@@ -187,19 +173,24 @@ export default function AvailabilitiesTab() {
 
   useEffect(() => {
     const newErrors: string[] = [];
+
     for (const [day, { enabled, hoursRanges }] of Object.entries(
       availabilityState.weekly
     )) {
-      if (!enabled) continue;
-      const err = validateHourRanges(hoursRanges);
-      if (err)
+      if (!enabled) {
+        continue;
+      }
+
+      const error = validateHourRanges(hoursRanges);
+      if (error)
         newErrors.push(
           t("admin.availabilities.errors.exception", {
             date: t(`admin.availabilities.days.${day}`).toLowerCase(),
-            error: err,
+            error: error,
           })
         );
     }
+
     if (availabilityState.exceptions.enabled) {
       const exceptionsByDate = availabilityState.exceptions.dates.reduce(
         (acc, exception) => {
@@ -212,6 +203,7 @@ export default function AvailabilitiesTab() {
         },
         {} as Record<string, HourRange[]>
       );
+
       for (const [dateStr, hourRanges] of Object.entries(exceptionsByDate)) {
         const err = validateHourRanges(hourRanges);
         if (err)
@@ -223,11 +215,13 @@ export default function AvailabilitiesTab() {
           );
       }
     }
+
     setErrors(newErrors);
-  }, [availabilityState, t]);
+  }, [availabilityState]);
 
   useEffect(() => {
     const newErrors: string[] = [];
+
     const exceptionsByDate = specificDates.reduce((acc, exception) => {
       const dateKey = exception.date.toLocaleDateString();
       if (!acc[dateKey]) {
@@ -236,41 +230,49 @@ export default function AvailabilitiesTab() {
       acc[dateKey].push(exception.timeRange);
       return acc;
     }, {} as Record<string, HourRange[]>);
+
     for (const [dateStr, hourRanges] of Object.entries(exceptionsByDate)) {
-      const err = validateHourRanges(hourRanges);
-      if (err)
+      const error = validateHourRanges(hourRanges);
+      if (error) {
         newErrors.push(
           t("admin.availabilities.errors.exception", {
             date: dateStr,
-            error: err,
+            error: error,
           })
         );
+      }
+
       setSpecificDatesErrors(newErrors);
     }
-  }, [specificDates, t]);
+  }, [specificDates]);
 
   function updateWeekly(updatedWeekly: Record<string, WeekDay>) {
-    setAvailabilityState((prev) => ({ ...prev, weekly: updatedWeekly }));
+    setAvailabilityState((previous) => ({
+      ...previous,
+      weekly: updatedWeekly,
+    }));
   }
 
   function updateDateRange(
     range: { startDate: Date | null; endDate: Date | null } | null
   ) {
-    setAvailabilityState((prev) => ({
-      ...prev,
-      dateRange: { ...prev.dateRange, range: range },
+    setAvailabilityState((previous) => ({
+      ...previous,
+      dateRange: { ...previous.dateRange, range: range },
     }));
   }
 
   function updateExceptions(updatedExceptions: Exception[]) {
-    setAvailabilityState((prev) => ({
-      ...prev,
-      exceptions: { ...prev.exceptions, dates: updatedExceptions },
+    setAvailabilityState((previous) => ({
+      ...previous,
+      exceptions: { ...previous.exceptions, dates: updatedExceptions },
     }));
   }
 
   async function handleSubmitWeekly() {
-    if (errors.length > 0) return;
+    if (errors.length > 0) {
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -283,10 +285,12 @@ export default function AvailabilitiesTab() {
         credentials: "include",
       });
       setIsLoading(false);
+
       if (!response.ok) {
         toast.error(t("admin.availabilities.errors.savingAvailabilities"));
         return;
       }
+
       toast.success(t("admin.availabilities.messages.savedWeekly"));
     } catch {
       setIsLoading(false);
@@ -295,7 +299,9 @@ export default function AvailabilitiesTab() {
   }
 
   async function handleSubmitSpecificDates() {
-    if (specificDatesErrors.length > 0) return;
+    if (specificDatesErrors.length > 0) {
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -308,12 +314,14 @@ export default function AvailabilitiesTab() {
         credentials: "include",
       });
       setIsLoading(false);
+
       if (!response.ok) {
         toast.error(t("admin.availabilities.errors.savingAvailabilities"));
         return;
       }
+
       toast.success(t("admin.availabilities.messages.savedSpecific"));
-    } catch (e) {
+    } catch {
       setIsLoading(false);
       toast.error(t("admin.availabilities.errors.savingAvailabilities"));
     }
@@ -363,8 +371,8 @@ export default function AvailabilitiesTab() {
           />
           {errors.length > 0 && (
             <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
-              {errors.map((e, i) => (
-                <div key={i}>{e}</div>
+              {errors.map((error, index) => (
+                <div key={index}>{error}</div>
               ))}
             </div>
           )}
@@ -395,17 +403,13 @@ export default function AvailabilitiesTab() {
           />
           {specificDatesErrors.length > 0 && (
             <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
-              {specificDatesErrors.map((e, i) => (
-                <div key={i}>{e}</div>
+              {specificDatesErrors.map((error, index) => (
+                <div key={index}>{error}</div>
               ))}
             </div>
           )}
           <Button
-            disabled={
-              isLoading ||
-              specificDates.length == 0 ||
-              specificDatesErrors.length > 0
-            }
+            disabled={isLoading || specificDatesErrors.length > 0}
             type="submit"
             className="mt-4 w-fit mx-auto font-semibold text-base"
             onClick={handleSubmitSpecificDates}

@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Console } from "@/types/console";
 import {
-  Gamepad2Icon,
   Loader2,
   Check,
   X,
   AlertCircle,
   ArrowRight,
+  Monitor,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -36,7 +36,7 @@ export default function SelectedConsoleCard({
   if (!console) {
     return (
       <div className="p-8 border-dashed border-2 border-gray-300 rounded-2xl flex flex-col items-center gap-3 w-full">
-        <Gamepad2Icon className="h-12 w-12 text-gray-400" />
+        <Monitor className="h-12 w-12 text-gray-400" />
         <p className="text-center text-lg font-medium">
           {t("reservation.console.noneSelected")}
         </p>
@@ -53,7 +53,7 @@ export default function SelectedConsoleCard({
     setSuccess(false);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setSuccess(true);
 
       if (onSuccess) {
@@ -73,12 +73,18 @@ export default function SelectedConsoleCard({
   return (
     <div className="w-full space-y-4">
       <div className="relative w-full h-48 rounded-2xl overflow-hidden group bg-gray-100">
-        <Image
-          src={console.picture || "/placeholder_consoles.jpg"}
-          alt={console.name}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
+        {console.picture ? (
+          <Image
+            src={console.picture}
+            alt={console.name}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <Monitor className="h-16 w-16" />
+          </div>
+        )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
 
