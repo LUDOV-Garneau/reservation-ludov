@@ -1,7 +1,6 @@
 import { NextResponse, NextRequest } from "next/server";
 import pool from "@/lib/db";
 import { parse } from "csv-parse/sync";
-import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 
 const EXPECTED_COLUMNS = [
@@ -19,35 +18,33 @@ type CsvUserRecord = {
   "First Name": string;
   "Last Name": string;
   "Date Created": string;
+  "Last Login"?: string;
   [key: string]: unknown;
 };
 
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("SESSION");
-    let user = null;
+    const token = req.cookies.get("SESSION")?.value;
+    if (!token) {
+        return new Response(
+            JSON.stringify({ success: false, message: "Unauthorized" }),
+            { status: 401 }
+        );
+    }
 
-    try {
-      const token = sessionCookie?.value;
-      if (token) user = verifyToken(token);
-    } catch (error) {
-      return NextResponse.json(
-        { success: false, message: "Invalid or expired token" },
-        { status: 401 }
-      );
-    }
-    if (!user?.id) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    const user = verifyToken(token);
     if (!user?.isAdmin) {
-      return NextResponse.json(
-        { success: false, message: "Forbidden" },
-        { status: 403 }
-      );
+        return new Response(
+            JSON.stringify({ success: false, message: "Forbidden" }),
+            { status: 403 }
+        );
+    }
+
+    if (!user?.id) {
+        return new Response(
+            JSON.stringify({ success: false, message: "Unauthorized" }),
+            { status: 401 }
+        );
     }
 
     const formData = await req.formData();
@@ -55,26 +52,59 @@ export async function POST(req: NextRequest) {
 
     if (!file) {
       return NextResponse.json(
-        { error: "Fichier CSV manquant." },
+        { success: false, error: "Fichier CSV manquant." },
         { status: 400 }
       );
     }
 
     const csvText = await file.text();
 
-    const records = parse(csvText, {
-      columns: true,
-      skip_empty_lines: true,
-      trim: true,
-    }) as CsvUserRecord[];
+    if (!csvText.trim()) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Le fichier CSV est vide.",
+        },
+        { status: 400 }
+      );
+    }
+
+    let records: CsvUserRecord[] = [];
+    try {
+      records = parse(csvText, {
+        columns: true,
+        skip_empty_lines: true,
+        trim: true,
+      }) as CsvUserRecord[];
+    } catch (err) {
+      console.error("Error parsing CSV:", err);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Impossible de lire le fichier CSV. Vérifiez le format.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (records.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: "Aucun enregistrement trouvé dans le CSV.",
+        inserted: 0,
+        skipped: 0,
+      });
+    }
 
     const csvColumns = Object.keys(records[0] as object);
     const missingColumns = EXPECTED_COLUMNS.filter(
       (c) => !csvColumns.includes(c)
     );
+
     if (missingColumns.length > 0) {
       return NextResponse.json(
         {
+          success: false,
           error: `Colonnes manquantes dans le CSV: ${missingColumns.join(", ")}`,
         },
         { status: 400 }
@@ -95,19 +125,30 @@ export async function POST(req: NextRequest) {
 
     const now = new Date();
 
-    const users = (validRecords as CsvUserRecord[]).map((r) => ({
-      username: r["Username"],
-      firstName: r["First Name"],
-      lastName: r["Last Name"],
-      dateCreated: new Date(r["Date Created"]),
-      password: null,
-      isAdmin: 0,
-      lastUpdatedAt: now,
-    }));
+    const users = validRecords.map((r) => {
+      const dateCreatedRaw = r["Date Created"];
+      const parsedDate = new Date(dateCreatedRaw);
+      const dateCreated =
+        isNaN(parsedDate.getTime()) || !dateCreatedRaw
+          ? now
+          : parsedDate;
+
+      return {
+        username: r.Username.trim(),
+        firstName: r["First Name"]?.toString().trim() ?? "",
+        lastName: r["Last Name"]?.toString().trim() ?? "",
+        dateCreated,
+        password: null as string | null,
+        isAdmin: 0,
+        lastUpdatedAt: now,
+      };
+    });
 
     const conn = await pool.getConnection();
+
     try {
       const emails = users.map((u) => u.username);
+
       const [existingRows] = await conn.query(
         `SELECT email FROM users WHERE email IN (?)`,
         [emails]
@@ -120,7 +161,6 @@ export async function POST(req: NextRequest) {
       const newUsers = users.filter((u) => !existingEmails.has(u.username));
 
       if (newUsers.length === 0) {
-        conn.release();
         return NextResponse.json({
           success: true,
           message: "Aucun nouvel utilisateur à insérer.",
@@ -150,17 +190,27 @@ export async function POST(req: NextRequest) {
       await conn.query(sql, [values]);
       await conn.commit();
 
+      const skipped =
+        invalidRecords.length + (users.length - newUsers.length);
+
       return NextResponse.json({
         success: true,
         message: "Utilisateurs insérés avec succès.",
         inserted: newUsers.length,
-        skipped: invalidRecords.length + (users.length - newUsers.length),
+        skipped,
       });
     } catch (err) {
-      await conn.rollback();
       console.error("Error inserting users from CSV:", err);
+      try {
+        await pool.query("ROLLBACK");
+      } catch {
+      }
+
       return NextResponse.json(
-        { success: false, message: "Erreur lors de l'insertion des utilisateurs." },
+        {
+          success: false,
+          message: "Erreur lors de l'insertion des utilisateurs.",
+        },
         { status: 500 }
       );
     } finally {
