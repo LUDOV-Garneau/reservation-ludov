@@ -2,12 +2,11 @@
 
 import React, { useState } from "react";
 import {
-  Dialog, DialogContent, DialogDescription,
-  DialogTitle
+  Dialog, DialogContent, DialogDescription, DialogTitle
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {KeyRound, Mail, Loader2, Shield, Send } from "lucide-react";
+import { Mail, Loader2, ShieldAlert, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
@@ -18,29 +17,33 @@ type TargetUser = {
   lastName?: string;
 };
 
-export interface ResetPasswordActionProps {
+export interface DeleteUserActionProps {
   targetUser: TargetUser;
   onSuccess?: () => void;
-  onAlert?: (type: "success" | "error" | "info" | "warning", message: string, title?: string) => void;
+  onAlert?: (
+    type: "success" | "error" | "info" | "warning",
+    message: string,
+    title?: string
+  ) => void;
   children: (controls: { open: () => void; loading: boolean }) => React.ReactNode;
 }
 
-export default function ResetPasswordAction({
+export default function DeleteUserAction({
   targetUser,
   onSuccess,
   onAlert,
   children,
-}: ResetPasswordActionProps) {
+}: DeleteUserActionProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const t = useTranslations("admin.users.resetPasswordDialog");
+  const t = useTranslations("admin.users.deleteUserDialog");
 
   async function handleConfirm() {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/users/reset-password", {
-        method: "POST",
+      const res = await fetch("/api/admin/users/delete-user", {
+        method: "DELETE",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ targetUserId: targetUser.id }),
@@ -48,15 +51,15 @@ export default function ResetPasswordAction({
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || "Erreur lors de la réinitialisation");
+        throw new Error(err?.error || "Erreur lors de la suppression");
       }
 
-      const data = await res.json();
-      onAlert?.("success", data.message || "Mot de passe réinitialisé avec succès");
+      const data = await res.json().catch(() => ({}));
+      onAlert?.("success", data?.message || "Utilisateur supprimé avec succès");
       onSuccess?.();
       setOpen(false);
     } catch (e) {
-      onAlert?.("error", e instanceof Error ? e.message : "Erreur lors de la réinitialisation");
+      onAlert?.("error", e instanceof Error ? e.message : "Erreur lors de la suppression");
     } finally {
       setLoading(false);
     }
@@ -73,13 +76,13 @@ export default function ResetPasswordAction({
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] p-0 overflow-hidden">
-          <div className="border-b px-6 py-4 bg-orange-50">
+          <div className="border-b px-6 py-4 bg-red-50">
             <div className="flex-1 pt-0.5">
-              <DialogTitle className="text-lg text-amber-900">
-                {t("resetPassword")}
+              <DialogTitle className="text-lg text-red-900">
+                {t("deleteUser")}
               </DialogTitle>
-              <DialogDescription className="text-sm text-amber-700 mt-1">
-                {t("thisActionPreventLogin")}
+              <DialogDescription className="text-sm text-red-700 mt-1">
+                {t("definitiveAction")}
               </DialogDescription>
             </div>
           </div>
@@ -107,18 +110,29 @@ export default function ResetPasswordAction({
 
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                <Shield className="h-4 w-4 text-cyan-600" />
-                {t("whatWillHappen")}
+                <ShieldAlert className="h-4 w-4 text-red-600" />
+                {t("whatGonnaHappen")}
               </h4>
               <ul className="space-y-2.5 text-sm text-gray-700">
                 <li className="flex items-start gap-2.5">
-                  <KeyRound className="h-4 w-4 mt-0.5 text-cyan-600 shrink-0" />
-                  <span>{t("thePasswordWillBe")} <strong className="text-gray-900">{t("reset")}</strong> {t("inTheDatabase")}</span>
+                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
+                  <span>
+                    {t("theAccount")} <strong className="text-gray-900">{t("deleted")}</strong> {t("userWontBeAbleToLogin")}
+                  </span>
                 </li>
                 <li className="flex items-start gap-2.5">
-                  <Send className="h-4 w-4 mt-0.5 text-cyan-600 shrink-0" />
-                  <span>{t("emailWillBeSend")}</span>
+                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
+                  <span>
+                    {t("reservationDeleted")}
+                  </span>
                 </li>
+                <li className="flex items-start gap-2.5">
+                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
+                  <span>
+                    {t("dataDeleteAccordingToPolicy")}
+                  </span>
+                </li>
+
               </ul>
             </div>
 
@@ -130,7 +144,7 @@ export default function ResetPasswordAction({
                 onClick={() => setOpen(false)}
                 disabled={loading}
               >
-                {t("cancelReset")}
+                {t("CancelDelete")}
               </Button>
               <Button
                 type="submit"
@@ -144,12 +158,12 @@ export default function ResetPasswordAction({
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    {t("resetState")}
+                    {t("deletingState")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-2">
-                    <KeyRound className="h-4 w-4" />
-                    {t("confirmReset")}
+                    <Trash2 className="h-4 w-4" />
+                    {t("confirmDelete")}
                   </span>
                 )}
               </Button>
