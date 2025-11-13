@@ -290,36 +290,36 @@
     "users": {
       "title": "Utilisateurs",
       "subtitle": "Gérez les utilisateurs de la plateforme LUDOV",
-      "actionBar" : {
-        "searchPlaceholder" : "Rechercher...",
-        "addUser" : "Ajouter",
+      "actionBar": {
+        "searchPlaceholder": "Rechercher...",
+        "addUser": "Ajouter",
         "toolTipRefresh": "Actualiser",
-        "dropDownMenuAddUser" : {
-          "importCSV" : "Importer un fichier CSV",
-          "importCSVDescription" : "Importez plusieurs utilisateurs à partir d'un fichier CSV",
-          "importCSVInput" : "Choisir un fichier CSV",
-          "importCSVSuccess" : "Importation CSV réussie",
-          "addSingleUser" : "Ajouter un utilisateur",
-          "addSingleUserDescription" : "Créez un compte utilisateur manuellement",
-          "addSingleUserSuccess" : "Utilisateur ajouté avec succès"
+        "dropDownMenuAddUser": {
+          "importCSV": "Importer un fichier CSV",
+          "importCSVDescription": "Importez plusieurs utilisateurs à partir d'un fichier CSV",
+          "importCSVInput": "Choisir un fichier CSV",
+          "importCSVSuccess": "Importation CSV réussie",
+          "addSingleUser": "Ajouter un utilisateur",
+          "addSingleUserDescription": "Créez un compte utilisateur manuellement",
+          "addSingleUserSuccess": "Utilisateur ajouté avec succès"
         }
       },
-      "searchResult" : {
-        "noUsersFound" : "Aucun utilisateur(s) trouvé",
-        "noMatch" : "Aucun utilisateur ne correspond à votre recherche.",
-        "startByAdding" : "Commencez par ajouter votre premier utilisateur."
+      "searchResult": {
+        "noUsersFound": "Aucun utilisateur(s) trouvé",
+        "noMatch": "Aucun utilisateur ne correspond à votre recherche.",
+        "startByAdding": "Commencez par ajouter votre premier utilisateur."
       },
-      "table" : {
-        "header" : {
-          "email" : "Email",
-          "name" : "Nom",
-          "role" : "Rôle",
-          "createdAt" : "Date de création",
-          "actions" : "Actions"
+      "table": {
+        "header": {
+          "email": "Email",
+          "name": "Nom",
+          "role": "Rôle",
+          "createdAt": "Date de création",
+          "actions": "Actions"
         },
-        "ActionToolTips" : {
-          "resetPassword" : "Réinitialiser MDP",
-          "deleteUser" : "Supprimer l'utilisateur"
+        "ActionToolTips": {
+          "resetPassword": "Réinitialiser MDP",
+          "deleteUser": "Supprimer l'utilisateur"
         }
       },
       "stats": {
@@ -327,54 +327,67 @@
         "userNotBoarded": "Utilisateur(s) non configuré(s)",
         "userWithReservations": "Utilisateur(s) avec réservation"
       },
-      "badge" : {
+      "badge": {
         "admin": "Administrateur",
         "user": "Utilisateur"
       },
-      "pagination" : {
-        "affichageDe" : "Affichage de",
-        "a" : "à",
-        "sur" : "sur",
-        "noItem" : "Aucun élément"
+      "pagination": {
+        "affichageDe": "Affichage de",
+        "a": "à",
+        "sur": "sur",
+        "noItem": "Aucun élément"
       },
-      "deleteUserDialog" : {
-        "deleteUser" : "Supprimer l'utilisateur",
-        "definitiveAction" : "Cette action est définitive. L'utilisateur et ses accès seront supprimés.",
-        "whatGonnaHappen" : "Ce qui va se passer :",
-        "theAccount" : "Le compte sera",
-        "deleted" : "supprimé", 
-        "userWontBeAbleToLogin" : "et l'utilisateur ne pourra plus se connecter.",
-        "reservationDeleted" : "Les réservations à venir seront également supprimées.",
-        "dataDeleteAccordingToPolicy" : "Les données associées essentielles seront retirées selon votre politique.",
-        "CancelDelete" : "Annuler la suppression",
-        "deletingState" : "Suppression...",
-        "confirmDelete" : "Confirmer la suppresion"
+      "deleteUserDialog": {
+        "deleteUser": "Supprimer l'utilisateur",
+        "definitiveAction": "Cette action est définitive. L'utilisateur et ses accès seront supprimés.",
+        "whatGonnaHappen": "Ce qui va se passer :",
+        "theAccount": "Le compte sera",
+        "deleted": "supprimé",
+        "userWontBeAbleToLogin": "et l'utilisateur ne pourra plus se connecter.",
+        "reservationDeleted": "Les réservations à venir seront également supprimées.",
+        "dataDeleteAccordingToPolicy": "Les données associées essentielles seront retirées selon votre politique.",
+        "CancelDelete": "Annuler la suppression",
+        "deletingState": "Suppression...",
+        "confirmDelete": "Confirmer la suppresion"
       },
-      "resetPasswordDialog" : {
-        "resetPassword" : "Réinitialiser le mot de passe",
-        "thisActionPreventLogin" : "Cette action empêchera l'utilisateur de se connecter jusqu'à ce qu'il définisse un nouveau mot de passe.",
-        "whatWillHappen" : "Ce qui va se passer :",
-        "thePasswordWillBe" : "Le mot de passe sera",
+      "resetPasswordDialog": {
+        "resetPassword": "Réinitialiser le mot de passe",
+        "thisActionPreventLogin": "Cette action empêchera l'utilisateur de se connecter jusqu'à ce qu'il définisse un nouveau mot de passe.",
+        "whatWillHappen": "Ce qui va se passer :",
+        "thePasswordWillBe": "Le mot de passe sera",
         "reset": "réinitialisé",
-        "inTheDatabase" : "dans la base de données.",
-        "emailWillBeSend" : "Un courriel informant l'utilisateur de la réinitialisation de son mot de passe sera envoyé.",
-        "cancelReset" : "Annuler la réinitialisation",
+        "inTheDatabase": "dans la base de données.",
+        "emailWillBeSend": "Un courriel informant l'utilisateur de la réinitialisation de son mot de passe sera envoyé.",
+        "cancelReset": "Annuler la réinitialisation",
         "resetState": "Réinitialisation...",
-        "confirmReset" : "Confirmer la réinitialisation"
+        "confirmReset": "Confirmer la réinitialisation"
       }
     },
     "reservations": {
       "title": "Réservations",
-      "ReservationTable": {
-        "headers": {
+      "subtitle": "Gérer les réservations de la plateforme LUDOV",
+      "actionBar": {
+        "toolTipRefresh": "Rechercher...",
+        "searchPlaceholder": "Rechercher"
+      },
+      "searchResult": {
+        "noReservationsFound": "Aucune réservation trouvée",
+        "noMatch": "Aucune réservation ne correspond à votre recherche.",
+        "empty": "Aucune réservation pour le moment."
+      },
+      "table": {
+        "header": {
           "user": "Utilisateur",
           "console": "Console",
           "games": "Jeux",
           "date": "Date",
-          "createdAt": "Date de création",
+          "time": "Heure",
           "actions": "Actions",
-          "no_games": "Aucun jeu",
-          "station": "Station"
+          "station": "Station",
+          "status": "Statut"
+        },
+        "ActionToolTips": {
+          "deleteReservation": "Supprimer la réservation"
         },
         "alert": {
           "delete_failed": "Erreur lors de la suppression",
@@ -382,12 +395,42 @@
           "confirm_delete": "Supprimer cette réservation ?",
           "loading_error": "Erreur lors du chargement des réservations:"
         },
-        "delete" : "Supprimer",
+        "delete": "Supprimer",
         "no_reservations": "Aucune réservation trouvée.",
         "Previous": "Précédent",
         "Next": "Suivant",
         "confirm_title": "Confirmer la suppression",
         "cancel": "Annuler"
+      },
+      "pagination": {
+        "affichageDe": "Affichage de",
+        "a": "à",
+        "sur": "sur",
+        "noItem": "Aucun élément"
+      },
+      "stats": {
+        "totalReservations": "Nombre de réservations",
+        "upcomingReservations": "Réservations à venir",
+        "pastReservations": "Réservations passées"
+      },
+      "status": {
+        "upcoming": "À venir",
+        "past": "Passée"
+      },
+      "deleteDialog": {
+        "title": "Supprimer la réservation",
+        "description": "Cette action est définitive. La réservation sera supprimée.",
+        "confirm": "Supprimer",
+        "cancel": "Annuler",
+        "deleting": "Suppression..."
+      },
+      "alert": {
+        "deleteSuccess": {
+          "title": "Réservation supprimée",
+          "message": "La réservation a été supprimée avec succès."
+        },
+        "errorTitle": "Une erreur s'est produite",
+        "deleteError": "Une erreur s'est produite lors de la suppression de la réservation. Veuillez réessayer plus tard."
       }
     },
     "stations": {

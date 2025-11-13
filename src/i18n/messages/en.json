@@ -290,36 +290,36 @@
     "users": {
       "title": "Users",
       "subtitle": "Manage users on the LUDOV platform",
-      "actionBar" : {
-        "searchPlaceholder" : "Search...",
-        "addUser" : "Add",
+      "actionBar": {
+        "searchPlaceholder": "Search...",
+        "addUser": "Add",
         "toolTipRefresh": "Refresh",
-        "dropDownMenuAddUser" : {
-          "importCSV" : "Import CSV file",
-          "importCSVDescription" : "Import multiple users from a CSV file",
-          "importCSVInput" : "Choose a CSV file",
-          "importCSVSuccess" : "CSV import successful",
-          "addSingleUser" : "Add a user",
-          "addSingleUserDescription" : "Manually create a user account",
-          "addSingleUserSuccess" : "User added successfully"
+        "dropDownMenuAddUser": {
+          "importCSV": "Import CSV file",
+          "importCSVDescription": "Import multiple users from a CSV file",
+          "importCSVInput": "Choose a CSV file",
+          "importCSVSuccess": "CSV import successful",
+          "addSingleUser": "Add a user",
+          "addSingleUserDescription": "Manually create a user account",
+          "addSingleUserSuccess": "User added successfully"
         }
       },
-      "searchResult" : {
-        "noUsersFound" : "No user(s) found",
-        "noMatch" : "No user matches your search.",
-        "startByAdding" : "Start by adding your first user."
+      "searchResult": {
+        "noUsersFound": "No user(s) found",
+        "noMatch": "No user matches your search.",
+        "startByAdding": "Start by adding your first user."
       },
-      "table" : {
-        "header" : {
-          "email" : "Email",
-          "name" : "Name",
-          "role" : "Role",
-          "createdAt" : "Creation Date",
-          "actions" : "Actions"
+      "table": {
+        "header": {
+          "email": "Email",
+          "name": "Name",
+          "role": "Role",
+          "createdAt": "Creation Date",
+          "actions": "Actions"
         },
-        "ActionToolTips" : {
-          "resetPassword" : "Reset Password",
-          "deleteUser" : "Delete User"
+        "ActionToolTips": {
+          "resetPassword": "Reset Password",
+          "deleteUser": "Delete User"
         }
       },
       "stats": {
@@ -327,57 +327,70 @@
         "userNotBoarded": "User(s) not configured",
         "userWithReservations": "User(s) with reservation"
       },
-      "badge" : {
+      "badge": {
         "admin": "Administrator",
         "user": "User"
       },
-      "pagination" : {
-        "affichageDe" : "Displaying",
-        "a" : "to",
-        "sur" : "on",
-        "noItem" : "No item"
+      "pagination": {
+        "affichageDe": "Displaying",
+        "a": "to",
+        "sur": "on",
+        "noItem": "No item"
       },
-      "deleteUserDialog" : {
-        "deleteUser" : "Delete User",
-        "definitiveAction" : "This action is definitive and cannot be undone. Please confirm that you want to delete this user account.",
-        "whatGonnaHappen" : "What will happen:",
-        "theAccount" : "The account will be",
-        "deleted" : "deleted", 
-        "userWontBeAbleToLogin" : "and the user will no longer be able to log in.",
-        "reservationDeleted" : "Upcoming reservations will also be deleted.",
-        "dataDeleteAccordingToPolicy" : "Essential associated data will be removed according to your policy.",
-        "CancelDelete" : "Cancel",
-        "deletingState" : "Deleting…",
-        "confirmDelete" : "Confirm Deletion"
+      "deleteUserDialog": {
+        "deleteUser": "Delete User",
+        "definitiveAction": "This action is definitive and cannot be undone. Please confirm that you want to delete this user account.",
+        "whatGonnaHappen": "What will happen:",
+        "theAccount": "The account will be",
+        "deleted": "deleted",
+        "userWontBeAbleToLogin": "and the user will no longer be able to log in.",
+        "reservationDeleted": "Upcoming reservations will also be deleted.",
+        "dataDeleteAccordingToPolicy": "Essential associated data will be removed according to your policy.",
+        "CancelDelete": "Cancel",
+        "deletingState": "Deleting…",
+        "confirmDelete": "Confirm Deletion"
       },
-      "resetPasswordDialog" : {
-        "resetPassword" : "Reset Password",
-        "thisActionPreventLogin" : "This action will prevent the user from logging in until they set a new password.",
-        "whatWillHappen" : "What will happen:",
-        "thePasswordWillBe" : "The password will be",
+      "resetPasswordDialog": {
+        "resetPassword": "Reset Password",
+        "thisActionPreventLogin": "This action will prevent the user from logging in until they set a new password.",
+        "whatWillHappen": "What will happen:",
+        "thePasswordWillBe": "The password will be",
         "reset": "reset",
-        "inTheDatabase" : "in the database.",
-        "emailWillBeSend" : "An email informing the user of the password reset will be sent to them.",
-        "cancelReset" : "Cancel",
+        "inTheDatabase": "in the database.",
+        "emailWillBeSend": "An email informing the user of the password reset will be sent to them.",
+        "cancelReset": "Cancel",
         "resetState": "Resetting…",
-        "confirmReset" : "Confirm Reset"
+        "confirmReset": "Confirm Reset"
       }
     },
     "reservations": {
       "title": "Reservations",
-      "ReservationTable": {
-        "headers": {
+      "subtitle": "Manage LUDOV platform reservations",
+      "actionBar": {
+        "toolTipRefresh": "Search...",
+        "searchPlaceholder": "Search"
+      },
+      "searchResult": {
+        "noReservationsFound": "No reservations found",
+        "noMatch": "No reservation matches your search.",
+        "empty": "No reservations yet."
+      },
+      "table": {
+        "header": {
           "user": "User",
           "console": "Console",
           "games": "Games",
           "date": "Date",
-          "createdAt": "Creation date",
+          "time": "Time",
           "actions": "Actions",
-          "no_games": "No Games",
-          "station": "Station"
+          "station": "Station",
+          "status": "Status"
+        },
+        "ActionToolTips": {
+          "deleteReservation": "Delete reservation"
         },
         "alert": {
-          "delete_failed": "Error deleting reservation",
+          "delete_failed": "Error during deletion",
           "delete_success": "Reservation deleted",
           "confirm_delete": "Delete this reservation?",
           "loading_error": "Error loading reservations:"
@@ -386,8 +399,38 @@
         "no_reservations": "No reservations found.",
         "Previous": "Previous",
         "Next": "Next",
-        "confirm_title": "Confirm Deletion",
+        "confirm_title": "Confirm deletion",
         "cancel": "Cancel"
+      },
+      "pagination": {
+        "affichageDe": "Showing",
+        "a": "to",
+        "sur": "of",
+        "noItem": "No items"
+      },
+      "stats": {
+        "totalReservations": "Total reservations",
+        "upcomingReservations": "Upcoming reservations",
+        "pastReservations": "Past reservations"
+      },
+      "status": {
+        "upcoming": "Upcoming",
+        "past": "Past"
+      },
+      "deleteDialog": {
+        "title": "Delete reservation",
+        "description": "This action is irreversible. The reservation will be permanently deleted.",
+        "confirm": "Delete",
+        "cancel": "Cancel",
+        "deleting": "Deleting..."
+      },
+      "alert": {
+        "deleteSuccess": {
+          "title": "Reservation deleted",
+          "message": "The reservation has been successfully deleted."
+        },
+        "errorTitle": "An error occurred",
+        "deleteError": "An error occurred while deleting the reservation. Please try again later."
       }
     },
     "stations": {
