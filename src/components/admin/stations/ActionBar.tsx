@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Plus, Search, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import AddStationForm from "@/components/admin/stations/AddStationForm";
+import AddStationForm from "./AddStationForm";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
@@ -74,29 +74,28 @@ export default function CardStationStats({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
-
-        {/* <AddStationForm
+        <AddStationForm
           onSuccess={() => {
             onAlert(
               "success",
-              t(
-                "admin.station.actionBar.addStationSuccess"
-              )
+              t("admin.stations.actionBar.addStationSuccess")
             );
             onSuccess();
           }}
           onAlert={(type, message) =>
             onAlert(type as "success" | "error" | "info" | "warning", message)
           }
-          trigger={ */}
-            <Button className="bg-cyan-500 hover:bg-cyan-700 text-white shadow-md hover:shadow-lg transition-all flex-1 sm:flex-initial">
+          trigger={
+            <Button
+              className="bg-cyan-500 hover:bg-cyan-700 text-white shadow-md hover:shadow-lg transition-all flex-1 sm:flex-initial"
+            >
               <Plus className="h-4 w-4" />
               <span className="hidden md:inline">
                 {t("admin.stations.actionBar.addStation")}
               </span>
             </Button>
-          {/* }
-        /> */}
+          }
+        />
       </div>
     </div>
   );
