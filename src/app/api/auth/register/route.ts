@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import bcrypt from "bcrypt";
 import { RowDataPacket } from "mysql2";
+import { sendWelcomeEmail } from "@/lib/sendEmail";
 
 type ValidEmailRow = RowDataPacket & { validEmail: number };
 
@@ -79,12 +80,20 @@ export async function POST(request: NextRequest) {
       email,
     ]);
 
+    const response = await sendWelcomeEmail({
+      to: email,
+    });
+
+    if (response.rejected.length > 0) {
+      throw new Error();
+    }
+
     return NextResponse.json(
       { message: "Mot de passe créé avec succès!" },
       { status: 201 }
     );
   } catch (error) {
-    console.error("🔴 ERREUR INSCRIPTION:", error);
+    console.error("ERREUR INSCRIPTION:", error);
     return NextResponse.json(
       { message: "Une erreur s'est produite." },
       { status: 500 }
