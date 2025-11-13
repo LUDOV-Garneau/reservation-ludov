@@ -37,6 +37,19 @@ export async function POST(req: NextRequest) {
 
     const conn = await pool.getConnection();
     try {
+
+      const existingStation = await conn.query(
+        `SELECT id FROM stations WHERE LOWER(name) = LOWER(?)`,
+      [name.trim()]
+      );
+      if (existingStation.length > 0) {
+        conn.release();
+        return NextResponse.json(
+          { success: false, message: "Une station avec ce nom existe déjà." },
+          { status: 409 }
+        );
+      }
+
       await conn.query(
         `
         INSERT INTO stations (name, consoles, lastUpdatedAt, createdAt)

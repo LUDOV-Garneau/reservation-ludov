@@ -331,36 +331,36 @@
         "admin": "Administrator",
         "user": "User"
       },
-      "pagination" : {
-        "affichageDe" : "Displaying",
-        "a" : "to",
-        "sur" : "on",
-        "noItem" : "No item"
+      "pagination": {
+        "affichageDe": "Displaying",
+        "a": "to",
+        "sur": "on",
+        "noItem": "No item"
       },
-      "deleteUserDialog" : {
-        "deleteUser" : "Delete User",
-        "definitiveAction" : "This action is definitive and cannot be undone. Please confirm that you want to delete this user account.",
-        "whatGonnaHappen" : "What will happen:",
-        "theAccount" : "The account will be",
-        "deleted" : "deleted", 
-        "userWontBeAbleToLogin" : "and the user will no longer be able to log in.",
-        "reservationDeleted" : "Upcoming reservations will also be deleted.",
-        "dataDeleteAccordingToPolicy" : "Essential associated data will be removed according to your policy.",
-        "CancelDelete" : "Cancel",
-        "deletingState" : "Deleting…",
-        "confirmDelete" : "Confirm Deletion"
+      "deleteUserDialog": {
+        "deleteUser": "Delete User",
+        "definitiveAction": "This action is definitive and cannot be undone. Please confirm that you want to delete this user account.",
+        "whatGonnaHappen": "What will happen:",
+        "theAccount": "The account will be",
+        "deleted": "deleted",
+        "userWontBeAbleToLogin": "and the user will no longer be able to log in.",
+        "reservationDeleted": "Upcoming reservations will also be deleted.",
+        "dataDeleteAccordingToPolicy": "Essential associated data will be removed according to your policy.",
+        "CancelDelete": "Cancel",
+        "deletingState": "Deleting…",
+        "confirmDelete": "Confirm Deletion"
       },
-      "resetPasswordDialog" : {
-        "resetPassword" : "Reset Password",
-        "thisActionPreventLogin" : "This action will prevent the user from logging in until they set a new password.",
-        "whatWillHappen" : "What will happen:",
-        "thePasswordWillBe" : "The password will be",
+      "resetPasswordDialog": {
+        "resetPassword": "Reset Password",
+        "thisActionPreventLogin": "This action will prevent the user from logging in until they set a new password.",
+        "whatWillHappen": "What will happen:",
+        "thePasswordWillBe": "The password will be",
         "reset": "reset",
-        "inTheDatabase" : "in the database.",
-        "emailWillBeSend" : "An email informing the user of the password reset will be sent to them.",
-        "cancelReset" : "Cancel",
+        "inTheDatabase": "in the database.",
+        "emailWillBeSend": "An email informing the user of the password reset will be sent to them.",
+        "cancelReset": "Cancel",
         "resetState": "Resetting…",
-        "confirmReset" : "Confirm Reset"
+        "confirmReset": "Confirm Reset"
       }
     },
     "reservations": {
@@ -432,7 +432,8 @@
           "missingFields": "Please fill in all fields",
           "invalidConsole": "Invalid console",
           "consoleAlreadyAdded": "The console has already been added",
-          "consoleFetch": "Error fetching consoles"
+          "consoleFetch": "Error fetching consoles",
+          "nameConflict": "A station with this name already exists"
         },
         "alerts": {
           "addStationSuccess": "Station added successfully",
