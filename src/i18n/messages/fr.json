@@ -466,6 +466,21 @@
         "alerts": {
           "addStationSuccess": "Station ajoutée avec succès",
           "addStationError": "Erreur lors de l'ajout"
+        },
+      "deleteStationDialog": {
+        "deleteStation": "Supprimer la station",
+        "definitiveAction": "Cette action est définitive. La station ne sera plus accessible.",
+        "whatGonnaHappen": "Ce qui va se passer :",
+        "theStation": "La station sera",
+        "deleted": "supprimée",
+        "stationWontBeAccessible": " et ne sera plus accessible.",
+        "reservationDeleted": "Les réservations à venir seront également supprimées.",
+        "CancelDelete": "Annuler la suppression",
+        "deletingState": "Suppression...",
+        "confirmDelete": "Confirmer la suppresion",
+        "alerts":{
+          "deleteSuccess": "Station supprimée avec succès",
+          "deleteError": "Erreur lors de la suppression"
         }
       }
     },

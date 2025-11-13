@@ -466,6 +466,21 @@
         "alerts": {
           "addStationSuccess": "Station added successfully",
           "addStationError": "Error adding station"
+        },
+      "deleteStationDialog": {
+        "deleteStation": "Delete station",
+        "definitiveAction": "This action is non-reversible. The station will not be accessible anymore.",
+        "whatGonnaHappen": "What will happen:",
+        "theStation": "The station will be",
+        "deleted": "deleted",
+        "stationWontBeAccessible": " and will not be accessible anymore.",
+        "reservationDeleted": "Upcoming reservations will also be deleted.",
+        "CancelDelete": "Cancel deletion",
+        "deletingState": "Deleting…",
+        "confirmDelete": "Confirm deletion",
+        "alerts":{
+          "deleteSuccess": "Station deleted successfully",
+          "deleteError": "Error deleting station"
         }
       }
     },

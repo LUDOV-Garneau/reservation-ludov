@@ -50,6 +50,7 @@ import CardStationStats from "./CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
+import DeleteStationAction from "./DialogConfirmationDeleteStation";
 
 type Station = {
   id: number;
@@ -115,12 +116,18 @@ function usePagination(
 
 function StationTableRow({
   station,
-  onDelete,
+  onAlert,
+  onSuccess,
   onUpdate,
 }: {
   station: Station;
-  onDelete: (stationId: number, name: string) => void;
-  onUpdate: (stationId: number, name: string) => void;
+  onAlert: (
+    type: "success" | "error" | "info" | "warning",
+    message: string,
+    title?: string
+  ) => void;
+  onSuccess: () => void;
+  onUpdate: (stationId: number, stationName: string) => void;
 }) {
   const t = useTranslations();
   return (
@@ -138,15 +145,21 @@ function StationTableRow({
               </span>
             ))
           ) : (
-            <p className="text-gray-500 italic">{t("admin.stations.table.noPlatforms")}</p>
+            <p className="text-gray-500 italic">
+              {t("admin.stations.table.noPlatforms")}
+            </p>
           )}
         </div>
       </TableCell>
       <TableCell className="hidden lg:table-cell">
         {station.isActive ? (
-          <span className="text-green-600 font-medium">{t("admin.stations.table.active")}</span>
+          <span className="text-green-600 font-medium">
+            {t("admin.stations.table.active")}
+          </span>
         ) : (
-          <span className="text-red-600 font-medium">{t("admin.stations.table.inactive")}</span>
+          <span className="text-red-600 font-medium">
+            {t("admin.stations.table.inactive")}
+          </span>
         )}
       </TableCell>
       <TableCell className="hidden lg:table-cell">
@@ -178,25 +191,37 @@ function StationTableRow({
               </Tooltip>
             </TooltipProvider>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDelete(station.id, station.name)}
-                    className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    {t("admin.stations.table.ActionToolTips.deleteStation")}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <DeleteStationAction
+              targetStation={{ id: station.id, name: station.name }}
+              onAlert={onAlert}
+              onSuccess={onSuccess}
+            >
+              {({ open, loading }) => (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={open}
+                        disabled={loading}
+                        className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
+                        aria-label={t(
+                          "admin.stations.table.ActionToolTips.deleteStation"
+                        )}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {t("admin.stations.table.ActionToolTips.deleteStation")}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </DeleteStationAction>
           </div>
 
           <div className="sm:hidden">
@@ -214,13 +239,28 @@ function StationTableRow({
                   {t("admin.stations.table.ActionToolTips.updateStation")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => onDelete(station.id, station.name)}
-                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                <DeleteStationAction
+                  targetStation={{ id: station.id, name: station.name }}
+                  onAlert={onAlert}
+                  onSuccess={onSuccess}
                 >
-                  <Trash2 className="h-4 w-4 mr-2 text-red-600" />
-                  {t("admin.stations.table.ActionToolTips.deleteStation")}
-                </DropdownMenuItem>
+                  {({ open }) => (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        open();
+                      }}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                      }}
+                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                      {t("admin.stations.table.ActionToolTips.deleteStation")}
+                    </DropdownMenuItem>
+                  )}
+                </DeleteStationAction>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -490,7 +530,9 @@ export default function StationsTable() {
         loading={metricsLoading}
         activeStationsCount={totalActiveStations ?? 0}
         inactiveStationsCount={totalInactiveStations ?? 0}
-        mostUsed={stationMostReservations ?? t("admin.stations.stats.noReservations")}
+        mostUsed={
+          stationMostReservations ?? t("admin.stations.stats.noReservations")
+        }
       />
 
       <ModernAlert alert={alert} onClose={clearAlert} />
@@ -541,9 +583,8 @@ export default function StationsTable() {
                       <StationTableRow
                         key={station.id}
                         station={station}
-                        onDelete={() =>
-                          console.log("Delete station", station.id)
-                        }
+                        onAlert={showAlert}
+                        onSuccess={handleRefresh}
                         onUpdate={() =>
                           console.log("Update station", station.id)
                         }
