@@ -360,7 +360,35 @@
         "emailWillBeSend": "Un courriel informant l'utilisateur de la réinitialisation de son mot de passe sera envoyé.",
         "cancelReset": "Annuler la réinitialisation",
         "resetState": "Réinitialisation...",
-        "confirmReset": "Confirmer la réinitialisation"
+        "confirmReset" : "Confirmer la réinitialisation"
+      },
+      "addUserForm" : {
+        "errorMessage" : {
+          "firstnameRequired" : "Le prénom est requis.",
+          "firstnameLength" : "Le prénom doit contenir au moins 2 caractères.",
+          "lastnameRequired" : "Le nom de famille est requis.",
+          "lastnameLength" : "Le nom de famille doit contenir au moins 2 caractères.",
+          "emailRequired" : "L'adresse courriel est requise.",
+          "emailInvalid" : "L'adresse courriel est invalide.",
+          "emailLength" : "L'adresse courriel est trop longue.",
+          "userAlreadyExists" : "Un utilisateur avec ce courriel existe déjà.",
+          "genericError" : "Une erreur s'est produite. Veuillez réessayer."
+        },
+        "userAddedSuccess" : "Utilisateur ajouté avec succès.",
+        "userAdded" : "Utilisateur ajouté !",
+        "addUser" : "Ajouter un utilisateur",
+        "wasCreatedSuccessfully" : "a été créé avec succès.",
+        "form" : {
+          "firstName" : "Prénom",
+          "lastName" : "Nom de famille",
+          "email" : "Adresse courriel",
+          "adminAccess": "Accès administrateur",
+          "active": "Actif",
+          "adminAcessDescription": "Donne accès au panneau d’administration et aux actions sensibles. À réserver au personnel de confiance.",
+          "cancel" : "Annuler",
+          "submit" : "Ajouter l'utilisateur",
+          "submitting" : "Ajout en cours..."
+        }
       }
     },
     "reservations": {
