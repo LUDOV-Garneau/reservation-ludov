@@ -5,26 +5,26 @@ import { RowDataPacket } from "mysql2/promise";
 
 export async function GET(req: NextRequest) {
   try {
-    // const token = req.cookies.get("SESSION")?.value;
-    // if (!token) {
-    //   return NextResponse.json(
-    //     { success: false, message: "Unauthorized" },
-    //     { status: 401 }
-    //   );
-    // }
-    // const user = verifyToken(token);
-    // if (!user?.id) {
-    //   return NextResponse.json(
-    //     { success: false, message: "Unauthorized" },
-    //     { status: 401 }
-    //   );
-    // }
-    // if (!user.isAdmin) {
-    //   return NextResponse.json(
-    //     { success: false, message: "Forbidden" },
-    //     { status: 403 }
-    //   );
-    // }
+    const token = req.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    if (!user.isAdmin) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
+      );
+    }
     const conn = await pool.getConnection();
 
     // Fetch count stations active

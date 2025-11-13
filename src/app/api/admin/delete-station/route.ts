@@ -5,20 +5,20 @@ import { verifyToken } from "@/lib/jwt";
 
 export async function DELETE(req: NextRequest) {
   try {
-    // const token = req.cookies.get("SESSION")?.value;
+    const token = req.cookies.get("SESSION")?.value;
 
-    // if (!token) {
-    //   return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-    // }
+    if (!token) {
+      return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+    }
 
-    // const user = verifyToken(token);
-    // if (!user?.id) {
-    //   return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    // }
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
 
-    // if (!user.isAdmin) {
-    //   return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-    // }
+    if (!user.isAdmin) {
+      return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+    }
 
     const body = await req.json();
 
