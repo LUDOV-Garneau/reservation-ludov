@@ -62,7 +62,6 @@ export default function DateSelection() {
 
         const data = await response.json();
         const dates = data?.unavailableDates as DatesBlocked;
-        console.log(dates);
 
         setUnavailableDates(dates);
       } catch (err) {

@@ -3,20 +3,28 @@ import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
 import { verifyToken } from "@/lib/jwt";
 
-interface ReservationRow extends RowDataPacket {
+type ReservationRow = RowDataPacket & {
   time: string;
   console_id: number;
   game1_id: number | null;
   game2_id: number | null;
   game3_id: number | null;
   accessoirs: string;
-}
+};
 
 type WeeklyHoursRow = RowDataPacket & {
   start_hour: string;
   start_minute: string;
   end_hour: string;
   end_minute: string;
+};
+
+type UserReservationRow = RowDataPacket & {
+  console_type_id: number;
+};
+
+type ConsoleTypeRow = RowDataPacket & {
+  console_type_id: number;
 };
 
 type SpecificHoursRow = WeeklyHoursRow & { is_exception: boolean };
@@ -82,8 +90,18 @@ function mergeRanges(ranges: Range[]): Range[] {
 
 function computeValidRanges(
   weeklyHours: WeeklyHoursRow[],
-  specificHours: SpecificHoursRow[]
+  specificHours: SpecificHoursRow[],
+  userReservations: UserReservationRow[],
+  consoleTypeId: number | null
 ) {
+  if (consoleTypeId) {
+    for (const { console_type_id } of userReservations) {
+      if (consoleTypeId == console_type_id) {
+        return [];
+      }
+    }
+  }
+
   let validRanges: Range[] = weeklyHours.map((r) => ({
     start: toMinutes(r.start_hour, r.start_minute),
     end: toMinutes(r.end_hour, r.end_minute),
@@ -102,9 +120,7 @@ function computeValidRanges(
     }
   }
 
-  validRanges = mergeRanges(validRanges);
-
-  return validRanges;
+  return mergeRanges(validRanges);
 }
 
 function generateAllTimeSlots(): string[] {
@@ -271,6 +287,15 @@ export async function GET(request: NextRequest) {
           .filter((id) => !isNaN(id))
       : [];
 
+    const [consoleType] = await pool.query<ConsoleTypeRow[]>(
+      `SELECT console_type_id
+       FROM reservation_hold
+       WHERE user_id = ?
+        AND console_id = ?
+       LIMIT 1`,
+      [user.id, consoleId]
+    );
+
     const [reservations] = await pool.query<ReservationRow[]>(
       `SELECT time, console_id, game1_id, game2_id, game3_id, accessory_ids 
        FROM reservation 
@@ -307,7 +332,23 @@ export async function GET(request: NextRequest) {
       [dayName, date, date]
     );
 
-    const validRanges = computeValidRanges(weeklyHours, specificHours);
+    const [userReservations] = await pool.query<UserReservationRow[]>(
+      `
+        SELECT console_type_id
+        FROM reservation
+        WHERE user_id = ?
+          AND date = ?
+          AND archived = 0
+      `,
+      [user.id, date]
+    );
+
+    const validRanges = computeValidRanges(
+      weeklyHours,
+      specificHours,
+      userReservations,
+      consoleType[0]?.console_type_id || null
+    );
 
     const SESSION_DURATION_HOURS = 2;
     const SESSION_DURATION_MINUTES = SESSION_DURATION_HOURS * 60;
