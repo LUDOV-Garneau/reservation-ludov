@@ -324,7 +324,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-sm font-semibold text-red-900 dark:text-red-100">
-                Échec de l'import
+                Échec de l&apos;import
               </h4>
               {fileName && (
                 <div className="flex items-center gap-2 mt-1">
