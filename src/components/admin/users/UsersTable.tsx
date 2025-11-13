@@ -16,6 +16,7 @@ import ActionBar from "./ActionBar";
 import PaginationControls from "./Pagination";
 import ResetPasswordAction from "./DialogConfirmationResetsPassword";
 import DeleteUserAction from "./DialogConfirmationDeleteUser";
+import { useRouter } from "next/navigation";
 
 type User = {
   id: number;
@@ -104,25 +105,41 @@ function UserTableRow({
   isCurrentUser,
   onAlert,
   onSuccess,
+  onRowClick,
 }: {
   user: User;
   isCurrentUser: boolean;
   onAlert: (type: "success" | "error" | "info" | "warning", message: string, title?: string) => void;
   onSuccess: () => void;
+  onRowClick: (user: User) => void;
 }) {
   const t = useTranslations();
+  const router = useRouter();
+
+  const handleRowClick = () => {
+    router.push(`/admin/user/${user.id}`);
+  }
+
   return (
-    <TableRow key={user.id} className="hover:bg-gray-200">
+    <TableRow
+      key={user.id}
+      className="hover:bg-gray-100 cursor-pointer"
+      onClick={handleRowClick}
+    >
       <TableCell className="hidden lg:table-cell">{user.email}</TableCell>
       <TableCell>{user.firstName} {user.lastName}</TableCell>
-      <TableCell className="hidden md:table-cell"><RoleBadge isAdmin={user.isAdmin} /></TableCell>
+      <TableCell className="hidden md:table-cell">
+        <RoleBadge isAdmin={user.isAdmin} />
+      </TableCell>
       <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(user.createdAt).toLocaleDateString("fr-FR")}</span>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell
+        onClick={(e) => e.stopPropagation()}
+      >
         {!isCurrentUser ? (
           <div className="">
             <div className="hidden sm:flex gap-2">
@@ -138,7 +155,10 @@ function UserTableRow({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={open}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            open();
+                          }}
                           disabled={loading}
                           className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
                           aria-label={t("admin.users.table.ActionToolTips.resetPassword")}
@@ -166,7 +186,10 @@ function UserTableRow({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={open}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            open();
+                          }}
                           disabled={loading}
                           className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
                           aria-label={t("admin.users.table.ActionToolTips.deleteUser")}
@@ -186,7 +209,12 @@ function UserTableRow({
             <div className="sm:hidden">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Menu className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -340,6 +368,9 @@ export default function UsersTable() {
 
   const pagination = usePagination(total, ITEMS_PER_PAGE);
 
+  const [selectedUser, setSelectedUser] = useState<number | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
   useEffect(() => {
     const userId = getCurrentUserIdFromCookie();
     setCurrentUserId(userId);
@@ -429,6 +460,11 @@ export default function UsersTable() {
     setIsRefreshing(false);
   }, [pagination.page, pagination.itemsPerPage]);
 
+  const handleRowClick = useCallback((user: User) => {
+    setSelectedUser(user.id);
+    setIsDetailsOpen(true);
+  }, []);
+
   return (
     <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
       <div className="flex flex-col gap-1 sm:gap-2">
@@ -488,6 +524,7 @@ export default function UsersTable() {
                         isCurrentUser={currentUserId !== null && user.id === currentUserId}
                         onAlert={showAlert}
                         onSuccess={handleRefresh}
+                        onRowClick={handleRowClick}
                       />
                     ))}
                   </TableBody>
