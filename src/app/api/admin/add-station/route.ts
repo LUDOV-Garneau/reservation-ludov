@@ -38,11 +38,12 @@ export async function POST(req: NextRequest) {
     const conn = await pool.getConnection();
     try {
 
-      const existingStation = await conn.query(
+      const [existingStation] = await conn.query(
         `SELECT id FROM stations WHERE LOWER(name) = LOWER(?)`,
       [name.trim()]
       );
-      if (existingStation.length > 0) {
+      console.log("Existing station check result:", existingStation);
+      if (Array.isArray(existingStation) && existingStation.length > 0) {
         conn.release();
         return NextResponse.json(
           { success: false, message: "Une station avec ce nom existe déjà." },

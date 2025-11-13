@@ -156,7 +156,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
                 onValueChange={setSelectedConsoleId}
               >
                 <SelectTrigger className="max-w-full truncate">
-                  <SelectValue placeholder="Sélectionner une console" />
+                  <SelectValue placeholder={t("placeholders.selectConsole")} />
                 </SelectTrigger>
 
                 <SelectContent>

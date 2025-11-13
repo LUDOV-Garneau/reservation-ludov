@@ -414,30 +414,30 @@
           "openDialog": "Ajouter une station",
           "loading": "Ajout...",
           "submit": "Ajouter",
-          "addConsole": "Ajouter une console"
+          "addConsole": "Ajouter une plateforme"
         },
         "titles": {
           "dialogTitle": "Ajouter une station"
         },
         "fields": {
           "name": "Nom",
-          "consoles": "Consoles disponibles",
+          "consoles": "Plateformes disponibles",
           "stationName": "Nom de la station"
         },
         "placeholders": {
-          "selectConsole": "Sélectionner une console",
+          "selectConsole": "Sélectionner une plateforme",
           "stationName": "Entrez le nom de la station"
         },
         "errors": {
           "missingFields": "Veuillez remplir tous les champs",
           "invalidConsole": "Console invalide",
           "consoleAlreadyAdded": "La console a déjà été ajoutée",
-          "consoleFetch": "Erreur lors de la récupération des consoles",
+          "consoleFetch": "Erreur lors de la récupération des plateformes",
           "nameConflict": "Une station avec ce nom existe déjà"
         },
         "alerts": {
           "addStationSuccess": "Station ajoutée avec succès",
-          "addStationError": "Erreur lors de l’ajout"
+          "addStationError": "Erreur lors de l'ajout"
         }
       }
     },
