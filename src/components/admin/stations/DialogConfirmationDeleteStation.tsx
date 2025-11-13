@@ -35,7 +35,7 @@ export default function DeleteStationAction({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const t = useTranslations("admin.station.deleteStationDialog");
+  const t = useTranslations("admin.stations.deleteStationDialog");
 
   async function handleConfirm() {
     setLoading(true);

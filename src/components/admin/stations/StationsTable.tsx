@@ -50,7 +50,7 @@ import CardStationStats from "./CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
-import DeleteStationAction from "./DialogConfirmationDeleteUser";
+import DeleteStationAction from "./DialogConfirmationDeleteStation";
 
 type Station = {
   id: number;
