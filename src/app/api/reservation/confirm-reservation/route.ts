@@ -37,7 +37,6 @@ export async function POST(req: Request) {
   const connection = await pool.getConnection();
 
   try {
-    // cookies() est synchrone
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;

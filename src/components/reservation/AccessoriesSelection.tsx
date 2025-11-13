@@ -154,12 +154,7 @@ export default function AccessoriesSelection() {
                   </div>
                 </div>
                 <p className="text-sm text-gray-500">
-                  {selectedAccessories.length === 0
-                    ? t("reservation.accessory.empty_selection")
-                    : t("reservation.accessory.selected_count", {
-                        count: selectedAccessories.length,
-                        plural: selectedAccessories.length > 1 ? "s" : "",
-                      })}
+                  {t("reservation.accessory.selected_count", { count: selectedAccessories.length })}
                 </p>
               </div>
 

@@ -79,11 +79,11 @@
       "select_up_to_3": "Select up to 3 games",
       "go_through_library": "Browse through the library to choose",
       "saving": "Saving...",
-      "continue": "Continue",
+      "continue": "{count, plural, =0 {Continue} one {Continue (# game)} other {Continue (# games)}}",
       "game_library": "Game library",
       "searchPlaceholder": "Search for a game...",
       "searching": "Searching...",
-      "gamesAvailable": "{count} game{plural} available{plural}",
+      "gamesAvailable": "{count, plural, =0 {No games available} one {# game available} other {# games available}}",
       "displayed": "Displayed: {count}",
       "loading": "Loading games...",
       "noResult": "No game found for \"{search}\"",
@@ -97,7 +97,7 @@
     },
     "course": {
       "selectionTitle": "Course Selection",
-      "instruction": "Please choose the course you want to enroll in.",
+      "instruction": "Please select the course for which you are making a reservation.",
       "courseLabel": "Course",
       "loading": "Loading...",
       "chooseCourse": "Choose a course",
@@ -129,7 +129,7 @@
       "skip_step": "Skip this step",
       "previousStep": "Previous step",
       "selection": "Selection",
-      "selected_count": "{count} accessory selected{plural}",
+      "selected_count": "{count, plural, =0 {No accessories selected} one {# accessory selected} other {# accessories selected}}",
       "remove_aria_label": "Remove",
       "accessoryName": "Accessory name...",
       "noAccessoryFound": "No accessory found"
@@ -139,6 +139,7 @@
       "noValidDate": "No available timeslots",
       "continueBtn": "Continue",
       "errorLoadTimes": "Error loading times",
+      "errorLoadDates": "Error loading unavailable dates",
       "errorServer": "Server error",
       "allSlotsTaken": "All timeslots are booked for this date",
       "selectDate": "Select a date and time for your reservation",
@@ -287,7 +288,80 @@
   },
   "admin": {
     "users": {
-      "title": "Users"
+      "title": "Users",
+      "subtitle": "Manage users on the LUDOV platform",
+      "actionBar" : {
+        "searchPlaceholder" : "Search...",
+        "addUser" : "Add",
+        "toolTipRefresh": "Refresh",
+        "dropDownMenuAddUser" : {
+          "importCSV" : "Import CSV file",
+          "importCSVDescription" : "Import multiple users from a CSV file",
+          "importCSVInput" : "Choose a CSV file",
+          "importCSVSuccess" : "CSV import successful",
+          "addSingleUser" : "Add a user",
+          "addSingleUserDescription" : "Manually create a user account",
+          "addSingleUserSuccess" : "User added successfully"
+        }
+      },
+      "searchResult" : {
+        "noUsersFound" : "No user(s) found",
+        "noMatch" : "No user matches your search.",
+        "startByAdding" : "Start by adding your first user."
+      },
+      "table" : {
+        "header" : {
+          "email" : "Email",
+          "name" : "Name",
+          "role" : "Role",
+          "createdAt" : "Creation Date",
+          "actions" : "Actions"
+        },
+        "ActionToolTips" : {
+          "resetPassword" : "Reset Password",
+          "deleteUser" : "Delete User"
+        }
+      },
+      "stats": {
+        "totalUsers": "Number of user(s)",
+        "userNotBoarded": "User(s) not configured",
+        "userWithReservations": "User(s) with reservation"
+      },
+      "badge" : {
+        "admin": "Administrator",
+        "user": "User"
+      },
+      "pagination" : {
+        "affichageDe" : "Displaying",
+        "a" : "to",
+        "sur" : "on",
+        "noItem" : "No item"
+      },
+      "deleteUserDialog" : {
+        "deleteUser" : "Delete User",
+        "definitiveAction" : "This action is definitive and cannot be undone. Please confirm that you want to delete this user account.",
+        "whatGonnaHappen" : "What will happen:",
+        "theAccount" : "The account will be",
+        "deleted" : "deleted", 
+        "userWontBeAbleToLogin" : "and the user will no longer be able to log in.",
+        "reservationDeleted" : "Upcoming reservations will also be deleted.",
+        "dataDeleteAccordingToPolicy" : "Essential associated data will be removed according to your policy.",
+        "CancelDelete" : "Cancel",
+        "deletingState" : "Deleting…",
+        "confirmDelete" : "Confirm Deletion"
+      },
+      "resetPasswordDialog" : {
+        "resetPassword" : "Reset Password",
+        "thisActionPreventLogin" : "This action will prevent the user from logging in until they set a new password.",
+        "whatWillHappen" : "What will happen:",
+        "thePasswordWillBe" : "The password will be",
+        "reset": "reset",
+        "inTheDatabase" : "in the database.",
+        "emailWillBeSend" : "An email informing the user of the password reset will be sent to them.",
+        "cancelReset" : "Cancel",
+        "resetState": "Resetting…",
+        "confirmReset" : "Confirm Reset"
+      }
     },
     "reservations": {
       "title": "Reservations"

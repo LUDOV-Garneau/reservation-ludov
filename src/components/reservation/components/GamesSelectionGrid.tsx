@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Search, Check, Gamepad2, Loader2 } from "lucide-react";
@@ -43,51 +43,10 @@ export default function GameSelectionGrid({
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchDebounce, setSearchDebounce] = useState("");
   const [totalGames, setTotalGames] = useState(0);
-  const consoleId = consoleSelectedId || null;
 
   const observerTarget = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Only depend on `t` and `consoleId`
-  const loadGames = useCallback(
-    async (pageNum: number, searchQuery: string, reset: boolean = false) => {
-      // Don't use loading or hasMore as dependency here
-      if (loading || (!hasMore && !reset)) return;
-
-      setLoading(true);
-
-      try {
-        const params = new URLSearchParams({
-          page: String(pageNum),
-          limit: String(ITEMS_PER_PAGE),
-          ...(searchQuery && { search: searchQuery }),
-        });
-
-        const res = await fetch(
-          `/api/reservation/games?${params}&consoleId=${consoleId}`
-        );
-        if (!res.ok) throw new Error(t("reservation.games.errorLoading"));
-
-        const data = await res.json();
-
-        if (reset) {
-          setGames(data.games || []);
-          setPage(1);
-        } else {
-          setGames((prev) => [...prev, ...(data.games || [])]);
-        }
-
-        setHasMore(data.hasMore || false);
-        setTotalGames(data.pagination?.total || 0);
-      } catch (err) {
-        console.error(t("reservation.games.errorLoading"), err);
-      } finally {
-        setLoading(false);
-        setInitialLoading(false);
-      }
-    },
-    [t, consoleId, loading, hasMore]
-  );
+  const fetchIdRef = useRef(0);
 
   useEffect(() => {
     if (searchTimeoutRef.current) {
@@ -105,29 +64,75 @@ export default function GameSelectionGrid({
     };
   }, [search]);
 
-  // MAIN FETCH: Only reset cursor/pagination on search change
+  const loadGames = async (
+    pageNum: number,
+    searchQuery: string,
+    reset: boolean = false
+  ) => {
+    if (loading || (!hasMore && !reset)) return;
+
+    const currentFetchId = ++fetchIdRef.current;
+
+    setLoading(true);
+
+    try {
+      const params = new URLSearchParams({
+        page: String(pageNum),
+        limit: String(ITEMS_PER_PAGE),
+        ...(searchQuery && { search: searchQuery }),
+      });
+
+      const res = await fetch(
+        `/api/reservation/games?${params}&consoleId=${consoleSelectedId}`
+      );
+
+      if (currentFetchId !== fetchIdRef.current) {
+        return;
+      }
+
+      if (!res.ok) throw new Error(t("reservation.games.errorLoading"));
+
+      const data = await res.json();
+
+      if (reset) {
+        setGames(data.games || []);
+        setPage(pageNum);
+      } else {
+        setGames((prev) => [...prev, ...(data.games || [])]);
+      }
+
+      setHasMore(data.hasMore || false);
+      setTotalGames(data.pagination?.total || 0);
+    } catch (err) {
+      console.error(t("reservation.games.errorLoading"), err);
+    } finally {
+      if (currentFetchId === fetchIdRef.current) {
+        setLoading(false);
+        setInitialLoading(false);
+      }
+    }
+  };
+
   useEffect(() => {
     setGames([]);
     setPage(1);
     setHasMore(true);
-    loadGames(1, searchDebounce, true);
-    // Only dependencies that can change: searchDebounce, t, consoleId
-    // loading/hasMore are excluded as they're managed in effect
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchDebounce, t, consoleId]);
+    setInitialLoading(true);
+    fetchIdRef.current++;
 
-  // Intersection observer: only fetch on explicit page increments
+    loadGames(1, searchDebounce, true);
+  }, [searchDebounce, consoleSelectedId]);
+
+  // Intersection Observer pour l'infinite scroll
   useEffect(() => {
+    if (search || !hasMore || loading) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0].isIntersecting &&
-          hasMore &&
-          !loading &&
-          !search &&
-          page > 1
-        ) {
-          loadGames(page, searchDebounce, false);
+        if (entries[0].isIntersecting) {
+          const nextPage = page + 1;
+          setPage(nextPage);
+          loadGames(nextPage, searchDebounce, false);
         }
       },
       { threshold: 0.1 }
@@ -143,12 +148,14 @@ export default function GameSelectionGrid({
         observer.unobserve(currentTarget);
       }
     };
-  }, [page, hasMore, loading, search, searchDebounce, loadGames]);
+  }, [page, hasMore, loading, search, searchDebounce]);
 
-  // Manual "Load more" : only change page when not loading, not finished
+  // Gestion du scroll manuel pour la recherche
   const handleLoadMore = () => {
     if (!loading && hasMore) {
-      setPage((prev) => prev + 1);
+      const nextPage = page + 1;
+      setPage(nextPage);
+      loadGames(nextPage, searchDebounce, false);
     }
   };
 
@@ -164,6 +171,8 @@ export default function GameSelectionGrid({
             className="pl-10 h-11 text-base rounded-lg"
           />
         </div>
+
+        {/* Statistiques */}
         <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
           <div>
             {search && loading ? (
@@ -174,8 +183,7 @@ export default function GameSelectionGrid({
             ) : totalGames > 0 ? (
               <span>
                 {t("reservation.games.gamesAvailable", {
-                  count: totalGames,
-                  plural: totalGames > 1 ? "s" : "",
+                  count: totalGames
                 })}
               </span>
             ) : null}
@@ -188,6 +196,7 @@ export default function GameSelectionGrid({
         </div>
       </div>
 
+      {/* État de chargement initial */}
       {initialLoading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 className="h-10 w-10 animate-spin text-cyan-500 mb-4" />
@@ -212,6 +221,7 @@ export default function GameSelectionGrid({
         </div>
       ) : (
         <>
+          {/* Grille des jeux */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
             {games.map((game) => {
               const isSelected = selectedIds.includes(game.id);
@@ -229,13 +239,13 @@ export default function GameSelectionGrid({
                     relative group rounded-xl overflow-hidden shadow-md
                     transition-all duration-200
                     ${isSelected ? "ring-2 ring-cyan-500 scale-[0.98]" : ""}
-                    ${
-                      isDisabled
-                        ? "opacity-60 cursor-not-allowed"
-                        : "cursor-pointer hover:shadow-xl hover:scale-[1.02]"
+                    ${isDisabled
+                      ? "opacity-60 cursor-not-allowed"
+                      : "cursor-pointer hover:shadow-xl hover:scale-[1.02]"
                     }
                   `}
                 >
+                  {/* Image du jeu */}
                   <div className="relative h-96">
                     {game.picture === null ? (
                       <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -253,22 +263,26 @@ export default function GameSelectionGrid({
                       </div>
                     )}
 
+                    {/* Overlay au hover */}
                     <div
                       className={`${
                         game.picture !== null &&
                         "2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity"
-                      } absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`}
+                        } absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`}
                     />
+
+                    {/* Badge sélectionné */}
                     {isSelected && (
                       <div className="absolute top-2 right-1 bg-cyan-500 rounded-full p-2 shadow-lg animate-in zoom-in-50">
                         <Check className="h-4 w-4 text-white" strokeWidth={3} />
                       </div>
                     )}
+
                     <div
                       className={`${
                         game.picture !== null &&
                         "2xl:group-hover:opacity-100 2xl:transition-opacity 2xl:opacity-0"
-                      } absolute bottom-0 left-0 right-0 p-4`}
+                        } absolute bottom-0 left-0 right-0 p-4`}
                     >
                       <div className="flex flex-col gap-4 items-center">
                         <p className="text-white text-lg font-bold line-clamp-2">
@@ -296,7 +310,7 @@ export default function GameSelectionGrid({
             })}
           </div>
 
-          {/* Infinite scroll only triggers when ref comes into view and page > 1 */}
+          {/* Observer target pour l'infinite scroll */}
           {!search && (
             <div ref={observerTarget} className="flex justify-center py-4">
               {loading && hasMore && (
@@ -314,7 +328,7 @@ export default function GameSelectionGrid({
             </div>
           )}
 
-          {/* Manual load more button */}
+          {/* Bouton "Charger plus" pour la recherche */}
           {search && hasMore && !loading && (
             <div className="flex justify-center pt-4">
               <button
@@ -330,3 +344,4 @@ export default function GameSelectionGrid({
     </div>
   );
 }
+
