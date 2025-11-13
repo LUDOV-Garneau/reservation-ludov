@@ -151,7 +151,7 @@ export async function GET(req: Request) {
     }
 
     const r = rows[0];
-
+  
     if (r.expiresIn <= 0) {
       return NextResponse.json({ success: false, message: "La réservation a expiré" }, { status: 410 });
     }
@@ -191,15 +191,10 @@ export async function GET(req: Request) {
     let accessories: Accessoire[] = [];
     let accIds: number[] = [];
 
-    if (r.accessoirs) {
-      try {
-        const parsed = JSON.parse(r.accessoirs);
-        if (Array.isArray(parsed)) {
-          accIds = parsed.filter((item) => typeof item === "number");
-        }
-      } catch (_) {
-        accIds = [];
-      }
+    if (Array.isArray(r.accessoirs)) {
+      accIds = r.accessoirs.filter((item) => typeof item === "number");
+    } else {
+      accIds = [];
     }
 
     if (accIds.length > 0) {

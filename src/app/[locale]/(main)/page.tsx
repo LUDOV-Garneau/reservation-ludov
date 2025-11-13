@@ -1,6 +1,5 @@
-"use client";
-
 import AccueilReservations from "@/components/reservation/AccueilReservation";
+
 
 // export const metadata: Metadata = {
 //   title: "Module de réservation LUDOV",
