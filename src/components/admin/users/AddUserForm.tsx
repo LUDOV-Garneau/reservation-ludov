@@ -17,6 +17,7 @@ import {
   AlertCircle,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   onSuccess?: () => void;
@@ -48,6 +49,8 @@ export default function AddUserFormDialog({
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
 
+  const t = useTranslations("admin.users.addUserForm");
+
   const resetForm = () => {
     setFirstname("");
     setLastname("");
@@ -68,31 +71,24 @@ export default function AddUserFormDialog({
     const last = values.lastname.trim();
     const mail = values.email.trim();
 
-    // Prénom
     if (!first) {
-      newErrors.firstname = "Le prénom est requis.";
+      newErrors.firstname = t("errorMessage.firstnameRequired");
     } else if (first.length < 2) {
-      newErrors.firstname = "Le prénom doit contenir au moins 2 caractères.";
-    } else if (first.length > 50) {
-      newErrors.firstname = "Le prénom est trop long (max. 50 caractères).";
+      newErrors.firstname = t("errorMessage.firstnameLength");
     }
 
-    // Nom
     if (!last) {
-      newErrors.lastname = "Le nom est requis.";
+      newErrors.lastname = t("errorMessage.lastnameRequired");
     } else if (last.length < 2) {
-      newErrors.lastname = "Le nom doit contenir au moins 2 caractères.";
-    } else if (last.length > 50) {
-      newErrors.lastname = "Le nom est trop long (max. 50 caractères).";
+      newErrors.lastname = t("errorMessage.lastnameLength");
     }
 
-    // Email
     if (!mail) {
-      newErrors.email = "L'adresse email est requise.";
+      newErrors.email = t("errorMessage.emailRequired");
     } else if (!EMAIL_REGEX.test(mail)) {
-      newErrors.email = "L'adresse email n'est pas valide.";
+      newErrors.email = t("errorMessage.emailInvalid");
     } else if (mail.length > 255) {
-      newErrors.email = "L'adresse email est trop longue.";
+      newErrors.email = t("errorMessage.emailLength");
     }
 
     return newErrors;
@@ -140,7 +136,7 @@ export default function AddUserFormDialog({
           data?.error || "Erreur lors de l'ajout de l'utilisateur.";
 
         if (data?.error?.toLowerCase().includes("existe déjà")) {
-          message = "Cet utilisateur existe déjà.";
+          message = t("errorMessage.userAlreadyExists");
         }
 
         setErrors((prev) => ({ ...prev, global: message }));
@@ -149,7 +145,7 @@ export default function AddUserFormDialog({
       }
 
       setSuccess(true);
-      onAlert?.("success", "Utilisateur ajouté avec succès");
+      onAlert?.("success", t("userAddedSuccess"));
       onSuccess?.();
 
       setTimeout(() => {
@@ -157,7 +153,7 @@ export default function AddUserFormDialog({
         setOpen(false);
       }, 1600);
     } catch {
-      const message = "Erreur lors de la connexion au serveur.";
+      const message = t("errorMessage.genericError");
       setErrors({ global: message });
       onAlert?.("error", message);
     } finally {
@@ -190,7 +186,7 @@ export default function AddUserFormDialog({
             className="w-full px-3 py-2 text-sm rounded-md border border-gray-300 hover:bg-gray-50 flex items-center gap-2 justify-center"
           >
             <UserPlus className="w-4 h-4" />
-            Ajouter un utilisateur
+            {t("addUser")}
           </button>
         )}
       </DialogTrigger>
@@ -199,7 +195,7 @@ export default function AddUserFormDialog({
         <DialogHeader className="px-6 pt-5 pb-3 border-b border-gray-100">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <UserPlus className="w-5 h-5 text-cyan-600" />
-            Ajouter un utilisateur
+              {t("addUser")}
           </DialogTitle>
         </DialogHeader>
 
@@ -214,17 +210,16 @@ export default function AddUserFormDialog({
                 </div>
                 <div className="flex-1">
                   <h4 className="text-lg font-bold text-emerald-900 dark:text-emerald-100">
-                    Utilisateur ajouté !
+                    {t("userAdded")}
                   </h4>
                   <p className="text-sm text-emerald-700 dark:text-emerald-300 mt-1">
-                    {firstname} {lastname} a été créé avec succès
+                    {firstname} {lastname} {t("wasCreatedSuccessfully")}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4 w-full" noValidate>
-              {/* Global error (backend / général) */}
               {errors.global && (
                 <div className="relative overflow-hidden bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-1">
                   <div className="flex gap-3 items-center">
@@ -250,10 +245,9 @@ export default function AddUserFormDialog({
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Prénom */}
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                    Prénom <span className="text-red-500">*</span>
+                    {t("form.firstName")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -282,10 +276,9 @@ export default function AddUserFormDialog({
                   )}
                 </div>
 
-                {/* Nom */}
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                    Nom <span className="text-red-500">*</span>
+                    {t("form.lastName")} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -315,10 +308,9 @@ export default function AddUserFormDialog({
                 </div>
               </div>
 
-              {/* Email */}
               <div className="space-y-1.5">
                 <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                  Email <span className="text-red-500">*</span>
+                  {t("form.email")} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -342,7 +334,6 @@ export default function AddUserFormDialog({
                 )}
               </div>
 
-              {/* Admin – NOUVELLE VERSION */}
               <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3.5 py-3 flex items-start gap-3">
                 <Checkbox
                   id="isAdmin"
@@ -360,22 +351,20 @@ export default function AddUserFormDialog({
                       htmlFor="isAdmin"
                       className="text-sm font-medium text-amber-900 cursor-pointer"
                     >
-                      Accès administrateur
+                      {t("form.adminAccess")}
                     </label>
                     {isAdmin && (
                       <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-                        Actif
+                        {t("form.active")}
                       </span>
                     )}
                   </div>
                   <p className="text-xs text-amber-800/90 mt-1.5">
-                    Donne accès au panneau d’administration et aux actions
-                    sensibles. À réserver au personnel de confiance.
+                    {t("form.adminAcessDescription")}
                   </p>
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
                 <button
                   type="button"
@@ -383,7 +372,7 @@ export default function AddUserFormDialog({
                   disabled={loading}
                   className="w-full sm:w-auto px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all"
                 >
-                  Annuler
+                  {t("form.cancel")}
                 </button>
 
                 <button
@@ -394,12 +383,12 @@ export default function AddUserFormDialog({
                   {loading ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Ajout en cours...
+                      {t("submitting")}
                     </>
                   ) : (
                     <>
                       <UserPlus className="w-5 h-5" />
-                      Ajouter l'utilisateur
+                      {t("form.submit")}
                     </>
                   )}
                 </button>
