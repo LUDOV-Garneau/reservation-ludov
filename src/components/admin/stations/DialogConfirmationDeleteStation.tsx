@@ -49,15 +49,15 @@ export default function DeleteStationAction({
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || "Erreur lors de la suppression");
+        throw new Error(err?.error || t("alerts.deleteError"));
       }
 
       const data = await res.json().catch(() => ({}));
-      onAlert?.("success", data?.message || "Station supprimée avec succès");
+      onAlert?.("success", data?.message || t("alerts.deleteSuccess"));
       onSuccess?.();
       setOpen(false);
     } catch (e) {
-      onAlert?.("error", e instanceof Error ? e.message : "Erreur lors de la suppression");
+      onAlert?.("error", e instanceof Error ? e.message : t("alerts.deleteError"));
     } finally {
       setLoading(false);
     }

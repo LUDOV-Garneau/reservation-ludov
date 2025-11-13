@@ -418,7 +418,11 @@
         "reservationDeleted": "Upcoming reservations will also be deleted.",
         "CancelDelete": "Cancel deletion",
         "deletingState": "Deleting…",
-        "confirmDelete": "Confirm deletion"
+        "confirmDelete": "Confirm deletion",
+        "alerts":{
+          "deleteSuccess": "Station deleted successfully",
+          "deleteError": "Error deleting station"
+        }
       }
     },
     "availabilities": {
