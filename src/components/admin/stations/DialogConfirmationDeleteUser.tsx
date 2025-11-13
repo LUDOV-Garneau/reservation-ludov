@@ -120,12 +120,6 @@ export default function DeleteStationAction({
                     {t("reservationDeleted")}
                   </span>
                 </li>
-                <li className="flex items-start gap-2.5">
-                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>
-                    {t("dataDeleteAccordingToPolicy")}
-                  </span>
-                </li>
               </ul>
             </div>
 
