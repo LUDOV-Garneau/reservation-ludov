@@ -42,7 +42,7 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (reservationsRows && reservationsRows.length > 0) {
-      await pool.query("DELETE FROM reservation WHERE user_id = ?", [
+      await pool.query("DELETE FROM reservation WHERE station = ?", [
         stationId,
       ]);
     }
