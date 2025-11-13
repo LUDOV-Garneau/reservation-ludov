@@ -290,36 +290,36 @@
     "users": {
       "title": "Utilisateurs",
       "subtitle": "Gérez les utilisateurs de la plateforme LUDOV",
-      "actionBar" : {
-        "searchPlaceholder" : "Rechercher...",
-        "addUser" : "Ajouter",
+      "actionBar": {
+        "searchPlaceholder": "Rechercher...",
+        "addUser": "Ajouter",
         "toolTipRefresh": "Actualiser",
-        "dropDownMenuAddUser" : {
-          "importCSV" : "Importer un fichier CSV",
-          "importCSVDescription" : "Importez plusieurs utilisateurs à partir d'un fichier CSV",
-          "importCSVInput" : "Choisir un fichier CSV",
-          "importCSVSuccess" : "Importation CSV réussie",
-          "addSingleUser" : "Ajouter un utilisateur",
-          "addSingleUserDescription" : "Créez un compte utilisateur manuellement",
-          "addSingleUserSuccess" : "Utilisateur ajouté avec succès"
+        "dropDownMenuAddUser": {
+          "importCSV": "Importer un fichier CSV",
+          "importCSVDescription": "Importez plusieurs utilisateurs à partir d'un fichier CSV",
+          "importCSVInput": "Choisir un fichier CSV",
+          "importCSVSuccess": "Importation CSV réussie",
+          "addSingleUser": "Ajouter un utilisateur",
+          "addSingleUserDescription": "Créez un compte utilisateur manuellement",
+          "addSingleUserSuccess": "Utilisateur ajouté avec succès"
         }
       },
-      "searchResult" : {
-        "noUsersFound" : "Aucun utilisateur(s) trouvé",
-        "noMatch" : "Aucun utilisateur ne correspond à votre recherche.",
-        "startByAdding" : "Commencez par ajouter votre premier utilisateur."
+      "searchResult": {
+        "noUsersFound": "Aucun utilisateur(s) trouvé",
+        "noMatch": "Aucun utilisateur ne correspond à votre recherche.",
+        "startByAdding": "Commencez par ajouter votre premier utilisateur."
       },
-      "table" : {
-        "header" : {
-          "email" : "Email",
-          "name" : "Nom",
-          "role" : "Rôle",
-          "createdAt" : "Date de création",
-          "actions" : "Actions"
+      "table": {
+        "header": {
+          "email": "Email",
+          "name": "Nom",
+          "role": "Rôle",
+          "createdAt": "Date de création",
+          "actions": "Actions"
         },
-        "ActionToolTips" : {
-          "resetPassword" : "Réinitialiser MDP",
-          "deleteUser" : "Supprimer l'utilisateur"
+        "ActionToolTips": {
+          "resetPassword": "Réinitialiser MDP",
+          "deleteUser": "Supprimer l'utilisateur"
         }
       },
       "stats": {
@@ -327,7 +327,7 @@
         "userNotBoarded": "Utilisateur(s) non configuré(s)",
         "userWithReservations": "Utilisateur(s) avec réservation"
       },
-      "badge" : {
+      "badge": {
         "admin": "Administrateur",
         "user": "Utilisateur"
       },
@@ -367,7 +367,47 @@
       "title": "Réservations"
     },
     "stations": {
-      "title": "Stations"
+      "title": "Stations",
+      "subtitle": "Gérez les stations de la plateforme LUDOV",
+      "actionBar": {
+        "searchPlaceholder": "Recherche...",
+        "addStation": "Ajouter",
+        "toolTipRefresh": "Rafraîchir"
+      },
+      "searchResult": {
+        "noStationsFound": "Aucune station(s) trouvée(s)",
+        "noMatch": "Aucune station ne correspond à votre recherche.",
+        "startByAdding": "Commencez par ajouter votre première station."
+      },
+      "table": {
+        "header": {
+          "name": "Nom",
+          "platforms": "Plateforme(s)",
+          "isActive": "Statut",
+          "createdAt": "Date de création",
+          "actions": "Actions"
+        },
+        "ActionToolTips": {
+          "updateStation": "Modifier la station",
+          "deleteStation": "Supprimer la station"
+        },
+        "noPlatforms": "Aucune plateforme assignée",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "stats": {
+        "activeStations": "Nombre de stations actives",
+        "inactiveStations": "Nombre de stations inactives",
+        "mostUsedStation": "Station la plus réservée",
+        "noStations": "Aucune station créée",
+        "noReservations": "Aucune réservation effectuée"
+      },
+      "pagination": {
+        "affichageDe": "Affichage de",
+        "a": "à",
+        "sur": "sur",
+        "noItem": "Aucun élément"
+      }
     },
     "availabilities": {
       "title": "Disponibilités",
