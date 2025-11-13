@@ -79,11 +79,11 @@
       "select_up_to_3": "Select up to 3 games",
       "go_through_library": "Browse through the library to choose",
       "saving": "Saving...",
-      "continue": "Continue",
+      "continue": "{count, plural, =0 {Continue} one {Continue (# game)} other {Continue (# games)}}",
       "game_library": "Game library",
       "searchPlaceholder": "Search for a game...",
       "searching": "Searching...",
-      "gamesAvailable": "{count} game{plural} available{plural}",
+      "gamesAvailable": "{count, plural, =0 {No games available} one {# game available} other {# games available}}",
       "displayed": "Displayed: {count}",
       "loading": "Loading games...",
       "noResult": "No game found for \"{search}\"",
@@ -97,7 +97,7 @@
     },
     "course": {
       "selectionTitle": "Course Selection",
-      "instruction": "Please choose the course you want to enroll in.",
+      "instruction": "Please select the course for which you are making a reservation.",
       "courseLabel": "Course",
       "loading": "Loading...",
       "chooseCourse": "Choose a course",
@@ -129,7 +129,7 @@
       "skip_step": "Skip this step",
       "previousStep": "Previous step",
       "selection": "Selection",
-      "selected_count": "{count} accessory selected{plural}",
+      "selected_count": "{count, plural, =0 {No accessories selected} one {# accessory selected} other {# accessories selected}}",
       "remove_aria_label": "Remove",
       "accessoryName": "Accessory name...",
       "noAccessoryFound": "No accessory found"
@@ -290,36 +290,36 @@
     "users": {
       "title": "Users",
       "subtitle": "Manage users on the LUDOV platform",
-      "actionBar" : {
-        "searchPlaceholder" : "Search...",
-        "addUser" : "Add",
+      "actionBar": {
+        "searchPlaceholder": "Search...",
+        "addUser": "Add",
         "toolTipRefresh": "Refresh",
-        "dropDownMenuAddUser" : {
-          "importCSV" : "Import CSV file",
-          "importCSVDescription" : "Import multiple users from a CSV file",
-          "importCSVInput" : "Choose a CSV file",
-          "importCSVSuccess" : "CSV import successful",
-          "addSingleUser" : "Add a user",
-          "addSingleUserDescription" : "Manually create a user account",
-          "addSingleUserSuccess" : "User added successfully"
+        "dropDownMenuAddUser": {
+          "importCSV": "Import CSV file",
+          "importCSVDescription": "Import multiple users from a CSV file",
+          "importCSVInput": "Choose a CSV file",
+          "importCSVSuccess": "CSV import successful",
+          "addSingleUser": "Add a user",
+          "addSingleUserDescription": "Manually create a user account",
+          "addSingleUserSuccess": "User added successfully"
         }
       },
-      "searchResult" : {
-        "noUsersFound" : "No user(s) found",
-        "noMatch" : "No user matches your search.",
-        "startByAdding" : "Start by adding your first user."
+      "searchResult": {
+        "noUsersFound": "No user(s) found",
+        "noMatch": "No user matches your search.",
+        "startByAdding": "Start by adding your first user."
       },
-      "table" : {
-        "header" : {
-          "email" : "Email",
-          "name" : "Name",
-          "role" : "Role",
-          "createdAt" : "Creation Date",
-          "actions" : "Actions"
+      "table": {
+        "header": {
+          "email": "Email",
+          "name": "Name",
+          "role": "Role",
+          "createdAt": "Creation Date",
+          "actions": "Actions"
         },
-        "ActionToolTips" : {
-          "resetPassword" : "Reset Password",
-          "deleteUser" : "Delete User"
+        "ActionToolTips": {
+          "resetPassword": "Reset Password",
+          "deleteUser": "Delete User"
         }
       },
       "stats": {
@@ -327,7 +327,7 @@
         "userNotBoarded": "User(s) not configured",
         "userWithReservations": "User(s) with reservation"
       },
-      "badge" : {
+      "badge": {
         "admin": "Administrator",
         "user": "User"
       },
@@ -367,7 +367,47 @@
       "title": "Reservations"
     },
     "stations": {
-      "title": "Stations"
+      "title": "Stations",
+      "subtitle": "Manage stations on the LUDOV platform",
+      "actionBar": {
+        "searchPlaceholder": "Search...",
+        "addStation": "Add",
+        "toolTipRefresh": "Refresh"
+      },
+      "searchResult": {
+        "noStationsFound": "No station(s) found",
+        "noMatch": "No station matches your search.",
+        "startByAdding": "Start by adding your first station."
+      },
+      "table": {
+        "header": {
+          "name": "Name",
+          "platforms": "Platform(s)",
+          "isActive": "Status",
+          "createdAt": "Creation Date",
+          "actions": "Actions"
+        },
+        "ActionToolTips": {
+          "updateStation": "Edit station",
+          "deleteStation": "Delete station"
+        },
+        "noPlatforms": "No platform assigned",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "stats": {
+        "activeStations": "Number of active stations",
+        "inactiveStations": "Number of inactive stations",
+        "mostUsedStation": "Most reserved station",
+        "noStations": "No stations created",
+        "noReservations": "No reservations made"
+      },
+      "pagination": {
+        "affichageDe": "Displaying",
+        "a": "to",
+        "sur": "on",
+        "noItem": "No item"
+      }
     },
     "availabilities": {
       "title": "Availabilities",

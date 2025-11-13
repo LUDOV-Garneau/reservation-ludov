@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import { Search, Check, Gamepad2, Loader2 } from "lucide-react";
@@ -43,56 +43,10 @@ export default function GameSelectionGrid({
   const [initialLoading, setInitialLoading] = useState(true);
   const [searchDebounce, setSearchDebounce] = useState("");
   const [totalGames, setTotalGames] = useState(0);
-  const [consoleId] = useState<number | null>(consoleSelectedId || null);
 
-  // Ref pour l'intersection observer
   const observerTarget = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Fonction pour charger les jeux
-  const loadGames = useCallback(
-    async (
-      pageNum: number,
-      searchQuery: string,
-      reset: boolean = false,
-      consoleId: number | null
-    ) => {
-      if (loading || (!hasMore && !reset)) return;
-
-      setLoading(true);
-
-      try {
-        const params = new URLSearchParams({
-          page: String(pageNum),
-          limit: String(ITEMS_PER_PAGE),
-          ...(searchQuery && { search: searchQuery }),
-        });
-
-        const res = await fetch(
-          `/api/reservation/games?${params}&consoleId=${consoleId}`
-        );
-        if (!res.ok) throw new Error(t("reservation.games.errorLoading"));
-
-        const data = await res.json();
-
-        if (reset) {
-          setGames(data.games || []);
-          setPage(1);
-        } else {
-          setGames((prev) => [...prev, ...(data.games || [])]);
-        }
-
-        setHasMore(data.hasMore || false);
-        setTotalGames(data.pagination?.total || 0);
-      } catch (err) {
-        console.error(t("reservation.games.errorLoading"), err);
-      } finally {
-        setLoading(false);
-        setInitialLoading(false);
-      }
-    },
-    [loading, hasMore]
-  );
+  const fetchIdRef = useRef(0);
 
   useEffect(() => {
     if (searchTimeoutRef.current) {
@@ -110,23 +64,75 @@ export default function GameSelectionGrid({
     };
   }, [search]);
 
+  const loadGames = async (
+    pageNum: number,
+    searchQuery: string,
+    reset: boolean = false
+  ) => {
+    if (loading || (!hasMore && !reset)) return;
+
+    const currentFetchId = ++fetchIdRef.current;
+
+    setLoading(true);
+
+    try {
+      const params = new URLSearchParams({
+        page: String(pageNum),
+        limit: String(ITEMS_PER_PAGE),
+        ...(searchQuery && { search: searchQuery }),
+      });
+
+      const res = await fetch(
+        `/api/reservation/games?${params}&consoleId=${consoleSelectedId}`
+      );
+
+      if (currentFetchId !== fetchIdRef.current) {
+        return;
+      }
+
+      if (!res.ok) throw new Error(t("reservation.games.errorLoading"));
+
+      const data = await res.json();
+
+      if (reset) {
+        setGames(data.games || []);
+        setPage(pageNum);
+      } else {
+        setGames((prev) => [...prev, ...(data.games || [])]);
+      }
+
+      setHasMore(data.hasMore || false);
+      setTotalGames(data.pagination?.total || 0);
+    } catch (err) {
+      console.error(t("reservation.games.errorLoading"), err);
+    } finally {
+      if (currentFetchId === fetchIdRef.current) {
+        setLoading(false);
+        setInitialLoading(false);
+      }
+    }
+  };
+
   useEffect(() => {
     setGames([]);
     setPage(1);
     setHasMore(true);
-    loadGames(1, searchDebounce, true, consoleId);
-  }, [searchDebounce]);
+    setInitialLoading(true);
+    fetchIdRef.current++;
+
+    loadGames(1, searchDebounce, true);
+  }, [searchDebounce, consoleSelectedId]);
 
   // Intersection Observer pour l'infinite scroll
   useEffect(() => {
+    if (search || !hasMore || loading) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loading && !search) {
-          setPage((prev) => {
-            const next = prev + 1;
-            loadGames(next, searchDebounce, false, consoleId);
-            return next;
-          });
+        if (entries[0].isIntersecting) {
+          const nextPage = page + 1;
+          setPage(nextPage);
+          loadGames(nextPage, searchDebounce, false);
         }
       },
       { threshold: 0.1 }
@@ -142,14 +148,14 @@ export default function GameSelectionGrid({
         observer.unobserve(currentTarget);
       }
     };
-  }, [page, hasMore, loading, search, searchDebounce, loadGames]);
+  }, [page, hasMore, loading, search, searchDebounce]);
 
   // Gestion du scroll manuel pour la recherche
   const handleLoadMore = () => {
     if (!loading && hasMore) {
       const nextPage = page + 1;
       setPage(nextPage);
-      loadGames(nextPage, searchDebounce, false, consoleId);
+      loadGames(nextPage, searchDebounce, false);
     }
   };
 
@@ -177,8 +183,7 @@ export default function GameSelectionGrid({
             ) : totalGames > 0 ? (
               <span>
                 {t("reservation.games.gamesAvailable", {
-                  count: totalGames,
-                  plural: totalGames > 1 ? "s" : "",
+                  count: totalGames
                 })}
               </span>
             ) : null}
@@ -234,10 +239,9 @@ export default function GameSelectionGrid({
                     relative group rounded-xl overflow-hidden shadow-md
                     transition-all duration-200
                     ${isSelected ? "ring-2 ring-cyan-500 scale-[0.98]" : ""}
-                    ${
-                      isDisabled
-                        ? "opacity-60 cursor-not-allowed"
-                        : "cursor-pointer hover:shadow-xl hover:scale-[1.02]"
+                    ${isDisabled
+                      ? "opacity-60 cursor-not-allowed"
+                      : "cursor-pointer hover:shadow-xl hover:scale-[1.02]"
                     }
                   `}
                 >
@@ -264,7 +268,7 @@ export default function GameSelectionGrid({
                       className={`${
                         game.picture !== null &&
                         "2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity"
-                      } absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`}
+                        } absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`}
                     />
 
                     {/* Badge sélectionné */}
@@ -278,7 +282,7 @@ export default function GameSelectionGrid({
                       className={`${
                         game.picture !== null &&
                         "2xl:group-hover:opacity-100 2xl:transition-opacity 2xl:opacity-0"
-                      } absolute bottom-0 left-0 right-0 p-4`}
+                        } absolute bottom-0 left-0 right-0 p-4`}
                     >
                       <div className="flex flex-col gap-4 items-center">
                         <p className="text-white text-lg font-bold line-clamp-2">
@@ -340,3 +344,4 @@ export default function GameSelectionGrid({
     </div>
   );
 }
+

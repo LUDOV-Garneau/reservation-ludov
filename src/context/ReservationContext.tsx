@@ -438,21 +438,31 @@ export function ReservationProvider({
         body: JSON.stringify({ reservationId, newConsoleId }),
       });
 
-      if (!res.ok) throw new Error("Erreur modification plateforme");
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message || "Erreur modification plateforme");
+      }
 
       const data = await res.json();
-      if (data.success) {
-        setSelectedConsole({ ...selectedConsole!, id: newConsoleId });
+      if (!data.success) throw new Error("Échec côté serveur");
+
+      if (typeof data.consoleId === "number") {
+        setSelectedConsoleId(Number(data.consoleId));
+      } else if (data.consoleId) {
+        setSelectedConsoleId(Number(data.consoleId));
       }
+
+      setSelectedGames([]);
+      setSelectedAccessories([]);
+      setSelectedCours(null);
+      setSelectedDate(undefined);
+      setSelectedTime(undefined);
+
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur update plateforme");
     }
   };
 
-  /** Finalise la réservation côté serveur */
-  // Extrait de la fonction completeReservation corrigée pour le ReservationContext
-
-  /** Finalise la réservation côté serveur */
   const completeReservation = async () => {
     if (!reservationId) {
       setError("Aucune réservation à finaliser");
