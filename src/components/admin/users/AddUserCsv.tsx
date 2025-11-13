@@ -125,7 +125,6 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
   return (
     <div className="w-full space-y-3">
       
-      {/* Upload Zone */}
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -150,7 +149,6 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
           disabled={status === "uploading"}
         />
 
-        {/* Mobile: Stack vertically */}
         <div className="flex flex-col gap-3 sm:hidden">
           <div className="flex items-center gap-3">
             <div className={`
@@ -202,7 +200,6 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
           )}
         </div>
 
-        {/* Desktop: Horizontal layout */}
         <div className="hidden sm:flex items-center gap-3">
           <div className={`
             p-2.5 rounded-lg transition-all flex-shrink-0
@@ -267,7 +264,6 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         )}
       </div>
 
-      {/* Success State */}
       {status === "success" && stats && (
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4 space-y-3 w-full">
           <div className="flex items-start gap-3">
@@ -320,7 +316,6 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         </div>
       )}
 
-      {/* Error State */}
       {status === "error" && (
         <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4 w-full">
           <div className="flex items-start gap-3">
@@ -329,7 +324,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <h4 className="text-sm font-semibold text-red-900 dark:text-red-100">
-                Échec de l'import
+                Échec de l&apos;import
               </h4>
               {fileName && (
                 <div className="flex items-center gap-2 mt-1">
@@ -354,7 +349,6 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         </div>
       )}
 
-      {/* Info section */}
       {status === "idle" && (
         <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 w-full">
           <div className="flex items-start gap-2">

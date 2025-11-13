@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       LEFT JOIN games g3 ON g3.id = r.game3_id
       WHERE r.user_id = ?  AND TIMESTAMP(r.date, r.time) >= NOW() 
       AND r.archived = 0
-      ORDER BY TIMESTAMP(r.date, r.time) DESC`,
+      ORDER BY TIMESTAMP(r.date, r.time)`,
       [userId]
     );
 
