@@ -1,5 +1,4 @@
-// app/api/reservations/past/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
@@ -16,28 +15,25 @@ type ReservationRow = RowDataPacket & {
   game3_title: string | null;
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const sessionCookie = cookieStore.get("SESSION");
-    let user = null;
-
-    try {
-      const token = sessionCookie?.value;
-      if (token) user = verifyToken(token);
-    } catch (error) {
-      console.error("Token verification error:", error);
+    const token = request.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    if (!user?.id) {
+    const user = verifyToken(token);
+    if(!user?.id) {
       return NextResponse.json(
-        { error: "User not authenticated" },
+        { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
     const userId = Number(user.id);
-    // const userId = 1;
 
     const [rows] = await pool.query<ReservationRow[]>(
       `
@@ -55,8 +51,8 @@ export async function GET() {
       LEFT JOIN games g1 ON g1.id = r.game1_id
       LEFT JOIN games g2 ON g2.id = r.game2_id
       LEFT JOIN games g3 ON g3.id = r.game3_id
-      WHERE r.user_id = ?  AND TIMESTAMP(r.date, r.time) < NOW() OR
-      r.archived = 1
+      WHERE r.user_id = ?  AND (TIMESTAMP(r.date, r.time) < NOW() OR
+      r.archived = 1)
       ORDER BY TIMESTAMP(r.date, r.time) DESC`,
       [userId]
     );
