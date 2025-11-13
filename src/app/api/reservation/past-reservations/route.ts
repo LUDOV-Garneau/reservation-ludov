@@ -1,4 +1,3 @@
-// app/api/reservations/past/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { cookies } from "next/headers";
@@ -35,7 +34,6 @@ export async function GET(request: NextRequest) {
     }
 
     const userId = Number(user.id);
-    console.log("Fetching past reservations for user ID:", userId);
 
     const [rows] = await pool.query<ReservationRow[]>(
       `
