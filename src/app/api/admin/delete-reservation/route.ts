@@ -1,46 +1,40 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
-import { ResultSetHeader } from "mysql2";
-import { verifyToken } from "@/lib/jwt";
 
 export async function DELETE(req: NextRequest) {
-    const token = req.cookies.get("SESSION")?.value;
-
-    if (!token) {
-        return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-    }
-
-    let currentUser;
-    try {
-        currentUser = verifyToken(token);
-    } catch {
-        return NextResponse.json({ error: "Token invalide" }, { status: 401 });
-    }
-
-    if (!currentUser || !currentUser.isAdmin) {
-        return NextResponse.json({ error: "Accès refusé" }, { status: 403 });
-    }
-
+  try {
     const { searchParams } = new URL(req.url);
-    const reservationId = searchParams.get("reservationId");
+    const idParam = searchParams.get("id");
+    console.log("Received DELETE request for reservation id:", idParam);
 
-    if (!reservationId) {
-        return NextResponse.json({ error: "ID réservation manquant" }, { status: 400 });
+    if (!idParam) {
+      return NextResponse.json(
+        { error: "Missing reservation id" },
+        { status: 400 }
+      );
+    }
+    const id = idParam;
+
+    const [result] = await pool.query(
+      "DELETE FROM reservation WHERE id = ?",
+      [id]            
+    );
+
+    const okPacket = result as { affectedRows?: number };
+
+    if (!okPacket.affectedRows) {
+      return NextResponse.json(
+        { error: "Reservation not found" },
+        { status: 404 }
+      );
     }
 
-    try {
-        const [result] = (await pool.query(
-            "DELETE FROM reservations WHERE id = ?",
-            [reservationId]
-        )) as [ResultSetHeader, unknown];
-
-        if (result.affectedRows === 0) {
-            return NextResponse.json({ error: "Réservation non trouvée" }, { status: 404 });
-        }
-
-        return NextResponse.json({ message: "Réservation supprimée avec succès." });
-    } catch (err) {
-        console.error("Erreur lors de la suppression:", err);
-        return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
-    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting reservation:", error);
+    return NextResponse.json(
+      { error: "Erreur serveur lors de la suppression" },
+      { status: 500 }
+    );
+  }
 }
