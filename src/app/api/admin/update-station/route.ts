@@ -21,6 +21,7 @@ export async function PUT(req: NextRequest) {
     const { name, stationId, consoles, isActive } = body;
 
     if (!name || name.trim() === "") {
+      console.error("Nom de la station manquant ou vide.");
       return NextResponse.json(
         { error: "Le nom de la station est requis." },
         { status: 400 }
@@ -28,6 +29,7 @@ export async function PUT(req: NextRequest) {
     }
 
     if (!stationId) {
+      console.error("id de la station manquant ou vide.");
       return NextResponse.json(
         { error: "L'identifiant de la station est requis." },
         { status: 400 }
@@ -35,6 +37,7 @@ export async function PUT(req: NextRequest) {
     }
 
     if (!Array.isArray(consoles) || consoles.length === 0) {
+      console.error("aucune plateforme fournie pour la station.");
       return NextResponse.json(
         { error: "Aucune plateforme fournie pour la station." },
         { status: 400 }
@@ -42,6 +45,7 @@ export async function PUT(req: NextRequest) {
     }
 
     if (typeof isActive !== "boolean" || isActive === null) {
+      console.error("status actif de la station manquant ou invalide.");
       return NextResponse.json(
         { error: "Le statut actif de la station est requis." },
         { status: 400 }
@@ -68,7 +72,7 @@ export async function PUT(req: NextRequest) {
     try {
       await conn.query(
         `
-        UPDATE stations SET name = ?, consoles = ?, isActive = ?, updateAt = ?
+        UPDATE stations SET name = ?, consoles = ?, isActive = ?, lastUpdatedAt = ?
         WHERE id = ?
         `,
         [name, JSON.stringify(consoles), isActive, now, stationId]
