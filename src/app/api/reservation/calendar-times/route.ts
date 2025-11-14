@@ -1,21 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
+import { verifyToken } from "@/lib/jwt";
 
-interface ReservationRow extends RowDataPacket {
+type ReservationRow = RowDataPacket & {
   time: string;
   console_id: number;
   game1_id: number | null;
   game2_id: number | null;
   game3_id: number | null;
   accessoirs: string;
-}
+};
 
 type WeeklyHoursRow = RowDataPacket & {
   start_hour: string;
   start_minute: string;
   end_hour: string;
   end_minute: string;
+};
+
+type UserReservationRow = RowDataPacket & {
+  console_type_id: number;
+};
+
+type ConsoleTypeRow = RowDataPacket & {
+  console_type_id: number;
 };
 
 type SpecificHoursRow = WeeklyHoursRow & { is_exception: boolean };
@@ -36,13 +45,9 @@ function toMinutes(h: string, m: string) {
   return parseInt(h) * 60 + parseInt(m);
 }
 
-function fromMinutes(minutes: number) {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return {
-    hour: h.toString().padStart(2, "0"),
-    minute: m.toString().padStart(2, "0"),
-  };
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
 }
 
 function subtractRange(base: Range[], toRemove: Range): Range[] {
@@ -85,8 +90,18 @@ function mergeRanges(ranges: Range[]): Range[] {
 
 function computeValidRanges(
   weeklyHours: WeeklyHoursRow[],
-  specificHours: SpecificHoursRow[]
+  specificHours: SpecificHoursRow[],
+  userReservations: UserReservationRow[],
+  consoleTypeId: number | null
 ) {
+  if (consoleTypeId) {
+    for (const { console_type_id } of userReservations) {
+      if (consoleTypeId == console_type_id) {
+        return [];
+      }
+    }
+  }
+
   let validRanges: Range[] = weeklyHours.map((r) => ({
     start: toMinutes(r.start_hour, r.start_minute),
     end: toMinutes(r.end_hour, r.end_minute),
@@ -105,16 +120,7 @@ function computeValidRanges(
     }
   }
 
-  validRanges = mergeRanges(validRanges);
-
-  return validRanges;
-}
-
-function formatRanges(ranges: Range[]) {
-  return ranges.map((r) => ({
-    start: fromMinutes(r.start),
-    end: fromMinutes(r.end),
-  }));
+  return mergeRanges(validRanges);
 }
 
 function generateAllTimeSlots(): string[] {
@@ -219,6 +225,16 @@ function isSlotInFuture(time: string, currentHour: number): boolean {
 
 export async function GET(request: NextRequest) {
   try {
+    const token = request.cookies.get("SESSION")?.value;
+    if (!token) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    const user = verifyToken(token);
+    if (!user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date");
     const consoleId = searchParams.get("consoleId");
@@ -271,6 +287,15 @@ export async function GET(request: NextRequest) {
           .filter((id) => !isNaN(id))
       : [];
 
+    const [consoleType] = await pool.query<ConsoleTypeRow[]>(
+      `SELECT console_type_id
+       FROM reservation_hold
+       WHERE user_id = ?
+        AND console_id = ?
+       LIMIT 1`,
+      [user.id, consoleId]
+    );
+
     const [reservations] = await pool.query<ReservationRow[]>(
       `SELECT time, console_id, game1_id, game2_id, game3_id, accessory_ids 
        FROM reservation 
@@ -307,18 +332,26 @@ export async function GET(request: NextRequest) {
       [dayName, date, date]
     );
 
-    console.log("specificHours: ", specificHours);
-    console.log("weeklyHours: ", weeklyHours);
+    const [userReservations] = await pool.query<UserReservationRow[]>(
+      `
+        SELECT console_type_id
+        FROM reservation
+        WHERE user_id = ?
+          AND date = ?
+          AND archived = 0
+      `,
+      [user.id, date]
+    );
 
-    const validRanges = computeValidRanges(weeklyHours, specificHours);
+    const validRanges = computeValidRanges(
+      weeklyHours,
+      specificHours,
+      userReservations,
+      consoleType[0]?.console_type_id || null
+    );
 
     const SESSION_DURATION_HOURS = 2;
     const SESSION_DURATION_MINUTES = SESSION_DURATION_HOURS * 60;
-
-    function timeToMinutes(t: string): number {
-      const [h, m] = t.split(":").map(Number);
-      return h * 60 + m;
-    }
 
     const reservationRanges = reservations.map((r) => {
       const start = timeToMinutes(r.time);
