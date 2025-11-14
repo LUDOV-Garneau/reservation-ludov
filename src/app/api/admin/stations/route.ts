@@ -85,6 +85,7 @@ export async function GET(req: NextRequest) {
         return {
           ...station,
           consoles: consolesTitles,
+          consolesId: consolesArray,
         };
       })
     );

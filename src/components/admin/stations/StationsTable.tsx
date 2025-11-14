@@ -50,12 +50,14 @@ import CardStationStats from "./CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
+import UpdateStationForm from "./UpdateStationForm";
 import DeleteStationAction from "./DialogConfirmationDeleteStation";
 
 type Station = {
   id: number;
   name: string;
   consoles: string[];
+  consolesId: number[];
   isActive: boolean;
   createdAt: string;
 };
@@ -121,13 +123,13 @@ function StationTableRow({
   onUpdate,
 }: {
   station: Station;
+  onUpdate: (station: Station) => void;
   onAlert: (
     type: "success" | "error" | "info" | "warning",
     message: string,
     title?: string
   ) => void;
   onSuccess: () => void;
-  onUpdate: (stationId: number, stationName: string) => void;
 }) {
   const t = useTranslations();
   return (
@@ -177,7 +179,7 @@ function StationTableRow({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onUpdate(station.id, station.name)}
+                    onClick={() => onUpdate(station)}
                     className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
                   >
                     <Pencil className="h-4 w-4" />
@@ -233,7 +235,7 @@ function StationTableRow({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
-                  onClick={() => onUpdate(station.id, station.name)}
+                  onClick={() => onUpdate(station)}
                 >
                   <Pencil className="h-4 w-4 mr-2 text-blue-500" />
                   {t("admin.stations.table.ActionToolTips.updateStation")}
@@ -422,6 +424,8 @@ export default function StationsTable() {
   const [totalActiveStations, setTotalActiveStations] = useState(0);
   const [totalInactiveStations, setTotalInactiveStations] = useState(0);
   const [stationMostReservations, setStationMostReservations] = useState("");
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [stationToUpdate, setStationToUpdate] = useState<Station | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [metricsLoading, setMetricsLoading] = useState(true);
@@ -496,6 +500,11 @@ export default function StationsTable() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleUpdate(station: Station) {
+    setStationToUpdate(station);
+    setUpdateDialogOpen(true);
   }
 
   const filteredStations = stations.filter((station) => {
@@ -583,11 +592,9 @@ export default function StationsTable() {
                       <StationTableRow
                         key={station.id}
                         station={station}
+                        onUpdate={() => handleUpdate(station)}
                         onAlert={showAlert}
                         onSuccess={handleRefresh}
-                        onUpdate={() =>
-                          console.log("Update station", station.id)
-                        }
                       />
                     ))}
                   </TableBody>
@@ -623,6 +630,19 @@ export default function StationsTable() {
           )}
         </CardContent>
       </Card>
+
+      {stationToUpdate && (
+        <UpdateStationForm
+          open={updateDialogOpen}
+          onOpenChange={setUpdateDialogOpen}
+          station={stationToUpdate}
+          onSuccess={() => {
+            setUpdateDialogOpen(false);
+            handleRefresh();
+          }}
+          onAlert={showAlert}
+        />
+      )}
 
       {confirmDialog && (
         <ConfirmDialog
