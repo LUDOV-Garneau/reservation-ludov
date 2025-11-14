@@ -31,7 +31,8 @@ type ConsoleStock = {
 type Station = {
   id: number;
   name: string;
-  consoles: number[] | string[];
+  consoles: string[];
+  consolesId: number[];
   isActive: boolean;
 };
 
@@ -89,7 +90,7 @@ export default function UpdateStationForm({
         setConsoleList(data);
 
         const initial = data.filter((c) =>
-          station.consoles.map((id) => Number(id)).includes(c.id)
+          station.consolesId.map((id) => Number(id)).includes(c.id)
         );
         setSelectedConsoles(initial);
       } catch {
@@ -98,7 +99,7 @@ export default function UpdateStationForm({
     };
 
     fetchConsoleStock();
-  }, [openValue, station.consoles, t]);
+  }, [openValue, station.consolesId, t]);
 
   const handleAddConsole = () => {
     if (!selectedConsoleId) return;

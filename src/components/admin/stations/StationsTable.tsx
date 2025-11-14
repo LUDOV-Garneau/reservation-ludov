@@ -56,6 +56,7 @@ type Station = {
   id: number;
   name: string;
   consoles: string[];
+  consolesId: number[];
   isActive: boolean;
   createdAt: string;
 };
