@@ -31,7 +31,7 @@ type ConsoleStock = {
 type Station = {
   id: number;
   name: string;
-  consoles: string[];
+  consoles: number[] | string[];
   isActive: boolean;
 };
 
@@ -69,7 +69,17 @@ export default function UpdateStationForm({
   const router = useRouter();
 
   useEffect(() => {
-    if (!open) return;
+    if (!openValue) return;
+
+    setStationName(station.name);
+    setIsActive(Boolean(station.isActive));
+    setSelectedConsoles([]);
+    setSelectedConsoleId("");
+    setError(null);
+  }, [openValue, station]);
+
+  useEffect(() => {
+    if (!openValue) return;
 
     const fetchConsoleStock = async () => {
       try {
@@ -79,7 +89,7 @@ export default function UpdateStationForm({
         setConsoleList(data);
 
         const initial = data.filter((c) =>
-          station.consoles.includes(String(c.id))
+          station.consoles.map((id) => Number(id)).includes(c.id)
         );
         setSelectedConsoles(initial);
       } catch {
@@ -88,7 +98,7 @@ export default function UpdateStationForm({
     };
 
     fetchConsoleStock();
-  }, [open, station.consoles, t]);
+  }, [openValue, station.consoles, t]);
 
   const handleAddConsole = () => {
     if (!selectedConsoleId) return;
