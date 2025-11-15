@@ -27,6 +27,7 @@ export default function AccessoriesSelection() {
     setSelectedAccessories,
     updateReservationAccessories,
     setCurrentStep,
+    selectedGames,
     selectedConsole,
     currentStep,
   } = useReservation();
@@ -45,6 +46,7 @@ export default function AccessoriesSelection() {
     const fetchAccessories = async () => {
       setIsLoading(true);
       setError(null);
+
       try {
         const res = await fetch("/api/reservation/accessories", {
           method: "GET",
@@ -71,7 +73,38 @@ export default function AccessoriesSelection() {
       }
     };
 
+    const fetchRequiredAccessories = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams();
+        selectedGames.forEach((id) => params.append("gameIds", id));
+
+        const res = await fetch(
+          `/api/reservation/required-accessories?${params.toString()}`
+        );
+
+        const data = (await res.json()) as { required_accessories: string[] };
+
+        if (!res.ok) {
+          throw new Error(t("reservation.accessory.error"));
+        }
+
+        setSelectedAccessories(
+          data.required_accessories.map((acc) => Number(acc)) || []
+        );
+      } catch (err: unknown) {
+        setSelectedAccessories([]);
+        setError(
+          err instanceof Error ? err.message : t("reservation.accessory.error")
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchAccessories();
+    fetchRequiredAccessories();
     return () => controller.abort();
   }, [t]);
 
@@ -154,7 +187,9 @@ export default function AccessoriesSelection() {
                   </div>
                 </div>
                 <p className="text-sm text-gray-500">
-                  {t("reservation.accessory.selected_count", { count: selectedAccessories.length })}
+                  {t("reservation.accessory.selected_count", {
+                    count: selectedAccessories.length,
+                  })}
                 </p>
               </div>
 
