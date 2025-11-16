@@ -14,12 +14,14 @@ interface AccessorySelectionGridProps {
   accessories: Accessory[];
   selectedIds: number[];
   onSelect: (a: Accessory) => void;
+  requiredIds?: number[];
 }
 
 export default function AccessorySelectionGrid({
   accessories,
   selectedIds,
   onSelect,
+  requiredIds = [],
 }: AccessorySelectionGridProps) {
   const t = useTranslations();
 
@@ -53,14 +55,27 @@ export default function AccessorySelectionGrid({
           {filtered.map((a) => (
             <div
               key={a.id}
-              onClick={() => onSelect(a)}
-              className={`p-4 rounded-lg border text-center cursor-pointer transition ${
-                selectedIds.includes(a.id)
-                  ? "border-green-500 bg-green-50"
-                  : "border-gray-200 hover:border-gray-400"
-              }`}
+              onClick={() => {
+                if (!requiredIds.includes(a.id)) {
+                  onSelect(a);
+                }
+              }}
+              className={`relative p-4 rounded-lg border text-center transition
+                ${
+                  requiredIds.includes(a.id)
+                    ? "border-blue-500 bg-blue-50 cursor-not-allowed opacity-80"
+                    : selectedIds.includes(a.id)
+                    ? "border-green-500 bg-green-50 cursor-pointer"
+                    : "border-gray-200 hover:border-gray-400 cursor-pointer"
+                }
+              `}
             >
               <p className="font-semibold">{a.name}</p>
+              {requiredIds.includes(a.id) && (
+                <span className="absolute top-1 right-1 text-[10px] bg-blue-500 text-white px-2 py-px rounded-full">
+                  {t("reservation.accessory.required")}
+                </span>
+              )}
             </div>
           ))}
         </div>

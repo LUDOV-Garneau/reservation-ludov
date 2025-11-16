@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 import { RowDataPacket } from "mysql2";
 
 type GameRow = RowDataPacket & {
-  required_accessories: string;
+  required_accessories: number[];
 };
 
 type AccessoriesRow = RowDataPacket & {
@@ -41,15 +41,10 @@ export async function GET(request: NextRequest) {
       [gameIds]
     );
 
-    const accessoriesArrays: string[][] = rows.map((row) => {
-      return JSON.parse(row.required_accessories) as string[];
-    });
-
-    const requiredAccessories: string[] = [];
-
-    accessoriesArrays.forEach((accessoriesArray) => {
-      if (accessoriesArray[0]) {
-        requiredAccessories.push(accessoriesArray[0]);
+    const requiredAccessories: number[] = [];
+    rows.forEach((accessoriesArray) => {
+      if (accessoriesArray.required_accessories.length > 0) {
+        requiredAccessories.push(accessoriesArray.required_accessories[0]);
       }
     });
 

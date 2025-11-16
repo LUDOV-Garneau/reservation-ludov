@@ -132,7 +132,8 @@
       "selected_count": "{count, plural, =0 {No accessories selected} one {# accessory selected} other {# accessories selected}}",
       "remove_aria_label": "Remove",
       "accessoryName": "Accessory name...",
-      "noAccessoryFound": "No accessory found"
+      "noAccessoryFound": "No accessory found",
+      "required": "Required"
     },
     "calendar": {
       "title": "Reservation",
@@ -360,34 +361,34 @@
         "emailWillBeSend": "An email informing the user of the password reset will be sent to them.",
         "cancelReset": "Cancel",
         "resetState": "Resetting…",
-        "confirmReset" : "Confirm Reset"
+        "confirmReset": "Confirm Reset"
       },
-      "addUserForm" : {
-        "errorMessage" : {
-          "firstnameRequired" : "Firstname is required.",
-          "firstnameLength" : "Firstname must be at least 2 characters long.",
-          "lastnameRequired" : "Lastname is required.",
-          "lastnameLength" : "Lastname must be at least 2 characters long.",
-          "emailRequired" : "Email address is required.",
-          "emailInvalid" : "Email address is invalid.",
-          "emailLength" : "Email address is too long.",
-          "userAlreadyExists" : "A user with this email address already exists.",
-          "genericError" : "An error occurred. Please try again."
+      "addUserForm": {
+        "errorMessage": {
+          "firstnameRequired": "Firstname is required.",
+          "firstnameLength": "Firstname must be at least 2 characters long.",
+          "lastnameRequired": "Lastname is required.",
+          "lastnameLength": "Lastname must be at least 2 characters long.",
+          "emailRequired": "Email address is required.",
+          "emailInvalid": "Email address is invalid.",
+          "emailLength": "Email address is too long.",
+          "userAlreadyExists": "A user with this email address already exists.",
+          "genericError": "An error occurred. Please try again."
         },
-        "userAddedSuccess" : "User added successfully.",
-        "userAdded" : "User added!",
-        "addUser" : "Add a user",
-        "wasCreatedSuccessfully" : "was created successfully.",
-        "form" : {
-          "firstName" : "First name",
-          "lastName" : "Last name",
-          "email" : "Email address",
+        "userAddedSuccess": "User added successfully.",
+        "userAdded": "User added!",
+        "addUser": "Add a user",
+        "wasCreatedSuccessfully": "was created successfully.",
+        "form": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "email": "Email address",
           "adminAccess": "Administrator access",
           "active": "Active",
           "adminAcessDescription": "Grants access to the admin panel and sensitive actions. Reserved for trusted staff.",
-          "cancel" : "Cancel",
-          "submit" : "Add user",
-          "submitting" : "Adding..."
+          "cancel": "Cancel",
+          "submit": "Add user",
+          "submitting": "Adding..."
         }
       }
     },
@@ -447,7 +448,7 @@
         "CancelDelete": "Cancel deletion",
         "deletingState": "Deleting…",
         "confirmDelete": "Confirm deletion",
-        "alerts":{
+        "alerts": {
           "deleteSuccess": "Station deleted successfully",
           "deleteError": "Error deleting station"
         }

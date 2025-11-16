@@ -33,6 +33,7 @@ export default function AccessoriesSelection() {
   } = useReservation();
 
   const [allAccessories, setAllAccessories] = useState<Accessory[]>([]);
+  const [requiredAccessories, setRequiredAccessories] = useState<number[]>([]);
   const t = useTranslations();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,11 +91,16 @@ export default function AccessoriesSelection() {
           throw new Error(t("reservation.accessory.error"));
         }
 
-        setSelectedAccessories(
-          data.required_accessories.map((acc) => Number(acc)) || []
-        );
+        const req = data.required_accessories.map(Number);
+
+        setRequiredAccessories(req);
+
+        setSelectedAccessories((prev) => {
+          const merged = new Set([...prev, ...req]);
+          return Array.from(merged);
+        });
       } catch (err: unknown) {
-        setSelectedAccessories([]);
+        setRequiredAccessories([]);
         setError(
           err instanceof Error ? err.message : t("reservation.accessory.error")
         );
@@ -109,6 +115,8 @@ export default function AccessoriesSelection() {
   }, [t]);
 
   const handleSelect = (accessory: Accessory) => {
+    if (requiredAccessories.includes(accessory.id)) return;
+
     setSelectedAccessories((prev: number[]) => {
       if (prev.includes(accessory.id)) {
         return prev.filter((id) => id !== accessory.id);
@@ -125,7 +133,7 @@ export default function AccessoriesSelection() {
   };
 
   const handleClearAll = () => {
-    setSelectedAccessories([]);
+    setSelectedAccessories(requiredAccessories);
   };
 
   const handleContinue = async () => {
@@ -241,19 +249,25 @@ export default function AccessoriesSelection() {
                           </p>
                         </div>
 
-                        <button
-                          onClick={() => handleRemove(accessory.id)}
-                          className="h-8 w-8 flex items-center justify-center rounded-lg bg-[white] border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                          aria-label={t(
-                            "reservation.accessory.remove_aria_label"
-                          )}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                        {!requiredAccessories.includes(accessory.id) && (
+                          <button
+                            onClick={() => handleRemove(accessory.id)}
+                            className="h-8 w-8 flex items-center justify-center rounded-lg border transition-all
+      bg-white border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50
+      group-hover:opacity-100 opacity-0"
+                            aria-label={t(
+                              "reservation.accessory.remove_aria_label"
+                            )}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
                     ))}
 
-                    {selectedAccessoriesData.length > 1 && (
+                    {selectedAccessoriesData.some(
+                      (a) => !requiredAccessories.includes(a.id)
+                    ) && (
                       <button
                         onClick={handleClearAll}
                         className="w-full text-sm text-gray-500 hover:text-red-500 py-2 transition-colors flex items-center justify-center rounded-lg border border-gray-200 hover:border-red-300 bg-gray-50 hover:bg-red-50"
@@ -335,6 +349,7 @@ export default function AccessoriesSelection() {
                 <AccessorySelectionGrid
                   accessories={allAccessories}
                   selectedIds={selectedAccessories}
+                  requiredIds={requiredAccessories}
                   onSelect={handleSelect}
                 />
               )}
