@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const kohaIds: number[] = [];
     rows.forEach((row) => {
       if (row.required_accessories?.length > 0) {
-        kohaIds.push(row.required_accessories[0]); // <-- ORIGINAL LOGIC
+        kohaIds.push(row.required_accessories[0]);
       }
     });
 

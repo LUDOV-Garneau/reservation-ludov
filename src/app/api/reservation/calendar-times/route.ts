@@ -27,6 +27,10 @@ type ConsoleTypeRow = RowDataPacket & {
   console_type_id: number;
 };
 
+type GameRow = RowDataPacket & {
+  required_accessories: number[];
+};
+
 type SpecificHoursRow = WeeklyHoursRow & { is_exception: boolean };
 
 type Range = { start: number; end: number };
@@ -223,6 +227,55 @@ function isSlotInFuture(time: string, currentHour: number): boolean {
   return slotHour > currentHour;
 }
 
+function resolveAccessoryFallbacks(
+  time: string,
+  reservationsAtThisTime: ReservationRow[],
+  selectedAccessoryIds: number[],
+  requiredAccessoryIdMap: Record<number, number[]>
+): { valid: boolean; finalAccessoryIds: number[] } {
+  const finalAccessories = [...selectedAccessoryIds];
+
+  for (const gameId of Object.keys(requiredAccessoryIdMap)) {
+    const candidates = requiredAccessoryIdMap[Number(gameId)];
+    if (!candidates || candidates.length === 0) continue;
+
+    const mandatory = candidates[0];
+
+    if (finalAccessories.includes(mandatory)) continue;
+
+    let availableFound = false;
+
+    for (const candidate of candidates) {
+      const unavailable = reservationsAtThisTime.some((res) => {
+        let reserved = [];
+
+        try {
+          reserved =
+            typeof res.accessory_ids === "string"
+              ? JSON.parse(res.accessory_ids)
+              : res.accessory_ids || [];
+        } catch {
+          reserved = [];
+        }
+
+        return reserved.includes(candidate);
+      });
+
+      if (!unavailable) {
+        finalAccessories.push(candidate);
+        availableFound = true;
+        break;
+      }
+    }
+
+    if (!availableFound) {
+      return { valid: false, finalAccessoryIds: [] };
+    }
+  }
+
+  return { valid: true, finalAccessoryIds: finalAccessories };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get("SESSION")?.value;
@@ -350,6 +403,45 @@ export async function GET(request: NextRequest) {
       consoleType[0]?.console_type_id || null
     );
 
+    const [requiredRows] = await pool.query<GameRow[]>(
+      `SELECT required_accessories FROM games WHERE id IN (?)`,
+      [requestedGameIds]
+    );
+
+    const requiredAccessoryMap: Record<number, number[]> = {};
+
+    requiredRows.forEach((row, index) => {
+      const gameId = requestedGameIds[index];
+      const kohaList = row.required_accessories || [];
+
+      if (kohaList.length > 0) {
+        requiredAccessoryMap[gameId] = [kohaList[0]];
+      } else {
+        requiredAccessoryMap[gameId] = [];
+      }
+    });
+
+    const allRequiredKoha = Object.values(requiredAccessoryMap).flat();
+
+    const requiredAccessoryIdMap: Record<number, number[]> = {};
+
+    if (allRequiredKoha.length > 0) {
+      const [accRows] = await pool.query<RowDataPacket[]>(
+        `SELECT id, koha_id FROM accessoires WHERE koha_id IN (?)`,
+        [allRequiredKoha]
+      );
+
+      const kohaToId: Record<number, number> = {};
+      accRows.forEach((r) => (kohaToId[r.koha_id] = r.id));
+
+      for (const gameId of Object.keys(requiredAccessoryMap)) {
+        const kohaArray = requiredAccessoryMap[Number(gameId)];
+        requiredAccessoryIdMap[Number(gameId)] = kohaArray
+          .map((k) => kohaToId[k])
+          .filter(Boolean);
+      }
+    }
+
     const SESSION_DURATION_HOURS = 2;
     const SESSION_DURATION_MINUTES = SESSION_DURATION_HOURS * 60;
 
@@ -380,6 +472,23 @@ export async function GET(request: NextRequest) {
     });
 
     const availability: TimeSlotAvailability[] = allSlots.map((time) => {
+      const reservationsAtTime = reservations.filter((r) => r.time === time);
+
+      const fallback = resolveAccessoryFallbacks(
+        time,
+        reservationsAtTime,
+        requestedAccessoryIds,
+        requiredAccessoryIdMap
+      );
+
+      if (!fallback.valid) {
+        return {
+          time,
+          available: false,
+          conflicts: { accessories: [-1] },
+        };
+      }
+
       const check = checkSlotAvailability(
         time,
         reservations,
