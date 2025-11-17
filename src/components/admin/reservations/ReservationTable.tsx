@@ -226,7 +226,7 @@ function ReservationTableRow({
       </TableCell>
 
       {/* Console */}
-      <TableCell className="hidden md:table-cell">
+      <TableCell>
         <div className="flex items-center gap-2 text-sm">
           <span className="truncate max-w-[160px]">
             {reservation.console}
@@ -235,7 +235,7 @@ function ReservationTableRow({
       </TableCell>
 
       {/* Date */}
-      <TableCell className="hidden lg:table-cell">
+      <TableCell className="hidden md:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{reservation.date}</span>
@@ -243,7 +243,7 @@ function ReservationTableRow({
       </TableCell>
 
       {/* Heure */}
-      <TableCell>
+      <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="h-3.5 w-3.5" />
           <span>{reservation.heure}</span>
@@ -475,13 +475,13 @@ export default function ReservationsTable() {
                       <TableHead className="hidden lg:table-cell">
                         {t("admin.reservations.table.header.user")}
                       </TableHead>
-                      <TableHead className="hidden md:table-cell">
+                      <TableHead>
                         {t("admin.reservations.table.header.console")}
                       </TableHead>
-                      <TableHead className="hidden lg:table-cell">
+                      <TableHead className="hidden md:table-cell">
                         {t("admin.reservations.table.header.date")}
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="hidden lg:table-cell">
                         {t("admin.reservations.table.header.time")}
                       </TableHead>
                       <TableHead>
