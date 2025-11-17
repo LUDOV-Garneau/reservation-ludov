@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
+import { request } from "http";
 
 interface ReservationRow extends RowDataPacket {
   time: string;
@@ -9,6 +10,11 @@ interface ReservationRow extends RowDataPacket {
   game2_id: number | null;
   game3_id: number | null;
   accessoirs: string;
+  stationId: number;
+}
+
+interface StationRow extends RowDataPacket {
+  station_id: number;
 }
 
 type WeeklyHoursRow = RowDataPacket & {
@@ -141,12 +147,14 @@ function checkSlotAvailability(
   reservations: ReservationRow[],
   requestedConsoleId: number,
   requestedGameIds: number[],
-  requestedAccessoryIds: number[]
+  requestedAccessoryIds: number[],
+  requestedStationIds: number[]
 ): { available: boolean; conflicts?: unknown } {
   const conflicts: {
     console?: boolean;
     games?: number[];
     accessories?: number[];
+    station?: boolean;
   } = {};
   let hasConflict = false;
 
@@ -203,6 +211,19 @@ function checkSlotAvailability(
   }
   if (conflictingAccessories.length > 0) {
     conflicts.accessories = [...new Set(conflictingAccessories)];
+    hasConflict = true;
+  }
+
+  const conflictingStations: number[] = [];
+
+  for (const station of requestedStationIds) {
+    if (reservationsAtThisTime.some((res) => res.stationId === station)) {
+      conflictingStations.push(station);
+    }
+  }
+
+  if (conflictingStations.length === requestedStationIds.length) {
+    conflicts.station = true;
     hasConflict = true;
   }
 
@@ -272,7 +293,7 @@ export async function GET(request: NextRequest) {
       : [];
 
     const [reservations] = await pool.query<ReservationRow[]>(
-      `SELECT time, console_id, game1_id, game2_id, game3_id, accessory_ids 
+      `SELECT time, console_id, game1_id, game2_id, game3_id, accessory_ids, station AS stationId
        FROM reservation 
        WHERE date = ? AND archived = 0`,
       [date]
@@ -346,13 +367,22 @@ export async function GET(request: NextRequest) {
       return true;
     });
 
+    const [stationIds] = await pool.query<StationRow[]>(
+      `SELECT id AS station_id
+       FROM stations
+       WHERE isActive = 1 AND JSON_CONTAINS(consoles, JSON_ARRAY(?))
+      `,
+      [requestedConsoleId]
+    );
+
     const availability: TimeSlotAvailability[] = allSlots.map((time) => {
       const check = checkSlotAvailability(
         time,
         reservations,
         requestedConsoleId,
         requestedGameIds,
-        requestedAccessoryIds
+        requestedAccessoryIds,
+        stationIds.map((s) => s.station_id)
       );
 
       return {
