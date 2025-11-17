@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { RowDataPacket } from "mysql2";
-import { request } from "http";
 
 interface ReservationRow extends RowDataPacket {
   time: string;
@@ -35,6 +34,7 @@ interface TimeSlotAvailability {
     console?: boolean;
     games?: number[];
     accessories?: number[];
+    station?: boolean;
   };
 }
 
