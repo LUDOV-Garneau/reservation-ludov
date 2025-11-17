@@ -273,11 +273,7 @@ export default function GamesSelection() {
               </>
             ) : (
               <>
-                {t("reservation.games.continue")}
-                {selectedGameObjects.length > 0 &&
-                  ` (${selectedGameObjects.length} jeu${
-                    selectedGameObjects.length > 1 ? "x" : ""
-                  })`}
+                {t("reservation.games.continue", { count: selectedGameObjects.length })}
               </>
             )}
           </Button>

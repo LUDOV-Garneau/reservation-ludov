@@ -2,6 +2,7 @@ import pool from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { NextRequest, NextResponse } from "next/server";
 import { RowDataPacket, ResultSetHeader } from "mysql2";
+import { sendResetPasswordEmail } from "@/lib/sendEmail";
 
 type RequestBody = { 
   targetUserId: number;
@@ -78,6 +79,15 @@ export async function POST(req: NextRequest) {
     );
 
     if (result.affectedRows > 0) {
+
+      const res = await sendResetPasswordEmail({
+        to: userRows[0].email,
+      });
+
+      if (res.rejected.length > 0) {
+        throw new Error();
+      };
+
       return NextResponse.json(
         { 
           success: true, 

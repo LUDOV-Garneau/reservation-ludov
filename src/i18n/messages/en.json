@@ -79,11 +79,11 @@
       "select_up_to_3": "Select up to 3 games",
       "go_through_library": "Browse through the library to choose",
       "saving": "Saving...",
-      "continue": "Continue",
+      "continue": "{count, plural, =0 {Continue} one {Continue (# game)} other {Continue (# games)}}",
       "game_library": "Game library",
       "searchPlaceholder": "Search for a game...",
       "searching": "Searching...",
-      "gamesAvailable": "{count} game{plural} available{plural}",
+      "gamesAvailable": "{count, plural, =0 {No games available} one {# game available} other {# games available}}",
       "displayed": "Displayed: {count}",
       "loading": "Loading games...",
       "noResult": "No game found for \"{search}\"",
@@ -97,7 +97,7 @@
     },
     "course": {
       "selectionTitle": "Course Selection",
-      "instruction": "Please choose the course you want to enroll in.",
+      "instruction": "Please select the course for which you are making a reservation.",
       "courseLabel": "Course",
       "loading": "Loading...",
       "chooseCourse": "Choose a course",
@@ -129,7 +129,7 @@
       "skip_step": "Skip this step",
       "previousStep": "Previous step",
       "selection": "Selection",
-      "selected_count": "{count} accessory selected{plural}",
+      "selected_count": "{count, plural, =0 {No accessories selected} one {# accessory selected} other {# accessories selected}}",
       "remove_aria_label": "Remove",
       "accessoryName": "Accessory name...",
       "noAccessoryFound": "No accessory found"
@@ -434,7 +434,95 @@
       }
     },
     "stations": {
-      "title": "Stations"
+      "title": "Stations",
+      "subtitle": "Manage stations on the LUDOV platform",
+      "actionBar": {
+        "searchPlaceholder": "Search...",
+        "addStation": "Add",
+        "toolTipRefresh": "Refresh",
+        "addStationSuccess": "Station added successfully"
+      },
+      "searchResult": {
+        "noStationsFound": "No station(s) found",
+        "noMatch": "No station matches your search.",
+        "startByAdding": "Start by adding your first station."
+      },
+      "table": {
+        "header": {
+          "name": "Name",
+          "platforms": "Platform(s)",
+          "isActive": "Status",
+          "createdAt": "Creation Date",
+          "actions": "Actions"
+        },
+        "ActionToolTips": {
+          "updateStation": "Edit station",
+          "deleteStation": "Delete station"
+        },
+        "noPlatforms": "No platform assigned",
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "stats": {
+        "activeStations": "Number of active stations",
+        "inactiveStations": "Number of inactive stations",
+        "mostUsedStation": "Most reserved station",
+        "noStations": "No stations created",
+        "noReservations": "No reservations made"
+      },
+      "pagination": {
+        "affichageDe": "Displaying",
+        "a": "to",
+        "sur": "on",
+        "noItem": "No item"
+      },
+      "addStationForm": {
+        "button": {
+          "openDialog": "Add a station",
+          "loading": "Adding...",
+          "submit": "Add",
+          "addConsole": "Add a platform"
+        },
+        "titles": {
+          "dialogTitle": "Add a station"
+        },
+        "fields": {
+          "name": "Name",
+          "consoles": "Available platforms",
+          "stationName": "Station name"
+        },
+        "placeholders": {
+          "selectConsole": "Select a platform",
+          "stationName": "Enter the station name"
+        },
+        "errors": {
+          "missingFields": "Please fill in all fields",
+          "invalidConsole": "Invalid platform",
+          "consoleAlreadyAdded": "The console has already been added",
+          "consoleFetch": "Error fetching platforms",
+          "nameConflict": "A station with this name already exists"
+        },
+        "alerts": {
+          "addStationSuccess": "Station added successfully",
+          "addStationError": "Error adding station"
+        }
+      },
+      "deleteStationDialog": {
+        "deleteStation": "Delete station",
+        "definitiveAction": "This action is non-reversible. The station will not be accessible anymore.",
+        "whatGonnaHappen": "What will happen:",
+        "theStation": "The station will be",
+        "deleted": "deleted",
+        "stationWontBeAccessible": " and will not be accessible anymore.",
+        "reservationDeleted": "Upcoming reservations will also be deleted.",
+        "CancelDelete": "Cancel deletion",
+        "deletingState": "Deleting…",
+        "confirmDelete": "Confirm deletion",
+        "alerts": {
+          "deleteSuccess": "Station deleted successfully",
+          "deleteError": "Error deleting station"
+        }
+      }
     },
     "availabilities": {
       "title": "Availabilities",
