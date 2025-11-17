@@ -50,11 +50,15 @@ import CardStationStats from "./CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
+import UpdateStationForm from "./UpdateStationForm";
+import DeleteStationAction from "./DialogConfirmationDeleteStation";
+import { Badge } from "@/components/ui/badge";
 
 type Station = {
   id: number;
   name: string;
   consoles: string[];
+  consolesId: number[];
   isActive: boolean;
   createdAt: string;
 };
@@ -115,56 +119,50 @@ function usePagination(
 
 function StationTableRow({
   station,
-  onDelete,
+  onAlert,
+  onSuccess,
   onUpdate,
 }: {
   station: Station;
-  onDelete: (stationId: number, name: string) => void;
-  onUpdate: (stationId: number, name: string) => void;
+  onUpdate: (station: Station) => void;
+  onAlert: (
+    type: "success" | "error" | "info" | "warning",
+    message: string,
+    title?: string
+  ) => void;
+  onSuccess: () => void;
 }) {
   const t = useTranslations();
   return (
-    <TableRow key={station.id} className="hover:bg-gray-200">
-      <TableCell className="hidden lg:table-cell">{station.name}</TableCell>
-      <TableCell className="hidden lg:table-cell">
-        <div className="flex flex-wrap gap-2">
-          {station.consoles?.length ? (
-            station.consoles.map((console, i) => (
-              <span
-                key={i}
-                className="bg-gray-200 text-sm px-3 py-1 rounded-xl"
-              >
-                {console}
-              </span>
-            ))
-          ) : (
-            <p className="text-gray-500 italic">{t("admin.stations.table.noPlatforms")}</p>
-          )}
-        </div>
-      </TableCell>
-      <TableCell className="hidden lg:table-cell">
-        {station.isActive ? (
-          <span className="text-green-600 font-medium">{t("admin.stations.table.active")}</span>
-        ) : (
-          <span className="text-red-600 font-medium">{t("admin.stations.table.inactive")}</span>
-        )}
-      </TableCell>
-      <TableCell className="hidden lg:table-cell">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+    <TableRow key={station.id}>
+      <TableCell className="table-cell">{station.name}</TableCell>
+      <TableCell className="hidden md:table-cell">
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(station.createdAt).toLocaleDateString("fr-FR")}</span>
         </div>
       </TableCell>
-      <TableCell>
-        <div className="">
-          <div className="hidden sm:flex gap-2">
+      <TableCell className="table-cell text-center">
+        {station.isActive ? (
+          <Badge variant={"success"} className="rounded-full text-md w-full lg:w-[50%]">
+            {t("admin.stations.table.active")}
+            </Badge>
+        ) : (
+          <Badge variant={"destructive"} className="rounded-full text-md w-full lg:w-[50%]">
+            {t("admin.stations.table.inactive")}
+          </Badge>
+        )}
+      </TableCell>
+      <TableCell className="text-right">
+        <div>
+          <div className="hidden md:flex gap-2 justify-end">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onUpdate(station.id, station.name)}
+                    onClick={() => onUpdate(station)}
                     className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
                   >
                     <Pencil className="h-4 w-4" />
@@ -178,28 +176,40 @@ function StationTableRow({
               </Tooltip>
             </TooltipProvider>
 
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDelete(station.id, station.name)}
-                    className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    {t("admin.stations.table.ActionToolTips.deleteStation")}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <DeleteStationAction
+              targetStation={{ id: station.id, name: station.name }}
+              onAlert={onAlert}
+              onSuccess={onSuccess}
+            >
+              {({ open, loading }) => (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={open}
+                        disabled={loading}
+                        className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
+                        aria-label={t(
+                          "admin.stations.table.ActionToolTips.deleteStation"
+                        )}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {t("admin.stations.table.ActionToolTips.deleteStation")}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </DeleteStationAction>
           </div>
 
-          <div className="sm:hidden">
+          <div className="md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -208,19 +218,34 @@ function StationTableRow({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
-                  onClick={() => onUpdate(station.id, station.name)}
+                  onClick={() => onUpdate(station)}
                 >
                   <Pencil className="h-4 w-4 mr-2 text-blue-500" />
                   {t("admin.stations.table.ActionToolTips.updateStation")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => onDelete(station.id, station.name)}
-                  className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                <DeleteStationAction
+                  targetStation={{ id: station.id, name: station.name }}
+                  onAlert={onAlert}
+                  onSuccess={onSuccess}
                 >
-                  <Trash2 className="h-4 w-4 mr-2 text-red-600" />
-                  {t("admin.stations.table.ActionToolTips.deleteStation")}
-                </DropdownMenuItem>
+                  {({ open }) => (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        open();
+                      }}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                      }}
+                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                      {t("admin.stations.table.ActionToolTips.deleteStation")}
+                    </DropdownMenuItem>
+                  )}
+                </DeleteStationAction>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -382,6 +407,8 @@ export default function StationsTable() {
   const [totalActiveStations, setTotalActiveStations] = useState(0);
   const [totalInactiveStations, setTotalInactiveStations] = useState(0);
   const [stationMostReservations, setStationMostReservations] = useState("");
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [stationToUpdate, setStationToUpdate] = useState<Station | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [metricsLoading, setMetricsLoading] = useState(true);
@@ -458,6 +485,11 @@ export default function StationsTable() {
     }
   }
 
+  function handleUpdate(station: Station) {
+    setStationToUpdate(station);
+    setUpdateDialogOpen(true);
+  }
+
   const filteredStations = stations.filter((station) => {
     const search = searchQuery.toLowerCase();
     return (
@@ -490,7 +522,9 @@ export default function StationsTable() {
         loading={metricsLoading}
         activeStationsCount={totalActiveStations ?? 0}
         inactiveStationsCount={totalInactiveStations ?? 0}
-        mostUsed={stationMostReservations ?? t("admin.stations.stats.noReservations")}
+        mostUsed={
+          stationMostReservations ?? t("admin.stations.stats.noReservations")
+        }
       />
 
       <ModernAlert alert={alert} onClose={clearAlert} />
@@ -518,19 +552,16 @@ export default function StationsTable() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="hidden lg:table-cell">
+                      <TableHead className="table-cell">
                         {t("admin.stations.table.header.name")}
                       </TableHead>
-                      <TableHead>
-                        {t("admin.stations.table.header.platforms")}
-                      </TableHead>
-                      <TableHead>
-                        {t("admin.stations.table.header.isActive")}
-                      </TableHead>
-                      <TableHead className="hidden lg:table-cell">
+                      <TableHead className="hidden md:table-cell text-center">
                         {t("admin.stations.table.header.createdAt")}
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="text-center">
+                        {t("admin.stations.table.header.isActive")}
+                      </TableHead>
+                      <TableHead className="text-right">
                         {t("admin.stations.table.header.actions")}
                       </TableHead>
                     </TableRow>
@@ -541,12 +572,9 @@ export default function StationsTable() {
                       <StationTableRow
                         key={station.id}
                         station={station}
-                        onDelete={() =>
-                          console.log("Delete station", station.id)
-                        }
-                        onUpdate={() =>
-                          console.log("Update station", station.id)
-                        }
+                        onUpdate={() => handleUpdate(station)}
+                        onAlert={showAlert}
+                        onSuccess={handleRefresh}
                       />
                     ))}
                   </TableBody>
@@ -582,6 +610,19 @@ export default function StationsTable() {
           )}
         </CardContent>
       </Card>
+
+      {stationToUpdate && (
+        <UpdateStationForm
+          open={updateDialogOpen}
+          onOpenChange={setUpdateDialogOpen}
+          station={stationToUpdate}
+          onSuccess={() => {
+            setUpdateDialogOpen(false);
+            handleRefresh();
+          }}
+          onAlert={showAlert}
+        />
+      )}
 
       {confirmDialog && (
         <ConfirmDialog

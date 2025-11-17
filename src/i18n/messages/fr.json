@@ -331,63 +331,63 @@
         "admin": "Administrateur",
         "user": "Utilisateur"
       },
-      "pagination" : {
-        "affichageDe" : "Affichage de",
-        "a" : "à",
-        "sur" : "sur",
-        "noItem" : "Aucun élément"
+      "pagination": {
+        "affichageDe": "Affichage de",
+        "a": "à",
+        "sur": "sur",
+        "noItem": "Aucun élément"
       },
-      "deleteUserDialog" : {
-        "deleteUser" : "Supprimer l'utilisateur",
-        "definitiveAction" : "Cette action est définitive. L'utilisateur et ses accès seront supprimés.",
-        "whatGonnaHappen" : "Ce qui va se passer :",
-        "theAccount" : "Le compte sera",
-        "deleted" : "supprimé", 
-        "userWontBeAbleToLogin" : "et l'utilisateur ne pourra plus se connecter.",
-        "reservationDeleted" : "Les réservations à venir seront également supprimées.",
-        "dataDeleteAccordingToPolicy" : "Les données associées essentielles seront retirées selon votre politique.",
-        "CancelDelete" : "Annuler la suppression",
-        "deletingState" : "Suppression...",
-        "confirmDelete" : "Confirmer la suppresion"
+      "deleteUserDialog": {
+        "deleteUser": "Supprimer l'utilisateur",
+        "definitiveAction": "Cette action est définitive. L'utilisateur et ses accès seront supprimés.",
+        "whatGonnaHappen": "Ce qui va se passer :",
+        "theAccount": "Le compte sera",
+        "deleted": "supprimé",
+        "userWontBeAbleToLogin": "et l'utilisateur ne pourra plus se connecter.",
+        "reservationDeleted": "Les réservations à venir seront également supprimées.",
+        "dataDeleteAccordingToPolicy": "Les données associées essentielles seront retirées selon votre politique.",
+        "CancelDelete": "Annuler la suppression",
+        "deletingState": "Suppression...",
+        "confirmDelete": "Confirmer la suppresion"
       },
-      "resetPasswordDialog" : {
-        "resetPassword" : "Réinitialiser le mot de passe",
-        "thisActionPreventLogin" : "Cette action empêchera l'utilisateur de se connecter jusqu'à ce qu'il définisse un nouveau mot de passe.",
-        "whatWillHappen" : "Ce qui va se passer :",
-        "thePasswordWillBe" : "Le mot de passe sera",
+      "resetPasswordDialog": {
+        "resetPassword": "Réinitialiser le mot de passe",
+        "thisActionPreventLogin": "Cette action empêchera l'utilisateur de se connecter jusqu'à ce qu'il définisse un nouveau mot de passe.",
+        "whatWillHappen": "Ce qui va se passer :",
+        "thePasswordWillBe": "Le mot de passe sera",
         "reset": "réinitialisé",
-        "inTheDatabase" : "dans la base de données.",
-        "emailWillBeSend" : "Un courriel informant l'utilisateur de la réinitialisation de son mot de passe sera envoyé.",
-        "cancelReset" : "Annuler la réinitialisation",
+        "inTheDatabase": "dans la base de données.",
+        "emailWillBeSend": "Un courriel informant l'utilisateur de la réinitialisation de son mot de passe sera envoyé.",
+        "cancelReset": "Annuler la réinitialisation",
         "resetState": "Réinitialisation...",
-        "confirmReset" : "Confirmer la réinitialisation"
+        "confirmReset": "Confirmer la réinitialisation"
       },
-      "addUserForm" : {
-        "errorMessage" : {
-          "firstnameRequired" : "Le prénom est requis.",
-          "firstnameLength" : "Le prénom doit contenir au moins 2 caractères.",
-          "lastnameRequired" : "Le nom de famille est requis.",
-          "lastnameLength" : "Le nom de famille doit contenir au moins 2 caractères.",
-          "emailRequired" : "L'adresse courriel est requise.",
-          "emailInvalid" : "L'adresse courriel est invalide.",
-          "emailLength" : "L'adresse courriel est trop longue.",
-          "userAlreadyExists" : "Un utilisateur avec ce courriel existe déjà.",
-          "genericError" : "Une erreur s'est produite. Veuillez réessayer."
+      "addUserForm": {
+        "errorMessage": {
+          "firstnameRequired": "Le prénom est requis.",
+          "firstnameLength": "Le prénom doit contenir au moins 2 caractères.",
+          "lastnameRequired": "Le nom de famille est requis.",
+          "lastnameLength": "Le nom de famille doit contenir au moins 2 caractères.",
+          "emailRequired": "L'adresse courriel est requise.",
+          "emailInvalid": "L'adresse courriel est invalide.",
+          "emailLength": "L'adresse courriel est trop longue.",
+          "userAlreadyExists": "Un utilisateur avec ce courriel existe déjà.",
+          "genericError": "Une erreur s'est produite. Veuillez réessayer."
         },
-        "userAddedSuccess" : "Utilisateur ajouté avec succès.",
-        "userAdded" : "Utilisateur ajouté !",
-        "addUser" : "Ajouter un utilisateur",
-        "wasCreatedSuccessfully" : "a été créé avec succès.",
-        "form" : {
-          "firstName" : "Prénom",
-          "lastName" : "Nom de famille",
-          "email" : "Adresse courriel",
+        "userAddedSuccess": "Utilisateur ajouté avec succès.",
+        "userAdded": "Utilisateur ajouté !",
+        "addUser": "Ajouter un utilisateur",
+        "wasCreatedSuccessfully": "a été créé avec succès.",
+        "form": {
+          "firstName": "Prénom",
+          "lastName": "Nom de famille",
+          "email": "Adresse courriel",
           "adminAccess": "Accès administrateur",
           "active": "Actif",
           "adminAcessDescription": "Donne accès au panneau d’administration et aux actions sensibles. À réserver au personnel de confiance.",
-          "cancel" : "Annuler",
-          "submit" : "Ajouter l'utilisateur",
-          "submitting" : "Ajout en cours..."
+          "cancel": "Annuler",
+          "submit": "Ajouter l'utilisateur",
+          "submitting": "Ajout en cours..."
         }
       }
     },
@@ -400,7 +400,8 @@
       "actionBar": {
         "searchPlaceholder": "Recherche...",
         "addStation": "Ajouter",
-        "toolTipRefresh": "Rafraîchir"
+        "toolTipRefresh": "Rafraîchir",
+        "addStationSuccess": "Station ajoutée avec succès"
       },
       "searchResult": {
         "noStationsFound": "Aucune station(s) trouvée(s)",
@@ -435,6 +436,81 @@
         "a": "à",
         "sur": "sur",
         "noItem": "Aucun élément"
+      },
+      "updateStationForm": {
+        "button": {
+          "openDialog": "Modifier",
+          "saveChanges": "Enregistrer",
+          "loading": "Chargement...",
+          "addConsole": "Ajouter des consoles",
+          "submit": "Modifier"
+        },
+        "titles": {
+          "dialogTitle": "Modifier la station"
+        },
+        "fields": {
+          "stationName": "Nom de la station",
+          "consoles": "Consoles",
+          "isActive": "Active"
+        },
+        "select": {
+          "placeholder": "Sélectionnez les consoles"
+        },
+        "errors": {
+          "missingFields": "Veuillez remplir tous les champs requis.",
+          "consoleFetch": "Erreur lors de la récupération des consoles."
+        },
+        "alerts": {
+          "updateSuccess": "Station mise à jour avec succès !",
+          "updateError": "Erreur lors de la mise à jour de la station."
+        }
+      },
+      "addStationForm": {
+        "button": {
+          "openDialog": "Ajouter une station",
+          "loading": "Ajout...",
+          "submit": "Ajouter",
+          "addConsole": "Ajouter une plateforme"
+        },
+        "titles": {
+          "dialogTitle": "Ajouter une station"
+        },
+        "fields": {
+          "name": "Nom",
+          "consoles": "Plateformes disponibles",
+          "stationName": "Nom de la station"
+        },
+        "placeholders": {
+          "selectConsole": "Sélectionner une plateforme",
+          "stationName": "Entrez le nom de la station"
+        },
+        "errors": {
+          "missingFields": "Veuillez remplir tous les champs",
+          "invalidConsole": "Console invalide",
+          "consoleAlreadyAdded": "La console a déjà été ajoutée",
+          "consoleFetch": "Erreur lors de la récupération des plateformes",
+          "nameConflict": "Une station avec ce nom existe déjà"
+        },
+        "alerts": {
+          "addStationSuccess": "Station ajoutée avec succès",
+          "addStationError": "Erreur lors de l'ajout"
+        }
+      },
+      "deleteStationDialog": {
+        "deleteStation": "Supprimer la station",
+        "definitiveAction": "Cette action est définitive. La station ne sera plus accessible.",
+        "whatGonnaHappen": "Ce qui va se passer :",
+        "theStation": "La station sera",
+        "deleted": "supprimée",
+        "stationWontBeAccessible": " et ne sera plus accessible.",
+        "reservationDeleted": "Les réservations à venir seront également supprimées.",
+        "CancelDelete": "Annuler la suppression",
+        "deletingState": "Suppression...",
+        "confirmDelete": "Confirmer la suppresion",
+        "alerts": {
+          "deleteSuccess": "Station supprimée avec succès",
+          "deleteError": "Erreur lors de la suppression"
+        }
       }
     },
     "availabilities": {
