@@ -52,6 +52,7 @@ import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
 import UpdateStationForm from "./UpdateStationForm";
 import DeleteStationAction from "./DialogConfirmationDeleteStation";
+import { Badge } from "@/components/ui/badge";
 
 type Station = {
   id: number;
@@ -133,46 +134,28 @@ function StationTableRow({
 }) {
   const t = useTranslations();
   return (
-    <TableRow key={station.id} className="hover:bg-gray-200">
-      <TableCell className="hidden lg:table-cell">{station.name}</TableCell>
+    <TableRow key={station.id}>
+      <TableCell className="table-cell">{station.name}</TableCell>
       <TableCell className="hidden lg:table-cell">
-        <div className="flex flex-wrap gap-2">
-          {station.consoles?.length ? (
-            station.consoles.map((console, i) => (
-              <span
-                key={i}
-                className="bg-gray-200 text-sm px-3 py-1 rounded-xl"
-              >
-                {console}
-              </span>
-            ))
-          ) : (
-            <p className="text-gray-500 italic">
-              {t("admin.stations.table.noPlatforms")}
-            </p>
-          )}
+        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+          <Calendar className="h-3.5 w-3.5" />
+          <span>{new Date(station.createdAt).toLocaleDateString("fr-FR")}</span>
         </div>
       </TableCell>
-      <TableCell className="hidden lg:table-cell">
+      <TableCell className="table-cell text-center">
         {station.isActive ? (
           <span className="text-green-600 font-medium">
             {t("admin.stations.table.active")}
           </span>
         ) : (
-          <span className="text-red-600 font-medium">
+          <Badge variant={"destructive"}>
             {t("admin.stations.table.inactive")}
-          </span>
+          </Badge>
         )}
       </TableCell>
-      <TableCell className="hidden lg:table-cell">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar className="h-3.5 w-3.5" />
-          <span>{new Date(station.createdAt).toLocaleDateString("fr-FR")}</span>
-        </div>
-      </TableCell>
-      <TableCell>
-        <div className="">
-          <div className="hidden sm:flex gap-2">
+      <TableCell className="text-right">
+        <div>
+          <div className="flex gap-2 justify-end">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -569,19 +552,16 @@ export default function StationsTable() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="hidden lg:table-cell">
+                      <TableHead className="table-cell">
                         {t("admin.stations.table.header.name")}
                       </TableHead>
-                      <TableHead>
-                        {t("admin.stations.table.header.platforms")}
-                      </TableHead>
-                      <TableHead>
-                        {t("admin.stations.table.header.isActive")}
-                      </TableHead>
-                      <TableHead className="hidden lg:table-cell">
+                      <TableHead className="hidden lg:table-cell text-center">
                         {t("admin.stations.table.header.createdAt")}
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="text-center">
+                        {t("admin.stations.table.header.isActive")}
+                      </TableHead>
+                      <TableHead className="text-right">
                         {t("admin.stations.table.header.actions")}
                       </TableHead>
                     </TableRow>

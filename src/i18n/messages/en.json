@@ -360,34 +360,34 @@
         "emailWillBeSend": "An email informing the user of the password reset will be sent to them.",
         "cancelReset": "Cancel",
         "resetState": "Resetting…",
-        "confirmReset" : "Confirm Reset"
+        "confirmReset": "Confirm Reset"
       },
-      "addUserForm" : {
-        "errorMessage" : {
-          "firstnameRequired" : "Firstname is required.",
-          "firstnameLength" : "Firstname must be at least 2 characters long.",
-          "lastnameRequired" : "Lastname is required.",
-          "lastnameLength" : "Lastname must be at least 2 characters long.",
-          "emailRequired" : "Email address is required.",
-          "emailInvalid" : "Email address is invalid.",
-          "emailLength" : "Email address is too long.",
-          "userAlreadyExists" : "A user with this email address already exists.",
-          "genericError" : "An error occurred. Please try again."
+      "addUserForm": {
+        "errorMessage": {
+          "firstnameRequired": "Firstname is required.",
+          "firstnameLength": "Firstname must be at least 2 characters long.",
+          "lastnameRequired": "Lastname is required.",
+          "lastnameLength": "Lastname must be at least 2 characters long.",
+          "emailRequired": "Email address is required.",
+          "emailInvalid": "Email address is invalid.",
+          "emailLength": "Email address is too long.",
+          "userAlreadyExists": "A user with this email address already exists.",
+          "genericError": "An error occurred. Please try again."
         },
-        "userAddedSuccess" : "User added successfully.",
-        "userAdded" : "User added!",
-        "addUser" : "Add a user",
-        "wasCreatedSuccessfully" : "was created successfully.",
-        "form" : {
-          "firstName" : "First name",
-          "lastName" : "Last name",
-          "email" : "Email address",
+        "userAddedSuccess": "User added successfully.",
+        "userAdded": "User added!",
+        "addUser": "Add a user",
+        "wasCreatedSuccessfully": "was created successfully.",
+        "form": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "email": "Email address",
           "adminAccess": "Administrator access",
           "active": "Active",
           "adminAcessDescription": "Grants access to the admin panel and sensitive actions. Reserved for trusted staff.",
-          "cancel" : "Cancel",
-          "submit" : "Add user",
-          "submitting" : "Adding..."
+          "cancel": "Cancel",
+          "submit": "Add user",
+          "submitting": "Adding..."
         }
       }
     },
@@ -400,7 +400,8 @@
       "actionBar": {
         "searchPlaceholder": "Search...",
         "addStation": "Add",
-        "toolTipRefresh": "Refresh"
+        "toolTipRefresh": "Refresh",
+        "addStationSuccess": "Station added successfully"
       },
       "searchResult": {
         "noStationsFound": "No station(s) found",
@@ -464,6 +465,37 @@
           "updateError": "Error updating station."
         }
       },
+      "addStationForm": {
+        "button": {
+          "openDialog": "Add a station",
+          "loading": "Adding...",
+          "submit": "Add",
+          "addConsole": "Add a platform"
+        },
+        "titles": {
+          "dialogTitle": "Add a station"
+        },
+        "fields": {
+          "name": "Name",
+          "consoles": "Available platforms",
+          "stationName": "Station name"
+        },
+        "placeholders": {
+          "selectConsole": "Select a platform",
+          "stationName": "Enter the station name"
+        },
+        "errors": {
+          "missingFields": "Please fill in all fields",
+          "invalidConsole": "Invalid platform",
+          "consoleAlreadyAdded": "The console has already been added",
+          "consoleFetch": "Error fetching platforms",
+          "nameConflict": "A station with this name already exists"
+        },
+        "alerts": {
+          "addStationSuccess": "Station added successfully",
+          "addStationError": "Error adding station"
+        }
+      },
       "deleteStationDialog": {
         "deleteStation": "Delete station",
         "definitiveAction": "This action is non-reversible. The station will not be accessible anymore.",
@@ -475,7 +507,7 @@
         "CancelDelete": "Cancel deletion",
         "deletingState": "Deleting…",
         "confirmDelete": "Confirm deletion",
-        "alerts":{
+        "alerts": {
           "deleteSuccess": "Station deleted successfully",
           "deleteError": "Error deleting station"
         }
