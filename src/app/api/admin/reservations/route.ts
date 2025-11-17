@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
       LEFT JOIN games g2 ON r.game2_id = g2.id
       LEFT JOIN games g3 ON r.game3_id = g3.id
       LEFT JOIN users u ON r.user_id = u.id
-      ORDER BY r.createdAt DESC
+      ORDER BY r.date DESC, r.time DESC
       LIMIT ? OFFSET ?
       `,
       [limit, offset]
