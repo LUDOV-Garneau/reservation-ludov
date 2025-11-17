@@ -8,10 +8,6 @@ type GameRow = RowDataPacket & {
   required_accessories: number[];
 };
 
-type AccessoriesRow = RowDataPacket & {
-  id: number;
-};
-
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -41,14 +37,27 @@ export async function GET(request: NextRequest) {
       [gameIds]
     );
 
-    const requiredAccessories: number[] = [];
-    rows.forEach((accessoriesArray) => {
-      if (accessoriesArray.required_accessories.length > 0) {
-        requiredAccessories.push(accessoriesArray.required_accessories[0]);
+    const kohaIds: number[] = [];
+    rows.forEach((row) => {
+      if (row.required_accessories?.length > 0) {
+        kohaIds.push(row.required_accessories[0]); // <-- ORIGINAL LOGIC
       }
     });
 
-    return NextResponse.json({ required_accessories: requiredAccessories });
+    if (kohaIds.length === 0) {
+      return NextResponse.json({ required_accessories: [] });
+    }
+
+    const [mapped] = await pool.query<RowDataPacket[]>(
+      `SELECT id FROM accessoires WHERE koha_id IN (?)`,
+      [kohaIds]
+    );
+
+    const accessoryIds = mapped.map((row) => row.id);
+
+    return NextResponse.json({
+      required_accessories: accessoryIds,
+    });
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(
