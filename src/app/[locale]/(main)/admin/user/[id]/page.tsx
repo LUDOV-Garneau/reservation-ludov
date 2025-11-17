@@ -150,7 +150,7 @@ export default function UserDetailPage() {
         );
       case "completed":
         return (
-          <Badge className="bg-gray-100 text-gray-700 border-gray-200 text-sm">
+          <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-sm">
             Terminée
           </Badge>
         );
