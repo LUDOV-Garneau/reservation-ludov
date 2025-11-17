@@ -257,7 +257,7 @@ function ReservationTableRow({
 
       {/* Actions */}
       <TableCell>
-        <div className="hidden sm:flex gap-2 justify-end">
+        <div className="hidden sm:flex gap-2 justify-center">
           <DeleteReservationAction
             targetReservation={{
               id: reservation.id,
@@ -293,7 +293,7 @@ function ReservationTableRow({
         </div>
 
         {/* Mobile actions */}
-        <div className="sm:hidden flex justify-end">
+        <div className="sm:hidden flex justify-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
