@@ -181,7 +181,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <Select value={selectedConsoleId} onValueChange={setSelectedConsoleId}>
-                  <SelectTrigger className="h-5 flex-1 border-2 text-base">
+                  <SelectTrigger className="h-12 flex-1 border-2 text-base">
                     <SelectValue placeholder="Sélectionner une console..." />
                   </SelectTrigger>
 

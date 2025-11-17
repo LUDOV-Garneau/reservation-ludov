@@ -136,7 +136,7 @@ function StationTableRow({
   return (
     <TableRow key={station.id}>
       <TableCell className="table-cell">{station.name}</TableCell>
-      <TableCell className="hidden lg:table-cell">
+      <TableCell className="hidden md:table-cell">
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(station.createdAt).toLocaleDateString("fr-FR")}</span>
@@ -144,18 +144,18 @@ function StationTableRow({
       </TableCell>
       <TableCell className="table-cell text-center">
         {station.isActive ? (
-          <span className="text-green-600 font-medium">
+          <Badge variant={"success"} className="rounded-full text-md w-full lg:w-[50%]">
             {t("admin.stations.table.active")}
-          </span>
+            </Badge>
         ) : (
-          <Badge variant={"destructive"}>
+          <Badge variant={"destructive"} className="rounded-full text-md w-full lg:w-[50%]">
             {t("admin.stations.table.inactive")}
           </Badge>
         )}
       </TableCell>
       <TableCell className="text-right">
         <div>
-          <div className="flex gap-2 justify-end">
+          <div className="hidden md:flex gap-2 justify-end">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -209,7 +209,7 @@ function StationTableRow({
             </DeleteStationAction>
           </div>
 
-          <div className="sm:hidden">
+          <div className="md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -555,7 +555,7 @@ export default function StationsTable() {
                       <TableHead className="table-cell">
                         {t("admin.stations.table.header.name")}
                       </TableHead>
-                      <TableHead className="hidden lg:table-cell text-center">
+                      <TableHead className="hidden md:table-cell text-center">
                         {t("admin.stations.table.header.createdAt")}
                       </TableHead>
                       <TableHead className="text-center">
