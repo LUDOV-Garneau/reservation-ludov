@@ -18,12 +18,10 @@ import DeleteReservationAction from "./DeleteReservationAction";
 
 type Reservation = {
   id: string;
-  games: string[];
   console: string;
   date: string;
   heure: string;
-  station: string | number | null;
-  userEmail: string | null;
+  userNom: string | null;
 };
 
 type ReservationsApiResponse = {
@@ -194,7 +192,7 @@ function ReservationStatusBadge({ date, heure }: { date: string; heure: string }
   return (
     <Badge
       variant="secondary"
-      className="bg-gray-100 text-gray-700 border-gray-200 text-xs"
+      className="bg-orange-500 text-white border-orange-500 text-xs"
     >
       <Clock className="h-3 w-3 mr-1" />
       <span className="hidden sm:inline">
@@ -222,7 +220,7 @@ function ReservationTableRow({
       <TableCell className="hidden lg:table-cell">
         <div className="flex items-center gap-2">
           <span className="truncate max-w-[220px]">
-            {reservation.userEmail}
+            {reservation.userNom}
           </span>
         </div>
       </TableCell>
@@ -232,35 +230,6 @@ function ReservationTableRow({
         <div className="flex items-center gap-2 text-sm">
           <span className="truncate max-w-[160px]">
             {reservation.console}
-          </span>
-        </div>
-      </TableCell>
-
-      {/* Jeux */}
-      <TableCell>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="text-sm cursor-default truncate max-w-[220px] inline-block">
-                {reservation.games.length > 0
-                  ? reservation.games.join(", ")
-                  : t("admin.reservations.table.noGames")}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
-              {reservation.games.length > 0
-                ? reservation.games.join(", ")
-                : t("admin.reservations.table.noGames")}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </TableCell>
-
-      {/* Station */}
-      <TableCell className="hidden md:table-cell">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span className="truncate max-w-[140px]">
-            {reservation.station}
           </span>
         </div>
       </TableCell>
@@ -292,7 +261,7 @@ function ReservationTableRow({
           <DeleteReservationAction
             targetReservation={{
               id: reservation.id,
-              userEmail: reservation.userEmail,
+              userEmail: reservation.userNom,
               date: reservation.date,
               heure: reservation.heure,
             }}
@@ -335,7 +304,7 @@ function ReservationTableRow({
               <DeleteReservationAction
                 targetReservation={{
                   id: reservation.id,
-                  userEmail: reservation.userEmail,
+                  userEmail: reservation.userNom,
                   date: reservation.date,
                   heure: reservation.heure,
                 }}
@@ -411,12 +380,10 @@ export default function ReservationsTable() {
 
       const rows: Reservation[] = (data.rows ?? []).map((r) => ({
         id: String(r.id),
-        games: Array.isArray(r.games) ? r.games : [],
         console: r.console ?? "",
         date: r.date,
         heure: r.heure ?? "",
-        station: r.station ?? null,
-        userEmail: r.userEmail ?? null,
+        userNom: r.userNom ?? null,
       }));
 
       setReservations(rows);
@@ -448,13 +415,10 @@ export default function ReservationsTable() {
 
   const filteredReservations = reservations.filter((reservation) => {
     const search = searchQuery.toLowerCase();
-    const gamesText = reservation.games.join(", ").toLowerCase();
 
     return (
-      (reservation.userEmail ?? "").toLowerCase().includes(search) ||
+      (reservation.userNom ?? "").toLowerCase().includes(search) ||
       reservation.console.toLowerCase().includes(search) ||
-      gamesText.includes(search) ||
-      String(reservation.station ?? "").toLowerCase().includes(search) ||
       reservation.date.toLowerCase().includes(search)
     );
   });
@@ -513,12 +477,6 @@ export default function ReservationsTable() {
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
                         {t("admin.reservations.table.header.console")}
-                      </TableHead>
-                      <TableHead>
-                        {t("admin.reservations.table.header.games")}
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        {t("admin.reservations.table.header.station")}
                       </TableHead>
                       <TableHead className="hidden lg:table-cell">
                         {t("admin.reservations.table.header.date")}

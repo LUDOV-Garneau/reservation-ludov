@@ -37,23 +37,13 @@ export async function GET(req: NextRequest) {
         r.id,
         r.console_id,
         cs.name AS console_name,
-        r.game1_id,
-        g1.titre AS game1_title,
-        r.game2_id,
-        g2.titre AS game2_title,
-        r.game3_id,
-        g3.titre AS game3_title,
-        r.station,
         r.date,
         r.time,
         r.user_id,
-        u.email AS user_email,
-        r.createdAt
+        u.firstname AS prenom,
+        u.lastname AS nom
       FROM reservation r
       LEFT JOIN console_stock cs ON r.console_id = cs.id
-      LEFT JOIN games g1 ON r.game1_id = g1.id
-      LEFT JOIN games g2 ON r.game2_id = g2.id
-      LEFT JOIN games g3 ON r.game3_id = g3.id
       LEFT JOIN users u ON r.user_id = u.id
       ORDER BY r.date DESC, r.time DESC
       LIMIT ? OFFSET ?
@@ -62,11 +52,6 @@ export async function GET(req: NextRequest) {
     )
 
     const reservations = rows.map((row) => {
-      const games = [
-        row.game1_title,
-        row.game2_title,
-        row.game3_title,
-      ].filter(Boolean) as string[]
 
       const formattedDate =
         row.date instanceof Date
@@ -78,12 +63,10 @@ export async function GET(req: NextRequest) {
 
       return {
         id: String(row.id),
-        games,
         console: row.console_name ?? "",
         date: formattedDate,
         heure: formattedTime,
-        station: row.station,
-        userEmail: row.user_email,
+        userNom: `${row.prenom} ${row.nom}`,
       }
     })
 
