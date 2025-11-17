@@ -16,7 +16,7 @@ type ReservationRow = RowDataPacket & {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
   try {
     const token = req.cookies.get("SESSION")?.value;
@@ -35,7 +35,7 @@ export async function GET(
       );
     }
 
-    const userIdParam = params.userId;
+    const { userId: userIdParam } = await params;
     const userId = Number(userIdParam);
 
     if (!userIdParam || Number.isNaN(userId)) {
