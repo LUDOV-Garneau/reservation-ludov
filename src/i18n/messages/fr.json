@@ -437,6 +437,34 @@
         "sur": "sur",
         "noItem": "Aucun élément"
       },
+      "updateStationForm": {
+        "button": {
+          "openDialog": "Modifier",
+          "saveChanges": "Enregistrer",
+          "loading": "Chargement...",
+          "addConsole": "Ajouter des consoles",
+          "submit": "Modifier"
+        },
+        "titles": {
+          "dialogTitle": "Modifier la station"
+        },
+        "fields": {
+          "stationName": "Nom de la station",
+          "consoles": "Consoles",
+          "isActive": "Active"
+        },
+        "select": {
+          "placeholder": "Sélectionnez les consoles"
+        },
+        "errors": {
+          "missingFields": "Veuillez remplir tous les champs requis.",
+          "consoleFetch": "Erreur lors de la récupération des consoles."
+        },
+        "alerts": {
+          "updateSuccess": "Station mise à jour avec succès !",
+          "updateError": "Erreur lors de la mise à jour de la station."
+        }
+      },
       "addStationForm": {
         "button": {
           "openDialog": "Ajouter une station",

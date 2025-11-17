@@ -50,6 +50,7 @@ import CardStationStats from "./CardStats";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
+import UpdateStationForm from "./UpdateStationForm";
 import DeleteStationAction from "./DialogConfirmationDeleteStation";
 import { Badge } from "@/components/ui/badge";
 
@@ -57,6 +58,7 @@ type Station = {
   id: number;
   name: string;
   consoles: string[];
+  consolesId: number[];
   isActive: boolean;
   createdAt: string;
 };
@@ -122,19 +124,19 @@ function StationTableRow({
   onUpdate,
 }: {
   station: Station;
+  onUpdate: (station: Station) => void;
   onAlert: (
     type: "success" | "error" | "info" | "warning",
     message: string,
     title?: string
   ) => void;
   onSuccess: () => void;
-  onUpdate: (stationId: number, stationName: string) => void;
 }) {
   const t = useTranslations();
   return (
     <TableRow key={station.id}>
       <TableCell className="table-cell">{station.name}</TableCell>
-      <TableCell className="hidden lg:table-cell">
+      <TableCell className="hidden md:table-cell">
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
           <span>{new Date(station.createdAt).toLocaleDateString("fr-FR")}</span>
@@ -142,25 +144,25 @@ function StationTableRow({
       </TableCell>
       <TableCell className="table-cell text-center">
         {station.isActive ? (
-          <span className="text-green-600 font-medium">
+          <Badge variant={"success"} className="rounded-full text-md w-full lg:w-[50%]">
             {t("admin.stations.table.active")}
-          </span>
+            </Badge>
         ) : (
-          <Badge variant={"destructive"}>
+          <Badge variant={"destructive"} className="rounded-full text-md w-full lg:w-[50%]">
             {t("admin.stations.table.inactive")}
           </Badge>
         )}
       </TableCell>
       <TableCell className="text-right">
         <div>
-          <div className="flex gap-2 justify-end">
+          <div className="hidden md:flex gap-2 justify-end">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => onUpdate(station.id, station.name)}
+                    onClick={() => onUpdate(station)}
                     className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
                   >
                     <Pencil className="h-4 w-4" />
@@ -207,7 +209,7 @@ function StationTableRow({
             </DeleteStationAction>
           </div>
 
-          <div className="sm:hidden">
+          <div className="md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -216,7 +218,7 @@ function StationTableRow({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem
-                  onClick={() => onUpdate(station.id, station.name)}
+                  onClick={() => onUpdate(station)}
                 >
                   <Pencil className="h-4 w-4 mr-2 text-blue-500" />
                   {t("admin.stations.table.ActionToolTips.updateStation")}
@@ -405,6 +407,8 @@ export default function StationsTable() {
   const [totalActiveStations, setTotalActiveStations] = useState(0);
   const [totalInactiveStations, setTotalInactiveStations] = useState(0);
   const [stationMostReservations, setStationMostReservations] = useState("");
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [stationToUpdate, setStationToUpdate] = useState<Station | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [metricsLoading, setMetricsLoading] = useState(true);
@@ -481,6 +485,11 @@ export default function StationsTable() {
     }
   }
 
+  function handleUpdate(station: Station) {
+    setStationToUpdate(station);
+    setUpdateDialogOpen(true);
+  }
+
   const filteredStations = stations.filter((station) => {
     const search = searchQuery.toLowerCase();
     return (
@@ -546,7 +555,7 @@ export default function StationsTable() {
                       <TableHead className="table-cell">
                         {t("admin.stations.table.header.name")}
                       </TableHead>
-                      <TableHead className="hidden lg:table-cell text-center">
+                      <TableHead className="hidden md:table-cell text-center">
                         {t("admin.stations.table.header.createdAt")}
                       </TableHead>
                       <TableHead className="text-center">
@@ -563,11 +572,9 @@ export default function StationsTable() {
                       <StationTableRow
                         key={station.id}
                         station={station}
+                        onUpdate={() => handleUpdate(station)}
                         onAlert={showAlert}
                         onSuccess={handleRefresh}
-                        onUpdate={() =>
-                          console.log("Update station", station.id)
-                        }
                       />
                     ))}
                   </TableBody>
@@ -603,6 +610,19 @@ export default function StationsTable() {
           )}
         </CardContent>
       </Card>
+
+      {stationToUpdate && (
+        <UpdateStationForm
+          open={updateDialogOpen}
+          onOpenChange={setUpdateDialogOpen}
+          station={stationToUpdate}
+          onSuccess={() => {
+            setUpdateDialogOpen(false);
+            handleRefresh();
+          }}
+          onAlert={showAlert}
+        />
+      )}
 
       {confirmDialog && (
         <ConfirmDialog
