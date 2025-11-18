@@ -12,6 +12,7 @@ interface Reservation {
   id: string;
   archived: boolean;
   games: string[];
+  station: string;
   console: string;
   date: string;
   heure: string;

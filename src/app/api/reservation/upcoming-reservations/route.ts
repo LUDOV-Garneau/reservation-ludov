@@ -8,6 +8,7 @@ type ReservationRow = RowDataPacket & {
   id: number;
   createdAt: Date | string;
   console_name: string;
+  station_name: string;
   game1_title: string | null;
   game2_title: string | null;
   game3_title: string | null;
@@ -42,9 +43,11 @@ export async function GET(request: NextRequest) {
         c.name AS console_name,
         g1.titre AS game1_title,
         g2.titre AS game2_title,
-        g3.titre AS game3_title
+        g3.titre AS game3_title,
+        s.name AS station_name
       FROM reservation r
       JOIN console_type c ON c.id = r.console_type_id
+      LEFT JOIN stations s ON s.id = r.station
       LEFT JOIN games g1 ON g1.id = r.game1_id
       LEFT JOIN games g2 ON g2.id = r.game2_id
       LEFT JOIN games g3 ON g3.id = r.game3_id
@@ -74,6 +77,7 @@ export async function GET(request: NextRequest) {
       return {
         id: String(row.id),
         games,
+        station: row.station_name,
         console: row.console_name,
         date: formattedDate,
         heure: row.time.slice(0, 5),

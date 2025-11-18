@@ -6,6 +6,7 @@ type ReservationHoldRow = RowDataPacket & {
   id: number;
   user_id: number;
   station_id: number;
+  station_name: string;
   date: string | Date;
   time: string;
   console_name: string;
@@ -68,6 +69,7 @@ export async function GET(request: NextRequest) {
         r.time,
         c.name AS console_name,
         r.archived,
+        s.name AS station_name,
 
         g1.titre AS game1_title, g1.biblio_id AS game1_biblio_id, g1.picture AS game1_picture,
         g2.titre AS game2_title, g2.biblio_id AS game2_biblio_id, g2.picture AS game2_picture,
@@ -79,6 +81,7 @@ export async function GET(request: NextRequest) {
 
       FROM reservation r
       JOIN console_type c ON c.id = r.console_type_id
+      LEFT JOIN stations s ON s.id = r.station
       LEFT JOIN games g1 ON g1.id = r.game1_id
       LEFT JOIN games g2 ON g2.id = r.game2_id
       LEFT JOIN games g3 ON g3.id = r.game3_id
@@ -92,7 +95,7 @@ export async function GET(request: NextRequest) {
       WHERE r.id = ?
       GROUP BY
         r.id, r.user_id, r.station, DATE(r.date), r.time,
-        c.name,
+        c.name, s.name,
         g1.titre, g1.biblio_id, g1.picture,
         g2.titre, g2.biblio_id, g2.picture,
         g3.titre, g3.biblio_id, g3.picture
@@ -126,7 +129,7 @@ export async function GET(request: NextRequest) {
       jeux,
       accessoires,
       archived: row.archived,
-      station: String(row.station_id),
+      station: row.station_name,
       date: toYMD(row.date),
       heure: row.time.slice(0, 5),
     });

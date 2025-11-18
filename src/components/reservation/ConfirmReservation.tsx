@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   Loader2,
   BookOpen,
+  Computer,
 } from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
 import { useRouter } from "next/navigation";
@@ -21,6 +22,7 @@ interface ReservationData {
   accessoires: Array<{ id: number; nom: string }>;
   date: string | null;
   time: string | null;
+  station: { id: number; nom: string };
   reservationId: string;
   cours: { id: number; code_cours: string; nom_cours: string } | null;
 }
@@ -67,6 +69,7 @@ export default function ConfirmReservation() {
             json.date ||
             (selectedDate ? selectedDate.toLocaleDateString("fr-CA") : null),
           time: json.time,
+          station: json.station || null,
           reservationId: json.reservationId || reservationId,
           cours: json.cours || null,
         });
@@ -255,8 +258,26 @@ export default function ConfirmReservation() {
               </div>
             </div>
           )}
-        </div>
 
+          {data.station && (
+            <div className="bg-[white] rounded-xl shadow-sm border p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Computer className="h-5 w-5 text-cyan-500" />
+                {t("reservation.confirm.station")}
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                <span
+                  key={data.station.id}
+                  className="px-3 py-2 bg-cyan-50 text-cyan-700 rounded-lg text-sm font-medium border border-cyan-200"
+                >
+                  <p className="text-gray-700 font-medium">
+                    {data.station.nom}
+                  </p>
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
         <div className="lg:col-span-1">
           <div className="bg-[white] rounded-xl shadow-sm border p-6 sticky top-6">
             <h2 className="text-lg font-semibold mb-4">
@@ -295,6 +316,16 @@ export default function ConfirmReservation() {
                   </span>
                   <span className="font-medium">
                     {data.cours.code_cours} - {data.cours.nom_cours}
+                  </span>
+                </div>
+              )}
+              {data.station && (
+                <div className="flex justify-between text-sm py-2 border-b text-right">
+                  <span className="text-gray-600">
+                    {t("reservation.confirm.station")}
+                  </span>
+                  <span className="font-medium">
+                    {data.station.nom}
                   </span>
                 </div>
               )}

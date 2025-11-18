@@ -173,6 +173,7 @@
       "noConsoleSelected": "Aucune plateforme sélectionnée",
       "accessories": "Accessoires",
       "courses": "Cours",
+      "station": "Station",
       "yourReservation": "Votre réservation",
       "date": "date",
       "hour": "heure",
@@ -215,6 +216,7 @@
       "date": "Date",
       "time": "Heure",
       "games": "Jeux réservés",
+      "station": "Station",
       "console": "Plateforme",
       "cancelled": "annulée"
     },
@@ -331,36 +333,36 @@
         "admin": "Administrateur",
         "user": "Utilisateur"
       },
-      "pagination" : {
-        "affichageDe" : "Affichage de",
-        "a" : "à",
-        "sur" : "sur",
-        "noItem" : "Aucun élément"
+      "pagination": {
+        "affichageDe": "Affichage de",
+        "a": "à",
+        "sur": "sur",
+        "noItem": "Aucun élément"
       },
-      "deleteUserDialog" : {
-        "deleteUser" : "Supprimer l'utilisateur",
-        "definitiveAction" : "Cette action est définitive. L'utilisateur et ses accès seront supprimés.",
-        "whatGonnaHappen" : "Ce qui va se passer :",
-        "theAccount" : "Le compte sera",
-        "deleted" : "supprimé", 
-        "userWontBeAbleToLogin" : "et l'utilisateur ne pourra plus se connecter.",
-        "reservationDeleted" : "Les réservations à venir seront également supprimées.",
-        "dataDeleteAccordingToPolicy" : "Les données associées essentielles seront retirées selon votre politique.",
-        "CancelDelete" : "Annuler la suppression",
-        "deletingState" : "Suppression...",
-        "confirmDelete" : "Confirmer la suppresion"
+      "deleteUserDialog": {
+        "deleteUser": "Supprimer l'utilisateur",
+        "definitiveAction": "Cette action est définitive. L'utilisateur et ses accès seront supprimés.",
+        "whatGonnaHappen": "Ce qui va se passer :",
+        "theAccount": "Le compte sera",
+        "deleted": "supprimé",
+        "userWontBeAbleToLogin": "et l'utilisateur ne pourra plus se connecter.",
+        "reservationDeleted": "Les réservations à venir seront également supprimées.",
+        "dataDeleteAccordingToPolicy": "Les données associées essentielles seront retirées selon votre politique.",
+        "CancelDelete": "Annuler la suppression",
+        "deletingState": "Suppression...",
+        "confirmDelete": "Confirmer la suppresion"
       },
-      "resetPasswordDialog" : {
-        "resetPassword" : "Réinitialiser le mot de passe",
-        "thisActionPreventLogin" : "Cette action empêchera l'utilisateur de se connecter jusqu'à ce qu'il définisse un nouveau mot de passe.",
-        "whatWillHappen" : "Ce qui va se passer :",
-        "thePasswordWillBe" : "Le mot de passe sera",
+      "resetPasswordDialog": {
+        "resetPassword": "Réinitialiser le mot de passe",
+        "thisActionPreventLogin": "Cette action empêchera l'utilisateur de se connecter jusqu'à ce qu'il définisse un nouveau mot de passe.",
+        "whatWillHappen": "Ce qui va se passer :",
+        "thePasswordWillBe": "Le mot de passe sera",
         "reset": "réinitialisé",
-        "inTheDatabase" : "dans la base de données.",
-        "emailWillBeSend" : "Un courriel informant l'utilisateur de la réinitialisation de son mot de passe sera envoyé.",
-        "cancelReset" : "Annuler la réinitialisation",
+        "inTheDatabase": "dans la base de données.",
+        "emailWillBeSend": "Un courriel informant l'utilisateur de la réinitialisation de son mot de passe sera envoyé.",
+        "cancelReset": "Annuler la réinitialisation",
         "resetState": "Réinitialisation...",
-        "confirmReset" : "Confirmer la réinitialisation"
+        "confirmReset": "Confirmer la réinitialisation"
       }
     },
     "reservations": {

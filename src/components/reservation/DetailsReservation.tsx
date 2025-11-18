@@ -10,6 +10,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Cable,
+  Computer
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -49,20 +50,18 @@ interface ReservationDetailsProps {
   jeux: Game[];
   console: Console;
   accessoires?: Accessory[];
-  station?: string | null;
+  station?: number | null;
   date: string;
   heure: string;
   archived: boolean;
 }
 
-type AlertState =
-  | {
-      show: boolean;
-      type: "success" | "error";
-      title: string;
-      message: string;
-    }
-  | null;
+type AlertState = {
+  show: boolean;
+  type: "success" | "error";
+  title: string;
+  message: string;
+} | null;
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -150,7 +149,10 @@ function GameCard({ game }: { game: Game }) {
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
-              <Gamepad2 className="h-16 w-16 text-gray-300" aria-hidden="true" />
+              <Gamepad2
+                className="h-16 w-16 text-gray-300"
+                aria-hidden="true"
+              />
             </div>
           )}
         </div>
@@ -200,8 +202,14 @@ export function ConsoleCard({ item }: { item: Console }) {
               <Monitor className="h-32 w-32 text-cyan-900" aria-hidden="true" />
             </div>
           )}
-          
-          <div className={item.picture ? (`absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent`) : (`group-hover:from-black/90 transition-all duration-500`)} />
+
+          <div
+            className={
+              item.picture
+                ? `absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent`
+                : `group-hover:from-black/90 transition-all duration-500`
+            }
+          />
         </div>
 
         <div className="relative z-10 flex flex-col justify-end h-full p-6">
@@ -209,7 +217,7 @@ export function ConsoleCard({ item }: { item: Console }) {
             <h4 className="text-3xl font-black text-white mb-2 drop-shadow-2xl">
               {item.nom}
             </h4>
-            
+
             <div className="h-1 bg-cyan-500 rounded-full w-full" />
           </div>
         </div>
@@ -225,7 +233,9 @@ function AccessoriesSection({ accessories }: { accessories: Accessory[] }) {
       <Card className="w-full h-full">
         <CardContent className="p-6 flex flex-col items-center justify-center min-h-[160px]">
           <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-lg text-gray-400 italic">{t("reservation.details.noAccessory")}</p>
+          <p className="text-lg text-gray-400 italic">
+            {t("reservation.details.noAccessory")}
+          </p>
         </CardContent>
       </Card>
     );
@@ -257,6 +267,7 @@ function ReservationHeader({
   heure,
   reservationId,
   consoleName,
+  station,
   archived,
   onCancelSuccess,
   onCancelError,
@@ -265,6 +276,7 @@ function ReservationHeader({
   heure: string;
   reservationId: string;
   consoleName: string;
+  station?: number | null;
   archived: boolean;
   onCancelSuccess: () => void;
   onCancelError: (error: Error) => void;
@@ -274,7 +286,9 @@ function ReservationHeader({
   const handleAddToCalendar = useCallback(() => {
     downloadICS({
       title: t("reservation.details.pageDetailsTitle"),
-      description: `${t("reservation.details.selectedConsole")}: ${consoleName}`,
+      description: `${t(
+        "reservation.details.selectedConsole"
+      )}: ${consoleName}`,
       date,
       time: heure,
       uid: reservationId,
@@ -289,7 +303,7 @@ function ReservationHeader({
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
               {t("reservation.details.pageDetailsTitle")}
             </h1>
-            
+
             <div className="flex items-center gap-6 text-lg text-gray-600">
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
@@ -299,9 +313,9 @@ function ReservationHeader({
                   {date}
                 </time>
               </div>
-              
+
               <div className="w-px h-8 bg-gray-200" />
-              
+
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
                   <Clock className="h-5 w-5 text-cyan-600" />
@@ -310,6 +324,19 @@ function ReservationHeader({
                   {heure}
                 </time>
               </div>
+
+              {station && (
+                <>
+                  <div className="w-px h-8 bg-gray-200" />
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                      <Computer className="h-5 w-5 text-cyan-600" />
+                    </div>
+                    <span className="font-medium">{station}</span>
+                  </div>
+                </>
+              )}
+
             </div>
           </div>
 
@@ -351,6 +378,7 @@ export default function DetailsReservation({
   reservationId,
   jeux = [],
   console,
+  station,
   accessoires = [],
   date,
   heure,
@@ -388,7 +416,10 @@ export default function DetailsReservation({
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/" className="text-gray-600 hover:text-cyan-600">
+                <BreadcrumbLink
+                  href="/"
+                  className="text-gray-600 hover:text-cyan-600"
+                >
                   {t("reservation.layout.home")}
                 </BreadcrumbLink>
               </BreadcrumbItem>
@@ -421,10 +452,13 @@ export default function DetailsReservation({
                   <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 )}
                 <div className="flex-1">
-                  <AlertTitle className="font-semibold">{alert.title}</AlertTitle>
+                  <AlertTitle className="font-semibold">
+                    {alert.title}
+                  </AlertTitle>
                   <AlertDescription>
                     {alert.type === "error"
-                      ? alert.message || "Une erreur est survenue. Veuillez essayer ultérieurement."
+                      ? alert.message ||
+                        "Une erreur est survenue. Veuillez essayer ultérieurement."
                       : alert.message}
                   </AlertDescription>
                 </div>
@@ -449,6 +483,7 @@ export default function DetailsReservation({
           heure={heure}
           reservationId={reservationId}
           consoleName={console.nom}
+          station={station}
           archived={archived}
           onCancelSuccess={handleCancelSuccess}
           onCancelError={handleCancelError}
@@ -461,13 +496,18 @@ export default function DetailsReservation({
             {/* TEXTE DE SECTION */}
             <div className="flex items-center gap-3 mb-6">
               <Gamepad2 className="h-6 w-6 text-cyan-600" />
-              <h2 className="text-2xl font-bold text-gray-900">{t("reservation.details.selectedGames")}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {t("reservation.details.selectedGames")}
+              </h2>
             </div>
             {/* LAYOUT DES CARTES */}
             {jeux.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {jeux.map((jeu, index) => (
-                  <div key={jeu.biblio ?? `game-${index}`} className="mb-6 last:mb-0">
+                  <div
+                    key={jeu.biblio ?? `game-${index}`}
+                    className="mb-6 last:mb-0"
+                  >
                     <GameCard game={jeu} />
                   </div>
                 ))}
@@ -492,7 +532,9 @@ export default function DetailsReservation({
               {/* TEXTE DE SECTION */}
               <div className="flex items-center gap-3 mb-6">
                 <Monitor className="h-6 w-6 text-cyan-600" />
-                <h2 className="text-2xl font-bold text-gray-900">{t("reservation.details.selectedConsole")}</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {t("reservation.details.selectedConsole")}
+                </h2>
               </div>
               {/* CONSOLES */}
               <div>
@@ -504,7 +546,9 @@ export default function DetailsReservation({
               {/* TEXTE DE SECTION */}
               <div className="flex items-center gap-3 mb-6">
                 <Cable className="h-6 w-6 text-cyan-600" />
-                <h2 className="text-2xl font-bold text-gray-900">{t("reservation.details.selectedAccessory")}</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {t("reservation.details.selectedAccessory")}
+                </h2>
               </div>
               {/* CARTE */}
               <div>
