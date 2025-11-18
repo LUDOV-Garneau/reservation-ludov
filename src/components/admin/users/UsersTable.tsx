@@ -105,7 +105,6 @@ function UserTableRow({
   isCurrentUser,
   onAlert,
   onSuccess,
-  onRowClick,
 }: {
   user: User;
   isCurrentUser: boolean;
