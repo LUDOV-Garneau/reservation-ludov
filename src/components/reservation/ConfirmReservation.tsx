@@ -25,6 +25,19 @@ interface ReservationData {
   cours: { id: number; code_cours: string; nom_cours: string } | null;
 }
 
+type ReservationCompletedData = {
+  reservationId: string;
+  consoleId: number;
+  consoleTypeId: number;
+  game1Id: number;
+  game2Id: number | null;
+  game3Id: number | null;
+  accessoryIds: number[] | null;
+  coursId: number;
+  date: string;
+  time: string;
+};
+
 export default function ConfirmReservation() {
   const {
     reservationId,
@@ -91,8 +104,12 @@ export default function ConfirmReservation() {
     setError(null);
 
     try {
-      await completeReservation();
-      router.push(`/reservation/success?reservationId=${reservationId}`);
+      const reservationData = await completeReservation();
+      if (reservationData != null) {
+        router.push(`/reservation/success/${reservationData.reservationId}`);
+      } else {
+        throw new Error();
+      }
     } catch (err) {
       console.error("Erreur confirmation:", err);
       setError(

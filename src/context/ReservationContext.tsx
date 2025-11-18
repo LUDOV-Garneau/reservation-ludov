@@ -51,12 +51,25 @@ interface ReservationContextType {
 
   // Actions Réservation
   cancelReservation: () => Promise<void>; // annule la réservation côté serveur
-  completeReservation: () => Promise<void>; // finalise la réservation côté serveur
+  completeReservation: () => Promise<ReservationCompletedData | undefined>; // finalise la réservation côté serveur
   clearError: () => void; // efface le message d'erreur
   updateReservationConsole: (newConsoleId: number) => Promise<void>; // met à jour la console de la réservation
 
   updateReservationAccessories: (ids: number[]) => Promise<void>;
 }
+
+type ReservationCompletedData = {
+  reservationId: string;
+  consoleId: number;
+  consoleTypeId: number;
+  game1Id: number;
+  game2Id: number | null;
+  game3Id: number | null;
+  accessoryIds: number[] | null;
+  coursId: number;
+  date: string;
+  time: string;
+};
 
 // Contexte
 const ReservationContext = createContext<ReservationContextType | undefined>(
@@ -78,7 +91,9 @@ interface MinimalReservationState {
 const STORAGE_KEY = "reservation_hold"; // clé pour sessionStorage
 
 const toLocalYmd = (d: Date) =>
-  `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
+    d.getDate()
+  ).padStart(2, "0")}`;
 
 /**
  * Provider principal pour gérer tout le cycle de vie d'une réservation
@@ -207,9 +222,14 @@ export function ReservationProvider({
         setCurrentStep(data.currentStep || 1);
 
         setIsTimerActive(true);
-        if (typeof data.expiresIn === "number" && !Number.isNaN(data.expiresIn)) {
+        if (
+          typeof data.expiresIn === "number" &&
+          !Number.isNaN(data.expiresIn)
+        ) {
           // TTL côté serveur → on s'y fie en priorité
-          setTimeRemaining(Math.max(0, Math.min(timerDuration * 60, data.expiresIn)));
+          setTimeRemaining(
+            Math.max(0, Math.min(timerDuration * 60, data.expiresIn))
+          );
         } else if (data.expiresAt) {
           // Fallback (ancien backend)
           setTimeRemaining(computeRemaining(String(data.expiresAt)));
@@ -248,7 +268,7 @@ export function ReservationProvider({
     if (!isTimerActive) return;
 
     const interval = setInterval(() => {
-      setTimeRemaining(prev => {
+      setTimeRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
           handleTimeExpired();
@@ -287,69 +307,72 @@ export function ReservationProvider({
 
   /** Crée une réservation temporaire */
   const startTimer = async (consoleId?: number) => {
-  const consoleTypeId = consoleId ?? selectedConsole?.id;
-  if (!consoleTypeId) {
-    setError("Aucune plateforme sélectionnée");
-    return;
-  }
-  if (isTimerActive && timeRemaining > 0) return;
-
-  setIsLoading(true);
-  try {
-    const res = await fetch(`/api/reservation/create-hold-reservation`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ consoleTypeId, minutes: timerDuration }),
-      signal:
-        "AbortSignal" in window && "timeout" in AbortSignal
-          ? AbortSignal.timeout(10000)
-          : (() => {
-              const ctrl = new AbortController();
-              setTimeout(() => ctrl.abort(), 10000);
-              return ctrl.signal;
-            })(),
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => null);
-      throw new Error(err?.message || "Erreur création réservation");
+    const consoleTypeId = consoleId ?? selectedConsole?.id;
+    if (!consoleTypeId) {
+      setError("Aucune plateforme sélectionnée");
+      return;
     }
+    if (isTimerActive && timeRemaining > 0) return;
 
-    const data = await res.json();
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/reservation/create-hold-reservation`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ consoleTypeId, minutes: timerDuration }),
+        signal:
+          "AbortSignal" in window && "timeout" in AbortSignal
+            ? AbortSignal.timeout(10000)
+            : (() => {
+                const ctrl = new AbortController();
+                setTimeout(() => ctrl.abort(), 10000);
+                return ctrl.signal;
+              })(),
+      });
 
-    // on lit tout ce qui peut arriver depuis le backend
-    const expiresAtIso = String(
-      data.expiresAt ?? data.expires_at ?? data.expireAt ?? ""
-    );
-    const expiresInSrv = Number(data.expiresIn); // <<< TTL côté serveur (en secondes)
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.message || "Erreur création réservation");
+      }
 
-    if (!data.reservationId && !data.holdId) {
-      throw new Error("Réponse invalide du serveur (reservationId manquant)");
+      const data = await res.json();
+
+      // on lit tout ce qui peut arriver depuis le backend
+      const expiresAtIso = String(
+        data.expiresAt ?? data.expires_at ?? data.expireAt ?? ""
+      );
+      const expiresInSrv = Number(data.expiresIn); // <<< TTL côté serveur (en secondes)
+
+      if (!data.reservationId && !data.holdId) {
+        throw new Error("Réponse invalide du serveur (reservationId manquant)");
+      }
+      if (!expiresAtIso && !Number.isFinite(expiresInSrv)) {
+        throw new Error(
+          "Réponse invalide du serveur (expiresAt/expiresIn manquant)"
+        );
+      }
+
+      setSelectedConsoleId(Number(data.consoleStockId));
+      setReservationId(String(data.reservationId ?? data.holdId));
+      setExpiresAt(expiresAtIso || null);
+      setIsTimerActive(true);
+
+      // <<< NE PLUS DÉPENDRE DE L'HORLOGE DU NAVIGATEUR
+      if (Number.isFinite(expiresInSrv)) {
+        setTimeRemaining(
+          Math.max(0, Math.min(timerDuration * 60, expiresInSrv))
+        );
+      } else {
+        // Fallback si jamais expiresIn n’est pas renvoyé (ancien backend)
+        setTimeRemaining(computeRemaining(expiresAtIso));
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Erreur inconnue");
+      setIsTimerActive(false);
+    } finally {
+      setIsLoading(false);
     }
-    if (!expiresAtIso && !Number.isFinite(expiresInSrv)) {
-      throw new Error("Réponse invalide du serveur (expiresAt/expiresIn manquant)");
-    }
-
-    setSelectedConsoleId(Number(data.consoleStockId));
-    setReservationId(String(data.reservationId ?? data.holdId));
-    setExpiresAt(expiresAtIso || null);
-    setIsTimerActive(true);
-
-    // <<< NE PLUS DÉPENDRE DE L'HORLOGE DU NAVIGATEUR
-    if (Number.isFinite(expiresInSrv)) {
-      setTimeRemaining(Math.max(0, Math.min(timerDuration * 60, expiresInSrv)));
-    } else {
-      // Fallback si jamais expiresIn n’est pas renvoyé (ancien backend)
-      setTimeRemaining(computeRemaining(expiresAtIso));
-    }
-  } catch (e) {
-    setError(e instanceof Error ? e.message : "Erreur inconnue");
-    setIsTimerActive(false);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   const updateReservationAccessories = async (accessories: number[]) => {
     if (!reservationId) return;
@@ -457,13 +480,14 @@ export function ReservationProvider({
       setSelectedCours(null);
       setSelectedDate(undefined);
       setSelectedTime(undefined);
-
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur update plateforme");
     }
   };
 
-  const completeReservation = async () => {
+  async function completeReservation(): Promise<
+    ReservationCompletedData | undefined
+  > {
     if (!reservationId) {
       setError("Aucune réservation à finaliser");
       return;
@@ -551,14 +575,14 @@ export function ReservationProvider({
       setExpiresAt(null);
       clearStorage();
 
-      return data;
+      return data.data;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erreur finalisation");
       throw e; // Re-throw pour que le composant puisse gérer l'erreur
     } finally {
       setIsLoading(false);
     }
-  };
+  }
 
   const clearError = () => setError(null);
 
