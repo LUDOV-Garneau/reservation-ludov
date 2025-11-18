@@ -27,6 +27,7 @@ interface ReservationHoldRow extends RowDataPacket {
   game2_id: number | null;
   game3_id: number | null;
   accessoirs: string | null;
+  station_id: number | null;
   cours: number | null;
   date: Date | string;
   time: string;
