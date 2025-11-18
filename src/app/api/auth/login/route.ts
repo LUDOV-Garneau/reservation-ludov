@@ -46,6 +46,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    await pool.query("UPDATE users SET lastLogin = NOW() WHERE id = ?",
+      [user.id]
+    );
+
     const token = signToken({
       id: user.id,
       name: user.name,

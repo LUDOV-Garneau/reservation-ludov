@@ -19,6 +19,8 @@ const badgeVariants = cva(
           "border-transparent bg-green-500 text-white [a&]:hover:bg-green-500/90 focus-visible:ring-green-500/20 dark:focus-visible:ring-green-500/40 dark:bg-green-500/60 rounded-full",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+        games:
+          "bg-cyan-100 text-cyan-900 border-cyan-200 rounded-lg hover:bg-cyan-600 hover:text-white focus-visible:ring-cyan-300 transition-all ease-in-out duration-150",
       },
     },
     defaultVariants: {

@@ -26,23 +26,23 @@ export async function POST(req: NextRequest) {
   try {
     const token = req.cookies.get("SESSION")?.value;
     if (!token) {
-        return new Response(
-            JSON.stringify({ success: false, message: "Unauthorized" }),
-            { status: 401 }
-        );
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const user = verifyToken(token);
     if (!user?.isAdmin) {
-        return new Response(
-            JSON.stringify({ success: false, message: "Forbidden" }),
+        return NextResponse.json(
+            { success: false, message: "Forbidden" },
             { status: 403 }
         );
     }
 
     if (!user?.id) {
-        return new Response(
-            JSON.stringify({ success: false, message: "Unauthorized" }),
+        return NextResponse.json(
+            { success: false, message: "Unauthorized" },
             { status: 401 }
         );
     }
