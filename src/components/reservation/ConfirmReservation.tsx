@@ -35,6 +35,7 @@ export default function ConfirmReservation() {
     selectedDate,
     selectedTime,
     currentStep,
+    isTimerActive,
   } = useReservation();
 
   const router = useRouter();
@@ -47,6 +48,8 @@ export default function ConfirmReservation() {
 
   useEffect(() => {
     const fetchReservation = async () => {
+      if (!isTimerActive) return;
+
       if (!reservationId) {
         setError(t("reservation.confirm.noActiveReservation"));
         setLoading(false);
