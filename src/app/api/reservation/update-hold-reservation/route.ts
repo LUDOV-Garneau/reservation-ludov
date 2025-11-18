@@ -177,6 +177,7 @@ export async function POST(req: Request) {
               FROM reservation
               WHERE date = ?
                 AND time = ?
+                AND archived = 0
             )
             AND s.id NOT IN (
               SELECT station_id
