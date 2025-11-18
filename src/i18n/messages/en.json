@@ -132,7 +132,8 @@
       "selected_count": "{count, plural, =0 {No accessories selected} one {# accessory selected} other {# accessories selected}}",
       "remove_aria_label": "Remove",
       "accessoryName": "Accessory name...",
-      "noAccessoryFound": "No accessory found"
+      "noAccessoryFound": "No accessory found",
+      "required": "Required"
     },
     "calendar": {
       "title": "Reservation",

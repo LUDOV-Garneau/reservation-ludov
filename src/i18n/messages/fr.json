@@ -115,7 +115,8 @@
       "accessoryName": "Nom de l'accessoire...",
       "noAccessoryFound": "Aucun accessoire trouvé",
       "no_accessory_available": "Il n'y a pas d'accessoire disponible pour cette plateforme.",
-      "skip_step": "Passer cette étape"
+      "skip_step": "Passer cette étape",
+      "required": "Requis"
     },
     "calendar": {
       "title": "Réservation",
