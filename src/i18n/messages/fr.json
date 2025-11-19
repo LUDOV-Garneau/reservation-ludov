@@ -364,38 +364,77 @@
         "cancelReset": "Annuler la réinitialisation",
         "resetState": "Réinitialisation...",
         "confirmReset": "Confirmer la réinitialisation"
-      },
-      "addUserForm": {
-        "errorMessage": {
-          "firstnameRequired": "Le prénom est requis.",
-          "firstnameLength": "Le prénom doit contenir au moins 2 caractères.",
-          "lastnameRequired": "Le nom de famille est requis.",
-          "lastnameLength": "Le nom de famille doit contenir au moins 2 caractères.",
-          "emailRequired": "L'adresse courriel est requise.",
-          "emailInvalid": "L'adresse courriel est invalide.",
-          "emailLength": "L'adresse courriel est trop longue.",
-          "userAlreadyExists": "Un utilisateur avec ce courriel existe déjà.",
-          "genericError": "Une erreur s'est produite. Veuillez réessayer."
-        },
-        "userAddedSuccess": "Utilisateur ajouté avec succès.",
-        "userAdded": "Utilisateur ajouté !",
-        "addUser": "Ajouter un utilisateur",
-        "wasCreatedSuccessfully": "a été créé avec succès.",
-        "form": {
-          "firstName": "Prénom",
-          "lastName": "Nom de famille",
-          "email": "Adresse courriel",
-          "adminAccess": "Accès administrateur",
-          "active": "Actif",
-          "adminAcessDescription": "Donne accès au panneau d’administration et aux actions sensibles. À réserver au personnel de confiance.",
-          "cancel": "Annuler",
-          "submit": "Ajouter l'utilisateur",
-          "submitting": "Ajout en cours..."
-        }
       }
     },
     "reservations": {
-      "title": "Réservations"
+      "title": "Réservations",
+      "subtitle": "Gérer les réservations de la plateforme LUDOV",
+      "actionBar": {
+        "toolTipRefresh": "Rechercher...",
+        "searchPlaceholder": "Rechercher"
+      },
+      "searchResult": {
+        "noReservationsFound": "Aucune réservation trouvée",
+        "noMatch": "Aucune réservation ne correspond à votre recherche.",
+        "empty": "Aucune réservation pour le moment."
+      },
+      "table": {
+        "header": {
+          "user": "Utilisateur",
+          "console": "Console",
+          "games": "Jeux",
+          "date": "Date",
+          "time": "Heure",
+          "actions": "Actions",
+          "station": "Station",
+          "status": "Statut"
+        },
+        "ActionToolTips": {
+          "deleteReservation": "Supprimer la réservation"
+        },
+        "alert": {
+          "delete_failed": "Erreur lors de la suppression",
+          "delete_success": "Réservation supprimée",
+          "confirm_delete": "Supprimer cette réservation ?",
+          "loading_error": "Erreur lors du chargement des réservations:"
+        },
+        "delete": "Supprimer",
+        "no_reservations": "Aucune réservation trouvée.",
+        "Previous": "Précédent",
+        "Next": "Suivant",
+        "confirm_title": "Confirmer la suppression",
+        "cancel": "Annuler"
+      },
+      "pagination": {
+        "affichageDe": "Affichage de",
+        "a": "à",
+        "sur": "sur",
+        "noItem": "Aucun élément"
+      },
+      "stats": {
+        "totalReservations": "Nombre de réservations",
+        "upcomingReservations": "Réservations à venir",
+        "pastReservations": "Réservations passées"
+      },
+      "status": {
+        "upcoming": "À venir",
+        "past": "Passée"
+      },
+      "deleteDialog": {
+        "title": "Supprimer la réservation",
+        "description": "Cette action est définitive. La réservation sera supprimée.",
+        "confirm": "Supprimer",
+        "cancel": "Annuler",
+        "deleting": "Suppression..."
+      },
+      "alert": {
+        "deleteSuccess": {
+          "title": "Réservation supprimée",
+          "message": "La réservation a été supprimée avec succès."
+        },
+        "errorTitle": "Une erreur s'est produite",
+        "deleteError": "Une erreur s'est produite lors de la suppression de la réservation. Veuillez réessayer plus tard."
+      }
     },
     "stations": {
       "title": "Stations",

@@ -364,38 +364,77 @@
         "cancelReset": "Cancel",
         "resetState": "Resetting…",
         "confirmReset": "Confirm Reset"
-      },
-      "addUserForm": {
-        "errorMessage": {
-          "firstnameRequired": "Firstname is required.",
-          "firstnameLength": "Firstname must be at least 2 characters long.",
-          "lastnameRequired": "Lastname is required.",
-          "lastnameLength": "Lastname must be at least 2 characters long.",
-          "emailRequired": "Email address is required.",
-          "emailInvalid": "Email address is invalid.",
-          "emailLength": "Email address is too long.",
-          "userAlreadyExists": "A user with this email address already exists.",
-          "genericError": "An error occurred. Please try again."
-        },
-        "userAddedSuccess": "User added successfully.",
-        "userAdded": "User added!",
-        "addUser": "Add a user",
-        "wasCreatedSuccessfully": "was created successfully.",
-        "form": {
-          "firstName": "First name",
-          "lastName": "Last name",
-          "email": "Email address",
-          "adminAccess": "Administrator access",
-          "active": "Active",
-          "adminAcessDescription": "Grants access to the admin panel and sensitive actions. Reserved for trusted staff.",
-          "cancel": "Cancel",
-          "submit": "Add user",
-          "submitting": "Adding..."
-        }
       }
     },
     "reservations": {
-      "title": "Reservations"
+      "title": "Reservations",
+      "subtitle": "Manage LUDOV platform reservations",
+      "actionBar": {
+        "toolTipRefresh": "Search...",
+        "searchPlaceholder": "Search"
+      },
+      "searchResult": {
+        "noReservationsFound": "No reservations found",
+        "noMatch": "No reservation matches your search.",
+        "empty": "No reservations yet."
+      },
+      "table": {
+        "header": {
+          "user": "User",
+          "console": "Console",
+          "games": "Games",
+          "date": "Date",
+          "time": "Time",
+          "actions": "Actions",
+          "station": "Station",
+          "status": "Status"
+        },
+        "ActionToolTips": {
+          "deleteReservation": "Delete reservation"
+        },
+        "alert": {
+          "delete_failed": "Error during deletion",
+          "delete_success": "Reservation deleted",
+          "confirm_delete": "Delete this reservation?",
+          "loading_error": "Error loading reservations:"
+        },
+        "delete": "Delete",
+        "no_reservations": "No reservations found.",
+        "Previous": "Previous",
+        "Next": "Next",
+        "confirm_title": "Confirm deletion",
+        "cancel": "Cancel"
+      },
+      "pagination": {
+        "affichageDe": "Showing",
+        "a": "to",
+        "sur": "of",
+        "noItem": "No items"
+      },
+      "stats": {
+        "totalReservations": "Total reservations",
+        "upcomingReservations": "Upcoming reservations",
+        "pastReservations": "Past reservations"
+      },
+      "status": {
+        "upcoming": "Upcoming",
+        "past": "Past"
+      },
+      "deleteDialog": {
+        "title": "Delete reservation",
+        "description": "This action is irreversible. The reservation will be permanently deleted.",
+        "confirm": "Delete",
+        "cancel": "Cancel",
+        "deleting": "Deleting..."
+      },
+      "alert": {
+        "deleteSuccess": {
+          "title": "Reservation deleted",
+          "message": "The reservation has been successfully deleted."
+        },
+        "errorTitle": "An error occurred",
+        "deleteError": "An error occurred while deleting the reservation. Please try again later."
+      }
     },
     "stations": {
       "title": "Stations",
