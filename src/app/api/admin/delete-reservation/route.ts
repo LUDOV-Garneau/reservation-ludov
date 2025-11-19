@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/db";
+import { verifyToken } from "@/lib/jwt";
 
 export async function DELETE(req: NextRequest) {
+  const token = req.cookies.get("SESSION")?.value;
+  if (!token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+  const user = verifyToken(token);
+  if (!user?.id) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+  if (!user.isAdmin) {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  }
   try {
     const { searchParams } = new URL(req.url);
     const idParam = searchParams.get("id");
@@ -17,7 +29,7 @@ export async function DELETE(req: NextRequest) {
 
     const [result] = await pool.query(
       "DELETE FROM reservation WHERE id = ?",
-      [id]            
+      [id]
     );
 
     const okPacket = result as { affectedRows?: number };
