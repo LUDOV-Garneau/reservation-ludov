@@ -27,6 +27,7 @@ interface ReservationHoldRow extends RowDataPacket {
   game2_id: number | null;
   game3_id: number | null;
   accessoirs: string | null;
+  station_id: number | null;
   cours: number | null;
   date: Date | string;
   time: string;
@@ -239,8 +240,8 @@ export async function POST(req: Request) {
       await connection.query(
         `INSERT INTO reservation
            (id, user_id, console_id, console_type_id, game1_id, game2_id, game3_id,
-            accessory_ids, cours_id, date, time, createdAt)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+            accessory_ids, cours_id, station, date, time, createdAt)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
           reservationId,
           Number(user.id),
@@ -251,6 +252,7 @@ export async function POST(req: Request) {
           game3Id,
           accessoryIds.length ? JSON.stringify(accessoryIds) : null,
           coursId,
+          hold.station_id,
           dateStr,
           timeStr,
         ]

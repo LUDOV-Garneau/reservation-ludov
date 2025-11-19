@@ -5,6 +5,7 @@ interface Reservation {
   id: string;
   archived: boolean;
   games: string[];
+  station: string;
   console: string;
   date: string;
   heure: string;
@@ -33,6 +34,7 @@ export default function AccueilReservationSection({
             archived={reservation.archived}
             games={reservation.games}
             console={reservation.console}
+            station={reservation.station}
             date={reservation.date}
             heure={reservation.heure}
             onDetailsClick={() => onDetailsClick?.(reservation)}

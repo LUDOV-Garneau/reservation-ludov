@@ -9,6 +9,7 @@ interface AccueilReservationCardProps {
   games: string[];
   archived: boolean;
   console: string;
+  station: string;
   date: string;
   heure: string;
   onDetailsClick?: () => void;
@@ -18,6 +19,7 @@ export default function AccueilReservationCard({
   games,
   archived,
   console: consoleType,
+  station,
   date,
   heure,
   onDetailsClick,
@@ -46,6 +48,9 @@ export default function AccueilReservationCard({
               {t("reservation.accueil.console")}
             </p>
             <h3 className="font-bold text-gray-900 text-2xl">{consoleType}</h3>
+            <p className="text-sm text-gray-400 mt-1">
+              {t("reservation.accueil.station")}: {station}
+            </p>
           </div>
         </div>
 

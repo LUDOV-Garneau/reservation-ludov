@@ -8,7 +8,7 @@ import { Calendar, Clock } from "lucide-react";
 
 type Reservation = {
   id: number;
-  station: string;
+  station: number;
   date: string;
   heure: string;
   console: { nom: string; picture?: string };
@@ -127,6 +127,7 @@ function useReservation(id: string) {
         }
 
         const data = await response.json();
+        console.log("Reservation fetched:", data);
         setState({ data, isLoading: false, error: false });
       } catch (error) {
         console.error("Error fetching reservation:", error);

@@ -10,7 +10,17 @@ type ReservationRow = RowDataPacket & {
   game2_id: number | null;
   game3_id: number | null;
   accessoirs: string;
-};
+  stationId: number;
+}
+
+interface ReservationHoldRow extends RowDataPacket {
+  time: string;
+  stationId: number;
+}
+
+interface StationRow extends RowDataPacket {
+  station_id: number;
+}
 
 type WeeklyHoursRow = RowDataPacket & {
   start_hour: string;
@@ -42,6 +52,7 @@ interface TimeSlotAvailability {
     console?: boolean;
     games?: number[];
     accessories?: number[];
+    station?: boolean;
   };
 }
 
@@ -149,14 +160,17 @@ function generateAllTimeSlots(): string[] {
 function checkSlotAvailability(
   time: string,
   reservations: ReservationRow[],
+  holds: { time: string; stationId: number }[],
   requestedConsoleId: number,
   requestedGameIds: number[],
-  requestedAccessoryIds: number[]
+  requestedAccessoryIds: number[],
+  requestedStationIds: number[]
 ): { available: boolean; conflicts?: unknown } {
   const conflicts: {
     console?: boolean;
     games?: number[];
     accessories?: number[];
+    station?: boolean;
   } = {};
   let hasConflict = false;
 
@@ -213,6 +227,27 @@ function checkSlotAvailability(
   }
   if (conflictingAccessories.length > 0) {
     conflicts.accessories = [...new Set(conflictingAccessories)];
+    hasConflict = true;
+  }
+
+  const conflictingStations: number[] = [];
+
+  for (const station of requestedStationIds) {
+    if (reservationsAtThisTime.some((res) => res.stationId === station)) {
+      conflictingStations.push(station);
+    }
+  }
+
+  const holdsAtThisTime = holds.filter((h) => h.time === time);
+
+  for (const station of requestedStationIds) {
+    if (holdsAtThisTime.some((h) => h.stationId === station)) {
+      conflictingStations.push(station);
+    }
+  }
+
+  if (conflictingStations.length === requestedStationIds.length) {
+    conflicts.station = true;
     hasConflict = true;
   }
 
@@ -350,9 +385,19 @@ export async function GET(request: NextRequest) {
     );
 
     const [reservations] = await pool.query<ReservationRow[]>(
-      `SELECT time, console_id, game1_id, game2_id, game3_id, accessory_ids 
+      `SELECT time, console_id, game1_id, game2_id, game3_id, accessory_ids, station AS stationId
        FROM reservation 
        WHERE date = ? AND archived = 0`,
+      [date]
+    );
+
+    const [holds] = await pool.query<ReservationHoldRow[]>(
+      `
+      SELECT time, station_id AS stationId
+      FROM reservation_hold
+      WHERE date = ?
+      AND expireAt > NOW()
+      `,
       [date]
     );
 
@@ -471,6 +516,14 @@ export async function GET(request: NextRequest) {
       return true;
     });
 
+    const [stationIds] = await pool.query<StationRow[]>(
+      `SELECT id AS station_id
+       FROM stations
+       WHERE isActive = 1 AND JSON_CONTAINS(consoles, JSON_ARRAY(?))
+      `,
+      [requestedConsoleId]
+    );
+
     const availability: TimeSlotAvailability[] = allSlots.map((time) => {
       const reservationsAtTime = reservations.filter((r) => r.time === time);
 
@@ -492,9 +545,11 @@ export async function GET(request: NextRequest) {
       const check = checkSlotAvailability(
         time,
         reservations,
+        holds,
         requestedConsoleId,
         requestedGameIds,
-        requestedAccessoryIds
+        requestedAccessoryIds,
+        stationIds.map((s) => s.station_id)
       );
 
       return {

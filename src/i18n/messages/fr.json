@@ -174,6 +174,7 @@
       "noConsoleSelected": "Aucune plateforme sélectionnée",
       "accessories": "Accessoires",
       "courses": "Cours",
+      "station": "Station",
       "yourReservation": "Votre réservation",
       "date": "date",
       "hour": "heure",
@@ -216,6 +217,7 @@
       "date": "Date",
       "time": "Heure",
       "games": "Jeux réservés",
+      "station": "Station",
       "console": "Plateforme",
       "cancelled": "annulée"
     },
