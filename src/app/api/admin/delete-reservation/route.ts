@@ -28,7 +28,7 @@ export async function DELETE(req: NextRequest) {
     const id = idParam;
 
     const [result] = await pool.query(
-      "DELETE FROM reservation WHERE id = ?",
+      "UPDATE reservation SET archived = 1 WHERE id = ?",
       [id]
     );
 
