@@ -37,6 +37,7 @@ export default function ConfirmReservation() {
     selectedDate,
     selectedTime,
     currentStep,
+    isTimerActive,
   } = useReservation();
 
   const router = useRouter();
@@ -49,6 +50,8 @@ export default function ConfirmReservation() {
 
   useEffect(() => {
     const fetchReservation = async () => {
+      if (!isTimerActive) return;
+
       if (!reservationId) {
         setError(t("reservation.confirm.noActiveReservation"));
         setLoading(false);
@@ -94,8 +97,23 @@ export default function ConfirmReservation() {
     setError(null);
 
     try {
-      await completeReservation();
-      router.push(`/reservation/success?reservationId=${reservationId}`);
+      const reservationData = await completeReservation();
+
+      if (reservationData != null) {
+        await fetch("/api/reservation/confirm-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            reservationId: reservationData.reservationId,
+          }),
+        });
+
+        router.push(`/reservation/success/${reservationData.reservationId}`);
+      } else {
+        throw new Error();
+      }
     } catch (err) {
       console.error("Erreur confirmation:", err);
       setError(

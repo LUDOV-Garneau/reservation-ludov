@@ -184,6 +184,14 @@
       "noActiveReservation": "Aucune réservation active",
       "return": "Retour"
     },
+    "confirmation": {
+      "title": "Réservation confirmée!",
+      "subtitle": "Votre réservation a été complétée avec succès.",
+      "detailsTitle": "Détails de la réservation",
+      "goHome": "Retourner à l'accueil",
+      "detailsBtn": "Voir les détails de la réservation",
+      "reservationId": "Identifiant de réservation :"
+    },
     "details": {
       "cancelButton": "Annuler",
       "cancelConfirmationTitle": "Confirmer l'annulation",
