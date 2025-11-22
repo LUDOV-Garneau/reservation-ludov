@@ -372,6 +372,34 @@
         "cancelReset": "Cancel",
         "resetState": "Resetting…",
         "confirmReset": "Confirm Reset"
+      },
+      "addUserForm": {
+        "errorMessage": {
+          "firstnameRequired": "Firstname is required.",
+          "firstnameLength": "Firstname must be at least 2 characters long.",
+          "lastnameRequired": "Lastname is required.",
+          "lastnameLength": "Lastname must be at least 2 characters long.",
+          "emailRequired": "Email address is required.",
+          "emailInvalid": "Email address is invalid.",
+          "emailLength": "Email address is too long.",
+          "userAlreadyExists": "A user with this email address already exists.",
+          "genericError": "An error occurred. Please try again."
+        },
+        "userAddedSuccess": "User added successfully.",
+        "userAdded": "User added!",
+        "addUser": "Add a user",
+        "wasCreatedSuccessfully": "was created successfully.",
+        "form": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "email": "Email address",
+          "adminAccess": "Administrator access",
+          "active": "Active",
+          "adminAcessDescription": "Grants access to the admin panel and sensitive actions. Reserved for trusted staff.",
+          "cancel": "Cancel",
+          "submit": "Add user",
+          "submitting": "Adding..."
+        }
       }
     },
     "reservations": {

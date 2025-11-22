@@ -195,7 +195,7 @@ export default function AddUserFormDialog({
         <DialogHeader className="px-6 pt-5 pb-3 border-b border-gray-100">
           <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             <UserPlus className="w-5 h-5 text-cyan-600" />
-              {t("addUser")}
+            {t("addUser")}
           </DialogTitle>
         </DialogHeader>
 
@@ -256,9 +256,8 @@ export default function AddUserFormDialog({
                       setFirstname(e.target.value);
                       clearFieldError("firstname");
                     }}
-                    className={`${baseInputClasses} ${
-                      errors.firstname ? errorInputClasses : normalInputClasses
-                    }`}
+                    className={`${baseInputClasses} ${errors.firstname ? errorInputClasses : normalInputClasses
+                      }`}
                     placeholder="John"
                     disabled={loading}
                     aria-invalid={!!errors.firstname}
@@ -287,9 +286,8 @@ export default function AddUserFormDialog({
                       setLastname(e.target.value);
                       clearFieldError("lastname");
                     }}
-                    className={`${baseInputClasses} ${
-                      errors.lastname ? errorInputClasses : normalInputClasses
-                    }`}
+                    className={`${baseInputClasses} ${errors.lastname ? errorInputClasses : normalInputClasses
+                      }`}
                     placeholder="Doe"
                     disabled={loading}
                     aria-invalid={!!errors.lastname}
@@ -319,9 +317,8 @@ export default function AddUserFormDialog({
                     setEmail(e.target.value);
                     clearFieldError("email");
                   }}
-                  className={`${baseInputClasses} ${
-                    errors.email ? errorInputClasses : normalInputClasses
-                  }`}
+                  className={`${baseInputClasses} ${errors.email ? errorInputClasses : normalInputClasses
+                    }`}
                   placeholder="john.doe@example.com"
                   disabled={loading}
                   aria-invalid={!!errors.email}
