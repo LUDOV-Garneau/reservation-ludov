@@ -117,11 +117,10 @@ export default function ReservationReminderDialog({
         <Button
           size="lg"
           variant="outline"
-          className={`w-full sm:w-auto border-2 font-semibold transition-all duration-200 ${
-            reminderEnabled
-              ? "border-green-600 text-green-700 bg-green-50 hover:bg-green-100"
-              : "border-green-500 text-green-600 hover:bg-green-50 hover:border-green-600"
-          }`}
+          className={`w-full border-px transition-all duration-200 ${reminderEnabled
+            ? "border-green-600 text-green-700 bg-green-50 hover:bg-green-100"
+            : "border-green-500 text-green-600 hover:bg-green-50 hover:border-green-600"
+            }`}
           disabled={isLoading}
         >
           {isLoading ? (
@@ -262,11 +261,10 @@ export default function ReservationReminderDialog({
                 e.preventDefault();
                 handleConfirm();
               }}
-              className={`w-full sm:flex-1 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 h-11 sm:h-auto ${
-                reminderEnabled
-                  ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                  : "bg-gray-400 hover:bg-gray-500"
-              }`}
+              className={`w-full sm:flex-1 rounded-lg sm:rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 h-11 sm:h-auto ${reminderEnabled
+                ? "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                : "bg-gray-400 hover:bg-gray-500"
+                }`}
             >
               {isSending ? (
                 <>

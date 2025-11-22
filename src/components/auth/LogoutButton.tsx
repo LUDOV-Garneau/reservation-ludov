@@ -32,9 +32,9 @@ export default function LogoutButton({ name }: LogoutButtonProps) {
   return (
     <Popover>
       <PopoverTrigger>
-        <div className="flex items-center gap-4 hover:opacity-70">
+        <div className="flex items-center gap-4 hover:opacity-70 cursor-pointer">
           <UserIcon color="black" size={24} fill="black" />
-          <p>{name || ""}</p>
+          <p className="sm:block hidden">{name || ""}</p>
         </div>
       </PopoverTrigger>
       <PopoverContent
