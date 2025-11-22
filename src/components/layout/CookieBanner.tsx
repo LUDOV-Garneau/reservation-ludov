@@ -13,7 +13,6 @@ export function CookieBanner() {
 
     useEffect(() => {
         const consent = localStorage.getItem("cookie_consent");
-        console.log(consent);
         if (!consent) {
             setIsVisible(true);
         }
