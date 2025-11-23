@@ -303,7 +303,7 @@ function ReservationHeader({
             {t("reservation.details.pageDetailsTitle")}
           </h1>
 
-          <div className="flex md:flex-row flex-col items-center md:items-start gap-6 text-lg text-gray-600">
+          <div className="flex flex-wrap justify-center md:justify-start gap-6 text-lg text-gray-600">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
                 <Calendar className="h-5 w-5 text-cyan-600" />
@@ -313,7 +313,6 @@ function ReservationHeader({
               </time>
             </div>
 
-            <div className="w-px h-8 bg-gray-200 hidden md:block" />
 
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
@@ -326,7 +325,6 @@ function ReservationHeader({
 
             {station && (
               <>
-                <div className="w-px h-8 bg-gray-200 hidden md:block" />
                 <div className="flex items-center gap-2">
                   <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
                     <Computer className="h-5 w-5 text-cyan-600" />
