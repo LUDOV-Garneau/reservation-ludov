@@ -635,6 +635,9 @@
         "title": "Définissez votre disponibilité hebdomadaire ci-dessous",
         "unavailableOn": "Indisponible les {day}s"
       }
+    },
+    "cours" : {
+      "title": "Cours"
     }
   },
   "privacy": {

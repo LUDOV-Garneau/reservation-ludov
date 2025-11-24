@@ -328,7 +328,7 @@ export default function AvailabilitiesTab() {
   }
 
   return (
-    <TabsContent value="availabilities" className="mx-auto">
+    <TabsContent value="availabilities" className="max-w-5xl mx-auto">
       <AvailabilitiesTypeSelection
         selectedCard={selectedCard}
         setSelectedCard={setSelectedCard}
