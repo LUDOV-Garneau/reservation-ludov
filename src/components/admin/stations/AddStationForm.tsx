@@ -225,7 +225,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
                     </p>
                   </div>
 
-                  <div className="grid gap-2 overflow-y-auto max-h-80">
+                  <div className="grid gap-2 overflow-y-auto max-h-48">
                     {selectedConsoles.map((c, index) => (
                       <div
                         key={c.id}

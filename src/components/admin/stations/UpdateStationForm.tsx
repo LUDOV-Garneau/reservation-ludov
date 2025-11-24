@@ -251,7 +251,7 @@ export default function UpdateStationForm({
                     </p>
                   </div>
 
-                  <div className="grid gap-2 overflow-y-auto max-h-60">
+                  <div className="grid gap-2 overflow-y-auto max-h-30">
                     {selectedConsoles.map((c, index) => (
                       <div
                         key={c.id}
