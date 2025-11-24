@@ -170,145 +170,150 @@ export default function UpdateStationForm({
         </DialogTrigger>
       )}
 
-      <DialogContent className="max-w-[95vw] sm:max-w-[600px] w-full max-h-[92vh] p-0 gap-0 overflow-hidden">
-        <DialogHeader className="px-6 pt-6 pb-5 border-b">
+      <DialogContent className="max-w-[95vw] sm:max-w-[650px] w-full h-[90vh] p-0 gap-0 flex flex-col">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0 bg-background">
           <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Settings className="w-5 h-5 text-primary" />
+            <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl">
+              <Settings className="w-5 h-5 text-cyan-600" />
             </div>
             {t("titles.dialogTitle")}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
-          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
-            <div className="space-y-3">
-              <Label htmlFor="stationName" className="text-sm font-semibold flex items-center gap-2">
-                Nom de la station
-                <span className="text-xs text-red-500 font-normal">*</span>
-              </Label>
-              <Input
-                id="stationName"
-                value={stationName}
-                onChange={(e) => {
-                  setStationName(e.target.value);
-                  clearError();
-                }}
-                placeholder="Ex: Tv Ultra 4K XDR"
-                className="h-12 text-base border-2 focus:border-primary transition-all"
-              />
-            </div>
-
-            <div className="space-y-4">
-              <Label className="text-sm font-semibold flex items-center gap-2">
-                Consoles associées
-                <span className="text-xs text-red-500 font-normal">*</span>
-              </Label>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Select value={selectedConsoleId} onValueChange={setSelectedConsoleId}>
-                  <SelectTrigger className="h-12 flex-1 border-2 text-base">
-                    <SelectValue placeholder="Sélectionner une console..." />
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    {availableConsoles.length === 0 ? (
-                      <SelectItem value="none" disabled>
-                        Aucune console disponible
-                      </SelectItem>
-                    ) : (
-                      availableConsoles.map((c) => (
-                        <SelectItem key={c.id} value={`${c.id}`} className="py-3">
-                          <div className="flex items-center gap-2">
-                            <Monitor className="w-4 h-4 text-cyan-500" />
-                            <span className="font-medium">{c.name}</span>
-                            <span className="text-xs text-muted-foreground">• #{c.id}</span>
-                          </div>
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-
-                <Button
-                  type="button"
-                  onClick={handleAddConsole}
-                  disabled={!selectedConsoleId || availableConsoles.length === 0}
-                  className="sm:w-auto w-full gap-2 font-semibold bg-cyan-500 hover:bg-cyan-700"
-                  size="lg"
-                >
-                  <Plus className="w-4 h-4" />
-                  Ajouter
-                </Button>
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Contenu scrollable */}
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <div className="space-y-6 max-w-full">
+              <div className="space-y-2.5">
+                <Label htmlFor="stationName" className="text-sm font-semibold flex items-center gap-2">
+                  Nom de la station
+                  <span className="text-xs text-red-500">*</span>
+                </Label>
+                <Input
+                  id="stationName"
+                  value={stationName}
+                  onChange={(e) => {
+                    setStationName(e.target.value);
+                    clearError();
+                  }}
+                  placeholder="Ex: Tv Ultra 4K XDR"
+                  className="h-11 text-base border-2 focus:border-cyan-500 transition-colors"
+                />
               </div>
 
-              {selectedConsoles.length > 0 ? (
-                <div className="mt-5 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold flex items-center gap-2">
+                  Consoles associées
+                  <span className="text-xs text-red-500">*</span>
+                </Label>
+
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  <Select value={selectedConsoleId} onValueChange={setSelectedConsoleId}>
+                    <SelectTrigger className="h-11 flex-1 border-2 text-base">
+                      <SelectValue placeholder="Sélectionner une console..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableConsoles.length === 0 ? (
+                        <SelectItem value="none" disabled>
+                          Aucune console disponible
+                        </SelectItem>
+                      ) : (
+                        availableConsoles.map((c) => (
+                          <SelectItem key={c.id} value={`${c.id}`} className="py-3">
+                            <div className="flex items-center gap-2">
+                              <Monitor className="w-4 h-4 text-cyan-500" />
+                              <span className="font-medium">{c.name}</span>
+                              <span className="text-xs text-muted-foreground">#{c.id}</span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    type="button"
+                    onClick={handleAddConsole}
+                    disabled={!selectedConsoleId || availableConsoles.length === 0}
+                    className="sm:w-auto w-full h-11 gap-2 font-semibold bg-cyan-500 hover:bg-cyan-600"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Ajouter
+                  </Button>
+                </div>
+
+                {selectedConsoles.length > 0 ? (
+                  <div className="mt-4 space-y-3">
+                    <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-600" />
                       {selectedConsoles.length} console{selectedConsoles.length > 1 ? "s" : ""} sélectionnée{selectedConsoles.length > 1 ? "s" : ""}
                     </p>
-                  </div>
 
-                  <div className="grid gap-2 overflow-y-auto max-h-60">
-                    {selectedConsoles.map((c, index) => (
-                      <div
-                        key={c.id}
-                        className="group relative p-4 bg-gradient-to-br from-primary/5 to-primary/3 rounded-xl border-2 border-primary/20 hover:border-primary/40 transition-all duration-200 hover:shadow-md"
-                        style={{
-                          animation: `slideIn 0.3s ease-out ${index * 0.05}s backwards`,
-                        }}
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <div className="p-2 bg-primary/10 rounded-lg shrink-0">
-                              <Monitor className="w-4 h-4 text-primary" />
+                    <div className="space-y-2.5">
+                      {selectedConsoles.map((c) => (
+                        <div
+                          key={c.id}
+                          className="group p-3.5 bg-gradient-to-r from-cyan-50 to-cyan-50/50 dark:from-cyan-950/30 dark:to-cyan-950/10 rounded-lg border-2 border-cyan-200 dark:border-cyan-800 hover:border-cyan-400 dark:hover:border-cyan-600 transition-all"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <div className="p-2 bg-cyan-500/10 rounded-lg shrink-0">
+                                <Monitor className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-sm truncate">{c.name}</p>
+                                <p className="text-xs text-muted-foreground">Unité #{c.id}</p>
+                              </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-sm truncate">{c.name}</p>
-                              <p className="text-xs text-muted-foreground">Unité #{c.id}</p>
-                            </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              type="button"
+                              onClick={() => handleRemoveConsole(c.id)}
+                              className="h-8 w-8 shrink-0 hover:bg-red-500 hover:text-white transition-colors rounded-md"
+                              aria-label={`Retirer ${c.name}`}
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            type="button"
-                            onClick={() => handleRemoveConsole(c.id)}
-                            className="h-9 w-9 shrink-0 hover:bg-red-500 hover:text-white transition-all rounded-lg"
-                            aria-label={`Retirer ${c.name}`}
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="mt-5 p-8 text-center border-2 border-dashed rounded-xl bg-muted/30">
-                  <Monitor className="w-12 h-12 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-sm text-muted-foreground font-medium">
-                    Aucune console sélectionnée
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Ajoutez des consoles à votre station
-                  </p>
-                </div>
+                ) : (
+                  <div className="mt-4 p-6 text-center border-2 border-dashed rounded-lg bg-muted/30">
+                    <Monitor className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground font-medium">
+                      Aucune console sélectionnée
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Ajoutez des consoles à votre station
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {error && (
+                <Alert variant="destructive" className="border-2">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="font-medium">{error}</AlertDescription>
+                </Alert>
               )}
             </div>
+          </div>
 
-            <div className="p-4 rounded-xl border-2 border-cyan-500 bg-cyan-500/5">
-              <div className="flex items-center gap-3">
+          <div className="shrink-0 px-6 py-3 border-t bg-background">
+            <div className="p-4 rounded-lg border-2 border-cyan-200 dark:border-cyan-800 bg-cyan-50/50 dark:bg-cyan-950/20">
+              <div className="flex items-start gap-3">
                 <Checkbox
                   id="isActive"
                   checked={isActive}
                   onCheckedChange={(checked) => setIsActive(Boolean(checked))}
-                  className="h-5 w-5 data-[state=checked]:bg-cyan-500"
+                  className="h-5 w-5 mt-0.5 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
                 />
                 <div className="flex-1">
                   <Label htmlFor="isActive" className="text-sm font-semibold cursor-pointer flex items-center gap-2">
-                    <Zap className="w-4 h-4 text-primary" />
+                    <Zap className="w-4 h-4 text-cyan-600" />
                     {t("fields.isActive")}
                   </Label>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -317,21 +322,14 @@ export default function UpdateStationForm({
                 </div>
               </div>
             </div>
-
-            {error && (
-              <Alert variant="destructive" className="border-2 animate-in fade-in slide-in-from-top-2">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="font-medium">{error}</AlertDescription>
-              </Alert>
-            )}
           </div>
 
-          <div className="sticky bottom-0 px-6 py-4 border-t">
+          <div className="shrink-0 px-6 pb-4 bg-background">
             <Button
               type="submit"
+              onClick={handleSubmit}
               disabled={loading || !stationName.trim() || selectedConsoles.length === 0}
-              className="w-full h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-cyan-500 hover:bg-cyan-700"
-              size="lg"
+              className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-cyan-500 hover:bg-cyan-600"
             >
               {loading ? (
                 <>
@@ -346,20 +344,7 @@ export default function UpdateStationForm({
               )}
             </Button>
           </div>
-        </form>
-
-        <style jsx>{`
-          @keyframes slideIn {
-            from {
-              opacity: 0;
-              transform: translateY(-10px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}</style>
+        </div>
       </DialogContent>
     </Dialog>
   );
