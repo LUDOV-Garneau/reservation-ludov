@@ -82,7 +82,7 @@ export default function UpdateStationForm({
 
     const fetchConsoleStock = async () => {
       try {
-        const res = await fetch("/api/admin/console-stock");
+        const res = await fetch("/api/admin/console-type");
         if (!res.ok) throw new Error(t("errors.consoleFetch"));
         const data: ConsoleStock[] = await res.json();
         setConsoleList(data);
