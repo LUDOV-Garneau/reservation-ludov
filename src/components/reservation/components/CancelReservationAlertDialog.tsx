@@ -60,12 +60,12 @@ export default function CancelReservationAlertDialog({
       <AlertDialogTrigger asChild>
         <Button
           type="button"
-          variant="destructive"
+          variant="outline"
           size="lg"
-          className="group relative overflow-hidden transition-all hover:shadow-lg hover:shadow-red-500/30"
+          className="group w-full relative overflow-hidden border-red-500 text-red-600 hover:bg-red-50 hover:border-red-600"
         >
           <span className="flex items-center gap-2">
-            <XCircle className="h-4 w-4 transition-transform group-hover:rotate-90 duration-300" />
+            <XCircle className="h-4 w-4 mr-2" />
             {t("reservation.details.cancelButton")}
           </span>
         </Button>
