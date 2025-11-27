@@ -30,10 +30,7 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (!coursRows || coursRows.length === 0) {
-      return NextResponse.json(
-        { error: "Cours introuvable" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Cours introuvable" }, { status: 404 });
     }
 
     const [reservationsRows] = await pool.query<RowDataPacket[]>(
@@ -42,9 +39,10 @@ export async function DELETE(req: NextRequest) {
     );
 
     if (reservationsRows && reservationsRows.length > 0) {
-      await pool.query("DELETE FROM reservation WHERE cours_id = ?", [
-        coursId,
-      ]);
+      await pool.query(
+        "UPDATE reservation SET cours_id = NULL WHERE cours_id = ?",
+        [coursId]
+      );
     }
 
     await pool.query("DELETE FROM cours WHERE id = ?", [coursId]);
