@@ -82,6 +82,16 @@ export default function UpdateCoursForm({
         return;
       }
 
+      if (res.status === 400) {
+        const data = await res.json();
+        if (data.error?.includes("7 caractères")) {
+          setError("Le code du cours ne peut pas dépasser 7 caractères.");
+        } else {
+          setError(data.error || "Tous les champs doivent être remplis.");
+        }
+        return;
+      }
+
       if (!res.ok) throw new Error("Erreur API");
 
       onAlert?.("success", "Cours mis à jour avec succès.");
@@ -149,7 +159,10 @@ export default function UpdateCoursForm({
             </div>
 
             {error && (
-              <Alert variant="destructive" className="border-2 animate-in fade-in">
+              <Alert
+                variant="destructive"
+                className="border-2 animate-in fade-in"
+              >
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="font-medium">
                   {error}

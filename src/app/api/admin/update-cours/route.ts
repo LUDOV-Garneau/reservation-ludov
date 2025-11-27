@@ -21,7 +21,6 @@ export async function PUT(req: NextRequest) {
     const { name, coursId, code } = body;
 
     if (!name || name.trim() === "") {
-      console.error("Nom du cours manquant ou vide.");
       return NextResponse.json(
         { error: "Le nom du cours est requis." },
         { status: 400 }
@@ -29,9 +28,15 @@ export async function PUT(req: NextRequest) {
     }
 
     if (!code || code.trim() === "") {
-      console.error("Le code du cours est manquant ou vide.");
       return NextResponse.json(
         { error: "Le code du cours est requis." },
+        { status: 400 }
+      );
+    }
+
+    if (code.length > 7) {
+      return NextResponse.json(
+        { error: "Le code du cours ne peut pas dépasser 7 caractères." },
         { status: 400 }
       );
     }
@@ -53,8 +58,8 @@ export async function PUT(req: NextRequest) {
     }
 
     const [existingCours] = await conn.query(
-      `SELECT id FROM cours WHERE LOWER(nom_cours) = LOWER(?)`,
-      [name.trim()]
+      `SELECT id FROM cours WHERE LOWER(nom_cours) = LOWER(?) AND id != ?`,
+      [name.trim(), coursId]
     );
     if (Array.isArray(existingCours) && existingCours.length > 0) {
       conn.release();

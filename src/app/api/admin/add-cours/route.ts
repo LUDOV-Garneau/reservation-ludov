@@ -32,6 +32,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Le champ code est requis." }, { status: 400 });
     }
 
+    if (code.length > 7) {
+      return NextResponse.json(
+        { error: "Le code du cours ne peut pas dépasser 7 caractères." },
+        { status: 400 }
+      );
+    }
+
     const conn = await pool.getConnection();
     try {
 
