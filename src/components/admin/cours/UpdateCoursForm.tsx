@@ -17,8 +17,8 @@ import { CheckCircle2, AlertCircle, Settings } from "lucide-react";
 
 type Cours = {
   id: number;
-  name: string;
-  code: string;
+  nom_cours: string;
+  code_cours: string;
 };
 
 type Props = {
@@ -42,16 +42,16 @@ export default function UpdateCoursForm({
   const openValue = open !== undefined ? open : internalOpen;
   const setOpenValue = onOpenChange ?? setInternalOpen;
 
-  const [name, setName] = useState(cours.name);
-  const [code, setCode] = useState(cours.code);
+  const [name, setName] = useState(cours.nom_cours);
+  const [code, setCode] = useState(cours.code_cours);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!openValue) return;
 
-    setName(cours.name);
-    setCode(cours.code);
+    setName(cours.nom_cours);
+    setCode(cours.code_cours);
     setError(null);
   }, [openValue, cours]);
 

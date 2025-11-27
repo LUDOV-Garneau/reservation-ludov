@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   Info,
+  Pencil,
 } from "lucide-react";
 import {
   Dialog,
@@ -39,6 +40,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -46,6 +48,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
 import DeleteStationAction from "./DialogConfirmationDeleteCours";
+import UpdateCoursForm from "./UpdateCoursForm";
 
 type Cours = {
   id: number;
@@ -111,8 +114,10 @@ function CoursTableRow({
   cours,
   onAlert,
   onSuccess,
+  onUpdate,
 }: {
   cours: Cours;
+  onUpdate: (cours: Cours) => void;
   onAlert: (
     type: "success" | "error" | "info" | "warning",
     message: string,
@@ -127,6 +132,24 @@ function CoursTableRow({
       <TableCell className="text-right">
         <div>
           <div className="hidden md:flex gap-2 justify-end">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onUpdate(cours)}
+                    className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Modifier le cours</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
             <DeleteStationAction
               targetCours={{ id: cours.id, name: cours.nom_cours }}
               onAlert={onAlert}
@@ -164,6 +187,11 @@ function CoursTableRow({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => onUpdate(cours)}>
+                  <Pencil className="h-4 w-4 mr-2 text-blue-500" />
+                  Modifier le cours
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DeleteStationAction
                   targetCours={{ id: cours.id, name: cours.nom_cours }}
                   onAlert={onAlert}
@@ -343,6 +371,8 @@ export default function CoursTable() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [coursToUpdate, setCoursToUpdate] = useState<Cours | null>(null);
 
   const [loading, setLoading] = useState(false);
 
@@ -386,6 +416,11 @@ export default function CoursTable() {
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleUpdate(cours: Cours) {
+    setCoursToUpdate(cours);
+    setUpdateDialogOpen(true);
   }
 
   const filteredStations = cours.filter((cours) => {
@@ -446,6 +481,7 @@ export default function CoursTable() {
                       <CoursTableRow
                         key={cours.id}
                         cours={cours}
+                        onUpdate={() => handleUpdate(cours)}
                         onAlert={showAlert}
                         onSuccess={handleRefresh}
                       />
@@ -483,6 +519,19 @@ export default function CoursTable() {
           )}
         </CardContent>
       </Card>
+
+      {coursToUpdate && (
+        <UpdateCoursForm
+          open={updateDialogOpen}
+          onOpenChange={setUpdateDialogOpen}
+          cours={coursToUpdate}
+          onSuccess={() => {
+            setUpdateDialogOpen(false);
+            handleRefresh();
+          }}
+          onAlert={showAlert}
+        />
+      )}
 
       {confirmDialog && (
         <ConfirmDialog
