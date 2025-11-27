@@ -416,6 +416,10 @@
         }
       }
     },
+    "politique": {
+      "title": "Politique de confidentialité",
+      "subtitle": "Gérez la politique de confidentialité de la plateforme LUDOV"
+    },
     "reservations": {
       "title": "Réservations",
       "subtitle": "Gérer les réservations de la plateforme LUDOV",
