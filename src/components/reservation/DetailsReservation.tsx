@@ -296,79 +296,73 @@ function ReservationHeader({
   }, [consoleName, date, heure, reservationId, t]);
 
   return (
-    <div className="relative overflow-hidden rounded-xl border bg-[white] shadow-sm p-8 mb-8 text-center md:text-left">
-      <div className="relative">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-          <div className="flex-1 space-y-4">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
-              {t("reservation.details.pageDetailsTitle")}
-            </h1>
+    <div className="relative overflow-hidden rounded-xl border bg-[white] shadow-sm p-8 mb-8 text-center lg:text-left">
+      <div className="flex flex-col items-center lg:flex-row lg:items-start lg:justify-between gap-6">
+        <div className="flex-1 space-y-4">
+          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
+            {t("reservation.details.pageDetailsTitle")}
+          </h1>
 
-            <div className="flex items-center gap-6 text-lg text-gray-600">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-cyan-600" />
-                </div>
-                <time dateTime={date} className="font-medium">
-                  {date}
-                </time>
+          <div className="flex flex-wrap justify-center md:justify-start gap-6 text-lg text-gray-600">
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                <Calendar className="h-5 w-5 text-cyan-600" />
               </div>
+              <time dateTime={date} className="font-medium">
+                {date}
+              </time>
+            </div>
 
-              <div className="w-px h-8 bg-gray-200" />
 
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                  <Clock className="h-5 w-5 text-cyan-600" />
-                </div>
-                <time dateTime={heure} className="font-medium">
-                  {heure}
-                </time>
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                <Clock className="h-5 w-5 text-cyan-600" />
               </div>
+              <time dateTime={heure} className="font-medium">
+                {heure}
+              </time>
+            </div>
 
-              {station && (
-                <>
-                  <div className="w-px h-8 bg-gray-200" />
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                      <Computer className="h-5 w-5 text-cyan-600" />
-                    </div>
-                    <span className="font-medium">{station}</span>
+            {station && (
+              <>
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                    <Computer className="h-5 w-5 text-cyan-600" />
                   </div>
-                </>
-              )}
+                  <span className="font-medium">{station}</span>
+                </div>
+              </>
+            )}
 
-            </div>
           </div>
-
-          {!archived && (
-            <div className="flex flex-col sm:items-center gap-4">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 font-medium"
-                  aria-label={t("reservation.details.addToCalendar")}
-                  onClick={handleAddToCalendar}
-                >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {t("reservation.details.addToCalendar")}
-                </Button>
-
-                <CancelReservationAlertDialog
-                  reservationId={reservationId}
-                  onSuccess={onCancelSuccess}
-                  onError={onCancelError}
-                />
-              </div>
-
-              <ReservationReminderDialog
-                reservationId={reservationId}
-                onSendReminder={() => {}}
-                onError={() => {}}
-              />
-            </div>
-          )}
         </div>
+
+        {!archived && (
+          <div className="flex flex-col items-center gap-4 max-w-80 lg:w-auto">
+            <Button
+              size="lg"
+              variant="outline"
+              className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 font-medium w-full"
+              aria-label={t("reservation.details.addToCalendar")}
+              onClick={handleAddToCalendar}
+            >
+              <Calendar className="mr-2 h-4 w-4" />
+              {t("reservation.details.addToCalendar")}
+            </Button>
+
+            <ReservationReminderDialog
+              reservationId={reservationId}
+              onSendReminder={() => { }}
+              onError={() => { }}
+            />
+
+            <CancelReservationAlertDialog
+              reservationId={reservationId}
+              onSuccess={onCancelSuccess}
+              onError={onCancelError}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -436,11 +430,10 @@ export default function DetailsReservation({
         {alert?.show && (
           <Alert
             variant={alert.type === "error" ? "destructive" : "default"}
-            className={`mb-6 ${
-              alert.type === "success"
-                ? "border-green-200 bg-green-50 text-green-900"
-                : ""
-            }`}
+            className={`mb-6 ${alert.type === "success"
+              ? "border-green-200 bg-green-50 text-green-900"
+              : ""
+              }`}
             role="status"
             aria-live="polite"
           >
@@ -458,18 +451,17 @@ export default function DetailsReservation({
                   <AlertDescription>
                     {alert.type === "error"
                       ? alert.message ||
-                        "Une erreur est survenue. Veuillez essayer ultérieurement."
+                      "Une erreur est survenue. Veuillez essayer ultérieurement."
                       : alert.message}
                   </AlertDescription>
                 </div>
               </div>
               <button
                 onClick={() => setAlert(null)}
-                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
-                  alert.type === "error"
-                    ? "bg-red-100 text-red-600 hover:bg-red-200"
-                    : "bg-green-100 text-green-600 hover:bg-green-200"
-                }`}
+                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${alert.type === "error"
+                  ? "bg-red-100 text-red-600 hover:bg-red-200"
+                  : "bg-green-100 text-green-600 hover:bg-green-200"
+                  }`}
                 aria-label="Fermer l'alerte"
               >
                 ×

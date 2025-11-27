@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import {
-  Dialog, DialogContent, DialogDescription, DialogTitle
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -11,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 type TargetCours = {
   id: number;
-  name: string
+  name: string;
 };
 
 export interface DeleteCoursActionProps {
@@ -22,7 +25,10 @@ export interface DeleteCoursActionProps {
     message: string,
     title?: string
   ) => void;
-  children: (controls: { open: () => void; loading: boolean }) => React.ReactNode;
+  children: (controls: {
+    open: () => void;
+    loading: boolean;
+  }) => React.ReactNode;
 }
 
 export default function DeleteCoursAction({
@@ -46,15 +52,25 @@ export default function DeleteCoursAction({
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || "Une erreur est survenue lors de la suppression.");
+        throw new Error(
+          err?.error || "Une erreur est survenue lors de la suppression."
+        );
       }
 
       const data = await res.json().catch(() => ({}));
-      onAlert?.("success", data?.message || "Le cours a été supprimé avec succès.");
+      onAlert?.(
+        "success",
+        data?.message || "Le cours a été supprimé avec succès."
+      );
       onSuccess?.();
       setOpen(false);
     } catch (e) {
-      onAlert?.("error", e instanceof Error ? e.message : "Une erreur est survenue lors de la suppression.");
+      onAlert?.(
+        "error",
+        e instanceof Error
+          ? e.message
+          : "Une erreur est survenue lors de la suppression."
+      );
     } finally {
       setLoading(false);
     }
@@ -86,13 +102,7 @@ export default function DeleteCoursAction({
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-gray-900 truncate">
-                  {targetCours.name ? (
-                    <>
-                      {targetCours.name}
-                    </>
-                  ) : (
-                    "Cours"
-                  )}
+                  {targetCours.name ? <>{targetCours.name}</> : "Cours"}
                 </div>
               </div>
             </div>
@@ -108,13 +118,15 @@ export default function DeleteCoursAction({
                 <li className="flex items-start gap-2.5">
                   <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
                   <span>
-                    Le cours <strong className="text-gray-900">supprimé</strong> ne sera plus accessible.
+                    Le cours <strong className="text-gray-900">supprimé</strong>{" "}
+                    ne sera plus accessible.
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
                   <span>
-                    La réservation associée sera supprimée.
+                    La réservation associée seront définie à{" "}
+                    <strong className="text-gray-900">nulle</strong>.
                   </span>
                 </li>
               </ul>
