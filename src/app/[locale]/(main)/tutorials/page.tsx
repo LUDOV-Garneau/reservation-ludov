@@ -10,20 +10,25 @@ interface TutorialPageProps {
 
 export default function TutorialPage({ children }: TutorialPageProps) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="border-t-5 border-cyan-500">
       <div className="flex min-h-screen w-full bg-gray-50">
         <TutorialSidebar />
 
-        <main className="flex-1 flex flex-col w-full overflow-hidden bg-[white] m-10 p-5">
-          <header className="sticky top-0 z-10 flex items-center gap-4 px-4 py-3 md:px-6">
-            <SidebarTrigger
-              className="lg:hidden"
-              aria-label="Basculer le menu latéral"
-            />
+        <main className="flex-1 flex flex-col w-full overflow-hidden">
+          <header className="z-10 backdrop-blur-sm shadow-sm bg-gray-800 rounded-b-lg">
+            <div className="flex items-center gap-4 px-6 py-4">
+              <SidebarTrigger
+                className="text-white hover:bg-gray-100 p-2 rounded-lg transition-colors"
+                aria-label="Basculer le menu latéral"
+              />
+              <h1 className="text-white text-xl font-semibold">
+                Gestion des utilisateurs
+              </h1>
+            </div>
           </header>
 
           <div className="overflow-auto w-full">
-            <div className="w-full mx-auto p-4 md:p-6 lg:p-8">
+            <div className="w-full max-w-9xl mx-auto p-6 md:p-8 lg:p-12">
               {children}
               <TutorialViewer />
             </div>
