@@ -664,8 +664,12 @@
         "unavailableOn": "Indisponible les {day}s"
       }
     },
-    "cours" : {
+    "cours": {
       "title": "Cours"
+    },
+    "tutorials": {
+      "title": "Tutoriels",
+      "subtitle": "Guide d'utilisation de la plateforme LUDOV - Administrateurs"
     }
   },
   "privacy": {
