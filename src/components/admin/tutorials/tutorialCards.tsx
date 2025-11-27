@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -16,28 +15,29 @@ interface TutorialCardsProps {
     title: string;
     description: string;
     link: string;
-    icons: React.ComponentType;
+    icons: React.ComponentType<{ className?: string }>;
   };
 }
 
 export default function TutorialCards({ tuto }: TutorialCardsProps) {
+  const Icon = tuto.icons;
   return (
-    <Card className="w-full hover:shadow-xl transition-shadow duration-300 ease-in-out">
+    <Card className="w-full hover:shadow-xl duration-300 ease-in-out hover:border-cyan-500 transition-all">
       <CardHeader>
         <CardTitle>{tuto.title}</CardTitle>
         <CardDescription>{tuto.description}</CardDescription>
       </CardHeader>
       <CardContent className="mt-auto">
-        <div className="bg-gray-100 p-10 flex justify-center items-center rounded-2xl">
-          <tuto.icons className="w-10 h-10 text-cyan-500" />
+        <div className="bg-gray-100 p-5 flex justify-center items-center rounded-2xl">
+          <Icon className="w-15 h-15 text-cyan-500" />
         </div>
       </CardContent>
       <CardFooter className="w-full mt-auto">
         <Link href={tuto.link} className="w-full">
           <Button className="bg-cyan-500 hover:bg-cyan-700 w-full">
-            Go to Tutorial
+            Voir la documentation
           </Button>
-        </Link>{" "}
+        </Link>
       </CardFooter>
     </Card>
   );

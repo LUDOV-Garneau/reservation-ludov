@@ -1,48 +1,53 @@
 "use client";
 
-import { Flag, Settings } from "lucide-react";
-import { useTranslations } from "next-intl";
 import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  Book,
+  BookOpenText,
+  Calendar,
+  Clock,
+  MapPin,
+  User,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+
 import TutorialCards from "./tutorialCards";
 
 const TUTOS = [
   {
-    title: "Getting Started",
-    description: "Learn the basics of using our platform.",
-    link: "/tutorials/getting-started",
-    icons: Flag,
+    title: "Gestion des utilisateurs",
+    description: "Apprenez à gérer les utilisateurs efficacement.",
+    link: "/tutorials/user-management",
+    icons: User,
   },
   {
-    title: "Advanced Features",
-    description: "Explore the advanced functionalities available.",
-    link: "/tutorials/advanced-features",
-    icons: Settings,
+    title: "Gestion des réservations",
+    description: "Découvrez comment protéger vos données.",
+    link: "/tutorials/security-privacy",
+    icons: Calendar,
   },
   {
-    title: "Customization",
-    description: "Discover how to customize your experience.",
-    link: "/tutorials/customization",
-    icons: Settings,
+    title: "Gestion des stations",
+    description: "Maîtrisez la gestion des stations.",
+    link: "/tutorials/station-management",
+    icons: MapPin,
   },
   {
-    title: "Troubleshooting",
-    description: "Find solutions to common issues.",
-    link: "/tutorials/troubleshooting",
-    icons: Flag,
+    title: "Gestion des disponibilités",
+    description: "Optimisez la gestion des disponibilités.",
+    link: "/tutorials/availability-management",
+    icons: Clock,
   },
   {
-    title: "Best Practices",
-    description: "Learn the best practices for optimal use.",
-    link: "/tutorials/best-practices",
-    icons: Settings,
+    title: "Gestion des cours",
+    description: "Apprenez à gérer les cours efficacement.",
+    link: "/tutorials/course-management",
+    icons: BookOpenText,
+  },
+  {
+    title: "Gestion de la politique de confidentialité",
+    description: "Personnalisez les paramètres de votre application.",
+    link: "/tutorials/general-configuration",
+    icons: Book,
   },
 ];
 
