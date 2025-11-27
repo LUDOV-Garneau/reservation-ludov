@@ -138,23 +138,27 @@ function computeValidRanges(
   return mergeRanges(validRanges);
 }
 
-function generateAllTimeSlots(): string[] {
-  const OPENING_HOUR = 9;
-  const CLOSING_HOUR = 17;
+function generateAllTimeSlots(validRanges: Range[]): string[] {
   const SESSION_DURATION = 2;
-
   const slots: string[] = [];
 
-  for (
-    let hour = OPENING_HOUR;
-    hour <= CLOSING_HOUR - SESSION_DURATION;
-    hour++
-  ) {
-    const timeString = `${hour.toString().padStart(2, "0")}:00:00`;
-    slots.push(timeString);
+  for (const range of validRanges) {
+    const startHour = Math.ceil(range.start / 60);
+    const endHour = Math.floor(range.end / 60);
+
+    for (let hour = startHour; hour <= endHour - SESSION_DURATION; hour++) {
+      const timeString = `${hour.toString().padStart(2, "0")}:00:00`;
+
+      const slotStart = hour * 60;
+      const slotEnd = slotStart + (SESSION_DURATION * 60);
+
+      if (slotStart >= range.start && slotEnd <= range.end) {
+        slots.push(timeString);
+      }
+    }
   }
 
-  return slots;
+  return [...new Set(slots)].sort();
 }
 
 function checkSlotAvailability(
@@ -328,6 +332,7 @@ export async function GET(request: NextRequest) {
     const consoleId = searchParams.get("consoleId");
     const gameIds = searchParams.get("gameIds");
     const accessoryIds = searchParams.get("accessoryIds");
+    const reservationId = searchParams.get("reservationId");
 
     if (!date) {
       return NextResponse.json(
@@ -364,15 +369,15 @@ export async function GET(request: NextRequest) {
     const requestedConsoleId = parseInt(consoleId, 10);
     const requestedGameIds = gameIds
       ? gameIds
-          .split(",")
-          .map((id) => parseInt(id.trim(), 10))
-          .filter((id) => !isNaN(id))
+        .split(",")
+        .map((id) => parseInt(id.trim(), 10))
+        .filter((id) => !isNaN(id))
       : [];
     const requestedAccessoryIds = accessoryIds
       ? accessoryIds
-          .split(",")
-          .map((id) => parseInt(id.trim(), 10))
-          .filter((id) => !isNaN(id))
+        .split(",")
+        .map((id) => parseInt(id.trim(), 10))
+        .filter((id) => !isNaN(id))
       : [];
 
     const [consoleType] = await pool.query<ConsoleTypeRow[]>(
@@ -397,8 +402,9 @@ export async function GET(request: NextRequest) {
       FROM reservation_hold
       WHERE date = ?
       AND expireAt > NOW()
+      ${reservationId ? `AND id != ?` : ""}
       `,
-      [date]
+      reservationId ? [date, reservationId] : [date]
     );
 
     const [specificHours] = await pool.query<SpecificHoursRow[]>(
@@ -498,23 +504,7 @@ export async function GET(request: NextRequest) {
       };
     });
 
-    const allSlots = generateAllTimeSlots().filter((time) => {
-      const [hour, minute] = time.split(":").map(Number);
-      const slotStart = hour * 60 + minute;
-      const slotEnd = slotStart + SESSION_DURATION_MINUTES;
-
-      const fitsOpenHours = validRanges.some(
-        (r) => slotStart >= r.start && slotEnd <= r.end
-      );
-      if (!fitsOpenHours) return false;
-
-      const overlaps = reservationRanges.some(
-        (res) => !(slotEnd <= res.start || slotStart >= res.end)
-      );
-      if (overlaps) return false;
-
-      return true;
-    });
+    const allSlots = generateAllTimeSlots(validRanges);
 
     const [stationIds] = await pool.query<StationRow[]>(
       `SELECT id AS station_id

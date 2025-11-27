@@ -100,7 +100,7 @@ export default function ConfirmReservation() {
       const reservationData = await completeReservation();
 
       if (reservationData != null) {
-        await fetch("/api/reservation/confirm-email", {
+        fetch("/api/reservation/confirm-email", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

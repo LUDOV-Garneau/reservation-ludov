@@ -6,6 +6,7 @@ import { verifyToken } from "@/lib/jwt";
 
 type ConsoleRow = RowDataPacket & {
   console_id: number;
+  user_id: number;
 };
 
 export async function POST(req: Request) {
@@ -28,12 +29,6 @@ export async function POST(req: Request) {
         { status: 401 }
       );
     }
-    if (!user.isAdmin) {
-      return NextResponse.json(
-        { success: false, message: "Forbidden" },
-        { status: 403 }
-      );
-    }
 
     const userId = Number(user.id);
     if (!Number.isFinite(userId)) {
@@ -54,7 +49,7 @@ export async function POST(req: Request) {
 
     // Récupérer l’ancienne console pour la libérer
     const [rows] = await pool.query<ConsoleRow[]>(
-      `SELECT console_id, game1_id, game2_id, game3_id FROM reservation_hold WHERE id = ?`,
+      `SELECT user_id, console_id, game1_id, game2_id, game3_id FROM reservation_hold WHERE id = ?`,
       [reservationId]
     );
 
@@ -62,6 +57,14 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { success: false, message: "Réservation introuvable" },
         { status: 404 }
+      );
+    }
+
+    // Vérification des droits (Admin ou Propriétaire)
+    if (!user.isAdmin && rows[0].user_id !== userId) {
+      return NextResponse.json(
+        { success: false, message: "Forbidden" },
+        { status: 403 }
       );
     }
 
