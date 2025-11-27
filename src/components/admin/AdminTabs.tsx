@@ -11,7 +11,7 @@ const TABS = [
   { value: "stations", translationKey: "admin.stations.title", icon: MapPin },
   { value: "availabilities", translationKey: "admin.availabilities.title", icon: Clock },
   { value: "cours", translationKey: "admin.cours.title", icon: BookOpen },
-  { value: "policies", translationKey: "Politique de confidentialité", icon: Book },
+  { value: "policies", translationKey: "admin.politique.title", icon: Book },
 ] as const;
 
 export default function AdminTabs() {
