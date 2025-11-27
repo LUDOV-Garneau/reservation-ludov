@@ -11,7 +11,7 @@ type ReservationRow = RowDataPacket & {
   game3_id: number | null;
   accessoirs: string;
   stationId: number;
-}
+};
 
 interface ReservationHoldRow extends RowDataPacket {
   time: string;
@@ -381,8 +381,10 @@ export async function GET(request: NextRequest) {
        WHERE user_id = ?
         AND console_id = ?
        LIMIT 1`,
-      [user.id, consoleId]
+      [user.id, requestedConsoleId]
     );
+
+    const requestedConsoleTypeId = consoleType[0]?.console_type_id;
 
     const [reservations] = await pool.query<ReservationRow[]>(
       `SELECT time, console_id, game1_id, game2_id, game3_id, accessory_ids, station AS stationId
@@ -517,11 +519,12 @@ export async function GET(request: NextRequest) {
     });
 
     const [stationIds] = await pool.query<StationRow[]>(
-      `SELECT id AS station_id
-       FROM stations
-       WHERE isActive = 1 AND JSON_CONTAINS(consoles, JSON_ARRAY(?))
+      `
+      SELECT id AS station_id
+      FROM stations
+      WHERE isActive = 1 AND JSON_CONTAINS(consoles, JSON_ARRAY(?))
       `,
-      [requestedConsoleId]
+      [requestedConsoleTypeId]
     );
 
     const availability: TimeSlotAvailability[] = allSlots.map((time) => {

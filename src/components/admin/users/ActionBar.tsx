@@ -156,11 +156,11 @@ export default function CardUserStats({
                       }
                     </p>
                     <AddUserForm
-                        trigger={
-                            <Button className="bg-cyan-500 text-white">
-                            Ajouter un utilisateur
-                            </Button>
-                        }
+                      trigger={
+                        <Button className="bg-cyan-500 text-white">
+                          Ajouter un utilisateur
+                        </Button>
+                      }
                     />
 
                   </div>

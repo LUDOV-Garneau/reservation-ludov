@@ -22,7 +22,15 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, X, Monitor, CheckCircle2, AlertCircle, Settings, Zap } from "lucide-react";
+import {
+  Plus,
+  X,
+  Monitor,
+  CheckCircle2,
+  AlertCircle,
+  Settings,
+  Zap,
+} from "lucide-react";
 
 type ConsoleStock = {
   id: number;
@@ -82,7 +90,7 @@ export default function UpdateStationForm({
 
     const fetchConsoleStock = async () => {
       try {
-        const res = await fetch("/api/admin/console-stock");
+        const res = await fetch("/api/admin/console-type");
         if (!res.ok) throw new Error(t("errors.consoleFetch"));
         const data: ConsoleStock[] = await res.json();
         setConsoleList(data);
@@ -104,7 +112,9 @@ export default function UpdateStationForm({
   const handleAddConsole = () => {
     if (!selectedConsoleId) return;
 
-    const consoleToAdd = consoleList.find((c) => c.id === Number(selectedConsoleId));
+    const consoleToAdd = consoleList.find(
+      (c) => c.id === Number(selectedConsoleId)
+    );
     if (!consoleToAdd) return;
 
     const isDuplicate = selectedConsoles.some((c) => c.id === consoleToAdd.id);
@@ -159,7 +169,8 @@ export default function UpdateStationForm({
   };
 
   const availableConsoles = consoleList.filter(
-    (console) => !selectedConsoles.some((selected) => selected.id === console.id)
+    (console) =>
+      !selectedConsoles.some((selected) => selected.id === console.id)
   );
 
   return (
@@ -185,7 +196,10 @@ export default function UpdateStationForm({
           <div className="flex-1 overflow-y-auto px-6 py-6">
             <div className="space-y-6 max-w-full">
               <div className="space-y-2.5">
-                <Label htmlFor="stationName" className="text-sm font-semibold flex items-center gap-2">
+                <Label
+                  htmlFor="stationName"
+                  className="text-sm font-semibold flex items-center gap-2"
+                >
                   Nom de la station
                   <span className="text-xs text-red-500">*</span>
                 </Label>
@@ -208,7 +222,10 @@ export default function UpdateStationForm({
                 </Label>
 
                 <div className="flex flex-col sm:flex-row gap-2.5">
-                  <Select value={selectedConsoleId} onValueChange={setSelectedConsoleId}>
+                  <Select
+                    value={selectedConsoleId}
+                    onValueChange={setSelectedConsoleId}
+                  >
                     <SelectTrigger className="h-11 flex-1 border-2 text-base">
                       <SelectValue placeholder="Sélectionner une console..." />
                     </SelectTrigger>
@@ -219,11 +236,17 @@ export default function UpdateStationForm({
                         </SelectItem>
                       ) : (
                         availableConsoles.map((c) => (
-                          <SelectItem key={c.id} value={`${c.id}`} className="py-3">
+                          <SelectItem
+                            key={c.id}
+                            value={`${c.id}`}
+                            className="py-3"
+                          >
                             <div className="flex items-center gap-2">
                               <Monitor className="w-4 h-4 text-cyan-500" />
                               <span className="font-medium">{c.name}</span>
-                              <span className="text-xs text-muted-foreground">#{c.id}</span>
+                              <span className="text-xs text-muted-foreground">
+                                #{c.id}
+                              </span>
                             </div>
                           </SelectItem>
                         ))
@@ -234,7 +257,9 @@ export default function UpdateStationForm({
                   <Button
                     type="button"
                     onClick={handleAddConsole}
-                    disabled={!selectedConsoleId || availableConsoles.length === 0}
+                    disabled={
+                      !selectedConsoleId || availableConsoles.length === 0
+                    }
                     className="sm:w-auto w-full h-11 gap-2 font-semibold bg-cyan-500 hover:bg-cyan-600"
                   >
                     <Plus className="w-4 h-4" />
@@ -246,7 +271,9 @@ export default function UpdateStationForm({
                   <div className="mt-4 space-y-3">
                     <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      {selectedConsoles.length} console{selectedConsoles.length > 1 ? "s" : ""} sélectionnée{selectedConsoles.length > 1 ? "s" : ""}
+                      {selectedConsoles.length} console
+                      {selectedConsoles.length > 1 ? "s" : ""} sélectionnée
+                      {selectedConsoles.length > 1 ? "s" : ""}
                     </p>
 
                     <div className="space-y-2.5">
@@ -261,8 +288,12 @@ export default function UpdateStationForm({
                                 <Monitor className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-sm truncate">{c.name}</p>
-                                <p className="text-xs text-muted-foreground">Unité #{c.id}</p>
+                                <p className="font-semibold text-sm truncate">
+                                  {c.name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Unité #{c.id}
+                                </p>
                               </div>
                             </div>
                             <Button
@@ -296,7 +327,9 @@ export default function UpdateStationForm({
               {error && (
                 <Alert variant="destructive" className="border-2">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="font-medium">{error}</AlertDescription>
+                  <AlertDescription className="font-medium">
+                    {error}
+                  </AlertDescription>
                 </Alert>
               )}
             </div>
@@ -312,12 +345,17 @@ export default function UpdateStationForm({
                   className="h-5 w-5 mt-0.5 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
                 />
                 <div className="flex-1">
-                  <Label htmlFor="isActive" className="text-sm font-semibold cursor-pointer flex items-center gap-2">
+                  <Label
+                    htmlFor="isActive"
+                    className="text-sm font-semibold cursor-pointer flex items-center gap-2"
+                  >
                     <Zap className="w-4 h-4 text-cyan-600" />
                     {t("fields.isActive")}
                   </Label>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {isActive ? "La station est actuellement active" : "La station est actuellement inactive"}
+                    {isActive
+                      ? "La station est actuellement active"
+                      : "La station est actuellement inactive"}
                   </p>
                 </div>
               </div>
@@ -328,7 +366,9 @@ export default function UpdateStationForm({
             <Button
               type="submit"
               onClick={handleSubmit}
-              disabled={loading || !stationName.trim() || selectedConsoles.length === 0}
+              disabled={
+                loading || !stationName.trim() || selectedConsoles.length === 0
+              }
               className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-cyan-500 hover:bg-cyan-600"
             >
               {loading ? (

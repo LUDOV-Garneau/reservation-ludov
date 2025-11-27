@@ -21,24 +21,16 @@ export default function HeaderMenu({ username, isAdmin }: HeaderMenuProps) {
   }
 
   return (
-    <div className="flex items-center gap-10">
+    <div className="flex items-center sm:gap-6 gap-4">
+      <LocaleSwitcher />
       {isAdmin && (
         <button
           onClick={openAdminDashboard}
-          className={`
-            flex items-center gap-2 px-3 py-1 rounded-md border transition
-            ${
-              isActive
-                ? "bg-[#02dcde] text-white border-[#02dcde]"
-                : "border-gray-200 hover:bg-gray-100"
-            }
-          `}
+          className="hover:opacity-70 cursor-pointer"
         >
-          <ShieldCheck className="w-5 h-5" />
-          <p>admin</p>
+          <ShieldCheck color={`${isActive ? "#02dcde" : "black"}`} size={24} />
         </button>
       )}
-      <LocaleSwitcher />
       <LogoutButton name={username} />
     </div>
   );
