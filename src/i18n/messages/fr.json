@@ -131,7 +131,7 @@
       "errorLoadTimes": "Erreur chargement des horaires",
       "errorLoadDates": "Erreur chargement des dates indisponibles",
       "errorServer": "Erreur serveur",
-      "allSlotsTaken": "Toutes les plages horaires sont réservées pour cette date",
+      "allSlotsTaken": "Soit vous avez déjà une réservation avec cette plateforme, soit toutes les plages horaires sont réservées pour cette date",
       "selectDate": "Sélectionnez une date et une heure pour votre réservation",
       "reservationDate": "Date de réservation",
       "startTime": "Heure de début",
@@ -150,7 +150,15 @@
       "nSlotsAvailable": "{count} plage{plural} disponible{plural} (2h de jeu)",
       "durationLabel": "Durée",
       "durationValue": "2 heures",
-      "endLabel": "Fin"
+      "endLabel": "Fin",
+      "conflicts": {
+        "past": "Cette plage horaire est passée",
+        "console": "La plateforme sélectionnée est indisponible",
+        "games": "Un ou plusieurs jeux sélectionnés sont indisponibles",
+        "accessories": "Un ou plusieurs accessoires sélectionnés sont indisponibles",
+        "station": "Aucune station disponible pour cette sélection",
+        "unavailable": "Indisponible"
+      }
     },
     "course": {
       "selectionTitle": "Sélection du cours",
@@ -664,7 +672,7 @@
         "unavailableOn": "Indisponible les {day}s"
       }
     },
-    "cours" : {
+    "cours": {
       "title": "Cours"
     }
   },

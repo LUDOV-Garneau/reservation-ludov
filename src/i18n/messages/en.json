@@ -148,7 +148,7 @@
       "errorLoadTimes": "Error loading times",
       "errorLoadDates": "Error loading unavailable dates",
       "errorServer": "Server error",
-      "allSlotsTaken": "All timeslots are booked for this date",
+      "allSlotsTaken": "Either you already have a reservation with this platform or all timeslots are booked for this date",
       "selectDate": "Select a date and time for your reservation",
       "reservationDate": "Reservation date",
       "startTime": "Start time",
@@ -167,7 +167,15 @@
       "nSlotsAvailable": "{count} slot{plural} available{plural} (2h session)",
       "durationLabel": "Duration",
       "durationValue": "2 hours",
-      "endLabel": "End"
+      "endLabel": "End",
+      "conflicts": {
+        "past": "This time slot has passed",
+        "console": "The selected platform is unavailable",
+        "games": "One or more selected games are unavailable",
+        "accessories": "One or more selected accessories are unavailable",
+        "station": "No station available for this selection",
+        "unavailable": "Unavailable"
+      }
     },
     "confirm": {
       "loadingReservation": "Loading your reservation...",
