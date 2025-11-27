@@ -1,27 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { TutorialSidebar } from "@/components/tutorial/tutorialSidebar";
+import TutorialViewer from "@/components/tutorial/tutorialViewer";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-export default function TutorialPage() {
-  const [markdownContent, setMarkdownContent] = useState<string>("");
+interface TutorialPageProps {
+  children: React.ReactNode;
+}
 
-  useEffect(() => {
-    fetchMarkdown();
-  }, []);
-
-  function fetchMarkdown() {
-    fetch("/Tutorials/GettingStartedAdmin.md")
-      .then((response) => response.text())
-      .then((text) => setMarkdownContent(text));
-  }
-
+export default function TutorialPage({ children }: TutorialPageProps) {
   return (
-    <div className="mx-auto mt-8 px-4 sm:px-0">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>
-        {markdownContent}
-      </ReactMarkdown>
-    </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-gray-50">
+        <TutorialSidebar />
+
+        <main className="flex-1 flex flex-col w-full overflow-hidden bg-[white] m-10 p-5">
+          <header className="sticky top-0 z-10 flex items-center gap-4 px-4 py-3 md:px-6">
+            <SidebarTrigger
+              className="lg:hidden"
+              aria-label="Basculer le menu latéral"
+            />
+          </header>
+
+          <div className="overflow-auto w-full">
+            <div className="w-full mx-auto p-4 md:p-6 lg:p-8">
+              {children}
+              <TutorialViewer />
+            </div>
+          </div>
+        </main>
+      </div>
+    </SidebarProvider>
   );
 }
