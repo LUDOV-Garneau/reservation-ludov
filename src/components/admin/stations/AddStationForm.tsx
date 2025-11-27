@@ -51,7 +51,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
 
     const fetchConsoleStock = async () => {
       try {
-        const res = await fetch("/api/admin/console-stock");
+        const res = await fetch("/api/admin/console-type");
         if (!res.ok) throw new Error(t("errors.consoleFetch"));
         const data: ConsoleStock[] = await res.json();
         setConsoleList(data);
@@ -225,7 +225,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
                     </p>
                   </div>
 
-                  <div className="grid gap-2 overflow-y-auto max-h-80">
+                  <div className="grid gap-2 overflow-y-auto max-h-48">
                     {selectedConsoles.map((c, index) => (
                       <div
                         key={c.id}
