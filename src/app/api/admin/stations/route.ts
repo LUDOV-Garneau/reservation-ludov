@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
         let consolesTitles: string[] = [];
         if (consolesArray.length > 0) {
           const [consoleRows] = await conn.query<RowDataPacket[]>(
-            `SELECT name FROM console_stock WHERE id IN (?)`,
+            `SELECT name FROM console_type WHERE id IN (?)`,
             [consolesArray]
           );
           consolesTitles = (consoleRows as Array<{ name: string }>).map(

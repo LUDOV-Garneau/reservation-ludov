@@ -131,6 +131,7 @@ export async function POST(req: Request) {
 
       const reservation = rows[0];
       const currentConsoleId = reservation.console_id;
+      const currentConsoleTypeId = reservation.console_type_id;
 
       const updates: string[] = [];
       const values: unknown[] = [];
@@ -188,7 +189,7 @@ export async function POST(req: Request) {
                 AND id != ?
             )
           `,
-          [currentConsoleId, date, time, date, time, reservationId]
+          [currentConsoleTypeId, date, time, date, time, reservationId]
         );
 
         if (!availableStations || availableStations.length === 0) {
