@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
       `
       SELECT 
         id,
-        code_cours
+        code_cours,
         nom_cours
       FROM cours
       ORDER BY id ASC

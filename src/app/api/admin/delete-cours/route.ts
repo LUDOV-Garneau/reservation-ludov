@@ -25,7 +25,7 @@ export async function DELETE(req: NextRequest) {
     const coursId = Number(body.coursId);
 
     const [coursRows] = await pool.query<RowDataPacket[]>(
-      "SELECT id, name FROM cours WHERE id = ? LIMIT 1",
+      "SELECT id, nom_cours FROM cours WHERE id = ? LIMIT 1",
       [coursId]
     );
 

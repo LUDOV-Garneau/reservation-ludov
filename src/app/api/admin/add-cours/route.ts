@@ -36,10 +36,9 @@ export async function POST(req: NextRequest) {
     try {
 
       const [existingCours] = await conn.query(
-        `SELECT id FROM cours WHERE LOWER(name) = LOWER(?)`,
+        `SELECT id FROM cours WHERE LOWER(nom_cours) = LOWER(?)`,
       [name.trim()]
       );
-      console.log("Existing cours check result:", existingCours);
       if (Array.isArray(existingCours) && existingCours.length > 0) {
         conn.release();
         return NextResponse.json(
@@ -50,7 +49,7 @@ export async function POST(req: NextRequest) {
 
       await conn.query(
         `
-        INSERT INTO cours (name, code)
+        INSERT INTO cours (nom_cours, code_cours)
         VALUES (?, ?)
         `,
         [name, code]
