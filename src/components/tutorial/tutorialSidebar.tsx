@@ -1,4 +1,3 @@
-// components/tutorial/tutorialSidebar.tsx
 "use client";
 
 import {
@@ -7,15 +6,16 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar";
-import { HeadingItem, TutorialSidebarProps } from "@/types/tuto";
+import { TutorialSidebarProps } from "@/types/docs";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { NavMain } from "./sidebar-nav-main";
 import { useMemo } from "react";
 import { buildToc } from "@/lib/markdown";
+import { useTranslations } from "next-intl";
 
 export function TutorialSidebar({ headings }: TutorialSidebarProps) {
-  // utilise directement la prop headings et recalcul le toc quand elle change
+  const t = useTranslations("docs");
   const toc = useMemo(() => buildToc(headings), [headings]);
 
   return (
@@ -26,9 +26,13 @@ export function TutorialSidebar({ headings }: TutorialSidebarProps) {
           className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit"
         >
           <ChevronLeft className="w-4 h-4" />
-          <span className="text-sm font-medium">Retour à la liste</span>
+          <span className="text-sm font-medium">
+            {t("sidebar.goBackToLibrary")}
+          </span>
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900 px-3">Tutoriels</h1>
+        <h1 className="text-2xl font-bold text-gray-900 px-3">
+          {t("sidebar.title")}
+        </h1>
       </SidebarHeader>
 
       <SidebarContent className="px-3">

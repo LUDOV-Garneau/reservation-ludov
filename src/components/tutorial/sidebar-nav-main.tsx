@@ -1,6 +1,6 @@
 "use client";
 
-import { NavMainProps } from "@/types/tuto";
+import { NavMainProps } from "@/types/docs";
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -22,7 +22,6 @@ export function NavMain({ items }: NavMainProps) {
   console.log(items);
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Contenu</SidebarGroupLabel>
       <SidebarMenu>
         {items.map(
           (section) =>

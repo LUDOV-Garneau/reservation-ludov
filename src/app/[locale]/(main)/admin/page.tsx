@@ -31,7 +31,7 @@ const TutoTabs = dynamic(() => import("@/components/admin/TutoTabs"), {
   loading: () => <TabLoader />,
 });
 const CoursTab = dynamic(() => import("@/components/admin/CoursTab"), {
-  loading: () => <TabLoader />
+  loading: () => <TabLoader />,
 });
 
 function TabLoader() {
@@ -90,7 +90,7 @@ function AdminContent() {
       <div className="flex flex-col bg-[white] min-h-screen px-4 py-6 sm:px-10 sm:py-8 rounded-xl border border-gray-200 w-full">
         <Link
           href="/"
-          className="mb-6 flex items-center gap-1 text-gray-600 hover:text-[#02dcde] transition-colors w-fit group"
+          className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit group"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm font-medium">Retour à l&apos;accueil</span>

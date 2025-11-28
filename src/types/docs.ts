@@ -1,6 +1,13 @@
 export enum TutorialArgs {
   USERS = "users",
+  RESERVATIONS = "reservations",
   STATIONS = "stations",
+  AVAILABILITIES = "availabilities",
+  COURSES = "courses",
+  PRIVACY_POLICY = "privacy_policy",
+  LOGIN = "login",
+  CONSULT_RESERVATIONS = "consult_reservations",
+  REMINDERS = "reminders",
 }
 
 export interface TutorialCardsProps {

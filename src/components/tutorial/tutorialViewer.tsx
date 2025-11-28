@@ -1,7 +1,7 @@
 "use client";
 
 import { extractHeadings, slugify } from "@/lib/markdown";
-import { TutorialViewerProps } from "@/types/tuto";
+import { TutorialViewerProps } from "@/types/docs";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";

@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { TutorialCardsProps } from "@/types/tuto";
+import { TutorialCardsProps } from "@/types/docs";
 import Link from "next/link";
 
 export default function TutorialCards(tuto: TutorialCardsProps) {
@@ -26,9 +26,11 @@ export default function TutorialCards(tuto: TutorialCardsProps) {
       </CardContent>
       <CardFooter className="w-full mt-auto">
         <Link
-          href={`/admin/tutorials?page=${tuto.args}${
-            tuto.isAdminRessource && "&adminRessources=true"
-          }`}
+          href={
+            tuto.isAdminRessource
+              ? `/admin/tutorials?page=${tuto.args}&adminRessources=true`
+              : `/docs?page=${tuto.args}&adminRessources=false`
+          }
           className="w-full"
         >
           <Button className="bg-cyan-500 hover:bg-cyan-700 w-full">

@@ -1,5 +1,5 @@
 // lib/markdown.ts
-import type { HeadingItem, TocNode } from "@/types/tuto";
+import type { HeadingItem, TocNode } from "@/types/docs";
 
 export function slugify(text: string): string {
   return text

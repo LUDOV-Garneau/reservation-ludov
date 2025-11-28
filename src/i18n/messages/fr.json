@@ -687,5 +687,13 @@
   "privacy": {
     "title": "Résumé de la politique de confidentialité",
     "content": "Ce site web utilise des cookies strictement nécessaires afin de vous offrir la meilleure expérience utilisateur possible. Les informations contenues dans les cookies sont stockées dans votre navigateur et remplissent des fonctions telles que vous reconnaître lorsque vous revenez sur notre site web. En continuant à utiliser ce site, vous acceptez leur utilisation, conformément à notre politique de confidentialité."
+  },
+  "docs": {
+    "title": "Biblothèque de documentation",
+    "subtitle": "Trouvez des guides et des ressources pour utiliser la plateforme LUDOV",
+    "sidebar": {
+      "goBackToLibrary": "Retour à la bibliothèque",
+      "title": "Documentation"
+    }
   }
 }

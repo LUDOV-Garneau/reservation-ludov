@@ -9,7 +9,7 @@ import {
   User,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { TutorialArgs, TutorialCardsProps } from "@/types/tuto";
+import { TutorialArgs, TutorialCardsProps } from "@/types/docs";
 
 import TutorialCards from "./tutorialCards";
 
@@ -24,35 +24,35 @@ const TutoPage: TutorialCardsProps[] = [
   {
     title: "Gestion des réservations",
     description: "Découvrez comment protéger vos données.",
-    args: TutorialArgs.USERS,
+    args: TutorialArgs.RESERVATIONS,
     isAdminRessource: true,
     icons: Calendar,
   },
   {
     title: "Gestion des stations",
     description: "Maîtrisez la gestion des stations.",
-    args: TutorialArgs.USERS,
+    args: TutorialArgs.STATIONS,
     isAdminRessource: true,
     icons: MapPin,
   },
   {
     title: "Gestion des disponibilités",
     description: "Optimisez la gestion des disponibilités.",
-    args: TutorialArgs.USERS,
+    args: TutorialArgs.AVAILABILITIES,
     isAdminRessource: true,
     icons: Clock,
   },
   {
     title: "Gestion des cours",
     description: "Apprenez à gérer les cours efficacement.",
-    args: TutorialArgs.USERS,
+    args: TutorialArgs.COURSES,
     isAdminRessource: true,
     icons: BookOpenText,
   },
   {
     title: "Gestion de la politique de confidentialité",
     description: "Personnalisez les paramètres de votre application.",
-    args: TutorialArgs.USERS,
+    args: TutorialArgs.PRIVACY_POLICY,
     isAdminRessource: true,
     icons: Book,
   },
