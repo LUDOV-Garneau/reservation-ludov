@@ -1,11 +1,17 @@
-// TutorialViewer.tsx - Garde ta logique, améliore juste le rendu
 "use client";
 
+import { TutorialArgs } from "@/types/tuto";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export default function TutorialViewer() {
+export default function TutorialViewer({
+  page,
+  adminRessources,
+}: {
+  page: TutorialArgs;
+  adminRessources: boolean;
+}) {
   const [markdownContent, setMarkdownContent] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +24,18 @@ export default function TutorialViewer() {
         setLoading(true);
         setError(null);
 
-        const response = await fetch("/Tutorials/GettingStartedAdmin.md");
+        console.log(
+          "Fetching tutorial:",
+          page,
+          "Admin resources:",
+          adminRessources
+        );
+
+        const response = await fetch(
+          adminRessources
+            ? `/Tutorials/admin/${page}.md`
+            : `/Tutorials/${page}.md`
+        );
 
         if (!response.ok) {
           throw new Error(

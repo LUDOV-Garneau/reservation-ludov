@@ -29,11 +29,11 @@ export function TutorialSidebar() {
     <Sidebar collapsible="offcanvas" variant="floating">
       <SidebarHeader className="border-b border-gray-200 py-6">
         <Link
-          href="/"
+          href="/admin?tab=tutorials"
           className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit"
         >
           <ChevronLeft className="w-4 h-4" />
-          <span className="text-sm font-medium">Retour à l&apos;accueil</span>
+          <span className="text-sm font-medium">Retour à la liste</span>
         </Link>
         <h1 className="text-2xl font-bold text-gray-900 px-3">Tutoriels</h1>
       </SidebarHeader>

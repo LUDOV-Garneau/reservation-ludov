@@ -54,7 +54,6 @@ function AdminContent() {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-
     startTransition(() => {
       const params = new URLSearchParams(searchParams);
       params.set("tab", value);

@@ -8,18 +8,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { TutorialCardsProps } from "@/types/tuto";
 import Link from "next/link";
 
-interface TutorialCardsProps {
-  tuto: {
-    title: string;
-    description: string;
-    link: string;
-    icons: React.ComponentType<{ className?: string }>;
-  };
-}
-
-export default function TutorialCards({ tuto }: TutorialCardsProps) {
+export default function TutorialCards(tuto: TutorialCardsProps) {
   const Icon = tuto.icons;
   return (
     <Card className="w-full hover:shadow-xl duration-300 ease-in-out hover:border-cyan-500 transition-all">
@@ -33,7 +25,12 @@ export default function TutorialCards({ tuto }: TutorialCardsProps) {
         </div>
       </CardContent>
       <CardFooter className="w-full mt-auto">
-        <Link href={tuto.link} className="w-full">
+        <Link
+          href={`/admin/tutorials?page=${tuto.args}${
+            tuto.isAdminRessource && "&adminRessources=true"
+          }`}
+          className="w-full"
+        >
           <Button className="bg-cyan-500 hover:bg-cyan-700 w-full">
             Voir la documentation
           </Button>

@@ -9,44 +9,51 @@ import {
   User,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { TutorialArgs, TutorialCardsProps } from "@/types/tuto";
 
 import TutorialCards from "./tutorialCards";
 
-const TUTOS = [
+const TutoPage: TutorialCardsProps[] = [
   {
     title: "Gestion des utilisateurs",
     description: "Apprenez à gérer les utilisateurs efficacement.",
-    link: "/tutorials/user-management",
+    args: TutorialArgs.USERS,
+    isAdminRessource: true,
     icons: User,
   },
   {
     title: "Gestion des réservations",
     description: "Découvrez comment protéger vos données.",
-    link: "/tutorials/security-privacy",
+    args: TutorialArgs.USERS,
+    isAdminRessource: true,
     icons: Calendar,
   },
   {
     title: "Gestion des stations",
     description: "Maîtrisez la gestion des stations.",
-    link: "/tutorials/station-management",
+    args: TutorialArgs.USERS,
+    isAdminRessource: true,
     icons: MapPin,
   },
   {
     title: "Gestion des disponibilités",
     description: "Optimisez la gestion des disponibilités.",
-    link: "/tutorials/availability-management",
+    args: TutorialArgs.USERS,
+    isAdminRessource: true,
     icons: Clock,
   },
   {
     title: "Gestion des cours",
     description: "Apprenez à gérer les cours efficacement.",
-    link: "/tutorials/course-management",
+    args: TutorialArgs.USERS,
+    isAdminRessource: true,
     icons: BookOpenText,
   },
   {
     title: "Gestion de la politique de confidentialité",
     description: "Personnalisez les paramètres de votre application.",
-    link: "/tutorials/general-configuration",
+    args: TutorialArgs.USERS,
+    isAdminRessource: true,
     icons: Book,
   },
 ];
@@ -65,8 +72,8 @@ export default function TutorialContent() {
         </p>
       </div>
       <div className="grid lg:grid-cols-4 md:grid-cols-1 gap-10">
-        {TUTOS.map((tuto) => (
-          <TutorialCards key={tuto.title} tuto={tuto} />
+        {TutoPage.map((tuto) => (
+          <TutorialCards key={tuto.title} {...tuto} />
         ))}
       </div>
     </div>

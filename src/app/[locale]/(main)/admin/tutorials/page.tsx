@@ -3,12 +3,44 @@
 import { TutorialSidebar } from "@/components/tutorial/tutorialSidebar";
 import TutorialViewer from "@/components/tutorial/tutorialViewer";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { TutorialArgs } from "@/types/tuto";
+import { notFound, useSearchParams } from "next/navigation";
 
 interface TutorialPageProps {
   children: React.ReactNode;
 }
 
 export default function TutorialPage({ children }: TutorialPageProps) {
+  function toTutorialArg(value: string): TutorialArgs | null {
+    return Object.values(TutorialArgs).includes(value as TutorialArgs)
+      ? (value as TutorialArgs)
+      : null;
+  }
+
+  const searchParams = useSearchParams();
+  const page = searchParams.get("page");
+  const pageEnum = toTutorialArg(page ?? "");
+
+  if (!pageEnum) {
+    notFound();
+  }
+
+  const isAdminRessource = searchParams.get("adminRessources");
+
+  let adminRessources: boolean;
+
+  switch (isAdminRessource) {
+    case "true":
+      adminRessources = true;
+      break;
+    case "false":
+    case null:
+      adminRessources = false;
+      break;
+    default:
+      notFound();
+  }
+
   return (
     <SidebarProvider className="border-t-5 border-cyan-500">
       <div className="flex min-h-screen w-full bg-gray-50">
@@ -30,7 +62,10 @@ export default function TutorialPage({ children }: TutorialPageProps) {
           <div className="overflow-auto w-full">
             <div className="w-full max-w-9xl mx-auto p-6 md:p-8 lg:p-12">
               {children}
-              <TutorialViewer />
+              <TutorialViewer
+                page={pageEnum}
+                adminRessources={adminRessources}
+              />
             </div>
           </div>
         </main>
