@@ -1,30 +1,23 @@
-// TutorialSidebar.tsx - Garde ta structure, améliore juste les styles
+// components/tutorial/tutorialSidebar.tsx
+"use client";
+
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { HeadingItem, TutorialSidebarProps } from "@/types/tuto";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { NavMain } from "./sidebar-nav-main";
+import { useMemo } from "react";
+import { buildToc } from "@/lib/markdown";
 
-const items = [
-  {
-    title: "Introduction",
-    href: "/tutorials/introduction",
-  },
-  {
-    title: "Getting Started",
-    href: "/tutorials/getting-started",
-  },
-];
+export function TutorialSidebar({ headings }: TutorialSidebarProps) {
+  // utilise directement la prop headings et recalcul le toc quand elle change
+  const toc = useMemo(() => buildToc(headings), [headings]);
 
-export function TutorialSidebar() {
   return (
     <Sidebar collapsible="offcanvas" variant="floating">
       <SidebarHeader className="border-b border-gray-200 py-6">
@@ -39,27 +32,7 @@ export function TutorialSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="px-3">
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    className="hover:bg-cyan-50 hover:text-cyan-700 transition-colors rounded-lg"
-                  >
-                    <a
-                      href={item.href}
-                      className="flex items-center gap-3 py-3"
-                    >
-                      <span className="font-medium">{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <NavMain items={toc} />
       </SidebarContent>
 
       <SidebarFooter className="border-t border-gray-200 p-4">

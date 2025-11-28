@@ -3,8 +3,9 @@
 import { TutorialSidebar } from "@/components/tutorial/tutorialSidebar";
 import TutorialViewer from "@/components/tutorial/tutorialViewer";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { TutorialArgs } from "@/types/tuto";
+import { HeadingItem, TutorialArgs } from "@/types/tuto";
 import { notFound, useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 interface TutorialPageProps {
   children: React.ReactNode;
@@ -26,25 +27,23 @@ export default function TutorialPage({ children }: TutorialPageProps) {
   }
 
   const isAdminRessource = searchParams.get("adminRessources");
+  const adminRessources =
+    isAdminRessource === null ? false : isAdminRessource === "true";
 
-  let adminRessources: boolean;
-
-  switch (isAdminRessource) {
-    case "true":
-      adminRessources = true;
-      break;
-    case "false":
-    case null:
-      adminRessources = false;
-      break;
-    default:
-      notFound();
+  if (
+    isAdminRessource !== null &&
+    isAdminRessource !== "true" &&
+    isAdminRessource !== "false"
+  ) {
+    notFound();
   }
+
+  const [headings, setHeadings] = useState<HeadingItem[]>([]);
 
   return (
     <SidebarProvider className="border-t-5 border-cyan-500">
       <div className="flex min-h-screen w-full bg-gray-50">
-        <TutorialSidebar />
+        <TutorialSidebar headings={headings} />
 
         <main className="flex-1 flex flex-col w-full overflow-hidden">
           <header className="z-10 backdrop-blur-sm shadow-sm bg-gray-800 rounded-b-lg">
@@ -54,7 +53,7 @@ export default function TutorialPage({ children }: TutorialPageProps) {
                 aria-label="Basculer le menu latéral"
               />
               <h1 className="text-white text-xl font-semibold">
-                Gestion des utilisateurs
+                {headings.length > 0 ? headings[0].text : "Tutoriel"}
               </h1>
             </div>
           </header>
@@ -65,6 +64,7 @@ export default function TutorialPage({ children }: TutorialPageProps) {
               <TutorialViewer
                 page={pageEnum}
                 adminRessources={adminRessources}
+                onHeadings={setHeadings}
               />
             </div>
           </div>
