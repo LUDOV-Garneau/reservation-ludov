@@ -83,7 +83,7 @@ export default function HeaderMenu({ username, isAdmin }: HeaderMenuProps) {
                 size={20}
                 className={`${isHelpActive && "text-cyan-500"}`}
               />
-              <p className="text-base">Aide</p>
+              <p className="text-base">{t("help")}</p>
             </Link>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
