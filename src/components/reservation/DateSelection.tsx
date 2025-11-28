@@ -13,6 +13,13 @@ import { DatesBlocked } from "@/types/availabilities";
 type TimeSlot = {
   time: string;
   available: boolean;
+  conflicts?: {
+    console?: boolean;
+    games?: number[];
+    accessories?: number[];
+    station?: boolean;
+    past?: boolean;
+  };
 };
 
 export default function DateSelection() {
@@ -79,6 +86,12 @@ export default function DateSelection() {
     loadUnavailableDates();
   }, []);
 
+  useEffect(() => {
+    if (date) {
+      loadAvailableTimes(date);
+    }
+  }, []);
+
   const loadAvailableTimes = async (selectedDate: Date) => {
     setIsLoadingTimes(true);
     setError(null);
@@ -93,7 +106,10 @@ export default function DateSelection() {
           selectedConsoleId
         )}&gameIds=${encodeURIComponent(
           selectedGames.join(",")
-        )}&accessoryIds=${encodeURIComponent(selectedAccessories.join(","))}`,
+        )}&accessoryIds=${encodeURIComponent(selectedAccessories.join(","))}${reservationId
+          ? `&reservationId=${encodeURIComponent(reservationId)}`
+          : ""
+        }`,
         {
           credentials: "include",
         }
@@ -292,7 +308,7 @@ export default function DateSelection() {
                   ))}
               </div>
             ) : availableTimes.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              <div className="text-center py-12 px-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                 <AlertCircle className="h-12 w-12 text-yellow-500 mx-auto mb-3" />
                 <p className="text-gray-700 font-medium mb-1">
                   {t("reservation.calendar.noValidDate")}

@@ -44,12 +44,7 @@ export default function ConfirmedReservation({
             <Calendar className="h-5 w-5 text-cyan-700" />
             <span className="text-cyan-800 font-medium">
               {date
-                ? new Date(date).toLocaleDateString(locale, {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })
+                ? String(date).split("T")[0]
                 : "—"}
             </span>
           </div>

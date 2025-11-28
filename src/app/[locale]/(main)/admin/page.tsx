@@ -7,6 +7,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import PoliciesTab from "@/components/admin/PoliciesTabs";
 
 const UsersTab = dynamic(() => import("@/components/admin/UsersTab"), {
   loading: () => <TabLoader />,
