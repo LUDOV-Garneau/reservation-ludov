@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { message: "Une erreur s'est produite." },
       { status: 500 }

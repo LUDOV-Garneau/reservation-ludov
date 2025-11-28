@@ -77,20 +77,20 @@ export async function POST(req: Request) {
       body.game1Id === undefined
         ? undefined
         : body.game1Id === null
-        ? null
-        : Number(body.game1Id);
+          ? null
+          : Number(body.game1Id);
     const game2Id =
       body.game2Id === undefined
         ? undefined
         : body.game2Id === null
-        ? null
-        : Number(body.game2Id);
+          ? null
+          : Number(body.game2Id);
     const game3Id =
       body.game3Id === undefined
         ? undefined
         : body.game3Id === null
-        ? null
-        : Number(body.game3Id);
+          ? null
+          : Number(body.game3Id);
     const newConsoleTypeId =
       body.newConsoleId === undefined ? undefined : Number(body.newConsoleId);
     const accessories = body.accessories;
@@ -98,8 +98,8 @@ export async function POST(req: Request) {
       body.coursId === undefined
         ? undefined
         : body.coursId === null
-        ? null
-        : Number(body.coursId);
+          ? null
+          : Number(body.coursId);
     const date = body.date === undefined ? undefined : body.date ?? null;
     const time = body.time === undefined ? undefined : body.time ?? null;
 
@@ -186,9 +186,10 @@ export async function POST(req: Request) {
               WHERE date = ?
                 AND time = ?
                 AND expireAt > NOW()
+                AND id != ?
             )
           `,
-          [currentConsoleTypeId, date, time, date, time]
+          [currentConsoleTypeId, date, time, date, time, reservationId]
         );
 
         if (!availableStations || availableStations.length === 0) {
