@@ -14,29 +14,29 @@ import {
 } from "lucide-react";
 
 const TABS = [
-  { value: "users", translationKey: "admin.users.title", icon: Users },
+  { value: "users", translationKey: "users.title", icon: Users },
   {
     value: "reservations",
-    translationKey: "admin.reservations.title",
+    translationKey: "reservations.title",
     icon: Calendar,
   },
-  { value: "stations", translationKey: "admin.stations.title", icon: MapPin },
+  { value: "stations", translationKey: "stations.title", icon: MapPin },
   {
     value: "availabilities",
-    translationKey: "admin.availabilities.title",
+    translationKey: "availabilities.title",
     icon: Clock,
   },
-  { value: "cours", translationKey: "admin.cours.title", icon: BookOpen },
-  { value: "policies", translationKey: "admin.politique.title", icon: Book },
+  { value: "cours", translationKey: "cours.title", icon: BookOpen },
+  { value: "policies", translationKey: "politique.title", icon: Book },
   {
     value: "tutorials",
-    translationKey: "admin.tutorials.title",
+    translationKey: "tutorials.title",
     icon: HelpCircle,
   },
 ] as const;
 
 export default function AdminTabs() {
-  const t = useTranslations();
+  const t = useTranslations("admin");
   const searchParams = useSearchParams();
 
   const activeTab = searchParams.get("tab") || "users";

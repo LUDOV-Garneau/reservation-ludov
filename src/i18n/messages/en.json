@@ -312,6 +312,10 @@
     }
   },
   "admin": {
+    "politique": {
+      "title": "Privacy Policy",
+      "subtitle": "Manage the privacy policy of the LUDOV platform"
+    },
     "users": {
       "title": "Users",
       "subtitle": "Manage users on the LUDOV platform",
