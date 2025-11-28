@@ -21,6 +21,9 @@ const StationsTab = dynamic(() => import("@/components/admin/StationsTab"), {
 const AvailabilitiesTab = dynamic(() => import("@/components/admin/availabilities/AvailabilitiesTab"), {
   loading: () => <TabLoader />
 });
+const CoursTab = dynamic(() => import("@/components/admin/CoursTab"), {
+  loading: () => <TabLoader />
+});
 
 function TabLoader() {
   return (
@@ -64,13 +67,7 @@ function AdminContent() {
       case "availabilities":
         return <AvailabilitiesTab />;
       case "cours":
-        return (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <p className="text-gray-500 text-lg">Onglet Cours - En développement</p>
-            </div>
-          </div>
-        );
+        return <CoursTab />;
       case "policies":
         return <PoliciesTab />;
       default:
