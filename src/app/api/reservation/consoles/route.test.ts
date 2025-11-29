@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type mysql from "mysql2/promise";
 import * as dbModule from "@/lib/db";
 import { GET } from "./route";
+import type { ConsoleCatalogItem } from "./route";
 
 describe("API /reservation/consoles route", () => {
     beforeEach(() => {
@@ -70,7 +71,7 @@ describe("API /reservation/consoles route", () => {
         const json = await response.json();
 
         expect(response.status).toBe(200);
-        expect(json.every((console: any) => console.active_units > 0)).toBe(true);
+        expect(json.every((console: ConsoleCatalogItem) => console.active_units > 0)).toBe(true);
     });
 
     it("returns empty array when no active consoles available", async () => {

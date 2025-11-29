@@ -4,6 +4,7 @@ import type mysql from "mysql2/promise";
 import * as dbModule from "@/lib/db";
 import * as jwtModule from "@/lib/jwt";
 import { GET } from "./route";
+import type { TimeSlotAvailability } from "./route";
 
 describe("API /reservation/calendar-times route", () => {
     afterEach(() => {
@@ -222,7 +223,7 @@ describe("API /reservation/calendar-times route", () => {
         const json = await response.json();
 
         expect(json.success).toBe(true);
-        const slot10am = json.availability.find((s: any) => s.time === "10:00:00");
+        const slot10am = json.availability.find((s: TimeSlotAvailability) => s.time === "10:00:00");
         if (slot10am) {
             expect(slot10am.available).toBe(false);
             expect(slot10am.conflicts).toHaveProperty("console", true);
