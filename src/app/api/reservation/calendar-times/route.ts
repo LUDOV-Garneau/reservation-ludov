@@ -45,7 +45,7 @@ type SpecificHoursRow = WeeklyHoursRow & { is_exception: boolean };
 
 type Range = { start: number; end: number };
 
-interface TimeSlotAvailability {
+export interface TimeSlotAvailability {
   time: string;
   available: boolean;
   conflicts?: {
