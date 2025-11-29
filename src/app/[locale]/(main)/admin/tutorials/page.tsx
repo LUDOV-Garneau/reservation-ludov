@@ -43,7 +43,10 @@ export default function TutorialPage({ children }: TutorialPageProps) {
   return (
     <SidebarProvider className="border-t-5 border-cyan-500">
       <div className="flex min-h-screen w-full bg-gray-50">
-        <TutorialSidebar headings={headings} />
+        <TutorialSidebar
+          headings={headings}
+          adminRessources={adminRessources}
+        />
 
         <main className="flex-1 flex flex-col w-full overflow-hidden">
           <header className="z-10 backdrop-blur-sm shadow-sm bg-gray-800 rounded-b-lg">

@@ -14,7 +14,10 @@ import { useMemo } from "react";
 import { buildToc } from "@/lib/markdown";
 import { useTranslations } from "next-intl";
 
-export function TutorialSidebar({ headings }: TutorialSidebarProps) {
+export function TutorialSidebar({
+  headings,
+  adminRessources,
+}: TutorialSidebarProps) {
   const t = useTranslations("docs");
   const toc = useMemo(() => buildToc(headings), [headings]);
 
@@ -22,7 +25,7 @@ export function TutorialSidebar({ headings }: TutorialSidebarProps) {
     <Sidebar collapsible="offcanvas" variant="floating">
       <SidebarHeader className="border-b border-gray-200 py-6">
         <Link
-          href="/admin?tab=tutorials"
+          href={adminRessources ? `/admin?tab=tutorials` : `/docs/bibliotheque`}
           className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit"
         >
           <ChevronLeft className="w-4 h-4" />

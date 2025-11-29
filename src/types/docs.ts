@@ -33,6 +33,7 @@ export interface TutorialViewerProps {
 
 export interface TutorialSidebarProps {
   headings: HeadingItem[];
+  adminRessources: boolean;
 }
 
 export interface TocNode {

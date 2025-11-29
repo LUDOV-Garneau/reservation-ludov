@@ -3,7 +3,6 @@
 import { NavMainProps } from "@/types/docs";
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -15,7 +14,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@radix-ui/react-collapsible";
+} from "@/components/ui/collapsible";
 import { ChevronRight } from "lucide-react";
 
 export function NavMain({ items }: NavMainProps) {
@@ -49,7 +48,7 @@ export function NavMain({ items }: NavMainProps) {
                             className="w-full h-fit"
                           >
                             <a
-                              href={`#${section.id}`}
+                              href={`#${subItem.id}`}
                               className={`block text-sm ${
                                 section.isActive && section.id === subItem.id
                                   ? "text-cyan-700 font-semibold"

@@ -79,7 +79,7 @@ export default function HeaderMenu({ username, isAdmin }: HeaderMenuProps) {
           )}
           <DropdownMenuItem className="px-2 py-1">
             <Link
-              href="/docs"
+              href="/docs/bibliotheque"
               className="hover:opacity-70 cursor-pointer flex items-center gap-2"
             >
               <HelpCircleIcon size={20} />

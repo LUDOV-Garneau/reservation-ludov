@@ -3,7 +3,7 @@
 import { TabsContent } from "@/components/ui/tabs";
 import TutorialContent from "./tutorials/TutorialContent";
 
-export default function ReservationsTab() {
+export default function TutorialTabs() {
   return (
     <TabsContent value="tutorials">
       <TutorialContent />
