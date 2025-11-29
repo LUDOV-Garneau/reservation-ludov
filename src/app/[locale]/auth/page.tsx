@@ -94,7 +94,7 @@ export default function AuthPage() {
         }
       `}</style>
 
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-xl space-y-6">
         <div className="flex items-center justify-between gap-2 bg-[white]/90 backdrop-blur-md py-3 px-5 rounded-2xl shadow-lg animate-fadeInUp border border-white/40">
           <LocaleSwitcher />
           <Link

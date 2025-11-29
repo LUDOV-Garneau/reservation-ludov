@@ -7,7 +7,6 @@ import { useState } from "react";
 import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
-import Link from "next/link";
 
 export default function LoginForm({ onSignup }: { onSignup: () => void }) {
   const locale = useLocale();
@@ -192,12 +191,6 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
                 <AlertCircle className="w-4 h-4 text-red-500" />
               )}
             </Label>
-            <Link
-              href="/forgot-password"
-              className="text-xs text-cyan-600 hover:text-cyan-700 hover:underline transition-colors"
-            >
-              Mot de passe oublié ?
-            </Link>
           </div>
           <div className="relative group">
             <Lock

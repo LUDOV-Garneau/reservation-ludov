@@ -14,7 +14,7 @@ export default function SignupEmailForm({
   onNext: (email: string) => void;
   onBack: () => void;
 }) {
-  const t = useTranslations();
+  const t = useTranslations("auth.signup");
 
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -27,9 +27,9 @@ export default function SignupEmailForm({
     switch (name) {
       case "email":
         if (!value) {
-          errorMsg = t("auth.invalidEmail");
+          errorMsg = t("invalidEmail");
         } else if (!value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-          errorMsg = t("auth.invalidEmail");
+          errorMsg = t("invalidEmail");
         }
         break;
     }
@@ -71,11 +71,11 @@ export default function SignupEmailForm({
       );
       if (responseCheckEmail.status === 401) {
         setIsLoading(false);
-        setError(t("auth.signup.invalidCredentials"));
+        setError(t("invalidCredentials"));
         return;
       } else if (!responseCheckEmail.ok) {
         setIsLoading(false);
-        setError(t("auth.signup.errorValidation"));
+        setError(t("errorValidation"));
         return;
       }
 
@@ -91,14 +91,14 @@ export default function SignupEmailForm({
 
       setIsLoading(false);
       if (!response.ok) {
-        setError(t("auth.signup.errorSend"));
+        setError(t("errorSend"));
         return;
       }
 
       onNext(email);
     } catch {
       setIsLoading(false);
-      setError(t("auth.signup.errorSend"));
+      setError(t("errorSend"));
     }
   };
 
@@ -110,7 +110,7 @@ export default function SignupEmailForm({
         type="button"
       >
         <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
-        <span className="text-sm font-medium">{t("auth.back")}</span>
+        <span className="text-sm font-medium">{t("back")}</span>
       </button>
 
       <div className="text-center space-y-3">
@@ -119,12 +119,12 @@ export default function SignupEmailForm({
         </div>
         <div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            {t("auth.signup.title")}
+            {t("title")}
           </h1>
           <p className="text-gray-500 text-sm">
-            {t("auth.signup.subTitle1")}
+            {t("subTitle1")}
             <br />
-            {t("auth.signup.subTitle2")}
+            {t("subTitle2")}
           </p>
         </div>
       </div>
@@ -135,7 +135,7 @@ export default function SignupEmailForm({
             htmlFor="email"
             className="text-sm font-medium text-gray-700 flex items-center gap-1"
           >
-            {t("auth.email")}
+            {t("email")}
             {touched && error && (
               <AlertCircle className="w-4 h-4 text-red-500" />
             )}
@@ -203,11 +203,11 @@ export default function SignupEmailForm({
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              {t("auth.signup.sendCodeBtnLoading")}
+              {t("sendCodeBtnLoading")}
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
-              {t("auth.signup.sendCodeBtn")}
+              {t("sendCodeBtn")}
               <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
             </span>
           )}
@@ -220,7 +220,7 @@ export default function SignupEmailForm({
         onClick={onBack}
         className="w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:border-cyan-400 hover:text-cyan-600 hover:bg-cyan-50 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
       >
-        {t("auth.signup.login")}
+        {t("login")}
       </Button>
     </div>
   );
