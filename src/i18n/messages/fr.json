@@ -288,7 +288,10 @@
       "sendCodeBtnLoading": "Envoi du code en cours...",
       "invalidCredentials": "Cette adresse courriel n'a pas été approuvée par un administrateur ou elle est déjà associée à un compte.",
       "errorValidation": "Une erreur s'est produite lors de la validation du courriel. Veuillez réessayer ultérieurement.",
-      "errorSend": "Une erreur s'est produite lors de l'envoi du courriel. Veuillez réessayer ultérieurement."
+      "errorSend": "Une erreur s'est produite lors de l'envoi du courriel. Veuillez réessayer ultérieurement.",
+      "invalidEmail": "Adresse courriel invalide.",
+      "back": "Retour",
+      "email": "Courriel"
     },
     "OTP": {
       "title": "Code unique",
@@ -299,9 +302,15 @@
       "OTPBtnLoading": "Vérification du code en cours...",
       "invalidOTP": "Ce code OTP est invalide.",
       "expiredOTP": "Ce code OTP est invalide ou est expiré.",
-      "error": "Une erreur s'est produite lors de la validation du code OTP."
+      "error": "Une erreur s'est produite lors de la validation du code OTP.",
+      "resendOTP": "Renvoyer le code",
+      "resendOTPLoading": "Envoi en cours...",
+      "codeSent": "Le code a été renvoyé à votre adresse courriel.",
+      "back": "Retour"
     },
     "createPassword": {
+      "title": "Créer un mot de passe",
+      "subtitle": "Pour terminer, veuillez créer un mot de passe pour votre compte.",
       "password": "Définir un mot de passe",
       "confirmPassword": "Confirmation du mot de passe",
       "invalidPassword": "Le mot de passe doit contenir au moins 6 caractères.",
@@ -309,7 +318,9 @@
       "finishBtn": "Terminer",
       "finishBtnLoading": "Enregistrement du mot de passe en cours...",
       "errorAlreadySet": "Cet utilisateur a déjà un mot de passe.",
-      "error": "Une erreur s'est produite lors de la création de votre mot de passe. Veuillez réessayer ultérieurement."
+      "error": "Une erreur s'est produite lors de la création de votre mot de passe. Veuillez réessayer ultérieurement.",
+      "back": "Retour",
+      "emptyPassword": "Le mot de passe ne peut pas être vide."
     }
   },
   "admin": {
