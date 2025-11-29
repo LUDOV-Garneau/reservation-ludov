@@ -1,5 +1,6 @@
 {
   "header": {
+    "help": "Help",
     "logout": "Logout",
     "logoutLoading": "Logging out...",
     "language": "FR"

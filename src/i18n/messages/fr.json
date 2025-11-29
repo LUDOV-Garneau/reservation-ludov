@@ -1,5 +1,6 @@
 {
   "header": {
+    "help": "Aide",
     "logout": "Se déconnecter",
     "logoutLoading": "Déconnexion...",
     "language": "EN"
