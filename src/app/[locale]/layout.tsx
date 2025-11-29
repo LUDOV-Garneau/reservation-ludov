@@ -8,7 +8,6 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
-
 export default async function RootLayout({
   children,
   params,
@@ -26,7 +25,7 @@ export default async function RootLayout({
     <NextIntlClientProvider locale={locale} messages={messages}>
       {children}
       <CookieBanner />
-      <Toaster position="top-center" richColors closeButton />
+      <Toaster position="bottom-right" closeButton />
     </NextIntlClientProvider>
   );
 }

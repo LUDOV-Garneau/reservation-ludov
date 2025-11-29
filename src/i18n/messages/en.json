@@ -325,6 +325,10 @@
     }
   },
   "admin": {
+    "politique": {
+      "title": "Privacy Policy",
+      "subtitle": "Manage the privacy policy of the LUDOV platform"
+    },
     "users": {
       "title": "Users",
       "subtitle": "Manage users on the LUDOV platform",
@@ -687,10 +691,22 @@
     },
     "cours": {
       "title": "Classes"
+    },
+    "tutorials": {
+      "title": "Tutorials",
+      "subtitle": "User guide for the LUDOV platform - Administrators"
     }
   },
   "privacy": {
     "title": "Privacy Policy Summary",
     "content": "This website uses strictly necessary cookies to provide you with the best possible user experience. Cookie information is stored in your browser and performs functions such as recognizing you when you return to our website. By continuing to use this site, you agree to their use in accordance with our privacy policy."
+  },
+  "docs": {
+    "title": "Library Documentation",
+    "subtitle": "Find all the tutorials and documentation to help you use the LUDOV platform effectively.",
+    "sidebar": {
+      "goBackToLibrary": "Back to library",
+      "title": "Documentation"
+    }
   }
 }

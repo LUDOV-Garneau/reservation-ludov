@@ -1,17 +1,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --color-primary: #02dcde;
   --color-secondary: #e6e6e6;
   --color-black: #1f2124;
   --color-white: #f1f2f3;
 
   --radius-lg: 16px;
   --radius-sm: 10px;
-  --shadow-card: 0 10px 30px rgba(0, 0, 0, .12);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.12);
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -115,8 +115,7 @@ h2,
 h3 {
   font-family: var(--font-titles);
   line-height: 1.15;
-  letter-spacing: .2px;
-  color: var(--color-black);
+  letter-spacing: 0.2px;
 }
 
 h1 {

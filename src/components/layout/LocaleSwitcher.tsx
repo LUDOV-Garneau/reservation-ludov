@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 
 export default function LocaleSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const t = useTranslations();
 
   function switchLocale() {
@@ -17,7 +18,10 @@ export default function LocaleSwitcher() {
     segments[1] = newLocale;
     const newPath = segments.join("/") || "/";
 
-    router.push(newPath);
+    const params = searchParams.toString();
+    const newUrl = params ? `${newPath}?${params}` : newPath;
+
+    router.push(newUrl);
   }
 
   return (
