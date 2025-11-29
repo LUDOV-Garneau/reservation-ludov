@@ -14,5 +14,8 @@ export default defineConfig({
     coverage: {
       reporter: ["text", "lcov"],
     },
+    env: {
+      JWT_SECRET: "jwt-secret-for-unit-tests",
+    },
   },
 });

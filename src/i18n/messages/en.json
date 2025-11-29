@@ -1,5 +1,6 @@
 {
   "header": {
+    "help": "Help",
     "logout": "Logout",
     "logoutLoading": "Logging out...",
     "language": "FR"
@@ -288,19 +289,29 @@
       "sendCodeBtnLoading": "Sending code...",
       "invalidCredentials": "This email address has not been approved by an administrator or is already associated with an account.",
       "errorValidation": "An error occurred while validating the email. Please try again later.",
-      "errorSend": "An error occurred while sending the email. Please try again later."
+      "errorSend": "An error occurred while sending the email. Please try again later.",
+      "invalidEmail": "Invalid email address.",
+      "back": "Back",
+      "email": "Email"
     },
     "OTP": {
       "title": "One-Time Code",
-      "subTitle": "Please enter the one-time code <br /> that was sent to your email",
+      "subTitle1": "Enter the 6-digit code",
+      "subTitle2": "we sent to your email",
       "codeEmail": "Code received by email",
       "OTPBtn": "Verify code",
       "OTPBtnLoading": "Verifying code...",
       "invalidOTP": "This OTP code is invalid.",
       "expiredOTP": "This OTP code is invalid or has expired.",
-      "error": "An error occurred while validating the OTP code."
+      "error": "An error occurred while validating the OTP code.",
+      "resendOTP": "Resend code",
+      "resendOTPLoading": "Sending...",
+      "codeSent": "The code has been resent to your email address.",
+      "back": "Back"
     },
     "createPassword": {
+      "title": "Create a Password",
+      "subtitle": "To complete the process, please create a password for your account.",
       "password": "Set a password",
       "confirmPassword": "Confirm password",
       "invalidPassword": "The password must contain at least 6 characters.",
@@ -308,7 +319,9 @@
       "finishBtn": "Finish",
       "finishBtnLoading": "Saving password...",
       "errorAlreadySet": "This user already has a password.",
-      "error": "An error occurred while creating your password. Please try again later."
+      "error": "An error occurred while creating your password. Please try again later.",
+      "back": "Back",
+      "emptyPassword": "Password cannot be empty."
     }
   },
   "admin": {
