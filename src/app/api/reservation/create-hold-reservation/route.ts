@@ -19,7 +19,6 @@ interface HoldRow extends RowDataPacket {
 
 export async function POST(req: Request) {
   try {
-    // cookies() est synchrone
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;
@@ -165,16 +164,17 @@ export async function POST(req: Request) {
       );
 
       // Marquer l'unité en "holding"
-      await connection.query(`UPDATE console_stock SET holding = 1 WHERE id = ?`, [
-        consoleStockId,
-      ]);
+      await connection.query(
+        `UPDATE console_stock SET holding = 1 WHERE id = ?`,
+        [consoleStockId]
+      );
 
       await connection.commit();
 
       return NextResponse.json(
         {
           success: true,
-          reservationId,                      // pour cohérence front
+          reservationId, // pour cohérence front
           holdId: created[0].holdId,
           consoleStockId: created[0].consoleStockId,
           expiresAt: new Date(created[0].expiresAt).toISOString(),

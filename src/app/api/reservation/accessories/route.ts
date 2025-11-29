@@ -8,21 +8,23 @@ export async function GET() {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
     let user = null;
-      try {
-          const token  = sessionCookie?.value;
-          if (token) user = verifyToken(token);
-      } catch{
-          return NextResponse.json(
-              { success: false, message: "Invalid or expired token" },
-              { status: 401 }
-          );
-      }
+    try {
+      const token = sessionCookie?.value;
+      if (token) user = verifyToken(token);
+    } catch {
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+
     if (!user?.id) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
+
     const userId = Number(user.id);
     if (!Number.isFinite(userId)) {
       return NextResponse.json(
@@ -31,6 +33,7 @@ export async function GET() {
       );
     }
 
+    // Récupère le dernier hold
     const [holdRows] = await pool.query(
       `SELECT console_type_id
          FROM reservation_hold
@@ -39,36 +42,65 @@ export async function GET() {
         LIMIT 1`,
       [userId]
     );
-    const holds = holdRows as { console_type_id: number | null }[];
-    const consoleTypeId = Number(holds?.[0]?.console_type_id);
 
+    const holds = (holdRows as { console_type_id: number | null }[]) || [];
+    const consoleTypeIdRaw = holds?.[0]?.console_type_id;
+
+    if (consoleTypeIdRaw == null) {
+      return NextResponse.json(
+        {
+          success: false,
+          data: [],
+          message: "No recent reservation hold found for user",
+        },
+        { status: 404 }
+      );
+    }
+
+    const consoleTypeId = Number(consoleTypeIdRaw);
     if (!Number.isFinite(consoleTypeId)) {
       return NextResponse.json(
-        { success: false, data: [], message: "No recent reservation hold found for user" },
-        { status: 404 }
+        {
+          success: false,
+          data: [],
+          message: "Invalid console type id in hold",
+        },
+        { status: 400 }
       );
     }
 
     const [rows] = await pool.query(
-      `SELECT id, name
-         FROM accessoires
-        WHERE consoles IS NOT NULL
-          AND hidden = 0
-          AND JSON_VALID(consoles)
-          AND JSON_CONTAINS(consoles, CAST(? AS JSON), '$')`,
-      [String(consoleTypeId)]
+      `SELECT accessoire_type_id, name
+         FROM accessoires_catalog
+        WHERE console_type_ids IS NOT NULL
+          AND JSON_VALID(console_type_ids)
+          AND JSON_CONTAINS(console_type_ids, JSON_ARRAY(?)) 
+        AND hidden_units = 0
+        ORDER BY name`,
+      [consoleTypeId]
     );
 
-    const accessories = (rows as { id: number; name: string }[]) || [];
+    // Typage / mapping corrects
+    const accessories =
+      (rows as { accessoire_type_id: number; name: string }[]) || [];
 
     if (accessories.length === 0) {
       return NextResponse.json(
-        { success: false, data: [], message: "No accessories found for the user's console" },
+        {
+          success: false,
+          data: [],
+          message: "No accessories found for the user's console",
+        },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: accessories });
+    const payload = accessories.map((a) => ({
+      id: a.accessoire_type_id,
+      name: a.name,
+    }));
+
+    return NextResponse.json({ success: true, data: payload });
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json(

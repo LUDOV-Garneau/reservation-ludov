@@ -4,9 +4,8 @@ import { RowDataPacket } from "mysql2";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 
-// ---------------- Types DB ----------------
 interface ReservationRow extends RowDataPacket {
-  reservationId: number;
+  reservationId: string;
   userId: number;
   consoleStockId: number | null;
   consoleTypeId: number | null;
@@ -14,13 +13,12 @@ interface ReservationRow extends RowDataPacket {
   game2Id: number | null;
   game3Id: number | null;
   stationId: number | null;
-  accessoirs: string | null;
+  accessoirs: string | number[] | null;
   date: string | null;
   time: string | null;
   expireAt: string;
   createdAt: string;
   consoleName: string | null;
-  consoleImage: string | null;
   expiresIn: number;
   coursId: number | null;
   code_cours: string | null;
@@ -30,8 +28,8 @@ interface ReservationRow extends RowDataPacket {
 interface GameRow extends RowDataPacket {
   id: number;
   titre: string;
-  picture: string;
-  author: string;
+  picture: string | null;
+  author: string | null;
 }
 
 interface StationRow extends RowDataPacket {
@@ -44,8 +42,6 @@ interface AccessoireRow extends RowDataPacket {
   name: string;
 }
 
-// ---------------- API Types ----------------
-
 interface JwtSession {
   id: number;
   email: string;
@@ -54,8 +50,8 @@ interface JwtSession {
 interface Jeu {
   id: number;
   nom: string;
-  picture: string;
-  author: string;
+  picture: string | null;
+  author: string | null;
 }
 
 interface ConsoleInfo {
@@ -80,23 +76,24 @@ interface Station {
   nom: string;
 }
 
-// --------------------------------------------------
-
 export async function GET(req: Request) {
   try {
-    // ------- Auth -------
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
-    let user = null;
+    let user: JwtSession | null = null;
+
     try {
       const token = sessionCookie?.value;
-      if (token) user = verifyToken(token);
+      if (token) {
+        user = verifyToken(token) as JwtSession;
+      }
     } catch {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 }
       );
     }
+
     if (!user?.id || !Number.isFinite(Number(user.id))) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
@@ -105,15 +102,16 @@ export async function GET(req: Request) {
     }
     const userId = Number(user.id);
 
-    // ------- Params -------
     const { searchParams } = new URL(req.url);
     const reservationId = searchParams.get("id");
 
     if (!reservationId) {
-      return NextResponse.json({ success: false, message: "Reservation ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Reservation ID is required" },
+        { status: 400 }
+      );
     }
 
-    // ------- Fetch reservation -------
     const [rows] = await pool.query<ReservationRow[]>(
       `
       SELECT 
@@ -131,7 +129,6 @@ export async function GET(req: Request) {
         rh.expireAt,
         rh.createdAt,
         ct.name AS consoleName,
-        ct.picture AS consoleImage,
         GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), rh.expireAt)) AS expiresIn,
         co.id AS coursId,
         co.code_cours AS code_cours,
@@ -146,35 +143,42 @@ export async function GET(req: Request) {
       [reservationId, userId]
     );
 
-    if (rows.length === 0) {
-      return NextResponse.json({ success: false, message: "Réservation non trouvée" }, { status: 404 });
+    if (!rows || rows.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Réservation non trouvée" },
+        { status: 404 }
+      );
     }
 
     const r = rows[0];
-  
+
     if (r.expiresIn <= 0) {
-      return NextResponse.json({ success: false, message: "La réservation a expiré" }, { status: 410 });
+      return NextResponse.json(
+        { success: false, message: "La réservation a expiré" },
+        { status: 410 }
+      );
     }
 
-    // ------- Load games -------
-    const gameIds = [r.game1Id, r.game2Id, r.game3Id].filter((id): id is number => id !== null);
+    const gameIds = [r.game1Id, r.game2Id, r.game3Id].filter(
+      (id): id is number => id !== null
+    );
     let jeux: Jeu[] = [];
 
     if (gameIds.length > 0) {
+      const placeholders = gameIds.map(() => "?").join(",");
       const [gameRows] = await pool.query<GameRow[]>(
-        `SELECT id, titre, picture, author FROM games WHERE id IN (${gameIds.map(() => "?").join(",")})`,
+        `SELECT id, titre, picture, author FROM games WHERE id IN (${placeholders})`,
         gameIds
       );
 
       jeux = gameRows.map((g) => ({
         id: g.id,
         nom: g.titre,
-        picture: g.picture,
-        author: g.author,
+        picture: g.picture ?? null,
+        author: g.author ?? null,
       }));
     }
 
-    // ------- Station -------
     let station: Station | null = null;
     if (r.stationId !== null) {
       const [stationRows] = await pool.query<StationRow[]>(
@@ -187,28 +191,46 @@ export async function GET(req: Request) {
       }
     }
 
-    // ------- Accessoires -------
     let accessories: Accessoire[] = [];
     let accIds: number[] = [];
 
-    if (Array.isArray(r.accessoirs)) {
-      accIds = r.accessoirs.filter((item) => typeof item === "number");
+    if (r.accessoirs == null) {
+      accIds = [];
+    } else if (Array.isArray(r.accessoirs)) {
+      accIds = r.accessoirs.filter((x): x is number => typeof x === "number");
+    } else if (typeof r.accessoirs === "string") {
+      try {
+        const parsed = JSON.parse(r.accessoirs) as Array<
+          number | string | null
+        > | null;
+        if (Array.isArray(parsed)) {
+          accIds = parsed.filter((v): v is number => typeof v === "number");
+        } else {
+          accIds = [];
+        }
+      } catch {
+        accIds = [];
+      }
     } else {
       accIds = [];
     }
 
     if (accIds.length > 0) {
+      const accPlaceholders = accIds.map(() => "?").join(",");
       const [accRows] = await pool.query<AccessoireRow[]>(
-        `SELECT id, name FROM accessoires WHERE id IN (${accIds.map(() => "?").join(",")})`,
+        `SELECT id, name FROM accessoires_type WHERE id IN (${accPlaceholders})`,
         accIds
       );
 
       accessories = accRows.map((a) => ({ id: a.id, nom: a.name }));
     }
 
-    // ------- Response -------
     const consoleInfo: ConsoleInfo | null = r.consoleStockId
-      ? { id: r.consoleStockId, nom: r.consoleName ?? "Console", image: r.consoleImage }
+      ? {
+          id: r.consoleStockId,
+          nom: r.consoleName ?? "Console",
+          image: null,
+        }
       : null;
 
     const cours: CoursInfo | null =
@@ -228,10 +250,13 @@ export async function GET(req: Request) {
       date: r.date,
       time: r.time,
       expireAt: r.expireAt,
-      expiresIn: r.expiresIn, // ← timer front
+      expiresIn: r.expiresIn,
     });
   } catch (err) {
     console.error("GET reservation error:", err);
-    return NextResponse.json({ success: false, message: "Erreur serveur" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Erreur serveur" },
+      { status: 500 }
+    );
   }
 }

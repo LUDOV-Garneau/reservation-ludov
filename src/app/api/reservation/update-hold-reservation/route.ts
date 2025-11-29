@@ -25,7 +25,8 @@ interface HoldRow extends RowDataPacket {
   game2_id: number | null;
   game3_id: number | null;
   station_id: number | null;
-  accessoirs: string | null;
+  accessoirs_ids: string | null;
+  accessoirs_type_ids: string | null;
   cours: number | null;
   date: string | null;
   time: string | null;
@@ -77,20 +78,20 @@ export async function POST(req: Request) {
       body.game1Id === undefined
         ? undefined
         : body.game1Id === null
-          ? null
-          : Number(body.game1Id);
+        ? null
+        : Number(body.game1Id);
     const game2Id =
       body.game2Id === undefined
         ? undefined
         : body.game2Id === null
-          ? null
-          : Number(body.game2Id);
+        ? null
+        : Number(body.game2Id);
     const game3Id =
       body.game3Id === undefined
         ? undefined
         : body.game3Id === null
-          ? null
-          : Number(body.game3Id);
+        ? null
+        : Number(body.game3Id);
     const newConsoleTypeId =
       body.newConsoleId === undefined ? undefined : Number(body.newConsoleId);
     const accessories = body.accessories;
@@ -98,8 +99,8 @@ export async function POST(req: Request) {
       body.coursId === undefined
         ? undefined
         : body.coursId === null
-          ? null
-          : Number(body.coursId);
+        ? null
+        : Number(body.coursId);
     const date = body.date === undefined ? undefined : body.date ?? null;
     const time = body.time === undefined ? undefined : body.time ?? null;
 
@@ -136,24 +137,48 @@ export async function POST(req: Request) {
       const updates: string[] = [];
       const values: unknown[] = [];
 
-      if (accessories !== undefined) {
-        if (
-          accessories === null ||
-          (Array.isArray(accessories) && accessories.length === 0)
-        ) {
-          updates.push("accessoirs = NULL");
-        } else if (Array.isArray(accessories)) {
-          updates.push("accessoirs = CAST(? AS JSON)");
-          values.push(JSON.stringify(accessories));
+      if (accessories !== undefined && accessories !== null) {
+        if (!Array.isArray(accessories) || accessories.length === 0) {
+          updates.push("accessoirs_ids = NULL", "accessoirs_type_ids = NULL");
         } else {
-          await conn.rollback();
-          return NextResponse.json(
-            {
-              success: false,
-              message: "accessories doit être un tableau ou null",
-            },
-            { status: 400 }
-          );
+          const assignedIds: number[] = [];
+          const typeIds: number[] = [];
+
+          for (const typeId of accessories) {
+            const [rows] = await conn.query<RowDataPacket[]>(
+              `
+        SELECT id
+        FROM accessoires_stock
+        WHERE accessoire_type_id = ?
+          AND JSON_CONTAINS(consoles, CAST(? AS JSON))
+          AND holding = 0
+        LIMIT 1
+        FOR UPDATE
+        `,
+              [typeId, JSON.stringify([currentConsoleTypeId])]
+            );
+
+            if (!rows || rows.length === 0) {
+              continue;
+            }
+
+            const accessoryId = rows[0].id;
+            assignedIds.push(accessoryId);
+            typeIds.push(typeId);
+
+            await conn.query(
+              `UPDATE accessoires_stock SET holding = 1 WHERE id = ?`,
+              [accessoryId]
+            );
+          }
+
+          if (assignedIds.length > 0) {
+            updates.push(
+              "accessoirs_ids = CAST(? AS JSON)",
+              "accessoirs_type_ids = CAST(? AS JSON)"
+            );
+            values.push(JSON.stringify(assignedIds), JSON.stringify(typeIds));
+          }
         }
       }
 
@@ -197,7 +222,8 @@ export async function POST(req: Request) {
           return NextResponse.json(
             {
               success: false,
-              message: "Aucune station disponible pour la date et l'heure choisies",
+              message:
+                "Aucune station disponible pour la date et l'heure choisies",
             },
             { status: 409 }
           );
@@ -270,7 +296,8 @@ export async function POST(req: Request) {
           "game1_id = NULL",
           "game2_id = NULL",
           "game3_id = NULL",
-          "accessoirs = NULL",
+          "accessoirs_ids = NULL",
+          "accessoirs_type_ids = NULL",
           "cours = NULL",
           "date = NULL",
           "time = NULL"
@@ -415,7 +442,8 @@ export async function POST(req: Request) {
           game1_id,
           game2_id,
           game3_id,
-          accessoirs,
+          accessoirs_ids,
+          accessoirs_type_ids,
           cours,
           date,
           time,

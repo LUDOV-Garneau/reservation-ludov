@@ -16,7 +16,6 @@ export async function GET() {
       `SELECT 
         console_type_id as id,
         name,
-        picture,
         active_units,
         total_units
        FROM console_catalog 

@@ -4,16 +4,21 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import { RowDataPacket } from "mysql2";
 
+interface JwtSession {
+  id: number;
+  email?: string;
+}
+
 interface ReservationRow extends RowDataPacket {
   id: string;
   user_id: number;
-  console_id: number;
-  console_type_id: number;
+  console_id: number | null;
+  console_type_id: number | null;
   game1_id: number | null;
   game2_id: number | null;
   game3_id: number | null;
-  accessoirs: string | null;
-  expireAt: string;      // DATETIME/TIMESTAMP en base
+  accessoirs: string | number[] | null;
+  expireAt: string;
   createdAt: string;
   date: string | null;
   time: string | null;
@@ -23,8 +28,7 @@ interface ReservationRow extends RowDataPacket {
   ct_name: string;
   ct_picture: string | null;
 
-  // nouveau: TTL calculé par MySQL
-  expiresIn: number;     // secondes restantes = GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expireAt))
+  expiresIn: number;
 }
 
 export async function GET(request: NextRequest) {
@@ -37,16 +41,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // cookies() est synchrone
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
-    let user = null;
+    let user: JwtSession | null = null;
 
     try {
       const token = sessionCookie?.value;
-      if (token) user = verifyToken(token);
-    } catch (error) {
-      console.error("Token verification error:", error);
+      if (token) {
+        user = verifyToken(token) as JwtSession;
+      }
+    } catch (err) {
+      console.error("Token verification error:", err);
       return NextResponse.json(
         { success: false, message: "Invalid or expired token" },
         { status: 401 }
@@ -60,14 +65,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // On lit le hold + le TTL (expiresIn) calculé par MySQL
     const [rows] = await pool.query<ReservationRow[]>(
       `
       SELECT 
         r.*,
         ct.id   AS ct_id,
         ct.name AS ct_name,
-        ct.picture AS ct_picture,
         GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), r.expireAt)) AS expiresIn
       FROM reservation_hold r
       JOIN console_stock cs ON r.console_id = cs.id
@@ -78,7 +81,7 @@ export async function GET(request: NextRequest) {
       [reservationId, Number(user.id)]
     );
 
-    if (rows.length === 0) {
+    if (!rows || rows.length === 0) {
       return NextResponse.json(
         {
           success: false,
@@ -91,7 +94,7 @@ export async function GET(request: NextRequest) {
 
     const reservation = rows[0];
 
-    // Si déjà expiré pour MySQL (expiresIn == 0), on nettoie et on retourne 410
+    // Si expiré, nettoyage transactionnel et 410
     if (Number(reservation.expiresIn) <= 0) {
       const conn = await pool.getConnection();
       try {
@@ -115,7 +118,9 @@ export async function GET(request: NextRequest) {
           );
         }
 
-        await conn.query(`DELETE FROM reservation_hold WHERE id = ?`, [reservationId]);
+        await conn.query(`DELETE FROM reservation_hold WHERE id = ?`, [
+          reservation.id,
+        ]);
         await conn.commit();
       } catch (e) {
         await conn.rollback();
@@ -126,7 +131,11 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json(
-        { success: false, status: "expired", message: "Reservation has expired" },
+        {
+          success: false,
+          status: "expired",
+          message: "Reservation has expired",
+        },
         { status: 410 }
       );
     }
@@ -137,20 +146,30 @@ export async function GET(request: NextRequest) {
       reservation.game3_id,
     ].filter((id): id is number => id !== null);
 
+    // Parse sécurisé des accessoires
     let accessories: number[] = [];
-    if (reservation.accessoirs) {
-      try {
-        if (typeof reservation.accessoirs === "string") {
-          accessories = JSON.parse(reservation.accessoirs);
-        } else if (Array.isArray(reservation.accessoirs)) {
-          accessories = reservation.accessoirs;
-        }
-        if (!Array.isArray(accessories)) {
-          console.warn("Accessories is not an array, resetting to empty");
+    if (reservation.accessoirs != null) {
+      if (Array.isArray(reservation.accessoirs)) {
+        accessories = reservation.accessoirs.filter(
+          (v): v is number => typeof v === "number"
+        );
+      } else if (typeof reservation.accessoirs === "string") {
+        try {
+          const parsed = JSON.parse(
+            reservation.accessoirs
+          ) as Array<unknown> | null;
+          if (Array.isArray(parsed)) {
+            accessories = parsed.filter(
+              (v): v is number => typeof v === "number"
+            );
+          } else {
+            accessories = [];
+          }
+        } catch (parseErr) {
+          console.error("Error parsing accessories JSON:", parseErr);
           accessories = [];
         }
-      } catch (e) {
-        console.error("Error parsing accessories:", e);
+      } else {
         accessories = [];
       }
     }
@@ -162,11 +181,14 @@ export async function GET(request: NextRequest) {
     if (accessories.length > 0) currentStep = 4;
     if (reservation.date && reservation.time) currentStep = 5;
     if (reservation.cours !== null) currentStep = 6;
-    if (reservation.console_id && reservation.cours !== null && gameIds.length === 0) {
+    if (
+      reservation.console_id &&
+      reservation.cours !== null &&
+      gameIds.length === 0
+    ) {
       currentStep = 3;
     }
 
-    // On s’aligne sur l’API front : timeRemaining = expiresIn (pour compat)
     const expiresAtIso = new Date(reservation.expireAt).toISOString();
     const expiresIn = Number(reservation.expiresIn);
     const timeRemaining = Math.max(0, expiresIn);
@@ -191,17 +213,18 @@ export async function GET(request: NextRequest) {
       expiresAt: expiresAtIso,
       createdAt: new Date(reservation.createdAt).toISOString(),
       currentStep,
-      // compat + nouveau champ
-      timeRemaining,     // = expiresIn
-      expiresIn,         // <<< à utiliser côté front pour initialiser le compteur
+      timeRemaining,
+      expiresIn,
     });
-  } catch (err: unknown) {
+  } catch (err) {
+    // pas d'annotation 'unknown' ; on récupère le message si possible
     console.error("Error fetching active reservation:", err);
+    const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
       {
         success: false,
         message: "Error fetching reservation",
-        error: err instanceof Error ? err.message : "Unknown error",
+        error: message,
       },
       { status: 500 }
     );

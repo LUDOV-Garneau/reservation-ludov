@@ -14,8 +14,8 @@ type Body = {
   game3Id?: number | null;
   accessoryIds?: number[] | null;
   coursId: number;
-  date: string;   // <- YYYY-MM-DD (string, pas Date)
-  time: string;   // <- HH:MM(:SS)
+  date: string; // <- YYYY-MM-DD (string, pas Date)
+  time: string; // <- HH:MM(:SS)
 };
 
 interface ReservationHoldRow extends RowDataPacket {
@@ -46,10 +46,16 @@ export async function POST(req: Request) {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
     } catch {
-      return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Invalid or expired token" },
+        { status: 401 }
+      );
     }
     if (!user?.id) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     // Body
@@ -57,7 +63,10 @@ export async function POST(req: Request) {
     try {
       body = await req.json();
     } catch {
-      return NextResponse.json({ success: false, message: "Invalid JSON body" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Invalid JSON body" },
+        { status: 400 }
+      );
     }
 
     console.log("📥 Received reservation confirmation data:", body);
@@ -65,67 +74,116 @@ export async function POST(req: Request) {
     // Champs requis
     const missing: string[] = [];
     if (!body.reservationHoldId) missing.push("reservationHoldId");
-    if (!body.consoleId)        missing.push("consoleId");
-    if (!body.consoleTypeId)    missing.push("consoleTypeId");
-    if (!body.game1Id)          missing.push("game1Id");
-    if (!body.coursId)          missing.push("coursId");
-    if (!body.date)             missing.push("date");
-    if (!body.time)             missing.push("time");
+    if (!body.consoleId) missing.push("consoleId");
+    if (!body.consoleTypeId) missing.push("consoleTypeId");
+    if (!body.game1Id) missing.push("game1Id");
+    if (!body.coursId) missing.push("coursId");
+    if (!body.date) missing.push("date");
+    if (!body.time) missing.push("time");
     if (missing.length) {
-      return NextResponse.json({ success: false, message: `Champs obligatoire manquant: ${missing.join(", ")}` }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Champs obligatoire manquant: ${missing.join(", ")}`,
+        },
+        { status: 400 }
+      );
     }
 
     const reservationHoldId = String(body.reservationHoldId).trim();
     if (!reservationHoldId) {
-      return NextResponse.json({ success: false, message: "reservationHoldId must be a non-empty string" }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "reservationHoldId must be a non-empty string",
+        },
+        { status: 400 }
+      );
     }
 
     // Numériques
-    const consoleId     = Number(body.consoleId);
+    const consoleId = Number(body.consoleId);
     const consoleTypeId = Number(body.consoleTypeId);
-    const game1Id       = Number(body.game1Id);
-    const coursId       = Number(body.coursId);
-    if (![consoleId, consoleTypeId, game1Id, coursId].every(n => Number.isFinite(n) && n > 0)) {
-      return NextResponse.json({ success: false, message: "IDs must be positive numbers" }, { status: 400 });
+    const game1Id = Number(body.game1Id);
+    const coursId = Number(body.coursId);
+    if (
+      ![consoleId, consoleTypeId, game1Id, coursId].every(
+        (n) => Number.isFinite(n) && n > 0
+      )
+    ) {
+      return NextResponse.json(
+        { success: false, message: "IDs must be positive numbers" },
+        { status: 400 }
+      );
     }
 
     const game2Id = body.game2Id != null ? Number(body.game2Id) : null;
     const game3Id = body.game3Id != null ? Number(body.game3Id) : null;
     if (game2Id != null && (!Number.isFinite(game2Id) || game2Id <= 0)) {
-      return NextResponse.json({ success: false, message: "game2Id must be a positive number" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "game2Id must be a positive number" },
+        { status: 400 }
+      );
     }
     if (game3Id != null && (!Number.isFinite(game3Id) || game3Id <= 0)) {
-      return NextResponse.json({ success: false, message: "game3Id must be a positive number" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "game3Id must be a positive number" },
+        { status: 400 }
+      );
     }
 
     // Accessoires
     const accessoryIds: number[] = Array.isArray(body.accessoryIds)
-      ? body.accessoryIds.map(Number).filter(n => Number.isFinite(n) && n > 0)
+      ? body.accessoryIds.map(Number).filter((n) => Number.isFinite(n) && n > 0)
       : [];
 
     // Date/heure (local, pas d’UTC)
     const dateStr = String(body.date).trim();
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateStr)) {
-      return NextResponse.json({ success: false, message: "Invalid date format. Expected YYYY-MM-DD" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Invalid date format. Expected YYYY-MM-DD" },
+        { status: 400 }
+      );
     }
 
     const timeStr = String(body.time).trim();
     const timeRegex = /^\d{2}:\d{2}(:\d{2})?$/;
     if (!timeRegex.test(timeStr)) {
-      return NextResponse.json({ success: false, message: "Invalid time format. Expected HH:MM or HH:MM:SS" }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid time format. Expected HH:MM or HH:MM:SS",
+        },
+        { status: 400 }
+      );
     }
     const [H, M] = timeStr.split(":").map(Number);
     if (H < 0 || H > 23 || M < 0 || M > 59) {
-      return NextResponse.json({ success: false, message: "Invalid time value. Hours 0-23, minutes 0-59" }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid time value. Hours 0-23, minutes 0-59",
+        },
+        { status: 400 }
+      );
     }
 
     // Interdiction date passée (locale)
     const now = new Date();
-    const todayLocal = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const todayStr = `${todayLocal.getFullYear()}-${String(todayLocal.getMonth()+1).padStart(2,'0')}-${String(todayLocal.getDate()).padStart(2,'0')}`;
+    const todayLocal = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const todayStr = `${todayLocal.getFullYear()}-${String(
+      todayLocal.getMonth() + 1
+    ).padStart(2, "0")}-${String(todayLocal.getDate()).padStart(2, "0")}`;
     if (dateStr < todayStr) {
-      return NextResponse.json({ success: false, message: "Date cannot be in the past" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: "Date cannot be in the past" },
+        { status: 400 }
+      );
     }
 
     // ─────────────────────────────────────────────────────
@@ -144,18 +202,33 @@ export async function POST(req: Request) {
       );
       if (holdRows.length === 0) {
         await connection.rollback();
-        return NextResponse.json({ success: false, message: "Reservation hold not found, expired or not yours" }, { status: 404 });
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Reservation hold not found, expired or not yours",
+          },
+          { status: 404 }
+        );
       }
       const hold = holdRows[0];
 
       // Intégrité
       if (hold.console_id !== consoleId) {
         await connection.rollback();
-        return NextResponse.json({ success: false, message: "Console ID does not match the hold" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, message: "Console ID does not match the hold" },
+          { status: 400 }
+        );
       }
       if (hold.console_type_id !== consoleTypeId) {
         await connection.rollback();
-        return NextResponse.json({ success: false, message: "Console Type ID does not match the hold" }, { status: 400 });
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Console Type ID does not match the hold",
+          },
+          { status: 400 }
+        );
       }
       if (
         hold.game1_id !== game1Id ||
@@ -163,7 +236,10 @@ export async function POST(req: Request) {
         (hold.game3_id || null) !== (game3Id || null)
       ) {
         await connection.rollback();
-        return NextResponse.json({ success: false, message: "Game IDs do not match the hold" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, message: "Game IDs do not match the hold" },
+          { status: 400 }
+        );
       }
 
       // Console active/type OK
@@ -173,14 +249,23 @@ export async function POST(req: Request) {
       );
       if (consoles.length === 0) {
         await connection.rollback();
-        return NextResponse.json({ success: false, message: "Console is not available or does not match the type" }, { status: 400 });
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Console is not available or does not match the type",
+          },
+          { status: 400 }
+        );
       }
 
       // Accessoires : cohérence + existence
       if (accessoryIds.length > 0) {
         if (!hold.accessoirs) {
           await connection.rollback();
-          return NextResponse.json({ success: false, message: "No accessories held" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, message: "No accessories held" },
+            { status: 400 }
+          );
         }
         let holdAccessories: number[] = [];
         try {
@@ -188,16 +273,24 @@ export async function POST(req: Request) {
             ? (hold.accessoirs as number[])
             : JSON.parse(hold.accessoirs);
           if (!Array.isArray(holdAccessories)) throw new Error("not array");
-          holdAccessories = holdAccessories.map(Number).filter(n => Number.isFinite(n) && n > 0);
+          holdAccessories = holdAccessories
+            .map(Number)
+            .filter((n) => Number.isFinite(n) && n > 0);
         } catch {
           await connection.rollback();
-          return NextResponse.json({ success: false, message: "Invalid accessory data in hold" }, { status: 500 });
+          return NextResponse.json(
+            { success: false, message: "Invalid accessory data in hold" },
+            { status: 500 }
+          );
         }
-        const a = [...holdAccessories].sort((x,y)=>x-y);
-        const b = [...accessoryIds].sort((x,y)=>x-y);
+        const a = [...holdAccessories].sort((x, y) => x - y);
+        const b = [...accessoryIds].sort((x, y) => x - y);
         if (JSON.stringify(a) !== JSON.stringify(b)) {
           await connection.rollback();
-          return NextResponse.json({ success: false, message: "Accessory IDs do not match the hold" }, { status: 400 });
+          return NextResponse.json(
+            { success: false, message: "Accessory IDs do not match the hold" },
+            { status: 400 }
+          );
         }
         const phAcc = accessoryIds.map(() => "?").join(", ");
         const [accRows] = await connection.query<RowDataPacket[]>(
@@ -206,23 +299,37 @@ export async function POST(req: Request) {
         );
         if (accRows.length !== accessoryIds.length) {
           await connection.rollback();
-          return NextResponse.json({ success: false, message: "One or more selected accessories do not exist" }, { status: 400 });
+          return NextResponse.json(
+            {
+              success: false,
+              message: "One or more selected accessories do not exist",
+            },
+            { status: 400 }
+          );
         }
       }
 
       // Date/heure (pas d’UTC) : compare string yyyy-mm-dd et time texte
       const holdDateStr =
         hold.date instanceof Date
-          ? `${hold.date.getFullYear()}-${String(hold.date.getMonth()+1).padStart(2,'0')}-${String(hold.date.getDate()).padStart(2,'0')}`
-          : String(hold.date).slice(0,10);
+          ? `${hold.date.getFullYear()}-${String(
+              hold.date.getMonth() + 1
+            ).padStart(2, "0")}-${String(hold.date.getDate()).padStart(2, "0")}`
+          : String(hold.date).slice(0, 10);
 
       if (holdDateStr !== dateStr) {
         await connection.rollback();
-        return NextResponse.json({ success: false, message: "Date does not match the hold" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, message: "Date does not match the hold" },
+          { status: 400 }
+        );
       }
       if (hold.time !== timeStr) {
         await connection.rollback();
-        return NextResponse.json({ success: false, message: "Time does not match the hold" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, message: "Time does not match the hold" },
+          { status: 400 }
+        );
       }
 
       // Re-check expiration juste avant insertion
@@ -232,7 +339,10 @@ export async function POST(req: Request) {
       );
       if (stillValid.length === 0) {
         await connection.rollback();
-        return NextResponse.json({ success: false, message: "Reservation hold has expired" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, message: "Reservation hold has expired" },
+          { status: 400 }
+        );
       }
 
       // Insertion
@@ -259,13 +369,23 @@ export async function POST(req: Request) {
       );
 
       // Nettoyage/libération
-      await connection.query(`DELETE FROM reservation_hold WHERE id = ?`, [reservationHoldId]);
-      await connection.query(`UPDATE console_stock SET holding = 0 WHERE id = ?`, [consoleId]);
+      await connection.query(`DELETE FROM reservation_hold WHERE id = ?`, [
+        reservationHoldId,
+      ]);
+      await connection.query(
+        `UPDATE console_stock SET holding = 0 WHERE id = ?`,
+        [consoleId]
+      );
 
-      const gameIdsToRelease = [game1Id, game2Id, game3Id].filter((x): x is number => Number.isFinite(x as number));
+      const gameIdsToRelease = [game1Id, game2Id, game3Id].filter(
+        (x): x is number => Number.isFinite(x as number)
+      );
       if (gameIdsToRelease.length) {
         const phGames = gameIdsToRelease.map(() => "?").join(", ");
-        await connection.query(`UPDATE games SET holding = 0 WHERE id IN (${phGames})`, gameIdsToRelease);
+        await connection.query(
+          `UPDATE games SET holding = 0 WHERE id IN (${phGames})`,
+          gameIdsToRelease
+        );
       }
 
       await connection.commit();
@@ -278,7 +398,9 @@ export async function POST(req: Request) {
             reservationId,
             consoleId,
             consoleTypeId,
-            game1Id, game2Id, game3Id,
+            game1Id,
+            game2Id,
+            game3Id,
             accessoryIds: accessoryIds.length ? accessoryIds : null,
             coursId,
             date: dateStr,

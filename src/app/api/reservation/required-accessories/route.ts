@@ -49,11 +49,15 @@ export async function GET(request: NextRequest) {
     }
 
     const [mapped] = await pool.query<RowDataPacket[]>(
-      `SELECT id FROM accessoires WHERE koha_id IN (?)`,
+      `SELECT DISTINCT accessoire_type_id 
+       FROM accessoires_stock 
+       WHERE accessoire_type_id IN (?)
+       AND holding = 0 
+       AND hidden = 0`,
       [kohaIds]
     );
 
-    const accessoryIds = mapped.map((row) => row.id);
+    const accessoryIds = mapped.map((row) => row.accessoire_type_id);
 
     return NextResponse.json({
       required_accessories: accessoryIds,
