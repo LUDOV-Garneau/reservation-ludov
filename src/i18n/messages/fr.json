@@ -225,7 +225,8 @@
       "cancelWarningTitle": "Action irréversible",
       "cancelWarning": "Cette action ne peut pas être annulée. Vous devrez créer une nouvelle réservation si vous changez d'avis.",
       "cancelConfirmButton": "Confirmer l'annulation",
-      "canceling": "Annulation en cours..."
+      "canceling": "Annulation en cours...",
+      "cancelReservation": "Annuler la réservation"
     },
     "accueil": {
       "upcomingReservations": "Réservations à venir",
@@ -456,7 +457,8 @@
           "status": "Statut"
         },
         "ActionToolTips": {
-          "deleteReservation": "Supprimer la réservation"
+          "deleteReservation": "Supprimer la réservation",
+          "viewDetails": "Voir les détails"
         },
         "alert": {
           "delete_failed": "Erreur lors de la suppression",
@@ -484,7 +486,8 @@
       },
       "status": {
         "upcoming": "À venir",
-        "past": "Passée"
+        "past": "Passée",
+        "cancelled": "Annulée"
       },
       "deleteDialog": {
         "title": "Supprimer la réservation",
