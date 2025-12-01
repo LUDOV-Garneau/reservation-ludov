@@ -445,7 +445,7 @@ export default function StationsTable() {
       const data = await res.json();
       setTotalActiveStations(data.data.totalActiveStations);
       setTotalInactiveStations(data.data.totalInactiveStations);
-      setStationMostReservations(data.mostUsedName);
+      setStationMostReservations(data.data.mostUsedStationName);
     } catch (error) {
       console.error("Error fetching stations stats:", error);
     } finally {
