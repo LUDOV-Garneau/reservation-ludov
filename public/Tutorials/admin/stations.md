@@ -35,13 +35,34 @@ Le bouton **Ajouter une nouvelle station** ouvre un formulaire où les administr
 2. Entrez le nom de la station dans le champ prévu à cet effet.
 
 3. Sélectionnez les consoles associées à cette station. Pour chaque consoles sélectionnée, assurez-vous de cliquer sur le bouton **Ajouter** pour l'associer correctement.
+**(image)**
 
 4. Cliquez sur le bouton **Ajouter** dans le bas du formulaire pour créer la station.
 
 ## Modifier une station existante
+Le bouton **Modifier** dans la colonne des actions ouvre un formulaire pré-rempli avec les informations actuelles de la station sélectionnée. Les administrateurs peuvent mettre à jour le nom de la station et les consoles associées.
 
+### Comment modifer une station :
+1. Cliquez sur le bouton **Modifier** à côté de la station que vous souhaitez mettre à jour.
+
+2. Mettez à jour le nom de la station si nécessaire.
+
+3. Modifiez les consoles associées en ajoutant ou supprimant des consoles selon vos besoins. Il est impossible d'ajouter une console déjà associée à cette station. Comme pour l'ajout, assurez-vous de cliquer sur le bouton **Ajouter** pour chaque console que vous souhaitez associer.
+
+4. Cochez le champ **Active** pour changer le statut de la station.
+**(image)**
+
+5. Cliquez sur le bouton **Modifier** pour appliquer les modifications.
 
 ## Supprimer une station
+Le bouton **Supprimer** dans la colonne des actions permet aux administrateurs de retirer une station du système. Une confirmation sera demandée avant la suppression définitive.
 
+### Comment modifer une station :
+
+1. Cliquez sur le bouton **Supprimer** à côté de la station que vous souhaitez retirer.
+
+2. Confirmez la suppression dans la fenêtre contextuelle qui apparaît. **Attention : cette action est irréversible.**
 
 ## Métriques des stations
+Les administrateurs peuvent consulter diverses métriques liées aux stations, telles que le nombre de stations actives, le nombre de stations inactives, et la station la plus réservée. Ces informations sont accessibles en haut du tableau des stations et seront changés automatiquement pour correspondre aux données actuelles.
+**(image)**
