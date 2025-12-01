@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Calendar, Clock, CheckCircle2, XCircle, AlertTriangle, Info, Trash2, Menu } from "lucide-react";
+import { Calendar, Clock, CheckCircle2, XCircle, AlertTriangle, Info, Trash2, Menu, Eye } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import PaginationControls from "./Pagination";
 import ActionBar from "./ActionBar";
 import CardReservationStats from "./CardStats";
 import DeleteReservationAction from "./DeleteReservationAction";
+import { useRouter } from "next/navigation";
 
 type Reservation = {
   id: string;
@@ -22,6 +23,7 @@ type Reservation = {
   date: string;
   heure: string;
   userNom: string | null;
+  archived: boolean;
 };
 
 type ReservationsApiResponse = {
@@ -164,7 +166,7 @@ function TableSkeleton() {
   );
 }
 
-type ReservationStatus = "upcoming" | "past";
+type ReservationStatus = "upcoming" | "past" | "cancelled";
 
 function getReservationStatus(date: string, heure: string): ReservationStatus {
   if (!date || !heure) return "past";
@@ -173,8 +175,20 @@ function getReservationStatus(date: string, heure: string): ReservationStatus {
   return reservationDate.getTime() >= now.getTime() ? "upcoming" : "past";
 }
 
-function ReservationStatusBadge({ date, heure }: { date: string; heure: string }) {
+function ReservationStatusBadge({ date, heure, archived }: { date: string; heure: string; archived: boolean }) {
   const t = useTranslations();
+
+  if (archived) {
+    return (
+      <Badge className="bg-red-600 text-white border-0 text-xs">
+        <XCircle className="h-3 w-3 mr-1" />
+        <span className="hidden sm:inline">
+          {t("admin.reservations.status.cancelled")}
+        </span>
+        <span className="sm:hidden">!</span>
+      </Badge>
+    );
+  }
   const status = getReservationStatus(date, heure);
 
   if (status === "upcoming") {
@@ -213,6 +227,7 @@ function ReservationTableRow({
   onSuccess: () => void;
 }) {
   const t = useTranslations();
+  const router = useRouter();
 
   return (
     <TableRow key={reservation.id} className="hover:bg-gray-200">
@@ -252,44 +267,65 @@ function ReservationTableRow({
 
       {/* Status */}
       <TableCell>
-        <ReservationStatusBadge date={reservation.date} heure={reservation.heure} />
+        <ReservationStatusBadge date={reservation.date} heure={reservation.heure} archived={reservation.archived} />
       </TableCell>
 
       {/* Actions */}
       <TableCell>
         <div className="hidden sm:flex gap-2 justify-center">
-          <DeleteReservationAction
-            targetReservation={{
-              id: reservation.id,
-              userEmail: reservation.userNom,
-              date: reservation.date,
-              heure: reservation.heure,
-            }}
-            onAlert={onAlert}
-            onSuccess={onSuccess}
-          >
-            {({ open, loading }) => (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={open}
-                      disabled={loading}
-                      className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
-                      aria-label={t("admin.reservations.table.ActionToolTips.deleteReservation")}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{t("admin.reservations.table.ActionToolTips.deleteReservation")}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </DeleteReservationAction>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push(`/admin/reservation/details/${reservation.id}`)}
+                  className="hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-300 transition-colors h-8 w-8 p-0"
+                  aria-label={t("admin.reservations.table.ActionToolTips.viewDetails")}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t("admin.reservations.table.ActionToolTips.viewDetails")}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {!reservation.archived && (
+            <DeleteReservationAction
+              targetReservation={{
+                id: reservation.id,
+                userEmail: reservation.userNom,
+                date: reservation.date,
+                heure: reservation.heure,
+              }}
+              onAlert={onAlert}
+              onSuccess={onSuccess}
+            >
+              {({ open, loading }) => (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={open}
+                        disabled={loading}
+                        className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
+                        aria-label={t("admin.reservations.table.ActionToolTips.deleteReservation")}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t("admin.reservations.table.ActionToolTips.deleteReservation")}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </DeleteReservationAction>
+          )}
         </div>
 
         {/* Mobile actions */}
@@ -301,31 +337,40 @@ function ReservationTableRow({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DeleteReservationAction
-                targetReservation={{
-                  id: reservation.id,
-                  userEmail: reservation.userNom,
-                  date: reservation.date,
-                  heure: reservation.heure,
-                }}
-                onAlert={onAlert}
-                onSuccess={onSuccess}
+              <DropdownMenuItem
+                onClick={() => router.push(`/admin/reservation/details/${reservation.id}`)}
               >
-                {({ open }) => (
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      open();
-                    }}
-                    onSelect={(e) => e.preventDefault()}
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2 text-red-600" />
-                    {t("admin.reservations.table.ActionToolTips.deleteReservation")}
-                  </DropdownMenuItem>
-                )}
-              </DeleteReservationAction>
+                <Eye className="h-4 w-4 mr-2 text-cyan-600" />
+                {t("admin.reservations.table.ActionToolTips.viewDetails")}
+              </DropdownMenuItem>
+
+              {!reservation.archived && (
+                <DeleteReservationAction
+                  targetReservation={{
+                    id: reservation.id,
+                    userEmail: reservation.userNom,
+                    date: reservation.date,
+                    heure: reservation.heure,
+                  }}
+                  onAlert={onAlert}
+                  onSuccess={onSuccess}
+                >
+                  {({ open }) => (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        open();
+                      }}
+                      onSelect={(e) => e.preventDefault()}
+                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                      {t("admin.reservations.table.ActionToolTips.deleteReservation")}
+                    </DropdownMenuItem>
+                  )}
+                </DeleteReservationAction>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -384,6 +429,7 @@ export default function ReservationsTable() {
         date: r.date,
         heure: r.heure ?? "",
         userNom: r.userNom ?? null,
+        archived: Boolean(r.archived),
       }));
 
       setReservations(rows);
