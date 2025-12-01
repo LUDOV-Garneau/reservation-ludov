@@ -20,28 +20,18 @@
 
 ### À propos de ce guide
 
-Ce guide détaillé vous accompagne dans toutes les étapes de la gestion des utilisateurs via le panneau d'administration. Que vous soyez administrateur système, gestionnaire de comptes ou responsable IT, vous trouverez ici toutes les informations nécessaires pour administrer efficacement les comptes utilisateurs de votre plateforme.
-
-### Prérequis
-
-Avant de commencer, assurez-vous de disposer de :
-
-- Un compte administrateur actif avec les permissions appropriées
-- Un accès au panneau d'administration de la plateforme
-- Une connexion internet stable
-- Un navigateur web à jour (Chrome, Firefox, Safari ou Edge recommandés)
+Ce guide détaillé vous accompagne dans toutes les étapes de la gestion des utilisateurs via le panneau d'administration.
 
 ### Rôles et permissions
 
-Le système distingue trois niveaux d'accès principaux :
+Le système distingue deux niveaux d'accès principaux :
 
-- **Administrateur** : Accès complet à toutes les fonctionnalités, y compris la gestion des utilisateurs et des paramètres système
-- **Gestionnaire** : Peut créer et modifier des utilisateurs, mais avec des restrictions sur certaines fonctions critiques
-- **Utilisateur** : Accès limité aux fonctionnalités de base sans droits d'administration
+- **Administrateur** : Accès complet à toutes les fonctionnalités, y compris la gestion des utilisateurs, des réservation, des stations, des disponibilités, des cours et de la politique de confidentialité
+- **Utilisateur** : Accès limité au module de réservation sans droits d'administration
 
 ---
 
-## Accès au module de gestion
+## 
 
 ### Étape 1 : Connexion au panneau d'administration
 
