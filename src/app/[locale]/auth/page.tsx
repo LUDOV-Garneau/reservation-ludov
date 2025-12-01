@@ -10,6 +10,7 @@ import SignupPasswordForm from "@/components/auth/SignupPasswordForm";
 import LocaleSwitcher from "@/components/layout/LocaleSwitcher";
 import Link from "next/link";
 import { Suspense } from "react";
+import PolitiquesClient from "@/components/politiques/PolitiquesClient";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<
@@ -17,6 +18,7 @@ export default function AuthPage() {
   >("login");
   const [email, setEmail] = useState<string>("");
   const [direction, setDirection] = useState<number>(1);
+  const [policyOpen, setPolicyOpen] = useState(false);
 
   const handleModeChange = (newMode: typeof mode) => {
     const modes = ["login", "signup-step1", "signup-step2", "signup-step3"];
@@ -112,9 +114,8 @@ export default function AuthPage() {
 
           <div className="bg-[white]/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-[white]/20 relative overflow-hidden">
             <div
-              className={`${
-                mode === "login" && "hidden"
-              } absolute top-0 left-0 right-0 h-1 bg-gray-200`}
+              className={`${mode === "login" && "hidden"
+                } absolute top-0 left-0 right-0 h-1 bg-gray-200`}
             >
               <div
                 className="h-full bg-cyan-500 transition-all duration-500 ease-out"
@@ -123,10 +124,10 @@ export default function AuthPage() {
                     mode === "login"
                       ? "0%"
                       : mode === "signup-step1"
-                      ? "33%"
-                      : mode === "signup-step2"
-                      ? "66%"
-                      : "100%",
+                        ? "33%"
+                        : mode === "signup-step2"
+                          ? "66%"
+                          : "100%",
                 }}
               />
             </div>
@@ -213,14 +214,16 @@ export default function AuthPage() {
             className="text-center mt-6 text-sm text-gray-600"
           >
             En continuant, vous acceptez nos{" "}
-            <Link
-              href="/politiques"
+            <button
+              onClick={() => setPolicyOpen(true)}
               className="text-cyan-600 hover:text-cyan-700 hover:underline transition-colors font-medium"
             >
               Conditions d&apos;utilisation
-            </Link>
+            </button>
           </motion.p>
         </div>
+
+        <PolitiquesClient open={policyOpen} onOpenChange={setPolicyOpen} />
       </div>
     </Suspense>
   );

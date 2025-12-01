@@ -3,9 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+import PolitiquesClient from "@/components/politiques/PolitiquesClient";
 
 export default function FooterInfos() {
   const t = useTranslations();
+  const [policyOpen, setPolicyOpen] = useState(false);
 
   return (
     <>
@@ -28,12 +31,12 @@ export default function FooterInfos() {
           >
             {t("footer.contact")}
           </a>
-          <Link
-            href="/politiques"
+          <button
+            onClick={() => setPolicyOpen(true)}
             className="text-black hover:text-[#aaaaaa] transition-all duration-300"
           >
             {t("footer.policy")}
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -49,6 +52,8 @@ export default function FooterInfos() {
         </a>
         <p className="mt-6">{t("footer.copyright")}</p>
       </div>
+
+      <PolitiquesClient open={policyOpen} onOpenChange={setPolicyOpen} />
     </>
   );
 }

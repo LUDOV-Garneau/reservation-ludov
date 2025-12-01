@@ -1,5 +1,5 @@
 "use client";
-// src/Tiptap.tsx
+
 import { useEditor, EditorContent, EditorContext } from '@tiptap/react'
 import { FloatingMenu, BubbleMenu } from '@tiptap/react/menus'
 import StarterKit from '@tiptap/starter-kit'
@@ -7,11 +7,10 @@ import { useMemo } from 'react'
 
 const Tiptap = () => {
   const editor = useEditor({
-    extensions: [StarterKit], // define your extension array
-    content: '<p>Hello World!</p>', // initial content
+    extensions: [StarterKit],
+    content: '<p>Hello World!</p>',
   })
 
-  // Memoize the provider value to avoid unnecessary re-renders
   const providerValue = useMemo(() => ({ editor }), [editor])
 
   return (

@@ -25,8 +25,8 @@ export default function TutorialViewer({
 
         const response = await fetch(
           adminRessources
-            ? `/Tutorials/admin/${page}.md`
-            : `/Tutorials/${page}.md`
+            ? `/tutoriels/admin/${page}.md`
+            : `/tutoriels/${page}.md`
         );
 
         if (!response.ok) {
@@ -81,7 +81,7 @@ export default function TutorialViewer({
       <div className="mx-auto max-w-full py-8">
         <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-6 shadow-sm">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg
                 className="h-6 w-6 text-red-600"
                 fill="none"
@@ -134,7 +134,7 @@ export default function TutorialViewer({
           prose-li:text-gray-700 prose-li:leading-relaxed prose-li:my-2
           prose-blockquote:border-l-4 prose-blockquote:border-cyan-500 prose-blockquote:bg-cyan-50 prose-blockquote:pl-6 prose-blockquote:pr-6 prose-blockquote:py-4 prose-blockquote:italic prose-blockquote:text-gray-700 prose-blockquote:rounded-r-lg prose-blockquote:shadow-sm prose-blockquote:my-8
           prose-img:rounded-xl prose-img:shadow-md prose-img:my-8 prose-img:border prose-img:border-gray-200
-          prose-hr:my-12 prose-hr:border-0 prose-hr:h-px prose-hr:bg-gradient-to-r prose-hr:from-transparent prose-hr:via-gray-300 prose-hr:to-transparent
+          prose-hr:my-12 prose-hr:border-0 prose-hr:h-px prose-hr:bg-linear-to-r prose-hr:from-transparent prose-hr:via-gray-300 prose-hr:to-transparent
           prose-table:border-collapse prose-table:w-full prose-table:my-8 prose-table:shadow-sm prose-table:rounded-lg prose-table:overflow-hidden prose-table:border prose-table:border-gray-200
           prose-thead:bg-gray-50
           prose-th:font-semibold prose-th:text-gray-900 prose-th:text-left prose-th:p-4 prose-th:border-r prose-th:border-gray-200 prose-th:text-sm

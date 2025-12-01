@@ -169,7 +169,7 @@ export default function ConfirmReservation() {
               <div className="flex items-center gap-4">
                 <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
                   <Image
-                    src={data.console.image || "/placeholder_consoles.jpg"}
+                    src={data.console.image || "/images/placeholder_consoles.jpg"}
                     alt={data.console.nom}
                     fill
                     className="object-cover"
