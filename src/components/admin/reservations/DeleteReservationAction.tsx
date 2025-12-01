@@ -1,18 +1,24 @@
 "use client";
 
 import { ReactNode, useState, useCallback } from "react";
-import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Calendar, 
+  Clock, 
+  User, 
+  Loader2, 
+  ShieldAlert, 
+  Trash2,
+  XCircle 
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type AlertType = "success" | "error" | "info" | "warning";
 
@@ -34,7 +40,6 @@ export default function DeleteReservationAction({
   onSuccess,
   children,
 }: DeleteReservationActionProps) {
-  const t = useTranslations();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -48,7 +53,10 @@ export default function DeleteReservationAction({
     }
   }, [loading]);
 
-  const handleConfirm = useCallback(async () => {
+  const handleConfirm = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loading) return;
+
     try {
       setLoading(true);
 
@@ -64,15 +72,15 @@ export default function DeleteReservationAction({
         const data = await res.json().catch(() => ({}));
         const message =
           (data && (data as { error?: string }).error) ||
-          t("admin.reservations.alert.deleteError");
+          "Erreur lors de la suppression de la réservation";
 
         throw new Error(message);
       }
 
       onAlert(
         "success",
-        t("admin.reservations.alert.deleteSuccess.message"),
-        t("admin.reservations.alert.deleteSuccess.title")
+        "La réservation a été supprimée avec succès",
+        "Réservation supprimée"
       );
       onSuccess();
       setOpen(false);
@@ -80,60 +88,123 @@ export default function DeleteReservationAction({
       console.error("Error deleting reservation:", error);
       onAlert(
         "error",
-        t("admin.reservations.alert.deleteError"),
-        t("admin.reservations.alert.errorTitle")
+        error instanceof Error ? error.message : "Erreur lors de la suppression de la réservation",
+        "Erreur"
       );
     } finally {
       setLoading(false);
     }
-  }, [targetReservation.id, onAlert, onSuccess, t]);
-
+  }, [targetReservation.id, onAlert, onSuccess, loading]);
 
   const emailOrPlaceholder =
-    targetReservation.userEmail ||
-    t("admin.reservations.table.noUser");
+    targetReservation.userEmail || "Utilisateur inconnu";
 
   return (
     <>
       {children({ open: handleOpen, loading })}
 
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t("admin.reservations.deleteDialog.title")}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t("admin.reservations.deleteDialog.description", {
-                email: emailOrPlaceholder,
-                date: targetReservation.date,
-                time: targetReservation.heure,
-              })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={handleClose}
-              disabled={loading}
-            >
-              {t("admin.reservations.deleteDialog.cancel")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              asChild
-            >
+      <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
+        <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] p-0 overflow-hidden">
+          {/* Header */}
+          <div className="border-b px-6 py-4 bg-red-50">
+            <div className="flex-1 pt-0.5">
+              <DialogTitle className="text-lg text-red-900">
+                Annuler la réservation
+              </DialogTitle>
+              <DialogDescription className="text-sm text-red-700 mt-1">
+                Cette action est définitive et ne peut pas être annulée.
+              </DialogDescription>
+            </div>
+          </div>
+
+          <form onSubmit={handleConfirm} className="px-6 pb-5 pt-5 space-y-5">
+            {/* Reservation Info Card */}
+            <div className="flex flex-col gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
+              <div className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <User className="h-4 w-4 text-gray-600 shrink-0" />
+                <span className="truncate">{emailOrPlaceholder}</span>
+              </div>
+              <div className="flex flex-wrap gap-3 text-xs text-gray-600">
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5 shrink-0" />
+                  <span>{targetReservation.date}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 shrink-0" />
+                  <span>{targetReservation.heure}</span>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Warning Section */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+                <ShieldAlert className="h-4 w-4 text-red-600" />
+                Que va-t-il se passer ?
+              </h4>
+              <ul className="space-y-2.5 text-sm text-gray-700">
+                <li className="flex items-start gap-2.5">
+                  <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
+                  <span>
+                    La réservation sera{" "}
+                    <strong className="text-gray-900">
+                      annulée définitivement
+                    </strong>
+                  </span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
+                  <span>
+                    Les jeux, la plateforme et les accessoires réservés seront libérés et disponibles pour d&#39;autres utilisateurs
+                  </span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
+                  <span>
+                    Cette action ne peut pas être annulée
+                  </span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">
               <Button
-                variant="destructive"
-                onClick={handleConfirm}
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto hover:bg-gray-50"
+                onClick={handleClose}
                 disabled={loading}
               >
-                {loading
-                  ? t("admin.reservations.deleteDialog.deleting")
-                  : t("admin.reservations.deleteDialog.confirm")}
+                Annuler
               </Button>
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+              <Button
+                type="submit"
+                className={cn(
+                  "w-full sm:w-auto",
+                  "bg-red-600 hover:bg-red-700",
+                  "text-white shadow-md hover:shadow-lg transition-all"
+                )}
+                disabled={loading}
+              >
+                {loading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Suppression en cours...
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <Trash2 className="h-4 w-4" />
+                    Confirmer l&#39;annulation
+                  </span>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
