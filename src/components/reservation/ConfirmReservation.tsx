@@ -97,6 +97,11 @@ export default function ConfirmReservation() {
     setError(null);
 
     try {
+      // ✅ Extraire les IDs des accessoires depuis les données
+      const accessoryIds = data.accessoires.map((acc) => acc.id);
+
+      console.log("🔍 Envoi des accessoires:", accessoryIds);
+
       const reservationData = await completeReservation();
 
       if (reservationData != null) {
@@ -342,9 +347,7 @@ export default function ConfirmReservation() {
                   <span className="text-gray-600">
                     {t("reservation.confirm.station")}
                   </span>
-                  <span className="font-medium">
-                    {data.station.nom}
-                  </span>
+                  <span className="font-medium">{data.station.nom}</span>
                 </div>
               )}
 

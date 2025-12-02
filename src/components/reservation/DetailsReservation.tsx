@@ -10,7 +10,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Cable,
-  Computer
+  Computer,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -37,7 +37,7 @@ interface Game {
 
 interface Console {
   nom: string;
-  picture: string;
+  picture?: string; // ← Optionnel car pas toujours présent
 }
 
 interface Accessory {
@@ -50,7 +50,7 @@ interface ReservationDetailsProps {
   jeux: Game[];
   console: Console;
   accessoires?: Accessory[];
-  station?: number | null;
+  station?: string | null; // ← Changé de number à string (nom de la station)
   date: string;
   heure: string;
   archived: boolean;
@@ -276,7 +276,7 @@ function ReservationHeader({
   heure: string;
   reservationId: string;
   consoleName: string;
-  station?: number | null;
+  station?: string | null; // ← Changé de number à string
   archived: boolean;
   onCancelSuccess: () => void;
   onCancelError: (error: Error) => void;
@@ -313,7 +313,6 @@ function ReservationHeader({
               </time>
             </div>
 
-
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
                 <Clock className="h-5 w-5 text-cyan-600" />
@@ -324,16 +323,13 @@ function ReservationHeader({
             </div>
 
             {station && (
-              <>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                    <Computer className="h-5 w-5 text-cyan-600" />
-                  </div>
-                  <span className="font-medium">{station}</span>
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                  <Computer className="h-5 w-5 text-cyan-600" />
                 </div>
-              </>
+                <span className="font-medium">{station}</span>
+              </div>
             )}
-
           </div>
         </div>
 
@@ -352,8 +348,8 @@ function ReservationHeader({
 
             <ReservationReminderDialog
               reservationId={reservationId}
-              onSendReminder={() => { }}
-              onError={() => { }}
+              onSendReminder={() => {}}
+              onError={() => {}}
             />
 
             <CancelReservationAlertDialog
@@ -430,10 +426,11 @@ export default function DetailsReservation({
         {alert?.show && (
           <Alert
             variant={alert.type === "error" ? "destructive" : "default"}
-            className={`mb-6 ${alert.type === "success"
-              ? "border-green-200 bg-green-50 text-green-900"
-              : ""
-              }`}
+            className={`mb-6 ${
+              alert.type === "success"
+                ? "border-green-200 bg-green-50 text-green-900"
+                : ""
+            }`}
             role="status"
             aria-live="polite"
           >
@@ -451,17 +448,18 @@ export default function DetailsReservation({
                   <AlertDescription>
                     {alert.type === "error"
                       ? alert.message ||
-                      "Une erreur est survenue. Veuillez essayer ultérieurement."
+                        "Une erreur est survenue. Veuillez essayer ultérieurement."
                       : alert.message}
                   </AlertDescription>
                 </div>
               </div>
               <button
                 onClick={() => setAlert(null)}
-                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${alert.type === "error"
-                  ? "bg-red-100 text-red-600 hover:bg-red-200"
-                  : "bg-green-100 text-green-600 hover:bg-green-200"
-                  }`}
+                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
+                  alert.type === "error"
+                    ? "bg-red-100 text-red-600 hover:bg-red-200"
+                    : "bg-green-100 text-green-600 hover:bg-green-200"
+                }`}
                 aria-label="Fermer l'alerte"
               >
                 ×

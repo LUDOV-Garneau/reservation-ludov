@@ -150,7 +150,7 @@ function generateAllTimeSlots(validRanges: Range[]): string[] {
       const timeString = `${hour.toString().padStart(2, "0")}:00:00`;
 
       const slotStart = hour * 60;
-      const slotEnd = slotStart + (SESSION_DURATION * 60);
+      const slotEnd = slotStart + SESSION_DURATION * 60;
 
       if (slotStart >= range.start && slotEnd <= range.end) {
         slots.push(timeString);
@@ -369,15 +369,15 @@ export async function GET(request: NextRequest) {
     const requestedConsoleId = parseInt(consoleId, 10);
     const requestedGameIds = gameIds
       ? gameIds
-        .split(",")
-        .map((id) => parseInt(id.trim(), 10))
-        .filter((id) => !isNaN(id))
+          .split(",")
+          .map((id) => parseInt(id.trim(), 10))
+          .filter((id) => !isNaN(id))
       : [];
     const requestedAccessoryIds = accessoryIds
       ? accessoryIds
-        .split(",")
-        .map((id) => parseInt(id.trim(), 10))
-        .filter((id) => !isNaN(id))
+          .split(",")
+          .map((id) => parseInt(id.trim(), 10))
+          .filter((id) => !isNaN(id))
       : [];
 
     const [consoleType] = await pool.query<ConsoleTypeRow[]>(
@@ -480,7 +480,11 @@ export async function GET(request: NextRequest) {
 
     if (allRequiredKoha.length > 0) {
       const [accRows] = await pool.query<RowDataPacket[]>(
-        `SELECT id, koha_id FROM accessoires WHERE koha_id IN (?)`,
+        `SELECT DISTINCT accessoire_type_id 
+          FROM accessoires_stock 
+          WHERE accessoire_type_id IN (?)
+          AND holding = 0 
+          AND hidden = 0`,
         [allRequiredKoha]
       );
 

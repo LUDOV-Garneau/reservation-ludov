@@ -13,7 +13,8 @@ interface ReservationRow extends RowDataPacket {
   game2Id: number | null;
   game3Id: number | null;
   stationId: number | null;
-  accessoirs: string | number[] | null;
+  accessoirsIds: number[] | null; // ← Changé
+  accessoirsTypeIds: number[] | null; // ← Ajouté
   date: string | null;
   time: string | null;
   expireAt: string;
@@ -123,7 +124,8 @@ export async function GET(req: Request) {
         rh.game2_id AS game2Id,
         rh.game3_id AS game3Id,
         rh.station_id AS stationId,
-        rh.accessoirs AS accessoirs,
+        rh.accessoirs_ids AS accessoirsIds,
+        rh.accessoirs_type_ids AS accessoirsTypeIds,
         rh.date,
         rh.time,
         rh.expireAt,
@@ -191,35 +193,17 @@ export async function GET(req: Request) {
       }
     }
 
+    // ✅ NOUVELLE LOGIQUE POUR LES ACCESSOIRES
     let accessories: Accessoire[] = [];
-    let accIds: number[] = [];
 
-    if (r.accessoirs == null) {
-      accIds = [];
-    } else if (Array.isArray(r.accessoirs)) {
-      accIds = r.accessoirs.filter((x): x is number => typeof x === "number");
-    } else if (typeof r.accessoirs === "string") {
-      try {
-        const parsed = JSON.parse(r.accessoirs) as Array<
-          number | string | null
-        > | null;
-        if (Array.isArray(parsed)) {
-          accIds = parsed.filter((v): v is number => typeof v === "number");
-        } else {
-          accIds = [];
-        }
-      } catch {
-        accIds = [];
-      }
-    } else {
-      accIds = [];
-    }
+    // Utiliser accessoirs_type_ids pour récupérer les noms des types
+    const accTypeIds = r.accessoirsTypeIds || [];
 
-    if (accIds.length > 0) {
-      const accPlaceholders = accIds.map(() => "?").join(",");
+    if (accTypeIds.length > 0) {
+      const accPlaceholders = accTypeIds.map(() => "?").join(",");
       const [accRows] = await pool.query<AccessoireRow[]>(
         `SELECT id, name FROM accessoires_type WHERE id IN (${accPlaceholders})`,
-        accIds
+        accTypeIds
       );
 
       accessories = accRows.map((a) => ({ id: a.id, nom: a.name }));

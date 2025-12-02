@@ -6,16 +6,20 @@ import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock } from "lucide-react";
 
-type Reservation = {
-  id: number;
-  station: number;
+// Type pour la réponse de l'API (ce que tu reçois)
+type ReservationAPIResponse = {
+  id: string;
+  station: string | null;
   date: string;
   heure: string;
   console: { nom: string; picture?: string };
-  jeux: { nom: string; picture: string; biblio: number }[];
-  accessoires?: { id: number; nom: string }[];
+  jeux: { nom: string; picture: string | null; biblio?: number }[];
+  accessoires: Array<{ id: number; nom: string }>; // ← L'API retourne déjà "nom"
   archived: boolean;
 };
+
+// Type pour l'état interne
+type Reservation = ReservationAPIResponse;
 
 type ReservationState = {
   data: Reservation | null;
@@ -126,8 +130,10 @@ function useReservation(id: string) {
           return;
         }
 
-        const data = await response.json();
+        const data: ReservationAPIResponse = await response.json();
         console.log("Reservation fetched:", data);
+
+        // Les accessoires arrivent déjà avec "nom" depuis l'API
         setState({ data, isLoading: false, error: false });
       } catch (error) {
         console.error("Error fetching reservation:", error);
@@ -159,11 +165,11 @@ export default function DetailsReservationClient({ id }: { id: string }) {
 
   return (
     <DetailsReservation
-      reservationId={reservation.id.toString()}
+      reservationId={reservation.id}
       jeux={reservation.jeux}
-      console={{ ...reservation.console, picture: reservation.console.picture ?? "" }}
+      console={reservation.console}
       archived={reservation.archived}
-      accessoires={reservation.accessoires ?? []}
+      accessoires={reservation.accessoires || []}
       station={reservation.station}
       date={reservation.date}
       heure={reservation.heure}

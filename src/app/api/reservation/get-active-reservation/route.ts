@@ -146,7 +146,6 @@ export async function GET(request: NextRequest) {
       reservation.game3_id,
     ].filter((id): id is number => id !== null);
 
-    // Parse sécurisé des accessoires
     let accessories: number[] = [];
     if (reservation.accessoirs != null) {
       if (Array.isArray(reservation.accessoirs)) {

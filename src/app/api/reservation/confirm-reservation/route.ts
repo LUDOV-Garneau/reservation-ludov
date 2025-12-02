@@ -12,10 +12,10 @@ type Body = {
   game1Id: number;
   game2Id?: number | null;
   game3Id?: number | null;
-  accessoryIds?: number[] | null;
+  accessoryIds?: number[] | null; // Ce sont des accessoires_stock.id
   coursId: number;
-  date: string; // <- YYYY-MM-DD (string, pas Date)
-  time: string; // <- HH:MM(:SS)
+  date: string;
+  time: string;
 };
 
 interface ReservationHoldRow extends RowDataPacket {
@@ -26,7 +26,8 @@ interface ReservationHoldRow extends RowDataPacket {
   game1_id: number;
   game2_id: number | null;
   game3_id: number | null;
-  accessoirs: string | null;
+  accessoirs_ids: number[] | null; // ← Changé
+  accessoirs_type_ids: number[] | null; // ← Ajouté
   station_id: number | null;
   cours: number | null;
   date: Date | string;
@@ -69,9 +70,6 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("📥 Received reservation confirmation data:", body);
-
-    // Champs requis
     const missing: string[] = [];
     if (!body.reservationHoldId) missing.push("reservationHoldId");
     if (!body.consoleId) missing.push("consoleId");
@@ -132,12 +130,12 @@ export async function POST(req: Request) {
       );
     }
 
-    // Accessoires
+    // Accessoires (ce sont des accessoires_stock.id)
     const accessoryIds: number[] = Array.isArray(body.accessoryIds)
       ? body.accessoryIds.map(Number).filter((n) => Number.isFinite(n) && n > 0)
       : [];
 
-    // Date/heure (local, pas d’UTC)
+    // Date/heure (local, pas d'UTC)
     const dateStr = String(body.date).trim();
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateStr)) {
@@ -190,7 +188,7 @@ export async function POST(req: Request) {
     // Transaction atomique
     await connection.beginTransaction();
     try {
-      // Hold valide, à l’utilisateur, non expiré
+      // Hold valide, à l'utilisateur, non expiré
       const [holdRows] = await connection.query<ReservationHoldRow[]>(
         `SELECT *
            FROM reservation_hold
@@ -258,32 +256,18 @@ export async function POST(req: Request) {
         );
       }
 
-      // Accessoires : cohérence + existence
       if (accessoryIds.length > 0) {
-        if (!hold.accessoirs) {
+        const holdAccessoryTypeIds = hold.accessoirs_type_ids || [];
+
+        if (holdAccessoryTypeIds.length === 0) {
           await connection.rollback();
           return NextResponse.json(
             { success: false, message: "No accessories held" },
             { status: 400 }
           );
         }
-        let holdAccessories: number[] = [];
-        try {
-          holdAccessories = Array.isArray(hold.accessoirs)
-            ? (hold.accessoirs as number[])
-            : JSON.parse(hold.accessoirs);
-          if (!Array.isArray(holdAccessories)) throw new Error("not array");
-          holdAccessories = holdAccessories
-            .map(Number)
-            .filter((n) => Number.isFinite(n) && n > 0);
-        } catch {
-          await connection.rollback();
-          return NextResponse.json(
-            { success: false, message: "Invalid accessory data in hold" },
-            { status: 500 }
-          );
-        }
-        const a = [...holdAccessories].sort((x, y) => x - y);
+
+        const a = [...holdAccessoryTypeIds].sort((x, y) => x - y);
         const b = [...accessoryIds].sort((x, y) => x - y);
         if (JSON.stringify(a) !== JSON.stringify(b)) {
           await connection.rollback();
@@ -292,9 +276,10 @@ export async function POST(req: Request) {
             { status: 400 }
           );
         }
+
         const phAcc = accessoryIds.map(() => "?").join(", ");
         const [accRows] = await connection.query<RowDataPacket[]>(
-          `SELECT id FROM accessoires WHERE id IN (${phAcc})`,
+          `SELECT id FROM accessoires_stock WHERE id IN (${phAcc})`,
           accessoryIds
         );
         if (accRows.length !== accessoryIds.length) {
@@ -309,7 +294,7 @@ export async function POST(req: Request) {
         }
       }
 
-      // Date/heure (pas d’UTC) : compare string yyyy-mm-dd et time texte
+      // Date/heure (pas d'UTC) : compare string yyyy-mm-dd et time texte
       const holdDateStr =
         hold.date instanceof Date
           ? `${hold.date.getFullYear()}-${String(
@@ -347,11 +332,23 @@ export async function POST(req: Request) {
 
       // Insertion
       const reservationId = `RSVP-${crypto.randomUUID()}`;
+
+      // ✅ Calculer les accessoire_type_ids depuis les accessoire_stock_ids
+      let accessoryTypeIds: number[] = [];
+      if (accessoryIds.length > 0) {
+        const phAcc = accessoryIds.map(() => "?").join(", ");
+        const [typeRows] = await connection.query<RowDataPacket[]>(
+          `SELECT DISTINCT accessoire_type_id FROM accessoires_stock WHERE id IN (${phAcc})`,
+          accessoryIds
+        );
+        accessoryTypeIds = typeRows.map((row) => row.accessoire_type_id);
+      }
+
       await connection.query(
         `INSERT INTO reservation
-           (id, user_id, console_id, console_type_id, game1_id, game2_id, game3_id,
-            accessory_ids, cours_id, station, date, time, createdAt)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+            (id, user_id, console_id, console_type_id, game1_id, game2_id, game3_id,
+              accessoirs_ids, accessoirs_type_ids, cours_id, station, date, time, createdAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
           reservationId,
           Number(user.id),
@@ -360,7 +357,8 @@ export async function POST(req: Request) {
           game1Id,
           game2Id,
           game3Id,
-          accessoryIds.length ? JSON.stringify(accessoryIds) : null,
+          accessoryIds.length ? JSON.stringify(accessoryIds) : null, // accessoirs_ids
+          accessoryTypeIds.length ? JSON.stringify(accessoryTypeIds) : null, // accessoirs_type_ids
           coursId,
           hold.station_id,
           dateStr,
@@ -385,6 +383,14 @@ export async function POST(req: Request) {
         await connection.query(
           `UPDATE games SET holding = 0 WHERE id IN (${phGames})`,
           gameIdsToRelease
+        );
+      }
+
+      if (accessoryIds.length > 0) {
+        const phAcc = accessoryIds.map(() => "?").join(", ");
+        await connection.query(
+          `UPDATE accessoires_stock SET holding = 0 WHERE id IN (${phAcc})`,
+          accessoryIds
         );
       }
 

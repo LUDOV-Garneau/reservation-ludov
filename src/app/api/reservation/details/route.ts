@@ -22,7 +22,8 @@ type ReservationHoldRow = RowDataPacket & {
   accessoires_json: Array<{ id: number; name: string }> | null;
 };
 
-const REGEX_RESERVATION_ID = /^RSVP-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const REGEX_RESERVATION_ID =
+  /^RSVP-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function testReservationIdRegex(id: string): boolean {
   return REGEX_RESERVATION_ID.test(id);
@@ -76,7 +77,10 @@ export async function GET(request: NextRequest) {
         g3.titre AS game3_title, g3.biblio_id AS game3_biblio_id, g3.picture AS game3_picture,
 
         JSON_ARRAYAGG(
-          JSON_OBJECT('id', a.id, 'name', a.name)
+          IF(ast.accessoire_type_id IS NOT NULL,
+            JSON_OBJECT('id', ast.accessoire_type_id, 'name', at.name),
+            NULL
+          )
         ) AS accessoires_json
 
       FROM reservation r
@@ -87,15 +91,16 @@ export async function GET(request: NextRequest) {
       LEFT JOIN games g3 ON g3.id = r.game3_id
 
       LEFT JOIN JSON_TABLE(
-        r.accessory_ids, '$[*]'
-        COLUMNS(accessoir_id INT PATH '$')
+        r.accessoirs_type_ids, '$[*]'
+        COLUMNS(accessory_stock_id INT PATH '$')
       ) jt ON TRUE
-      LEFT JOIN accessoires a ON a.id = jt.accessoir_id
+      LEFT JOIN accessoires_stock ast ON ast.id = jt.accessory_stock_id
+      LEFT JOIN accessoires_type at ON at.id = ast.accessoire_type_id
 
       WHERE r.id = ?
       GROUP BY
         r.id, r.user_id, r.station, DATE(r.date), r.time,
-        c.name, s.name,
+        c.name, r.archived, s.name,
         g1.titre, g1.biblio_id, g1.picture,
         g2.titre, g2.biblio_id, g2.picture,
         g3.titre, g3.biblio_id, g3.picture
@@ -104,24 +109,45 @@ export async function GET(request: NextRequest) {
     );
 
     if (!rows.length) {
-      return NextResponse.json({ error: "Reservation not found." }, { status: 404 });
+      return NextResponse.json(
+        { error: "Reservation not found." },
+        { status: 404 }
+      );
     }
 
     const row = rows[0];
-   
+
     const accessoires = Array.isArray(row.accessoires_json)
       ? row.accessoires_json
-          .filter(x => x && typeof x.id === "number" && typeof x.name === "string")
-          .map(x => ({ id: x.id, nom: x.name }))
+          .filter(
+            (x) => x && typeof x.id === "number" && typeof x.name === "string"
+          )
+          .map((x) => ({ id: x.id, nom: x.name }))
       : [];
 
     const jeux = [
-      { titre: row.game1_title, picture: row.game1_picture, biblio: row.game1_biblio_id },
-      { titre: row.game2_title, picture: row.game2_picture, biblio: row.game2_biblio_id },
-      { titre: row.game3_title, picture: row.game3_picture, biblio: row.game3_biblio_id },
+      {
+        titre: row.game1_title,
+        picture: row.game1_picture,
+        biblio: row.game1_biblio_id,
+      },
+      {
+        titre: row.game2_title,
+        picture: row.game2_picture,
+        biblio: row.game2_biblio_id,
+      },
+      {
+        titre: row.game3_title,
+        picture: row.game3_picture,
+        biblio: row.game3_biblio_id,
+      },
     ]
-      .filter(j => j.titre)
-      .map(j => ({ nom: j.titre as string, picture: j.picture, biblio: j.biblio ?? undefined }));
+      .filter((j) => j.titre)
+      .map((j) => ({
+        nom: j.titre as string,
+        picture: j.picture,
+        biblio: j.biblio ?? undefined,
+      }));
 
     return NextResponse.json({
       id: row.id,

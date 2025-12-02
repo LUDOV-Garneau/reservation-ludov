@@ -23,7 +23,7 @@ interface ReservationContextType {
   reservationId: string | null;
   userId: number;
   expiresAt: string | null;
-  
+
   selectedConsole: Console | null;
   selectedConsoleId: number;
   selectedGames: string[];
@@ -32,16 +32,16 @@ interface ReservationContextType {
   selectedDate: Date | undefined;
   selectedTime: string | undefined;
   currentStep: number;
-  
+
   startTimer: (consoleId?: number) => Promise<void>;
   stopTimer: () => void;
   resetTimer: () => void;
-  
+
   cancelReservation: () => Promise<void>;
   completeReservation: () => Promise<ReservationCompletedData | undefined>;
   updateReservationConsole: (newConsoleId: number) => Promise<void>;
   updateReservationAccessories: (ids: number[]) => Promise<void>;
-  
+
   setUserId: (id: number) => void;
   setSelectedConsole: (console: Console | null) => void;
   setSelectedGames: (games: string[]) => void;
@@ -271,7 +271,9 @@ export function ReservationProvider({
   const [selectedAccessories, setSelectedAccessories] = useState<number[]>([]);
   const [selectedCours, setSelectedCours] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(
+    undefined
+  );
   const [currentStep, setCurrentStep] = useState(1);
 
   // État de restauration
@@ -327,7 +329,7 @@ export function ReservationProvider({
         }
 
         const newReservationId = String(data.reservationId ?? data.holdId);
-        
+
         setSelectedConsoleId(Number(data.consoleStockId));
         setReservationId(newReservationId);
         setExpiresAt(expiresAtIso || null);
@@ -375,7 +377,7 @@ export function ReservationProvider({
 
   const cancelReservation = useCallback(async () => {
     if (!reservationId) return;
-    
+
     setIsLoading(true);
     try {
       await ReservationAPI.cancelHold(reservationId);
@@ -461,6 +463,16 @@ export function ReservationProvider({
       setError("Informations de réservation incomplètes");
       return;
     }
+
+    console.log("🔍 DEBUG completeReservation:", {
+      reservationId,
+      selectedConsoleId,
+      selectedGames,
+      selectedAccessories, // ← Vérifie cette valeur
+      selectedCours,
+      selectedDate,
+      selectedTime,
+    });
 
     setIsLoading(true);
     setError(null);
@@ -571,7 +583,10 @@ export function ReservationProvider({
         setCurrentStep(data.currentStep || 1);
         setIsTimerActive(true);
 
-        if (typeof data.expiresIn === "number" && !Number.isNaN(data.expiresIn)) {
+        if (
+          typeof data.expiresIn === "number" &&
+          !Number.isNaN(data.expiresIn)
+        ) {
           setTimeRemaining(
             Math.max(0, Math.min(timerDuration * 60, data.expiresIn))
           );
@@ -593,7 +608,7 @@ export function ReservationProvider({
   // Sauvegarde dans sessionStorage
   useEffect(() => {
     if (!isHydrated) return;
-    
+
     if (reservationId && !isReservationCancelled) {
       StorageService.save(reservationId);
     } else {
@@ -641,7 +656,7 @@ export function ReservationProvider({
     selectedDate,
     selectedTime,
     currentStep,
-    
+
     // Actions
     startTimer,
     stopTimer,
@@ -650,7 +665,7 @@ export function ReservationProvider({
     completeReservation,
     updateReservationConsole,
     updateReservationAccessories,
-    
+
     // Mutateurs
     setUserId,
     setSelectedConsole,
