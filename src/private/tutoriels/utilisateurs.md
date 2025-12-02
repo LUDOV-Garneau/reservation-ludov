@@ -57,7 +57,7 @@ Le bouton **Ajouter** ouvre un fenêtre permettant l'ajout simple ou multiple d'
 
 4. Cochez si l'utilisateur est un administrateur. S'il n'est pas administrateur, laissez l'option décochée
 
-4. Finalement, cliquez sur **Ajoute l'utilisateur** pour confirmer l'ajout
+4. Finalement, cliquez sur **Ajouter l'utilisateur** pour confirmer l'ajout
 
 ### Comment ajouter plusieurs utilisateurs
 1. Cliquez sur le bouton **Ajouter**

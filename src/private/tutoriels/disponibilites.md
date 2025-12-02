@@ -34,26 +34,17 @@ Ce guide détaillé vous accompagne dans toutes les étapes de la gestion des co
 Le tableau des cours affiche tous les cours du module de réservation du LUDOV. Chaque ligne du tableau représente un cours avec les colonnes suivantes :
    - **Nom** : Nom du cours
    - **Code du cours** : Code du cours
-   - **Actions** : Boutons permettant de modifier ou de supprimer un utilisateur 
+   - **Actions** : Boutons permettant de modifier ou de supprimer un cours
 
-## Ajouter un nouvel utilisateur
-Le bouton **Ajouter** ouvre un fenêtre permettant l'ajout simple ou multiple d'utilisateurs. 
+## Ajouter un nouveeau cours
+Le bouton **Ajouter** ouvre un dialogue permettant l'ajout d'un cours
 
-### Comment ajouter un utilisateur simple
+### Comment ajouter un cours
 1. Cliquez sur le bouton **Ajouter**.
 
-2. Choisissez l'option **Ajouter un utilisateur**
+2. Remplissez tous les champs, soit le nom et le code
 
-3. Remplissez tous les champs, soit le prénom, le nom de famille et l'adresse courriel
-
-4. Cochez si l'utilisateur est un administrateur. S'il n'est pas administrateur, laissez l'option décochée
-
-4. Finalement, cliquez sur **Ajoute l'utilisateur** pour confirmer l'ajout
-
-### Comment ajouter plusieurs utilisateurs
-1. Cliquez sur le bouton **Ajouter**
-
-2. Glissez un fichier CSV ou cliquez sur l'espace réservé **Glissez un fichier CSV** pour sélectionner un fichier à importer. Assurez-vous que le fichier soit conforme au format décrit en dessous de l'espace de dépôt
+4. Finalement, cliquez sur **Ajouter le cours** pour confirmer l'ajout
 
 ## Réinitialiser le mot de passe d'un utilisateur 
 En cliquant sur le bouton avec l'**icône de clé**, vous pouvez réinitialiser le mot de passe d'un utilisateur, le forçant ainsi à devoir le changer lors de sa prochaine connexion.
