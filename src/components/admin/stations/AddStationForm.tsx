@@ -154,7 +154,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
       <DialogTrigger asChild>{trigger}</DialogTrigger>
 
       <DialogContent className="max-w-[95vw] sm:max-w-[650px] w-full h-[90vh] p-0 gap-0 flex flex-col">
-        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0 bg-background">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
           <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
             <MonitorCheck className="w-5 h-5 text-cyan-600" />
             {t("titles.dialogTitle")}
@@ -302,7 +302,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
               )}
             </div>
           </div>
-          <div className="shrink-0 px-6 pb-4 bg-background">
+          <div className="shrink-0 px-6 pb-4">
             <Button
               type="submit"
               onClick={handleSubmit}

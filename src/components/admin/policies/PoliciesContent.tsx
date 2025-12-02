@@ -5,8 +5,6 @@ import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 import SimpleEditor from "./editor";
 import { Button } from "@/components/ui/button";
-import { da } from "date-fns/locale";
-import { set } from "date-fns";
 
 type Error = {
   title: string;
@@ -161,16 +159,16 @@ export default function PoliciesContent() {
       )}
 
       <div className="w-full">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-4">
           {policyData?.lastUpdatedAt && (
             <p className="mb-4 text-muted-foreground">
-              Dernière mise à jour{" "}
+              Dernière mise à jour
               {new Date(policyData.lastUpdatedAt).toLocaleDateString("fr-CA")}
             </p>
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full md:w-auto">
             <Button
-              className="bg-gray-400 hover:bg-red-500"
+              className="bg-gray-400 hover:bg-red-500 flex-1 md:flex-0"
               onClick={handleCancel}
               disabled={
                 isSaving || editedPolicyContent === policyData?.policies
@@ -179,7 +177,7 @@ export default function PoliciesContent() {
               Annuler
             </Button>
             <Button
-              className="bg-cyan-500 hover:bg-cyan-700"
+              className="bg-cyan-500 hover:bg-cyan-700 flex-1 md:flex-0"
               onClick={handleSave}
               disabled={
                 isSaving ||

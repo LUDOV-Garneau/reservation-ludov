@@ -340,50 +340,48 @@ function ReservationTableRow({
             </Tooltip>
           </TooltipProvider>
 
-          {!reservation.archived && (
-            <DeleteReservationAction
-              targetReservation={{
-                id: reservation.id,
-                userEmail: reservation.userNom,
-                date: reservation.date,
-                heure: reservation.heure,
-              }}
-              onAlert={onAlert}
-              onSuccess={onSuccess}
-            >
-              {({ open, loading }) => (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={open}
-                        disabled={loading}
-                        className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
-                        aria-label={t(
-                          "admin.reservations.table.ActionToolTips.deleteReservation"
-                        )}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {t(
-                          "admin.reservations.table.ActionToolTips.deleteReservation"
-                        )}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-            </DeleteReservationAction>
-          )}
+          <DeleteReservationAction
+            targetReservation={{
+              id: reservation.id,
+              userEmail: reservation.userNom,
+              date: reservation.date,
+              heure: reservation.heure,
+            }}
+            onAlert={onAlert}
+            onSuccess={onSuccess}
+          >
+            {({ open, loading }) => (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={open}
+                      disabled={loading || reservation.archived}
+                      className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
+                      aria-label={t(
+                        "admin.reservations.table.ActionToolTips.deleteReservation"
+                      )}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      {t(
+                        "admin.reservations.table.ActionToolTips.deleteReservation"
+                      )}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </DeleteReservationAction>
         </div>
 
         {/* Mobile actions */}
-        <div className="sm:hidden flex justify-center">
+        <div className="sm:hidden text-right">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -400,35 +398,34 @@ function ReservationTableRow({
                 {t("admin.reservations.table.ActionToolTips.viewDetails")}
               </DropdownMenuItem>
 
-              {!reservation.archived && (
-                <DeleteReservationAction
-                  targetReservation={{
-                    id: reservation.id,
-                    userEmail: reservation.userNom,
-                    date: reservation.date,
-                    heure: reservation.heure,
-                  }}
-                  onAlert={onAlert}
-                  onSuccess={onSuccess}
-                >
-                  {({ open }) => (
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        open();
-                      }}
-                      onSelect={(e) => e.preventDefault()}
-                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2 text-red-600" />
-                      {t(
-                        "admin.reservations.table.ActionToolTips.deleteReservation"
-                      )}
-                    </DropdownMenuItem>
-                  )}
-                </DeleteReservationAction>
-              )}
+              <DeleteReservationAction
+                targetReservation={{
+                  id: reservation.id,
+                  userEmail: reservation.userNom,
+                  date: reservation.date,
+                  heure: reservation.heure,
+                }}
+                onAlert={onAlert}
+                onSuccess={onSuccess}
+              >
+                {({ open }) => (
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      open();
+                    }}
+                    onSelect={(e) => e.preventDefault()}
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                    disabled={reservation.archived}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                    {t(
+                      "admin.reservations.table.ActionToolTips.deleteReservation"
+                    )}
+                  </DropdownMenuItem>
+                )}
+              </DeleteReservationAction>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

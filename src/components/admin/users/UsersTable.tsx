@@ -129,13 +129,9 @@ function RoleBadge({ isAdmin }: { isAdmin: boolean }) {
       <span className="sm:hidden">A</span>
     </Badge>
   ) : (
-    <Badge
-      variant="secondary"
-      className="bg-gray-100 text-gray-700 border-gray-200 text-xs"
-    >
+    <Badge className="bg-gray-700 text-white border-0 text-xs mt-1 rounded-full">
       <User className="h-3 w-3 mr-1" />
-      <span className="hidden sm:inline">{t("admin.users.badge.user")}</span>
-      <span className="sm:hidden">U</span>
+      {t("admin.users.badge.user")}
     </Badge>
   );
 }
