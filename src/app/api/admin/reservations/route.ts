@@ -15,6 +15,7 @@ interface ReservationRow extends RowDataPacket {
   date: string | Date;
   time: string;
   user_id: number | null;
+  archived: boolean;
   user_email: string | null;
   createdAt: string | Date;
 }
@@ -52,6 +53,7 @@ export async function GET(req: NextRequest) {
         r.date,
         r.time,
         r.user_id,
+        r.archived,
         u.firstname AS prenom,
         u.lastname AS nom
       FROM reservation r
@@ -79,6 +81,7 @@ export async function GET(req: NextRequest) {
         date: formattedDate,
         heure: formattedTime,
         userNom: `${row.prenom} ${row.nom}`,
+        archived: Boolean(row.archived),
       }
     })
 

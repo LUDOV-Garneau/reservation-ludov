@@ -226,7 +226,8 @@
       "cancelWarningTitle": "Irreversible action",
       "cancelWarning": "This action cannot be undone. You will need to create a new reservation if you change your mind.",
       "cancelConfirmButton": "Confirm cancellation",
-      "canceling": "Cancelling..."
+      "canceling": "Cancelling...",
+      "cancelReservation": "Cancel reservation"
     },
     "accueil": {
       "upcomingReservations": "Upcoming reservations",
@@ -457,7 +458,8 @@
           "status": "Status"
         },
         "ActionToolTips": {
-          "deleteReservation": "Delete reservation"
+          "deleteReservation": "Delete reservation",
+          "viewDetails": "View details"
         },
         "alert": {
           "delete_failed": "Error during deletion",
@@ -485,7 +487,8 @@
       },
       "status": {
         "upcoming": "Upcoming",
-        "past": "Past"
+        "past": "Past",
+        "cancelled": "Cancelled"
       },
       "deleteDialog": {
         "title": "Delete reservation",

@@ -26,7 +26,7 @@ export default function NotFound() {
         </p>
         <Link
           href="/"
-          className="px-5 py-2 rounded-md bg-[#02dcde] text-white font-semibold text-lg shadow hover:opacity-70 transition"
+          className="px-5 py-2 rounded-md bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold text-lg shadow transition-colors"
         >
           Retourner à l&apos;accueil
         </Link>

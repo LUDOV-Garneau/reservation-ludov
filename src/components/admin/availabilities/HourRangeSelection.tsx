@@ -180,7 +180,7 @@ export default function HourRangeSelection({
         {showAddButton && (
           <Button
             variant="link"
-            className="text-[#02dcde] text-xs !p-2"
+            className="text-cyan-500 text-xs !p-2 hover:text-cyan-700"
             onClick={addRow}
           >
             <Plus className="h-4 w-4 block md:hidden" />

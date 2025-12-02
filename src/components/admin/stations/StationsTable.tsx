@@ -27,6 +27,7 @@ import {
   AlertTriangle,
   Info,
   Pencil,
+  AlertCircle,
 } from "lucide-react";
 import {
   Dialog,
@@ -64,7 +65,7 @@ type Station = {
 };
 
 type AlertState = {
-  type: "success" | "error" | "info" | "warning";
+  type: "success" | "destructive" | "info" | "warning";
   message: string;
   title?: string;
 } | null;
@@ -126,7 +127,7 @@ function StationTableRow({
   station: Station;
   onUpdate: (station: Station) => void;
   onAlert: (
-    type: "success" | "error" | "info" | "warning",
+    type: "success" | "destructive" | "info" | "warning",
     message: string,
     title?: string
   ) => void;
@@ -144,11 +145,17 @@ function StationTableRow({
       </TableCell>
       <TableCell className="table-cell text-center">
         {station.isActive ? (
-          <Badge variant={"success"} className="rounded-full text-md w-full lg:w-[50%]">
+          <Badge
+            variant={"success"}
+            className="rounded-full text-md w-full lg:w-[50%]"
+          >
             {t("admin.stations.table.active")}
-            </Badge>
+          </Badge>
         ) : (
-          <Badge variant={"destructive"} className="rounded-full text-md w-full lg:w-[50%]">
+          <Badge
+            variant={"destructive"}
+            className="rounded-full text-md w-full lg:w-[50%]"
+          >
             {t("admin.stations.table.inactive")}
           </Badge>
         )}
@@ -217,9 +224,7 @@ function StationTableRow({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem
-                  onClick={() => onUpdate(station)}
-                >
+                <DropdownMenuItem onClick={() => onUpdate(station)}>
                   <Pencil className="h-4 w-4 mr-2 text-blue-500" />
                   {t("admin.stations.table.ActionToolTips.updateStation")}
                 </DropdownMenuItem>
@@ -318,8 +323,8 @@ export function ModernAlert({
   const icon =
     alert.type === "success" ? (
       <CheckCircle2 className="h-4 w-4 text-green-600" />
-    ) : alert.type === "error" ? (
-      <XCircle className="h-4 w-4 text-red-600" />
+    ) : alert.type === "destructive" ? (
+      <AlertCircle className="h-4 w-4 text-red-600" />
     ) : alert.type === "warning" ? (
       <AlertTriangle className="h-4 w-4 text-yellow-600" />
     ) : (
@@ -331,14 +336,14 @@ export function ModernAlert({
       className="mb-4"
       variant={
         alert.type === "success"
-          ? "default"
-          : alert.type === "error"
+          ? "success"
+          : alert.type === "destructive"
           ? "destructive"
           : "default"
       }
     >
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex gap-2">
+      <div className="flex justify-between w-full items-center gap-2">
+        <div className="flex gap-2 items-center">
           {icon}
           <div>
             {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
@@ -364,7 +369,7 @@ function useAlert() {
 
   const showAlert = useCallback(
     (
-      type: "success" | "error" | "info" | "warning",
+      type: "success" | "destructive" | "info" | "warning",
       message: string,
       title?: string
     ) => {

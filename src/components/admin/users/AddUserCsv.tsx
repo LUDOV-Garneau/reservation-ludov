@@ -1,19 +1,41 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Upload, Loader2, FileSpreadsheet, CheckCircle2, XCircle, AlertCircle, UserPlus, UserX, X } from "lucide-react";
+import {
+  Upload,
+  Loader2,
+  FileSpreadsheet,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  UserPlus,
+  UserX,
+  X,
+} from "lucide-react";
 
 type Props = {
   onSuccess?: () => void;
-  onAlert?: (type: "success" | "error", message: string) => void;
+  onAlert?: (
+    type: "success" | "destructive" | "info" | "warning",
+    message: string
+  ) => void;
 };
 
-type UploadStatus = "idle" | "uploading" | "success" | "error";
+type UploadStatus =
+  | "idle"
+  | "uploading"
+  | "success"
+  | "destructive"
+  | "error"
+  | "warning";
 
 export default function UsersForm({ onSuccess, onAlert }: Props) {
   const [status, setStatus] = useState<UploadStatus>("idle");
   const [fileName, setFileName] = useState<string>("");
-  const [stats, setStats] = useState<{ inserted: number; skipped: number } | null>(null);
+  const [stats, setStats] = useState<{
+    inserted: number;
+    skipped: number;
+  } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -21,16 +43,16 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
-      
-      if (!selectedFile.name.endsWith('.csv')) {
-        setStatus("error");
+
+      if (!selectedFile.name.endsWith(".csv")) {
+        setStatus("destructive");
         setErrorMessage("Le fichier doit être au format CSV");
         return;
       }
-      
+
       setFileName(selectedFile.name);
       await uploadFile(selectedFile);
-      
+
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -57,13 +79,13 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const droppedFile = e.dataTransfer.files[0];
-      
-      if (!droppedFile.name.endsWith('.csv')) {
-        setStatus("error");
+
+      if (!droppedFile.name.endsWith(".csv")) {
+        setStatus("destructive");
         setErrorMessage("Le fichier doit être au format CSV");
         return;
       }
-      
+
       setFileName(droppedFile.name);
       await uploadFile(droppedFile);
     }
@@ -92,26 +114,35 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
       const data = await res.json();
 
       if (!res.ok || !data) {
-        setStatus("error");
+        setStatus("destructive");
         setErrorMessage(data?.error || data?.message || "Échec de l'import");
-        onAlert?.("error", data?.error || data?.message || "Échec de l'import");
+        onAlert?.(
+          "destructive",
+          data?.error || data?.message || "Échec de l'import"
+        );
         return;
       }
 
       if (data.success && data.inserted > 0) {
         setStatus("success");
         setStats({ inserted: data.inserted, skipped: data.skipped });
-        onAlert?.("success", `${data.inserted} utilisateur(s) ajouté(s), ${data.skipped} ignoré(s)`);
+        onAlert?.(
+          "success",
+          `${data.inserted} utilisateur(s) ajouté(s), ${data.skipped} ignoré(s)`
+        );
         onSuccess?.();
       } else {
-        setStatus("error");
-        setErrorMessage(data.message || `Aucun utilisateur ajouté. ${data.skipped || 0} ignoré(s)`);
-        onAlert?.("error", data.message || `Aucun utilisateur ajouté`);
+        setStatus("warning");
+        setErrorMessage(
+          data.message ||
+            `Aucun utilisateur ajouté. ${data.skipped || 0} ignoré(s)`
+        );
+        onAlert?.("warning", data.message || `Aucun utilisateur ajouté`);
       }
     } catch (error) {
-      setStatus("error");
+      setStatus("destructive");
       setErrorMessage("Erreur lors de l'upload du fichier");
-      onAlert?.("error", "Erreur lors de l'upload du fichier");
+      onAlert?.("destructive", "Erreur lors de l'upload du fichier");
     }
   };
 
@@ -124,7 +155,6 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
 
   return (
     <div className="w-full space-y-3">
-      
       <div
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -132,11 +162,12 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         onClick={status !== "uploading" ? handleButtonClick : undefined}
         className={`
           relative border-2 border-dashed rounded-lg transition-all w-full
-          ${status === "uploading" 
-            ? "border-blue-300 bg-blue-50/50 dark:bg-blue-950/20 cursor-not-allowed p-4" 
-            : isDragging 
-            ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30 cursor-pointer p-4" 
-            : "border-gray-300 dark:border-gray-700 hover:border-cyan-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer p-4"
+          ${
+            status === "uploading"
+              ? "border-cyan-300 bg-cyan-50/50 dark:bg-cyan-950/20 cursor-not-allowed p-4"
+              : isDragging
+              ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30 cursor-pointer p-4"
+              : "border-gray-300 dark:border-gray-700 hover:border-cyan-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer p-4"
           }
         `}
       >
@@ -151,19 +182,26 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
 
         <div className="flex flex-col gap-3 sm:hidden">
           <div className="flex items-center gap-3">
-            <div className={`
+            <div
+              className={`
               p-2.5 rounded-lg transition-all flex-shrink-0
-              ${isDragging 
-                ? "bg-cyan-100 dark:bg-cyan-900/50" 
-                : status === "uploading"
-                ? "bg-blue-100 dark:bg-blue-900/50"
-                : "bg-gray-100 dark:bg-gray-800"
+              ${
+                isDragging
+                  ? "bg-cyan-100 dark:bg-cyan-900/50"
+                  : status === "uploading"
+                  ? "bg-cyan-100 dark:bg-cyan-900/50"
+                  : "bg-gray-100 dark:bg-gray-800"
               }
-            `}>
+            `}
+            >
               {status === "uploading" ? (
-                <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+                <Loader2 className="w-5 h-5 text-cyan-600 animate-spin" />
               ) : (
-                <Upload className={`w-5 h-5 ${isDragging ? "text-cyan-600" : "text-gray-400"}`} />
+                <Upload
+                  className={`w-5 h-5 ${
+                    isDragging ? "text-cyan-600" : "text-gray-400"
+                  }`}
+                />
               )}
             </div>
 
@@ -193,7 +231,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
           {status === "idle" && !isDragging && (
             <button
               type="button"
-              className="w-full px-4 py-2.5 bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white text-sm font-medium rounded-md transition-colors"
+              className="w-full px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white text-sm font-medium rounded-md transition-colors"
             >
               Sélectionner un fichier
             </button>
@@ -201,19 +239,26 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         </div>
 
         <div className="hidden sm:flex items-center gap-3">
-          <div className={`
+          <div
+            className={`
             p-2.5 rounded-lg transition-all flex-shrink-0
-            ${isDragging 
-              ? "bg-cyan-100 dark:bg-cyan-900/50" 
-              : status === "uploading"
-              ? "bg-blue-100 dark:bg-blue-900/50"
-              : "bg-gray-100 dark:bg-gray-800"
+            ${
+              isDragging
+                ? "bg-cyan-100 dark:bg-cyan-900/50"
+                : status === "uploading"
+                ? "bg-cyan-100 dark:bg-cyan-900/50"
+                : "bg-gray-100 dark:bg-gray-800"
             }
-          `}>
+          `}
+          >
             {status === "uploading" ? (
-              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
+              <Loader2 className="w-5 h-5 text-cyan-600 animate-spin" />
             ) : (
-              <Upload className={`w-5 h-5 ${isDragging ? "text-cyan-600" : "text-gray-400"}`} />
+              <Upload
+                className={`w-5 h-5 ${
+                  isDragging ? "text-cyan-600" : "text-gray-400"
+                }`}
+              />
             )}
           </div>
 
@@ -242,7 +287,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
           {status === "idle" && !isDragging && (
             <button
               type="button"
-              className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium rounded-md transition-colors flex-shrink-0"
+              className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white text-sm font-medium rounded-full transition-colors flex-shrink-0"
             >
               Parcourir
             </button>
@@ -252,11 +297,11 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         {status === "uploading" && (
           <div className="mt-3">
             <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full"
+              <div
+                className="h-full bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-full"
                 style={{
                   width: "70%",
-                  animation: "progress 1.5s ease-in-out infinite"
+                  animation: "progress 1.5s ease-in-out infinite",
                 }}
               ></div>
             </div>
@@ -276,7 +321,9 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
               </h4>
               <div className="flex items-center gap-2 mt-1">
                 <FileSpreadsheet className="w-3 h-3 text-green-700 dark:text-green-300 flex-shrink-0" />
-                <span className="text-xs text-green-700 dark:text-green-300 truncate">{fileName}</span>
+                <span className="text-xs text-green-700 dark:text-green-300 truncate">
+                  {fileName}
+                </span>
               </div>
             </div>
             <button
@@ -295,8 +342,12 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
                   <UserPlus className="w-4 h-4 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xl font-bold text-green-900 dark:text-green-100">{stats.inserted}</p>
-                  <p className="text-[10px] text-green-700 dark:text-green-300 font-medium">Ajoutés</p>
+                  <p className="text-xl font-bold text-green-900 dark:text-green-100">
+                    {stats.inserted}
+                  </p>
+                  <p className="text-[10px] text-green-700 dark:text-green-300 font-medium">
+                    Ajoutés
+                  </p>
                 </div>
               </div>
             </div>
@@ -307,8 +358,12 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
                   <UserX className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xl font-bold text-amber-900 dark:text-amber-100">{stats.skipped}</p>
-                  <p className="text-[10px] text-amber-700 dark:text-amber-300 font-medium">Ignorés</p>
+                  <p className="text-xl font-bold text-amber-900 dark:text-amber-100">
+                    {stats.skipped}
+                  </p>
+                  <p className="text-[10px] text-amber-700 dark:text-amber-300 font-medium">
+                    Ignorés
+                  </p>
                 </div>
               </div>
             </div>
@@ -329,7 +384,9 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
               {fileName && (
                 <div className="flex items-center gap-2 mt-1">
                   <FileSpreadsheet className="w-3 h-3 text-red-700 dark:text-red-300 flex-shrink-0" />
-                  <span className="text-xs text-red-700 dark:text-red-300 truncate">{fileName}</span>
+                  <span className="text-xs text-red-700 dark:text-red-300 truncate">
+                    {fileName}
+                  </span>
                 </div>
               )}
               {errorMessage && (
@@ -350,15 +407,17 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
       )}
 
       {status === "idle" && (
-        <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 w-full">
+        <div className="bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800 rounded-lg p-3 w-full">
           <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 text-cyan-600 dark:text-cyan-400 mt-0.5 flex-shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-blue-900 dark:text-blue-100 mb-1">
+              <p className="text-xs font-medium text-cyan-900 dark:text-cyan-100 mb-1">
                 Format CSV requis :
               </p>
-              <ul className="space-y-1 text-[11px] text-blue-700 dark:text-blue-300">
-                <li className="break-words">• Username, Date Created, Last Login, First Name, Last Name</li>
+              <ul className="space-y-1 text-[11px] text-cyan-700 dark:text-cyan-300">
+                <li className="break-words">
+                  • Username, Date Created, Last Login, First Name, Last Name
+                </li>
                 <li>• Encodage UTF-8, max 5 MB</li>
               </ul>
             </div>
@@ -368,9 +427,15 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
 
       <style jsx>{`
         @keyframes progress {
-          0% { transform: translateX(-100%); }
-          50% { transform: translateX(0%); }
-          100% { transform: translateX(100%); }
+          0% {
+            transform: translateX(-100%);
+          }
+          50% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(100%);
+          }
         }
       `}</style>
     </div>

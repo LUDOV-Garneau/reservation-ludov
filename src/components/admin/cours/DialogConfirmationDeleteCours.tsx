@@ -21,7 +21,7 @@ export interface DeleteCoursActionProps {
   targetCours: TargetCours;
   onSuccess?: () => void;
   onAlert?: (
-    type: "success" | "error" | "info" | "warning",
+    type: "success" | "destructive" | "info" | "warning",
     message: string,
     title?: string
   ) => void;
@@ -66,7 +66,7 @@ export default function DeleteCoursAction({
       setOpen(false);
     } catch (e) {
       onAlert?.(
-        "error",
+        "destructive",
         e instanceof Error
           ? e.message
           : "Une erreur est survenue lors de la suppression."

@@ -71,7 +71,7 @@ export default function TutorialContent() {
           {t("admin.tutorials.subtitle")}
         </p>
       </div>
-      <div className="grid lg:grid-cols-4 md:grid-cols-1 gap-10">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
         {TutoPage.map((tuto) => (
           <TutorialCards key={tuto.title} {...tuto} />
         ))}

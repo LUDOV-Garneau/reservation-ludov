@@ -26,6 +26,8 @@ import {
   AlertTriangle,
   Info,
   Pencil,
+  CircleAlert,
+  AlertCircle,
 } from "lucide-react";
 import {
   Dialog,
@@ -57,7 +59,7 @@ type Cours = {
 };
 
 type AlertState = {
-  type: "success" | "error" | "info" | "warning";
+  type: "success" | "destructive" | "info" | "warning";
   message: string;
   title?: string;
 } | null;
@@ -119,7 +121,7 @@ function CoursTableRow({
   cours: Cours;
   onUpdate: (cours: Cours) => void;
   onAlert: (
-    type: "success" | "error" | "info" | "warning",
+    type: "success" | "destructive" | "info" | "warning",
     message: string,
     title?: string
   ) => void;
@@ -127,9 +129,9 @@ function CoursTableRow({
 }) {
   return (
     <TableRow key={cours.id}>
-      <TableCell className="table-cell">{cours.nom_cours}</TableCell>
-      <TableCell className="text-center">{cours.code_cours}</TableCell>
-      <TableCell className="text-right">
+      <TableCell className="md:table-cell hidden">{cours.nom_cours}</TableCell>
+      <TableCell className="table-cell">{cours.code_cours}</TableCell>
+      <TableCell className="table-cell text-right">
         <div>
           <div className="hidden md:flex gap-2 justify-end">
             <TooltipProvider>
@@ -286,8 +288,8 @@ export function ModernAlert({
   const icon =
     alert.type === "success" ? (
       <CheckCircle2 className="h-4 w-4 text-green-600" />
-    ) : alert.type === "error" ? (
-      <XCircle className="h-4 w-4 text-red-600" />
+    ) : alert.type === "destructive" ? (
+      <AlertCircle className="h-4 w-4 text-red-600" />
     ) : alert.type === "warning" ? (
       <AlertTriangle className="h-4 w-4 text-yellow-600" />
     ) : (
@@ -299,14 +301,14 @@ export function ModernAlert({
       className="mb-4"
       variant={
         alert.type === "success"
-          ? "default"
-          : alert.type === "error"
+          ? "success"
+          : alert.type === "destructive"
           ? "destructive"
           : "default"
       }
     >
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex gap-2">
+      <div className="flex justify-between w-full items-center gap-2">
+        <div className="flex gap-2 items-center">
           {icon}
           <div>
             {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
@@ -332,7 +334,7 @@ function useAlert() {
 
   const showAlert = useCallback(
     (
-      type: "success" | "error" | "info" | "warning",
+      type: "success" | "destructive" | "info" | "warning",
       message: string,
       title?: string
     ) => {
@@ -468,11 +470,15 @@ export default function CoursTable() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="table-cell">Nom</TableHead>
-                      <TableHead className="text-center">
+                      <TableHead className="md:table-cell hidden">
+                        Nom
+                      </TableHead>
+                      <TableHead className="table-cell">
                         Code du cours
                       </TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                      <TableHead className="table-cell text-right">
+                        Actions
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
 
