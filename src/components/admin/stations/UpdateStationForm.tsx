@@ -208,7 +208,7 @@ export default function UpdateStationForm({
                     clearError();
                   }}
                   placeholder="Ex: Tv Ultra 4K XDR"
-                  className="h-11 text-base border-2 focus:border-cyan-500 transition-colors"
+                  className="h-11 text-base border-2"
                 />
               </div>
 
@@ -218,12 +218,12 @@ export default function UpdateStationForm({
                   <span className="text-xs text-red-500">*</span>
                 </Label>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col md:flex-row gap-2">
                   <Select
                     value={selectedConsoleId}
                     onValueChange={setSelectedConsoleId}
                   >
-                    <SelectTrigger className="flex-1 border-2 text-base">
+                    <SelectTrigger className="flex-1 border-2 text-base w-full">
                       <SelectValue placeholder="Sélectionner une console..." />
                     </SelectTrigger>
                     <SelectContent>
