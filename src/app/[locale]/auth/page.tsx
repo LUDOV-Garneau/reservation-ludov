@@ -54,7 +54,7 @@ export default function AuthPage() {
 
   return (
     <Suspense>
-      <div className="min-h-screen bg-linear-to-br from-cyan-50 via-blue-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-r from-cyan-50 via-blue-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
           <div className="absolute top-40 right-20 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -114,8 +114,9 @@ export default function AuthPage() {
 
           <div className="bg-[white]/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-[white]/20 relative overflow-hidden">
             <div
-              className={`${mode === "login" && "hidden"
-                } absolute top-0 left-0 right-0 h-1 bg-gray-200`}
+              className={`${
+                mode === "login" && "hidden"
+              } absolute top-0 left-0 right-0 h-1 bg-gray-200`}
             >
               <div
                 className="h-full bg-cyan-500 transition-all duration-500 ease-out"
@@ -124,10 +125,10 @@ export default function AuthPage() {
                     mode === "login"
                       ? "0%"
                       : mode === "signup-step1"
-                        ? "33%"
-                        : mode === "signup-step2"
-                          ? "66%"
-                          : "100%",
+                      ? "33%"
+                      : mode === "signup-step2"
+                      ? "66%"
+                      : "100%",
                 }}
               />
             </div>
