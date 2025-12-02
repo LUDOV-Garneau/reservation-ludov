@@ -7,7 +7,7 @@ Ce guide explique comment modifier la politique de confidentialité de l'applica
 1. Connectez-vous en tant qu'administrateur.
 2. Cliquez sur l'onglet **Politique de confidentialité** dans le menu de navigation supérieur.
 
-![Interface de gestion de la politique](/images/tutoriels/admin/politique/politique.png)
+![Interface de gestion de la politique](/api/admin/images/politique/politique.png)
 
 ## Modifier le contenu
 

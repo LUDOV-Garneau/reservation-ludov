@@ -10,12 +10,20 @@ export default function TutorialViewer({
   page,
   adminRessources,
   onHeadings,
-}: TutorialViewerProps) {
-  const [markdownContent, setMarkdownContent] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  content,
+}: TutorialViewerProps & { content?: string }) {
+  const [markdownContent, setMarkdownContent] = useState<string>(content || "");
+  const [loading, setLoading] = useState<boolean>(!content);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (content) {
+      setMarkdownContent(content);
+      const headings = extractHeadings(content);
+      onHeadings?.(headings);
+      return;
+    }
+
     let isMounted = true;
 
     async function fetchMarkdown() {
@@ -63,7 +71,7 @@ export default function TutorialViewer({
     return () => {
       isMounted = false;
     };
-  }, [page, adminRessources, onHeadings]);
+  }, [page, adminRessources, onHeadings, content]);
 
   if (loading) {
     return (

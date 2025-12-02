@@ -54,7 +54,7 @@ export default function AuthPage() {
 
   return (
     <Suspense>
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-linear-to-br from-cyan-50 via-blue-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
           <div className="absolute top-40 right-20 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -102,7 +102,7 @@ export default function AuthPage() {
           <div className="flex items-center justify-between gap-2 bg-[white]/90 backdrop-blur-md py-3 px-5 rounded-2xl shadow-lg animate-fadeInUp border border-white/40">
             <LocaleSwitcher />
             <Link
-              href="/docs/bibliotheques"
+              href="/docs?page=connexion&adminRessources=false"
               className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-cyan-50 transition-all group"
             >
               <HelpCircle className="w-4 h-4 text-gray-600 group-hover:text-cyan-600 transition-colors" />

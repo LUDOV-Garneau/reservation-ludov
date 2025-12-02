@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
 
   const pathWithoutLocale = pathname.replace(/^\/(fr|en)(?=\/|$)/, "");
 
-  if (pathWithoutLocale.startsWith("/auth")) {
+  if (pathWithoutLocale.startsWith("/auth") || pathWithoutLocale.startsWith("/docs")) {
     return i18nMiddleware(request);
   }
 
