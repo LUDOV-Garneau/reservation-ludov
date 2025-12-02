@@ -43,7 +43,7 @@ Le tableau des utilisateurs affiche tous les utilisateurs du module de réservat
    - **Nom** : Nom complet de l'utlisateur
    - **Rôle** : Rôle de l'utilisateur
    - **Date de création** : Date de création de l'utilisateur
-   - **Actions** : Boutons permettant de modifier ou de supprimer un utilisateur 
+   - **Actions** : Boutons permettant de réinitialiser le mot de passe ou de supprimer un utilisateur 
 
 ## Ajouter un nouvel utilisateur
 Le bouton **Ajouter** ouvre un fenêtre permettant l'ajout simple ou multiple d'utilisateurs. 
