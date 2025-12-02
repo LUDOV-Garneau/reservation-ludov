@@ -12,7 +12,7 @@ import {
   Cable,
   Computer,
   User,
-  ExternalLink
+  ExternalLink,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -63,7 +63,7 @@ interface ReservationDetailsProps {
 
 type AlertState = {
   show: boolean;
-  type: "success" | "error";
+  type: "success" | "destructive";
   title: string;
   message: string;
 } | null;
@@ -242,7 +242,11 @@ function ReservationHeader({
   lastname: string;
   email: string;
   user_id: number;
-  onAlert: (type: "success" | "error" | "info" | "warning", message: string, title?: string) => void;
+  onAlert: (
+    type: "success" | "destructive" | "info" | "warning",
+    message: string,
+    title?: string
+  ) => void;
   onCancelSuccess: () => void;
   onCancelError: (error: Error) => void;
 }) {
@@ -307,7 +311,6 @@ function ReservationHeader({
 
         {!archived && (
           <div className="flex flex-col items-center gap-4 max-w-80 lg:w-auto">
-
             <DeleteReservationAction
               targetReservation={{
                 id: reservationId,
@@ -329,8 +332,7 @@ function ReservationHeader({
                   <AlertCircle className="h-5 w-5 mr-2" />
                   {loading
                     ? t("reservation.details.canceling")
-                    : t("reservation.details.cancelReservation")
-                  }
+                    : t("reservation.details.cancelReservation")}
                 </Button>
               )}
             </DeleteReservationAction>
@@ -374,26 +376,33 @@ export default function DetailsReservation({
   const handleCancelError = useCallback((error: Error) => {
     setAlert({
       show: true,
-      type: "error",
+      type: "destructive",
       title: "Erreur",
       message: error.message || "Impossible d'annuler la réservation.",
     });
   }, []);
 
-  const handleAlert = useCallback((type: "success" | "error" | "info" | "warning", message: string, title?: string) => {
-    setAlert({
-      show: true,
-      type: type === "success" ? "success" : "error",
-      title: title || (type === "success" ? "Succès" : "Erreur"),
-      message: message,
-    });
+  const handleAlert = useCallback(
+    (
+      type: "success" | "destructive" | "info" | "warning",
+      message: string,
+      title?: string
+    ) => {
+      setAlert({
+        show: true,
+        type: type === "success" ? "success" : "destructive",
+        title: title || (type === "success" ? "Succès" : "Erreur"),
+        message: message,
+      });
 
-    if (type === "success") {
-      setTimeout(() => {
-        router.replace("/admin/reservations");
-      }, 1600);
-    }
-  }, [router]);
+      if (type === "success") {
+        setTimeout(() => {
+          router.replace("/admin/reservations");
+        }, 1600);
+      }
+    },
+    [router]
+  );
 
   return (
     <div className="sm:bg-[white] rounded-lg mb-10">
@@ -421,11 +430,12 @@ export default function DetailsReservation({
 
         {alert?.show && (
           <Alert
-            variant={alert.type === "error" ? "destructive" : "default"}
-            className={`mb-6 ${alert.type === "success"
-              ? "border-green-200 bg-green-50 text-green-900"
-              : ""
-              }`}
+            variant={alert.type === "destructive" ? "destructive" : "default"}
+            className={`mb-6 ${
+              alert.type === "success"
+                ? "border-green-200 bg-green-50 text-green-900"
+                : ""
+            }`}
             role="status"
             aria-live="polite"
           >
@@ -441,19 +451,20 @@ export default function DetailsReservation({
                     {alert.title}
                   </AlertTitle>
                   <AlertDescription>
-                    {alert.type === "error"
+                    {alert.type === "destructive"
                       ? alert.message ||
-                      "Une erreur est survenue. Veuillez essayer ultérieurement."
+                        "Une erreur est survenue. Veuillez essayer ultérieurement."
                       : alert.message}
                   </AlertDescription>
                 </div>
               </div>
               <button
                 onClick={() => setAlert(null)}
-                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${alert.type === "error"
-                  ? "bg-red-100 text-red-600 hover:bg-red-200"
-                  : "bg-green-100 text-green-600 hover:bg-green-200"
-                  }`}
+                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
+                  alert.type === "destructive"
+                    ? "bg-red-100 text-red-600 hover:bg-red-200"
+                    : "bg-green-100 text-green-600 hover:bg-green-200"
+                }`}
                 aria-label="Fermer l'alerte"
               >
                 ×

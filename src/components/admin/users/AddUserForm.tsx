@@ -132,8 +132,7 @@ export default function AddUserFormDialog({
       const data = await res.json();
 
       if (!res.ok) {
-        let message =
-          data?.error || "Erreur lors de l'ajout de l'utilisateur.";
+        let message = data?.error || "Erreur lors de l'ajout de l'utilisateur.";
 
         if (data?.error?.toLowerCase().includes("existe déjà")) {
           message = t("errorMessage.userAlreadyExists");
@@ -219,7 +218,11 @@ export default function AddUserFormDialog({
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-4 w-full" noValidate>
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-4 w-full"
+              noValidate
+            >
               {errors.global && (
                 <div className="relative overflow-hidden bg-red-50 border-2 border-red-200 rounded-lg p-4 mb-1">
                   <div className="flex gap-3 items-center">
@@ -247,7 +250,8 @@ export default function AddUserFormDialog({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-1.5">
-                    {t("form.firstName")} <span className="text-red-500">*</span>
+                    {t("form.firstName")}{" "}
+                    <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -256,8 +260,9 @@ export default function AddUserFormDialog({
                       setFirstname(e.target.value);
                       clearFieldError("firstname");
                     }}
-                    className={`${baseInputClasses} ${errors.firstname ? errorInputClasses : normalInputClasses
-                      }`}
+                    className={`${baseInputClasses} ${
+                      errors.firstname ? errorInputClasses : normalInputClasses
+                    }`}
                     placeholder="John"
                     disabled={loading}
                     aria-invalid={!!errors.firstname}
@@ -286,8 +291,9 @@ export default function AddUserFormDialog({
                       setLastname(e.target.value);
                       clearFieldError("lastname");
                     }}
-                    className={`${baseInputClasses} ${errors.lastname ? errorInputClasses : normalInputClasses
-                      }`}
+                    className={`${baseInputClasses} ${
+                      errors.lastname ? errorInputClasses : normalInputClasses
+                    }`}
                     placeholder="Doe"
                     disabled={loading}
                     aria-invalid={!!errors.lastname}
@@ -317,8 +323,9 @@ export default function AddUserFormDialog({
                     setEmail(e.target.value);
                     clearFieldError("email");
                   }}
-                  className={`${baseInputClasses} ${errors.email ? errorInputClasses : normalInputClasses
-                    }`}
+                  className={`${baseInputClasses} ${
+                    errors.email ? errorInputClasses : normalInputClasses
+                  }`}
                   placeholder="john.doe@example.com"
                   disabled={loading}
                   aria-invalid={!!errors.email}
@@ -331,32 +338,30 @@ export default function AddUserFormDialog({
                 )}
               </div>
 
-              <div className="rounded-lg border border-amber-200 bg-amber-50/80 px-3.5 py-3 flex items-start gap-3">
+              <div className="rounded-lg border border-red-200 bg-red-50/80 px-3.5 py-3 flex items-start gap-3">
                 <Checkbox
                   id="isAdmin"
                   checked={isAdmin}
-                  onCheckedChange={(checked) =>
-                    setIsAdmin(Boolean(checked))
-                  }
+                  onCheckedChange={(checked) => setIsAdmin(Boolean(checked))}
                   disabled={loading}
                   className="mt-0.5"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Shield className="w-4 h-4 text-amber-700" />
+                    <Shield className="w-4 h-4 text-red-600" />
                     <label
                       htmlFor="isAdmin"
-                      className="text-sm font-medium text-amber-900 cursor-pointer"
+                      className="text-sm font-medium text-red-900 cursor-pointer"
                     >
                       {t("form.adminAccess")}
                     </label>
                     {isAdmin && (
-                      <span className="text-[10px] uppercase tracking-wide px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+                      <span className="text-xs uppercase tracking-wide px-2 py-0.5 rounded-full bg-red-500 text-[white] font-bold border-2 border-red-500">
                         {t("form.active")}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-amber-800/90 mt-1.5">
+                  <p className="text-xs text-red-800/90 mt-1.5">
                     {t("form.adminAcessDescription")}
                   </p>
                 </div>
@@ -367,7 +372,7 @@ export default function AddUserFormDialog({
                   type="button"
                   onClick={() => setOpen(false)}
                   disabled={loading}
-                  className="w-full sm:w-auto px-6 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all"
+                  className="w-full px-6 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all"
                 >
                   {t("form.cancel")}
                 </button>
@@ -375,12 +380,12 @@ export default function AddUserFormDialog({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full sm:w-auto px-6 py-3 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-400 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl disabled:shadow-none transition-all duration-200 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      {t("submitting")}
+                      Ajout en cours...
                     </>
                   ) : (
                     <>

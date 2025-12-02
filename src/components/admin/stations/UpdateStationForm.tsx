@@ -48,7 +48,7 @@ type Station = {
 type Props = {
   station: Station;
   onSuccess?: () => void;
-  onAlert?: (type: "success" | "error", message: string) => void;
+  onAlert?: (type: "success" | "destructive", message: string) => void;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 };
@@ -162,7 +162,7 @@ export default function UpdateStationForm({
       setOpenValue(false);
       onSuccess?.();
     } catch {
-      onAlert?.("error", t("alerts.updateError"));
+      onAlert?.("destructive", t("alerts.updateError"));
     } finally {
       setLoading(false);
     }
@@ -184,15 +184,12 @@ export default function UpdateStationForm({
       <DialogContent className="max-w-[95vw] sm:max-w-[650px] w-full h-[90vh] p-0 gap-0 flex flex-col">
         <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0 bg-background">
           <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
-            <div className="p-2.5 bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 rounded-xl">
-              <Settings className="w-5 h-5 text-cyan-600" />
-            </div>
+            <Settings className="w-5 h-5 text-cyan-600" />
             {t("titles.dialogTitle")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex flex-col flex-1 min-h-0">
-          {/* Contenu scrollable */}
           <div className="flex-1 overflow-y-auto px-6 py-6">
             <div className="space-y-6 max-w-full">
               <div className="space-y-2.5">
@@ -221,12 +218,12 @@ export default function UpdateStationForm({
                   <span className="text-xs text-red-500">*</span>
                 </Label>
 
-                <div className="flex flex-col sm:flex-row gap-2.5">
+                <div className="flex gap-2">
                   <Select
                     value={selectedConsoleId}
                     onValueChange={setSelectedConsoleId}
                   >
-                    <SelectTrigger className="h-11 flex-1 border-2 text-base">
+                    <SelectTrigger className="flex-1 border-2 text-base">
                       <SelectValue placeholder="Sélectionner une console..." />
                     </SelectTrigger>
                     <SelectContent>
@@ -260,7 +257,7 @@ export default function UpdateStationForm({
                     disabled={
                       !selectedConsoleId || availableConsoles.length === 0
                     }
-                    className="sm:w-auto w-full h-11 gap-2 font-semibold bg-cyan-500 hover:bg-cyan-600"
+                    className="sm:w-auto w-full gap-2 font-semibold bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     Ajouter
@@ -369,7 +366,7 @@ export default function UpdateStationForm({
               disabled={
                 loading || !stationName.trim() || selectedConsoles.length === 0
               }
-              className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-cyan-500 hover:bg-cyan-600"
+              className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
             >
               {loading ? (
                 <>
@@ -377,10 +374,7 @@ export default function UpdateStationForm({
                   {t("button.loading")}
                 </>
               ) : (
-                <>
-                  <CheckCircle2 className="w-4 h-4 mr-2" />
-                  {t("button.submit")}
-                </>
+                <>{t("button.submit")}</>
               )}
             </Button>
           </div>

@@ -104,10 +104,10 @@ export default function DateRangeSelection({
             />
           </PopoverContent>
         </Popover>
-        <Label className="w-full md:w-auto hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-[#02dcde] has-[[aria-checked=true]]:bg-blue-50">
+        <Label className="w-full md:w-auto hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-cyan-700 has-[[aria-checked=true]]:bg-cyan-500/10 cursor-pointer">
           <Checkbox
             id="toggle-always"
-            className="data-[state=checked]:border-[#02dcde] data-[state=checked]:bg-[#02dcde] data-[state=checked]:text-white"
+            className="data-[state=checked]:border-cyan-700 data-[state=checked]:bg-cyan-700 data-[state=checked]:text-white"
             checked={alwaysApplies}
             onCheckedChange={onToggleAlways}
           />

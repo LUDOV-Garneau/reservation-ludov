@@ -60,7 +60,7 @@ export default function CardReservationStats({
       <Card className={`border-l-4 ${colorMap.ring}`}>
         <CardContent className="flex items-center gap-4">
           <div
-            className={`flex h-16 w-16 items-center justify-center rounded-full ${colorMap.tint}`}
+            className={`flex h-16 w-16 items-center justify-center rounded-full shrink-0 ${colorMap.tint}`}
           >
             <div className={`rounded-full ${colorMap.dot} p-3 shadow-lg`}>
               <Calendar className="h-6 w-6 text-white" />

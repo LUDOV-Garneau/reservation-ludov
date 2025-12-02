@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -20,7 +20,7 @@ interface ActionBarProps {
   onRefresh: () => void;
   onSuccess: () => void;
   onAlert: (
-    type: "success" | "error" | "info" | "warning",
+    type: "success" | "destructive" | "info" | "warning",
     message: string,
     title?: string
   ) => void;
@@ -35,19 +35,17 @@ export default function CardStationStats({
   onAlert,
   isRefreshing,
 }: ActionBarProps) {
-  const [open, setOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const t = useTranslations();
 
   return (
-    <div className="flex gap-3">
+    <div className="flex flex-col md:flex-row gap-3">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder={t("admin.stations.actionBar.searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10 border-gray-300 focus:border-cyan-500 focus:ring-cyan-500 w-full"
+          className="pl-10 border-gray-300"
         />
       </div>
 
@@ -76,20 +74,18 @@ export default function CardStationStats({
         </TooltipProvider>
         <AddCoursForm
           onSuccess={() => {
-            onAlert(
-              "success",
-              "Cours ajouté avec succès !"
-            );
+            onAlert("success", "Cours ajouté avec succès !");
             onSuccess();
           }}
           onAlert={(type, message) =>
-            onAlert(type as "success" | "error" | "info" | "warning", message)
+            onAlert(
+              type as "success" | "destructive" | "info" | "warning",
+              message
+            )
           }
           trigger={
-            <Button
-              className="bg-cyan-500 hover:bg-cyan-700 text-white shadow-md hover:shadow-lg transition-all flex-1 sm:flex-initial"
-            >
-              <Plus className="h-4 w-4" />
+            <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors flex-1">
+              <Plus className="h-5 w-5" />
               <span className="hidden md:inline">
                 {t("admin.stations.actionBar.addStation")}
               </span>

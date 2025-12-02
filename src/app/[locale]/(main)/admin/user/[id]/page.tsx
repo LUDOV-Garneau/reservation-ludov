@@ -20,9 +20,12 @@ import {
   CheckCircle2,
   Monitor,
   CircleX,
+  Link as Link2,
+  ChevronLeft,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 
 type UserDetails = {
   id: number;
@@ -49,7 +52,7 @@ export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
   const t = useTranslations();
-  
+
   const userId = params?.id as string;
 
   const [userData, setUserData] = useState<UserDetails | null>(null);
@@ -69,13 +72,16 @@ export default function UserDetailPage() {
       setLoading(true);
       setError(null);
 
-      const res = await fetch(`/api/admin/users/get-user-details?userId=${userId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
+      const res = await fetch(
+        `/api/admin/users/get-user-details?userId=${userId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+        }
+      );
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -85,7 +91,6 @@ export default function UserDetailPage() {
       const data = await res.json();
 
       setUserData(data.user);
-
     } catch (err) {
       console.error("Error fetching user data:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -112,51 +117,54 @@ export default function UserDetailPage() {
       const reservationsData = await res.json();
 
       const now = new Date();
-      const reservationsWithStatus = reservationsData.reservations.map((res: Reservation) => {
-        const startTime = new Date(`${res.date}T${res.heure}`);
-        const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
+      const reservationsWithStatus = reservationsData.reservations.map(
+        (res: Reservation) => {
+          const startTime = new Date(`${res.date}T${res.heure}`);
+          const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
 
-        let status: "upcoming" | "ongoing" | "completed" | "canceled";
-        if (res.archived) status = "canceled";
-        else if (now < startTime) status = "upcoming";
-        else if (now >= startTime && now <= endTime) status = "ongoing";
-        else status = "completed";
+          let status: "upcoming" | "ongoing" | "completed" | "canceled";
+          if (res.archived) status = "canceled";
+          else if (now < startTime) status = "upcoming";
+          else if (now >= startTime && now <= endTime) status = "ongoing";
+          else status = "completed";
 
-        return { ...res, status };
-      });
+          return { ...res, status };
+        }
+      );
 
       setReservations(reservationsWithStatus);
-
     } catch (err) {
       console.error("Error fetching user reservations:", err);
     }
   }
 
-  function getStatusBadge(status?: "upcoming" | "ongoing" | "completed" | "canceled") {
+  function getStatusBadge(
+    status?: "upcoming" | "ongoing" | "completed" | "canceled"
+  ) {
     switch (status) {
       case "upcoming":
         return (
-          <Badge className="bg-cyan-100 text-cyan-900 border-cyan-200 text-sm">
-            <Clock className="h-3 w-3 mr-1" />
-            À venir
+          <Badge className="bg-cyan-500/10 text-cyan-900 border-cyan-500 rounded-full text-sm border-2 font-semibold">
+            <Clock className="h-3 w-3 mr-1" />À venir
           </Badge>
         );
       case "ongoing":
         return (
-          <Badge className="bg-green-100 text-green-700 border-green-200 text-sm">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
+          <Badge className="bg-yellow-500/10 text-yellow-900 border-yellow-500 rounded-full text-sm border-2 font-semibold">
+            <Clock className="h-3 w-3 mr-1" />
             En cours
           </Badge>
         );
       case "completed":
         return (
-          <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-sm">
+          <Badge className="bg-green-500/10 text-green-900 border-green-500 text-sm rounded-full border-2 font-semibold">
+            <CheckCircle2 className="h-3 w-3 mr-1" />
             Terminée
           </Badge>
         );
       case "canceled":
         return (
-          <Badge className="bg-red-100 text-red-700 border-red-200 text-sm">
+          <Badge className="bg-red-500/10 text-red-900 border-red-500 text-sm rounded-full border-2 font-semibold">
             <CircleX className="h-3 w-3 mr-1" />
             Annulée
           </Badge>
@@ -201,11 +209,7 @@ export default function UserDetailPage() {
   if (error || !userData) {
     return (
       <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-        <Button
-          variant="ghost"
-          onClick={() => router.back()}
-          className="mb-6"
-        >
+        <Button variant="ghost" onClick={() => router.back()} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
@@ -223,12 +227,11 @@ export default function UserDetailPage() {
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
       <Button
-        variant="ghost"
         onClick={() => router.back()}
-        className="mb-6"
+        className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit group"
       >
-        <ArrowLeft className="h-4 w-4 mr-2" />
-        Retour
+        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm font-medium">Retour</span>
       </Button>
 
       <div className="mb-6">
@@ -242,7 +245,7 @@ export default function UserDetailPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <Card>
+          <Card className="sticky top-5">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-cyan-600" />
@@ -256,13 +259,13 @@ export default function UserDetailPage() {
                     {userData.firstname} {userData.lastname}
                   </h4>
                   {userData.isAdmin ? (
-                    <Badge className="bg-cyan-700 text-white border-0 text-xs mt-1">
-                      <Shield className="h-3 w-3 mr-1" />
+                    <Badge className="bg-cyan-700 text-white border-0 text-sm mt-1 rounded-full">
+                      <Shield className="h-5 w-5" />
                       Administrateur
                     </Badge>
                   ) : (
-                    <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 text-xs mt-1">
-                      <User className="h-3 w-3 mr-1" />
+                    <Badge className="bg-gray-700 text-white border-0 text-sm mt-1 rounded-full">
+                      <User className="h-5 w-5" />
                       Utilisateur
                     </Badge>
                   )}
@@ -274,7 +277,9 @@ export default function UserDetailPage() {
                   <Mail className="h-5 w-5 text-cyan-700" />
                   <p className="text-cyan-700 font-bold">Courriel</p>
                 </div>
-                <p className="font-medium break-all text-sm">{userData.email}</p>
+                <p className="font-medium break-all text-sm">
+                  {userData.email}
+                </p>
               </div>
 
               <div className="space-y-1">
@@ -316,11 +321,16 @@ export default function UserDetailPage() {
                     <p className="text-2xl font-bold text-cyan-600">
                       {reservations.length}
                     </p>
-                    <p className="text-xs text-muted-foreground">Réservations</p>
+                    <p className="text-xs text-muted-foreground">
+                      Réservations
+                    </p>
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <p className="text-2xl font-bold text-green-600">
-                      {reservations.filter(r => r.status === "completed").length}
+                      {
+                        reservations.filter((r) => r.status === "completed")
+                          .length
+                      }
                     </p>
                     <p className="text-xs text-muted-foreground">Complétées</p>
                   </div>
@@ -354,33 +364,49 @@ export default function UserDetailPage() {
               ) : (
                 <div className="space-y-4">
                   {reservations.map((reservation) => (
-                    <Card key={reservation.id} className="border-2 py-0 hover:shadow-lg transition-all duration-300 hover:border-cyan-500 ease-in-out">
+                    <Card
+                      key={reservation.id}
+                      className="border-2 py-0 hover:shadow-lg transition-all duration-300 hover:border-cyan-500 ease-in-out"
+                    >
                       <CardContent className="p-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
+                        <div className="flex flex-col md:flex-row gap-2 items-start justify-between mb-3">
+                          <Link
+                            href={`/admin/reservation/details/${reservation.id}`}
+                            className="flex gap-2 items-center hover:border-b-cyan-500 border-b-2 pb-1 transition-colors"
+                          >
+                            <Link2 className="w-8 h-8 sm:w-4 sm:h-4 text-cyan-700" />
                             <h4 className="font-semibold text-xl text-cyan-600 line-clamp-1">
                               {reservation.id}
                             </h4>
-                          </div>
+                          </Link>
                           {getStatusBadge(reservation.status)}
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                           <div className="flex items-center gap-2 text-md">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <Calendar className="h-4 w-4 text-cyan-700" />
                             <span>
-                              {new Date(`${reservation.date}T${reservation.heure}`).toLocaleDateString("fr-CA")}
+                              {new Date(
+                                `${reservation.date}T${reservation.heure}`
+                              ).toLocaleDateString("fr-CA")}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-md">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <Clock className="h-4 w-4 text-cyan-700" />
                             <span>
-                              {new Date(`${reservation.date}T${reservation.heure}`).toLocaleTimeString("fr-CA", {
+                              {new Date(
+                                `${reservation.date}T${reservation.heure}`
+                              ).toLocaleTimeString("fr-CA", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}{" "}
                               -{" "}
-                              {new Date(new Date(`${reservation.date}T${reservation.heure}`).getTime() + 2 * 60 * 60 * 1000).toLocaleTimeString("fr-CA", {
+                              {new Date(
+                                new Date(
+                                  `${reservation.date}T${reservation.heure}`
+                                ).getTime() +
+                                  2 * 60 * 60 * 1000
+                              ).toLocaleTimeString("fr-CA", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}
@@ -392,10 +418,13 @@ export default function UserDetailPage() {
 
                         <div>
                           <div className="flex items-center gap-3 mb-3">
-                            <Monitor className="h-5 w-5 text-cyan-700"/>
+                            <Monitor className="h-5 w-5 text-cyan-700" />
                             <p className="text-cyan-700">Console</p>
                           </div>
-                          <Badge variant={"games"} className="text-sm">
+                          <Badge
+                            variant={"reservationDetails"}
+                            className="text-sm"
+                          >
                             {reservation.console}
                           </Badge>
                         </div>
@@ -410,7 +439,11 @@ export default function UserDetailPage() {
                             </div>
                             <div className="flex flex-wrap gap-2 overflow-clip">
                               {reservation.games.map((game, index) => (
-                                <Badge key={index} variant="games" className="text-sm">
+                                <Badge
+                                  key={index}
+                                  variant={"reservationDetails"}
+                                  className="text-sm"
+                                >
                                   {game}
                                 </Badge>
                               ))}

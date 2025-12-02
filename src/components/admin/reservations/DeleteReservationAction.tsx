@@ -9,18 +9,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Loader2, 
-  ShieldAlert, 
+import {
+  Calendar,
+  Clock,
+  User,
+  Loader2,
   Trash2,
-  XCircle 
+  XCircle,
+  CircleQuestionMark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type AlertType = "success" | "error" | "info" | "warning";
+type AlertType = "success" | "destructive" | "info" | "warning";
 
 interface DeleteReservationActionProps {
   targetReservation: {
@@ -53,48 +53,55 @@ export default function DeleteReservationAction({
     }
   }, [loading]);
 
-  const handleConfirm = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading) return;
+  const handleConfirm = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (loading) return;
 
-    try {
-      setLoading(true);
+      try {
+        setLoading(true);
 
-      const res = await fetch(
-        `/api/admin/delete-reservation?id=${encodeURIComponent(targetReservation.id)}`,
-        {
-          method: "DELETE",
-          credentials: "include",
+        const res = await fetch(
+          `/api/admin/delete-reservation?id=${encodeURIComponent(
+            targetReservation.id
+          )}`,
+          {
+            method: "DELETE",
+            credentials: "include",
+          }
+        );
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          const message =
+            (data && (data as { error?: string }).error) ||
+            "Erreur lors de la suppression de la réservation";
+
+          throw new Error(message);
         }
-      );
 
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const message =
-          (data && (data as { error?: string }).error) ||
-          "Erreur lors de la suppression de la réservation";
-
-        throw new Error(message);
+        onAlert(
+          "success",
+          "La réservation a été supprimée avec succès",
+          "Réservation supprimée"
+        );
+        onSuccess();
+        setOpen(false);
+      } catch (error) {
+        console.error("Error deleting reservation:", error);
+        onAlert(
+          "destructive",
+          error instanceof Error
+            ? error.message
+            : "Erreur lors de la suppression de la réservation",
+          "Erreur"
+        );
+      } finally {
+        setLoading(false);
       }
-
-      onAlert(
-        "success",
-        "La réservation a été supprimée avec succès",
-        "Réservation supprimée"
-      );
-      onSuccess();
-      setOpen(false);
-    } catch (error) {
-      console.error("Error deleting reservation:", error);
-      onAlert(
-        "error",
-        error instanceof Error ? error.message : "Erreur lors de la suppression de la réservation",
-        "Erreur"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [targetReservation.id, onAlert, onSuccess, loading]);
+    },
+    [targetReservation.id, onAlert, onSuccess, loading]
+  );
 
   const emailOrPlaceholder =
     targetReservation.userEmail || "Utilisateur inconnu";
@@ -105,7 +112,6 @@ export default function DeleteReservationAction({
 
       <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
         <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] p-0 overflow-hidden">
-          {/* Header */}
           <div className="border-b px-6 py-4 bg-red-50">
             <div className="flex-1 pt-0.5">
               <DialogTitle className="text-lg text-red-900">
@@ -118,7 +124,6 @@ export default function DeleteReservationAction({
           </div>
 
           <form onSubmit={handleConfirm} className="px-6 pb-5 pt-5 space-y-5">
-            {/* Reservation Info Card */}
             <div className="flex flex-col gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
               <div className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                 <User className="h-4 w-4 text-gray-600 shrink-0" />
@@ -138,10 +143,9 @@ export default function DeleteReservationAction({
 
             <Separator />
 
-            {/* Warning Section */}
             <div className="space-y-3">
               <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-red-600" />
+                <CircleQuestionMark className="h-4 w-4 text-red-600" />
                 Que va-t-il se passer ?
               </h4>
               <ul className="space-y-2.5 text-sm text-gray-700">
@@ -157,14 +161,13 @@ export default function DeleteReservationAction({
                 <li className="flex items-start gap-2.5">
                   <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
                   <span>
-                    Les jeux, la plateforme et les accessoires réservés seront libérés et disponibles pour d&#39;autres utilisateurs
+                    Les jeux, la plateforme et les accessoires réservés seront
+                    libérés et disponibles pour d&#39;autres utilisateurs
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>
-                    Cette action ne peut pas être annulée
-                  </span>
+                  <span>Cette action ne peut pas être annulée</span>
                 </li>
               </ul>
             </div>

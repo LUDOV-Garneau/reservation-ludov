@@ -94,9 +94,7 @@ export default function AddCoursForm({ trigger, onSuccess, onAlert }: Props) {
       <DialogContent className="max-w-[95vw] sm:max-w-[500px] w-full p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-5 border-b">
           <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <BookOpen className="w-5 h-5 text-primary" />
-            </div>
+            <BookOpen className="w-5 h-5 text-cyan-600" />
             Ajouter un cours
           </DialogTitle>
         </DialogHeader>
@@ -133,7 +131,10 @@ export default function AddCoursForm({ trigger, onSuccess, onAlert }: Props) {
             </div>
 
             {error && (
-              <Alert variant="destructive" className="border-2 animate-in fade-in">
+              <Alert
+                variant="destructive"
+                className="border-2 animate-in fade-in"
+              >
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="font-medium">
                   {error}
@@ -146,7 +147,7 @@ export default function AddCoursForm({ trigger, onSuccess, onAlert }: Props) {
             <Button
               type="submit"
               disabled={loading || !name.trim() || !code.trim()}
-              className="w-full h-12 text-base font-semibold bg-cyan-500 hover:bg-cyan-700"
+              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 hover:bg-cyan-700 transition-colors"
               size="lg"
             >
               {loading ? (
