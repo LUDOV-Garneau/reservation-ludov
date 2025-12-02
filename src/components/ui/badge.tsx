@@ -21,6 +21,8 @@ const badgeVariants = cva(
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         reservationDetails:
           "bg-cyan-500/10 text-cyan-900 border-cyan-500 rounded-full",
+        reservationStatus:
+          "w-full text-white rounded-full text-md font-semibold",
       },
     },
     defaultVariants: {

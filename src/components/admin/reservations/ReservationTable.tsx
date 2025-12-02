@@ -28,6 +28,7 @@ import {
   Menu,
   Eye,
   AlertCircle,
+  CheckCircle,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -217,8 +218,11 @@ function ReservationStatusBadge({
 
   if (archived) {
     return (
-      <Badge className="bg-red-600 text-white border-0 text-xs px-4 py-3 rounded-full shrink-1">
-        <XCircle className="h-3 w-3 mr-1 block" />
+      <Badge
+        variant={"reservationStatus"}
+        className="bg-red-500 border-red-500"
+      >
+        <XCircle className="h-3 w-3" />
         <span className="hidden sm:inline">
           {t("admin.reservations.status.cancelled")}
         </span>
@@ -229,26 +233,25 @@ function ReservationStatusBadge({
 
   if (status === "upcoming") {
     return (
-      <Badge className="bg-emerald-600 text-white border-0 text-xs">
-        <CheckCircle2 className="h-3 w-3 mr-1" />
+      <Badge
+        variant={"reservationStatus"}
+        className="bg-cyan-500 border-cyan-500"
+      >
+        <Clock className="h-3 w-3" />
         <span className="hidden sm:inline">
           {t("admin.reservations.status.upcoming")}
         </span>
-        <span className="sm:hidden">+</span>
       </Badge>
     );
   }
 
   return (
     <Badge
-      variant="secondary"
-      className="bg-orange-500 text-white border-orange-500 text-xs"
+      variant={"reservationStatus"}
+      className="bg-green-500 border-green-500"
     >
-      <Clock className="h-3 w-3 mr-1" />
-      <span className="hidden sm:inline">
-        {t("admin.reservations.status.past")}
-      </span>
-      <span className="sm:hidden">-</span>
+      <CheckCircle className="h-3 w-3" />
+      <span className="hidden sm:inline">Complétée</span>
     </Badge>
   );
 }
@@ -278,9 +281,8 @@ function ReservationTableRow({
         </div>
       </TableCell>
 
-      {/* Console */}
       <TableCell>
-        <div className="flex items-center gap-2 text-sm">
+        <div className="flex items-center gap-2 text-xs sm:text-base">
           <span className="truncate max-w-[160px]">{reservation.console}</span>
         </div>
       </TableCell>
@@ -312,7 +314,7 @@ function ReservationTableRow({
 
       {/* Actions */}
       <TableCell>
-        <div className="hidden sm:flex gap-2 justify-center">
+        <div className="hidden sm:flex gap-2 justify-end">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -584,10 +586,10 @@ export default function ReservationsTable() {
                       <TableHead className="hidden lg:table-cell">
                         {t("admin.reservations.table.header.time")}
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="text-center">
                         {t("admin.reservations.table.header.status")}
                       </TableHead>
-                      <TableHead>
+                      <TableHead className="text-end">
                         {t("admin.reservations.table.header.actions")}
                       </TableHead>
                     </TableRow>
