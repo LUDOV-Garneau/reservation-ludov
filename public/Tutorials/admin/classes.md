@@ -46,47 +46,28 @@ Le bouton **Ajouter** ouvre un dialogue permettant l'ajout d'un cours
 
 4. Finalement, cliquez sur **Ajouter le cours** pour confirmer l'ajout
 
-## Réinitialiser le mot de passe d'un utilisateur 
-En cliquant sur le bouton avec l'**icône de clé**, vous pouvez réinitialiser le mot de passe d'un utilisateur, le forçant ainsi à devoir le changer lors de sa prochaine connexion.
+## Modifier un cours
+En cliquant sur le bouton avec l'**icône de crayon**, vous pouvez modifier un cours, soit changer son nom et son code.
 
-### Comment réinitialiser un mot de passe
-1. Cliquez sur le bouton avec l'**icône de clé**
+### Comment modifier un cours
+1. Cliquez sur le bouton avec l'**icône de crayon**
 
-2. Prenez connaissance des avertissements dans le dialogue de confirmation
+2. Effectuez les changements nécessaires
 
-3. Cliquez sur **Confirmer la réinitialisation** pour réinitialiser le mot de passe de l'utilisateur 
+3. Cliquez sur **Enregistrer le modifications** pour confirmer
 
-## Supprimer un utilisateur
-En cliquant sur le bouton avec l'**icône de poubelle**, vous pouvez supprimer un utilisateur.
+## Supprimer un cours
+En cliquant sur le bouton avec l'**icône de poubelle**, vous pouvez supprimer un cours.
 
 ### Comment supprimer un utilisateur
 1. Cliquez sur le bouton avec l'**icône de poubelle**
 
 2. Prenez connaissance des avertissements dans le dialogue de confirmation
 
-3. Clique sur **Confirmer la supression** pour supprimer l'utilisateur
+3. Clique sur **Confirmer la supression** pour supprimer le cours
 
-## Afficher les détails d'un utilisateur
-En cliquant sur une ligne du tableau, donc sur un utilisateur, vous pouvez accèder à ses détails pour voir ses informations personnelles (prénom, nom, courriel, date de création, date de dernière connexion, nombre de réservations, réservations complétées et son historique de réservation).
-
-### Comment afficher les détails d'un utilisateur
-1. Cliquez sur la ligne du tableau correspondante à l'utilisateur souhaité
-
-2. Une page avec ses détails sera affichée
-
-3. Cliquez sur **Retour** pour revenir au tableau des utilisateurs
-
-## Métriques des utilisateurs
-Vous trouverez en haut de l'onglet des utilisateurs des métriques concernant les utilisateurs
-
-1. Le nombre d'utilisateurs total
-
-2. Le nombre d'utilisateurs non configurés, soit qui n'ont pas créer de mot de passe 
-
-3. Le nombre d'utilisateurs qui ont effectué des réservations
-
-## Filtrage de utilisateurs
-Vous pouvez utiliser la barre de recherche pour filtrer la liste d'utilisateurs
+## Filtrage de cours
+Vous pouvez utiliser la barre de recherche pour filtrer la liste decours
 
 ## Rafraîchissement
 Appuyez sur le bouton de rafraîchissement pour mettre à jour la liste des utilisateurs manuellement
