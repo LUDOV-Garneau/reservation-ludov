@@ -2,17 +2,19 @@
 
 ## Table des matières
 
+## Table des matières
+
 1. [Introduction](#introduction)
-2. [Accès au module de gestion](#accès-au-module-de-gestion)
-3. [Interface utilisateur](#interface-utilisateur)
-4. [Création d'un nouvel utilisateur](#création-dun-nouvel-utilisateur)
-5. [Modification des informations utilisateur](#modification-des-informations-utilisateur)
-6. [Gestion avancée des permissions](#gestion-avancée-des-permissions)
-7. [Désactivation et suppression d'utilisateurs](#désactivation-et-suppression-dutilisateurs)
-8. [Réinitialisation des mots de passe](#réinitialisation-des-mots-de-passe)
-9. [Recherche et filtrage](#recherche-et-filtrage)
-10. [Bonnes pratiques et sécurité](#bonnes-pratiques-et-sécurité)
-11. [Dépannage](#dépannage)
+2. [Accès au panneau d'administration des utilisateurs](#accès-au-panneau-dadministration-des-utilisateurs)
+3. [Tableau des utilisateurs](#tableau-des-utilisateurs)
+4. [Ajouter un nouvel utilisateur](#ajouter-un-nouvel-utilisateur)
+5. [Réinitialiser le mot de passe d'un utilisateur](#réinitialiser-le-mot-de-passe-dun-utilisateur)
+6. [Supprimer un utilisateur](#supprimer-un-utilisateur)
+7. [Afficher les détails d'un utilisateur](#afficher-les-détails-dun-utilisateur)
+8. [Métriques des utilisateurs](#métriques-des-utilisateurs)
+9. [Filtrage des utilisateurs](#filtrage-des-utilisateurs)
+10. [Rafraîchissement](#rafraîchissement)
+
 
 ---
 
@@ -43,19 +45,66 @@ Le tableau des utilisateurs affiche tous les utilisateurs du module de réservat
    - **Date de création** : Date de création de l'utilisateur
    - **Actions** : Boutons permettant de modifier ou de supprimer un utilisateur 
 
-## Ajouter un utlisateur
-### Ouvrir le formulaire d'ajout simple
-1. Cliquez sur le bouton *Ajouter*
-![Fenêtre ajouts](img/ajouter.png)
-2. Dans la fenêtre qui s'ouvre, cliquez sur le bouton *Ajouter un utilisateur*
-![Ajout simple](img/ajout_simple.png)
+## Ajouter un nouvel utilisateur
+Le bouton **Ajouter** ouvre un fenêtre permettant l'ajout simple ou multiple d'utilisateurs. 
 
-## Ajouter des utilisateurs
+### Comment ajouter un utilisateur simple
+1. Cliquez sur le bouton **Ajouter**.
 
-## Modifier un utilisateur
+2. Choisissez l'option **Ajouter un utilisateur**
+
+3. Remplissez tous les champs, soit le prénom, le nom de famille et l'adresse courriel
+
+4. Cochez si l'utilisateur est un administrateur. S'il n'est pas administrateur, laissez l'option décochée
+
+4. Finalement, cliquez sur **Ajoute l'utilisateur** pour confirmer l'ajout
+
+### Comment ajouter plusieurs utilisateurs
+1. Cliquez sur le bouton **Ajouter**
+
+2. Glissez un fichier CSV ou cliquez sur l'espace réservé **Glissez un fichier CSV** pour sélectionner un fichier à importer. Assurez-vous que le fichier soit conforme au format décrit en dessous de l'espace de dépôt
+
+## Réinitialiser le mot de passe d'un utilisateur 
+En cliquant sur le bouton avec l'**icône de clé**, vous pouvez réinitialiser le mot de passe d'un utilisateur, le forçant ainsi à devoir le changer lors de sa prochaine connexion.
+
+### Comment réinitialiser un mot de passe
+1. Cliquez sur le bouton avec l'**icône de clé**
+
+2. Prenez connaissance des avertissements dans le dialogue de confirmation
+
+3. Cliquez sur **Confirmer la réinitialisation** pour réinitialiser le mot de passe de l'utilisateur 
 
 ## Supprimer un utilisateur
+En cliquant sur le bouton avec l'**icône de poubelle**, vous pouvez supprimer un utilisateur.
+
+### Comment supprimer un utilisateur
+1. Cliquez sur le bouton avec l'**icône de poubelle**
+
+2. Prenez connaissance des avertissements dans le dialogue de confirmation
+
+3. Clique sur **Confirmer la supression** pour supprimer l'utilisateur
+
+## Afficher les détails d'un utilisateur
+En cliquant sur une ligne du tableau, donc sur un utilisateur, vous pouvez accèder à ses détails pour voir ses informations personnelles (prénom, nom, courriel, date de création, date de dernière connexion, nombre de réservations, réservations complétées et son historique de réservation).
+
+### Comment afficher les détails d'un utilisateur
+1. Cliquez sur la ligne du tableau correspondante à l'utilisateur souhaité
+
+2. Une page avec ses détails sera affichée
+
+3. Cliquez sur **Retour** pour revenir au tableau des utilisateurs
 
 ## Métriques des utilisateurs
+Vous trouverez en haut de l'onglet des utilisateurs des métriques concernant les utilisateurs
 
+1. Le nombre d'utilisateurs total
 
+2. Le nombre d'utilisateurs non configurés, soit qui n'ont pas créer de mot de passe 
+
+3. Le nombre d'utilisateurs qui ont effectué des réservations
+
+## Filtrage de utilisateurs
+Vous pouvez utiliser la barre de recherche pour filtrer la liste d'utilisateurs
+
+## Rafraîchissement
+Appuyez sur le bouton de rafraîchissement pour mettre à jour la liste des utilisateurs manuellement
