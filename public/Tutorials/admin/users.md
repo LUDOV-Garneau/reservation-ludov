@@ -1,9 +1,7 @@
 # Guide Complet : Gestion des Utilisateurs dans le Panneau d'Administration
 
-## Table des matières
 
 ## Table des matières
-
 1. [Introduction](#introduction)
 2. [Accès au panneau d'administration des utilisateurs](#accès-au-panneau-dadministration-des-utilisateurs)
 3. [Tableau des utilisateurs](#tableau-des-utilisateurs)

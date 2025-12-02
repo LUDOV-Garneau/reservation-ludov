@@ -1,19 +1,14 @@
 # Guide Complet : Gestion des Cours dans le Panneau d'Administration
 
 ## Table des matières
-
-## Table des matières
-
 1. [Introduction](#introduction)
-2. [Accès au panneau d'administration des utilisateurs](#accès-au-panneau-dadministration-des-utilisateurs)
-3. [Tableau des utilisateurs](#tableau-des-utilisateurs)
-4. [Ajouter un nouvel utilisateur](#ajouter-un-nouvel-utilisateur)
-5. [Réinitialiser le mot de passe d'un utilisateur](#réinitialiser-le-mot-de-passe-dun-utilisateur)
-6. [Supprimer un utilisateur](#supprimer-un-utilisateur)
-7. [Afficher les détails d'un utilisateur](#afficher-les-détails-dun-utilisateur)
-8. [Métriques des utilisateurs](#métriques-des-utilisateurs)
-9. [Filtrage des utilisateurs](#filtrage-des-utilisateurs)
-10. [Rafraîchissement](#rafraîchissement)
+2. [Accès au panneau d'administration des cours](#accès-au-panneau-dadministration-des-cours)
+3. [Tableau des utilisateurs](#tableau-des-cours)
+4. [Ajouter un nouveau cours](#ajouter-un-nouveau-cours)
+5. [Modifier un cours](#modifier-un-cours)
+6. [Supprimer un cours](#supprimer-un-cours)
+7. [Filtrage de cours](#filtrage-de-cours)
+8. [Rafraîchissement](#rafraîchissement)
 
 
 ---
@@ -30,7 +25,7 @@ Ce guide détaillé vous accompagne dans toutes les étapes de la gestion des co
 1. Accédez à la page d'administration
 2. Cliquez sur l'onglet *Cours*
 
-## Tableau des utilisateurs
+## Tableau des cours
 Le tableau des cours affiche tous les cours du module de réservation du LUDOV. Chaque ligne du tableau représente un cours avec les colonnes suivantes :
    - **Nom** : Nom du cours
    - **Code du cours** : Code du cours
@@ -67,7 +62,7 @@ En cliquant sur le bouton avec l'**icône de poubelle**, vous pouvez supprimer u
 3. Clique sur **Confirmer la supression** pour supprimer le cours
 
 ## Filtrage de cours
-Vous pouvez utiliser la barre de recherche pour filtrer la liste decours
+Vous pouvez utiliser la barre de recherche pour filtrer la liste de cours
 
 ## Rafraîchissement
-Appuyez sur le bouton de rafraîchissement pour mettre à jour la liste des utilisateurs manuellement
+Appuyez sur le bouton de rafraîchissement pour mettre à jour la liste des cours manuellement
