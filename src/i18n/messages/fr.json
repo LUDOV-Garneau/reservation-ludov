@@ -707,7 +707,7 @@
     "title": "Biblothèque de documentation",
     "subtitle": "Trouvez des guides et des ressources pour utiliser la plateforme LUDOV",
     "sidebar": {
-      "goBackToLibrary": "Retour à la bibliothèque",
+      "goBackToLibrary": "Retour",
       "title": "Documentation"
     }
   }

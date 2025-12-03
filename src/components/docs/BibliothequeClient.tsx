@@ -23,7 +23,7 @@ const TutoPage: TutorialCardsProps[] = [
     {
         title: "Effectuer une réservation",
         description: "Découvrez comment effectuer des réservations.",
-        args: TutorialArgs.RESERVATIONS,
+        args: TutorialArgs.MAKE_RESERVATION,
         isAdminRessource: false,
         icons: Calendar,
     },
