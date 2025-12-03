@@ -1,68 +1,63 @@
-# Guide Complet : Gestion des Cours dans le Panneau d'Administration
+# Getting Started - Admin Guide
 
-## Table des matières
-1. [Introduction](#introduction)
-2. [Accès au panneau d'administration des cours](#accès-au-panneau-dadministration-des-cours)
-3. [Tableau des utilisateurs](#tableau-des-cours)
-4. [Ajouter un nouveau cours](#ajouter-un-nouveau-cours)
-5. [Modifier un cours](#modifier-un-cours)
-6. [Supprimer un cours](#supprimer-un-cours)
-7. [Filtrage de cours](#filtrage-de-cours)
-8. [Rafraîchissement](#rafraîchissement)
+## Overview
 
+Welcome to the LUDOV admin panel. This guide will help you get started with managing the reservation system.
 
----
+## Prerequisites
 
-## Introduction
+- Admin account credentials
+- Access to the admin dashboard
+- Basic understanding of the reservation system
 
-### À propos de ce guide
+## Accessing the Admin Panel
 
-Ce guide détaillé vous accompagne dans toutes les étapes de la gestion des cours via le panneau d'administration.
+1. Navigate to the admin login page
+2. Enter your admin credentials
+3. Click "Login" to access the dashboard
 
----
+## Key Features
 
-## Accès au panneau d'administration des cours
-1. Accédez à la page d'administration
-2. Cliquez sur l'onglet *Cours*
+### User Management
 
-## Tableau des cours
-Le tableau des cours affiche tous les cours du module de réservation du LUDOV. Chaque ligne du tableau représente un cours avec les colonnes suivantes :
-   - **Nom** : Nom du cours
-   - **Code du cours** : Code du cours
-   - **Actions** : Boutons permettant de modifier ou de supprimer un cours
+- View all registered users
+- Edit user permissions
+- Deactivate/activate accounts
 
-## Ajouter un nouveeau cours
-Le bouton **Ajouter** ouvre un dialogue permettant l'ajout d'un cours
+### Reservation Management
 
-### Comment ajouter un cours
-1. Cliquez sur le bouton **Ajouter**.
+- View all reservations
+- Approve or reject pending reservations
+- Modify existing reservations
+- Cancel reservations if needed
 
-2. Remplissez tous les champs, soit le nom et le code
+### Resource Management
 
-4. Finalement, cliquez sur **Ajouter le cours** pour confirmer l'ajout
+- Add new resources
+- Update resource availability
+- Set resource capacity and schedules
 
-## Modifier un cours
-En cliquant sur le bouton avec l'**icône de crayon**, vous pouvez modifier un cours, soit changer son nom et son code.
+### Reports and Analytics
 
-### Comment modifier un cours
-1. Cliquez sur le bouton avec l'**icône de crayon**
+- View reservation statistics
+- Generate usage reports
+- Monitor system activity
 
-2. Effectuez les changements nécessaires
+## Common Tasks
 
-3. Cliquez sur **Enregistrer le modifications** pour confirmer
+### Approving a Reservation
 
-## Supprimer un cours
-En cliquant sur le bouton avec l'**icône de poubelle**, vous pouvez supprimer un cours.
+1. Go to "Pending Reservations"
+2. Review the reservation details
+3. Click "Approve" or "Reject"
 
-### Comment supprimer un utilisateur
-1. Cliquez sur le bouton avec l'**icône de poubelle**
+### Adding a New Resource
 
-2. Prenez connaissance des avertissements dans le dialogue de confirmation
+1. Navigate to "Resources"
+2. Click "Add New Resource"
+3. Fill in the required information
+4. Save changes
 
-3. Clique sur **Confirmer la supression** pour supprimer le cours
+## Support
 
-## Filtrage de cours
-Vous pouvez utiliser la barre de recherche pour filtrer la liste de cours
-
-## Rafraîchissement
-Appuyez sur le bouton de rafraîchissement pour mettre à jour la liste des cours manuellement
+For additional help, contact the system administrator or refer to the full documentation.
