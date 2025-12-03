@@ -46,7 +46,7 @@ describe("API /reservation/calendar-times route", () => {
         );
 
         const mockRequest = new NextRequest(
-            "http://localhost/api/reservation/calendar-times?date=2025-12-01&consoleId=1",
+            `http://localhost/api/reservation/calendar-times?date=${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}&consoleId=1`,
             {
                 headers: {
                     Cookie: "SESSION=mock-token",
@@ -97,7 +97,7 @@ describe("API /reservation/calendar-times route", () => {
         });
 
         const mockRequest = new NextRequest(
-            "http://localhost/api/reservation/calendar-times?date=2025-12-01",
+            `http://localhost/api/reservation/calendar-times?date=${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}`,
             {
                 headers: {
                     Cookie: "SESSION=mock-token",
@@ -211,7 +211,7 @@ describe("API /reservation/calendar-times route", () => {
         );
 
         const mockRequest = new NextRequest(
-            "http://localhost/api/reservation/calendar-times?date=2025-12-01&consoleId=1",
+            `http://localhost/api/reservation/calendar-times?date=${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}&consoleId=1`,
             {
                 headers: {
                     Cookie: "SESSION=mock-token",
@@ -265,7 +265,7 @@ describe("API /reservation/calendar-times route", () => {
         );
 
         const mockRequest = new NextRequest(
-            "http://localhost/api/reservation/calendar-times?date=2025-12-01&consoleId=1&gameIds=1,2,3&accessoryIds=10,20",
+            `http://localhost/api/reservation/calendar-times?date=${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}&consoleId=1&gameIds=1,2,3&accessoryIds=10,20`,
             {
                 headers: {
                     Cookie: "SESSION=mock-token",
@@ -283,7 +283,7 @@ describe("API /reservation/calendar-times route", () => {
 
     it("returns 401 when token is missing", async () => {
         const mockRequest = new NextRequest(
-            "http://localhost/api/reservation/calendar-times?date=2025-12-01&consoleId=1"
+            `http://localhost/api/reservation/calendar-times?date=${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}&consoleId=1`
         );
 
         const response = await GET(mockRequest);
@@ -297,7 +297,7 @@ describe("API /reservation/calendar-times route", () => {
         vi.spyOn(jwtModule, "verifyToken").mockReturnValue(null);
 
         const mockRequest = new NextRequest(
-            "http://localhost/api/reservation/calendar-times?date=2025-12-01&consoleId=1",
+            `http://localhost/api/reservation/calendar-times?date=${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}&consoleId=1`,
             {
                 headers: {
                     Cookie: "SESSION=invalid-token",
@@ -328,7 +328,7 @@ describe("API /reservation/calendar-times route", () => {
         );
 
         const mockRequest = new NextRequest(
-            "http://localhost/api/reservation/calendar-times?date=2025-12-01&consoleId=1",
+            `http://localhost/api/reservation/calendar-times?date=${new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}&consoleId=1`,
             {
                 headers: {
                     Cookie: "SESSION=mock-token",

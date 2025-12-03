@@ -10,12 +10,20 @@ export default function TutorialViewer({
   page,
   adminRessources,
   onHeadings,
-}: TutorialViewerProps) {
-  const [markdownContent, setMarkdownContent] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(true);
+  content,
+}: TutorialViewerProps & { content?: string }) {
+  const [markdownContent, setMarkdownContent] = useState<string>(content || "");
+  const [loading, setLoading] = useState<boolean>(!content);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (content) {
+      setMarkdownContent(content);
+      const headings = extractHeadings(content);
+      onHeadings?.(headings);
+      return;
+    }
+
     let isMounted = true;
 
     async function fetchMarkdown() {
@@ -25,8 +33,8 @@ export default function TutorialViewer({
 
         const response = await fetch(
           adminRessources
-            ? `/Tutorials/admin/${page}.md`
-            : `/Tutorials/${page}.md`
+            ? `/tutoriels/admin/${page}.md`
+            : `/tutoriels/${page}.md`
         );
 
         if (!response.ok) {
@@ -63,7 +71,7 @@ export default function TutorialViewer({
     return () => {
       isMounted = false;
     };
-  }, [page, adminRessources, onHeadings]);
+  }, [page, adminRessources, onHeadings, content]);
 
   if (loading) {
     return (
@@ -81,7 +89,7 @@ export default function TutorialViewer({
       <div className="mx-auto max-w-full py-8">
         <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-6 shadow-sm">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <svg
                 className="h-6 w-6 text-red-600"
                 fill="none"

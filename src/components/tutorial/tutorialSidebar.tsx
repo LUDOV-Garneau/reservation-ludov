@@ -25,7 +25,7 @@ export function TutorialSidebar({
     <Sidebar collapsible="offcanvas" variant="floating">
       <SidebarHeader className="border-b border-gray-200 py-6">
         <Link
-          href={adminRessources ? `/admin?tab=tutorials` : `/docs/bibliotheque`}
+          href={adminRessources ? `/admin?tab=tutorials` : `/biblio`}
           className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit"
         >
           <ChevronLeft className="w-4 h-4" />
