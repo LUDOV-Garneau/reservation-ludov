@@ -385,7 +385,7 @@ export default function AvailabilitiesTab() {
             }
             onClick={handleSubmitWeekly}
             type="submit"
-            className="mt-4 w-fit mx-auto font-semibold text-base"
+            className="mt-4 w-fit mx-auto font-semibold text-base bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors"
           >
             {isLoading
               ? t("admin.availabilities.actions.setting")
@@ -411,7 +411,7 @@ export default function AvailabilitiesTab() {
           <Button
             disabled={isLoading || specificDatesErrors.length > 0}
             type="submit"
-            className="mt-4 w-fit mx-auto font-semibold text-base"
+            className="mt-4 w-fit mx-auto font-semibold text-base bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors"
             onClick={handleSubmitSpecificDates}
           >
             {isLoading

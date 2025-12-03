@@ -2,12 +2,14 @@
 
 import React, { useState } from "react";
 import {
-  Dialog, DialogContent, DialogDescription,
-  DialogTitle
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import {KeyRound, Mail, Loader2, Shield, Send } from "lucide-react";
+import { KeyRound, Mail, Loader2, Shield, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
@@ -21,8 +23,15 @@ type TargetUser = {
 export interface ResetPasswordActionProps {
   targetUser: TargetUser;
   onSuccess?: () => void;
-  onAlert?: (type: "success" | "error" | "info" | "warning", message: string, title?: string) => void;
-  children: (controls: { open: () => void; loading: boolean }) => React.ReactNode;
+  onAlert?: (
+    type: "success" | "destructive" | "info" | "warning",
+    message: string,
+    title?: string
+  ) => void;
+  children: (controls: {
+    open: () => void;
+    loading: boolean;
+  }) => React.ReactNode;
 }
 
 export default function ResetPasswordAction({
@@ -52,11 +61,17 @@ export default function ResetPasswordAction({
       }
 
       const data = await res.json();
-      onAlert?.("success", data.message || "Mot de passe réinitialisé avec succès");
+      onAlert?.(
+        "success",
+        data.message || "Mot de passe réinitialisé avec succès"
+      );
       onSuccess?.();
       setOpen(false);
     } catch (e) {
-      onAlert?.("error", e instanceof Error ? e.message : "Erreur lors de la réinitialisation");
+      onAlert?.(
+        "destructive",
+        e instanceof Error ? e.message : "Erreur lors de la réinitialisation"
+      );
     } finally {
       setLoading(false);
     }
@@ -113,7 +128,11 @@ export default function ResetPasswordAction({
               <ul className="space-y-2.5 text-sm text-gray-700">
                 <li className="flex items-start gap-2.5">
                   <KeyRound className="h-4 w-4 mt-0.5 text-cyan-600 shrink-0" />
-                  <span>{t("thePasswordWillBe")} <strong className="text-gray-900">{t("reset")}</strong> {t("inTheDatabase")}</span>
+                  <span>
+                    {t("thePasswordWillBe")}{" "}
+                    <strong className="text-gray-900">{t("reset")}</strong>{" "}
+                    {t("inTheDatabase")}
+                  </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Send className="h-4 w-4 mt-0.5 text-cyan-600 shrink-0" />

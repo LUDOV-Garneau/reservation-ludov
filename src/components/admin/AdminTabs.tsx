@@ -56,13 +56,13 @@ export default function AdminTabs() {
               <div className="flex items-center gap-2.5">
                 <Icon
                   className={`w-[18px] h-[18px] transition-colors ${
-                    isActive ? "text-[#02dcde]" : "text-gray-400"
+                    isActive ? "text-cyan-500" : "text-gray-400"
                   }`}
                 />
                 <span
                   className={`text-sm font-medium transition-colors ${
                     isActive
-                      ? "text-[#02dcde]"
+                      ? "text-cyan-500 font-semibold"
                       : "text-gray-600 hover:text-gray-900"
                   }`}
                 >
@@ -71,7 +71,7 @@ export default function AdminTabs() {
               </div>
 
               <div
-                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-[#02dcde] transition-all duration-300 ${
+                className={`absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-500 transition-all duration-300 ${
                   isActive ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
                 }`}
               />

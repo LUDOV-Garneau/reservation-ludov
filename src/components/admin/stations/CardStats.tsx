@@ -58,7 +58,7 @@ export default function CardStationStats({
       <Card className={`border-l-4 ${colorMap.ring}`}>
         <CardContent className="flex items-center gap-4">
           <div
-            className={`flex h-16 w-16 items-center justify-center rounded-full ${colorMap.tint}`}
+            className={`flex h-16 w-16 items-center justify-center rounded-full shrink-0 ${colorMap.tint}`}
           >
             <div className={`rounded-full ${colorMap.dot} p-3 shadow-lg`}>
               <Computer className="h-6 w-6 text-white" />
@@ -86,7 +86,7 @@ export default function CardStationStats({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
       <Stat
         label={t("admin.stations.stats.activeStations")}
         value={activeStationsCount}

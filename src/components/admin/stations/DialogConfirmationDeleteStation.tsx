@@ -2,7 +2,10 @@
 
 import React, { useState } from "react";
 import {
-  Dialog, DialogContent, DialogDescription, DialogTitle
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -12,18 +15,21 @@ import { useTranslations } from "next-intl";
 
 type TargetStation = {
   id: number;
-  name: string
+  name: string;
 };
 
 export interface DeleteStationActionProps {
   targetStation: TargetStation;
   onSuccess?: () => void;
   onAlert?: (
-    type: "success" | "error" | "info" | "warning",
+    type: "success" | "destructive" | "info" | "warning",
     message: string,
     title?: string
   ) => void;
-  children: (controls: { open: () => void; loading: boolean }) => React.ReactNode;
+  children: (controls: {
+    open: () => void;
+    loading: boolean;
+  }) => React.ReactNode;
 }
 
 export default function DeleteStationAction({
@@ -57,7 +63,10 @@ export default function DeleteStationAction({
       onSuccess?.();
       setOpen(false);
     } catch (e) {
-      onAlert?.("error", e instanceof Error ? e.message : t("alerts.deleteError"));
+      onAlert?.(
+        "destructive",
+        e instanceof Error ? e.message : t("alerts.deleteError")
+      );
     } finally {
       setLoading(false);
     }
@@ -89,13 +98,7 @@ export default function DeleteStationAction({
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-gray-900 truncate">
-                  {targetStation.name ? (
-                    <>
-                      {targetStation.name}
-                    </>
-                  ) : (
-                    "Station"
-                  )}
+                  {targetStation.name ? <>{targetStation.name}</> : "Station"}
                 </div>
               </div>
             </div>
@@ -111,14 +114,14 @@ export default function DeleteStationAction({
                 <li className="flex items-start gap-2.5">
                   <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
                   <span>
-                    {t("theStation")} <strong className="text-gray-900">{t("deleted")}</strong> {t("stationWontBeAccessible")}
+                    {t("theStation")}{" "}
+                    <strong className="text-gray-900">{t("deleted")}</strong>{" "}
+                    {t("stationWontBeAccessible")}
                   </span>
                 </li>
                 <li className="flex items-start gap-2.5">
                   <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>
-                    {t("reservationDeleted")}
-                  </span>
+                  <span>{t("reservationDeleted")}</span>
                 </li>
               </ul>
             </div>
