@@ -18,7 +18,7 @@ import { BookOpen, CheckCircle2, AlertCircle } from "lucide-react";
 type Props = {
   trigger: React.ReactNode;
   onSuccess?: () => void;
-  onAlert?: (type: "success" | "error", message: string) => void;
+  onAlert?: (type: "success" | "destructive", message: string) => void;
 };
 
 export default function AddCoursForm({ trigger, onSuccess, onAlert }: Props) {
@@ -81,7 +81,7 @@ export default function AddCoursForm({ trigger, onSuccess, onAlert }: Props) {
       onSuccess?.();
     } catch (err) {
       console.error(err);
-      onAlert?.("error", "Erreur lors de l’ajout du cours.");
+      onAlert?.("destructive", "Erreur lors de l’ajout du cours.");
     } finally {
       setLoading(false);
     }

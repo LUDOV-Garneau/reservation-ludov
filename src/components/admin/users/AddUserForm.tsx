@@ -21,7 +21,7 @@ import { useTranslations } from "next-intl";
 
 type Props = {
   onSuccess?: () => void;
-  onAlert?: (type: "success" | "error", message: string) => void;
+  onAlert?: (type: "success" | "destructive", message: string) => void;
   trigger?: ReactNode;
 };
 
@@ -139,7 +139,7 @@ export default function AddUserFormDialog({
         }
 
         setErrors((prev) => ({ ...prev, global: message }));
-        onAlert?.("error", message);
+        onAlert?.("destructive", message);
         return;
       }
 
@@ -154,7 +154,7 @@ export default function AddUserFormDialog({
     } catch {
       const message = t("errorMessage.genericError");
       setErrors({ global: message });
-      onAlert?.("error", message);
+      onAlert?.("destructive", message);
     } finally {
       setLoading(false);
     }
