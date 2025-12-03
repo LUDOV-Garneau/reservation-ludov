@@ -196,6 +196,6 @@ describe("API /reservation/calendar-dates route", () => {
     const json = await response.json();
 
     expect(response.status).toBe(500);
-    expect(json).toHaveProperty("destructive", "Internal server error");
+    expect(json).toHaveProperty("error", "Internal server error");
   });
 });
