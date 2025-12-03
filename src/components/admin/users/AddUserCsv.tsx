@@ -26,7 +26,7 @@ type UploadStatus =
   | "uploading"
   | "success"
   | "destructive"
-  | "error"
+  | "destructive"
   | "warning";
 
 export default function UsersForm({ onSuccess, onAlert }: Props) {
@@ -371,7 +371,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         </div>
       )}
 
-      {status === "error" && (
+      {status === "destructive" && (
         <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4 w-full">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg flex-shrink-0">

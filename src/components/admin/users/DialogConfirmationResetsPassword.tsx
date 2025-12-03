@@ -69,7 +69,7 @@ export default function ResetPasswordAction({
       setOpen(false);
     } catch (e) {
       onAlert?.(
-        "error",
+        "destructive",
         e instanceof Error ? e.message : "Erreur lors de la réinitialisation"
       );
     } finally {

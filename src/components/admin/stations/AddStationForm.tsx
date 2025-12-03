@@ -38,7 +38,7 @@ type ConsoleStock = {
 
 type Props = {
   onSuccess?: () => void;
-  onAlert?: (type: "success" | "error", message: string) => void;
+  onAlert?: (type: "success" | "destructive", message: string) => void;
   trigger: React.ReactNode;
 };
 
@@ -138,7 +138,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
       onSuccess?.();
     } catch (err) {
       console.error(err);
-      onAlert?.("error", t("alerts.addStationError"));
+      onAlert?.("destructive", t("alerts.addStationError"));
     } finally {
       setLoading(false);
     }
