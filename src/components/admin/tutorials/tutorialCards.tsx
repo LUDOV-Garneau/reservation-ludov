@@ -33,7 +33,7 @@ export default function TutorialCards(tuto: TutorialCardsProps) {
           }
           className="w-full"
         >
-          <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-7s00 w-full">
+          <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 w-full">
             Voir la documentation
           </Button>
         </Link>
