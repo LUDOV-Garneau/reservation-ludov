@@ -214,7 +214,7 @@ export default function UpdateStationForm({
 
               <div className="space-y-3">
                 <Label className="text-sm font-semibold flex items-center gap-2">
-                  plateformes associées
+                  Plateformes associées
                   <span className="text-xs text-red-500">*</span>
                 </Label>
 
