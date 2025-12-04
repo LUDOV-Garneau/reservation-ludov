@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Calendar, X } from 'lucide-react';
+import React from 'react';
+import { Calendar, Funnel, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import {
   Popover,
   PopoverContent,
@@ -43,10 +42,7 @@ export const normalizeDate = (date: Date): Date => {
 };
 
 export default function DateFilter({ value, onChange, onClear }: DateFilterProps) {
-  const [mode, setMode] = useState<DateFilterMode>(value.mode);
-
   const handleModeChange = (newMode: DateFilterMode) => {
-    setMode(newMode);
     onChange({
       mode: newMode,
       specificDate: undefined,
@@ -79,8 +75,8 @@ export default function DateFilter({ value, onChange, onClear }: DateFilterProps
     });
   };
 
-  const formatDate = (date: Date | undefined) => {
-    if (!date) return 'Sélectionner une date';
+  const formatDate = (date: Date | undefined, placeholder: string) => {
+    if (!date) return placeholder;
     return date.toLocaleDateString('fr-CA', {
       year: 'numeric',
       month: 'long',
@@ -88,19 +84,18 @@ export default function DateFilter({ value, onChange, onClear }: DateFilterProps
     });
   };
 
-  const hasActiveFilter = 
+  const hasActiveFilter =
     (value.mode === 'specific' && value.specificDate) ||
     (value.mode === 'range' && (value.startDate || value.endDate));
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-end">
-      <div className="w-full sm:w-auto">
-        <Label htmlFor="filter-mode" className="text-sm font-medium mb-1.5 block">
-          Type de filtre
-        </Label>
-        <Select value={mode} onValueChange={handleModeChange}>
-          <SelectTrigger id="filter-mode" className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Sélectionner le type" />
+    <div className="flex flex-col lg:flex-row gap-2 items-start lg:items-center">
+      <div className="flex items-center gap-2 w-full lg:w-auto">
+        <Funnel className="h-5 w-5 text-cyan-500 flex-shrink-0" />
+        
+        <Select value={value.mode} onValueChange={handleModeChange}>
+          <SelectTrigger className="w-full md:w-[180px]">
+            <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="specific">Date spécifique</SelectItem>
@@ -109,19 +104,16 @@ export default function DateFilter({ value, onChange, onClear }: DateFilterProps
         </Select>
       </div>
 
-      {mode === 'specific' && (
-        <div className="w-full sm:w-auto">
-          <Label className="text-sm font-medium mb-1.5 block">
-            Date
-          </Label>
+      <div className="flex flex-col md:flex-row gap-2 w-full lg:w-auto">
+        {value.mode === 'specific' && (
           <Popover>
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
-                className="w-full sm:w-[240px] justify-start text-left font-normal"
+                className="w-full md:w-[240px] justify-start text-left font-normal"
               >
-                <Calendar className="mr-2 h-4 w-4" />
-                {formatDate(value.specificDate)}
+                <Calendar className="mr-2 h-4 w-4 text-cyan-500" />
+                {formatDate(value.specificDate, 'Sélectionner une date')}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -133,23 +125,18 @@ export default function DateFilter({ value, onChange, onClear }: DateFilterProps
               />
             </PopoverContent>
           </Popover>
-        </div>
-      )}
+        )}
 
-      {mode === 'range' && (
-        <>
-          <div className="w-full sm:w-auto">
-            <Label className="text-sm font-medium mb-1.5 block">
-              Date de début
-            </Label>
+        {value.mode === 'range' && (
+          <>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full sm:w-[200px] justify-start text-left font-normal"
+                  className="w-full md:w-[200px] justify-start text-left font-normal"
                 >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {formatDate(value.startDate)}
+                  <Calendar className="mr-2 h-4 w-4 text-cyan-500" />
+                  {formatDate(value.startDate, 'Date de début')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -161,20 +148,15 @@ export default function DateFilter({ value, onChange, onClear }: DateFilterProps
                 />
               </PopoverContent>
             </Popover>
-          </div>
 
-          <div className="w-full sm:w-auto">
-            <Label className="text-sm font-medium mb-1.5 block">
-              Date de fin
-            </Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full sm:w-[200px] justify-start text-left font-normal"
+                  className="w-full md:w-[200px] justify-start text-left font-normal"
                 >
-                  <Calendar className="mr-2 h-4 w-4" />
-                  {formatDate(value.endDate)}
+                  <Calendar className="mr-2 h-4 w-4 text-cyan-500" />
+                  {formatDate(value.endDate, 'Date de fin')}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -183,27 +165,27 @@ export default function DateFilter({ value, onChange, onClear }: DateFilterProps
                   selected={value.endDate}
                   onSelect={handleEndDateChange}
                   initialFocus
-                  disabled={(date) => 
+                  disabled={(date) =>
                     value.startDate ? date < value.startDate : false
                   }
                 />
               </PopoverContent>
             </Popover>
-          </div>
-        </>
-      )}
+          </>
+        )}
 
-      {hasActiveFilter && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClear}
-          className="mt-0 sm:mt-0 self-end"
-          title="Effacer le filtre"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      )}
+        {hasActiveFilter && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClear}
+            title="Effacer le filtre"
+            className="self-start md:self-center"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
