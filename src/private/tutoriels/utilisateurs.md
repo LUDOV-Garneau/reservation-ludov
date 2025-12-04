@@ -45,13 +45,13 @@ Le tableau des utilisateurs affiche tous les utilisateurs du module de réservat
 
 ## Ajouter un nouvel utilisateur
 Le bouton **Ajouter** ouvre un fenêtre permettant l'ajout simple ou multiple d'utilisateurs.
-![Image ajout](../images/tutoriels/users/ajout.png)
+![Image ajout](/api/admin/images/users/ajout.png)
 
 ### Comment ajouter un seul utilisateur
 1. Cliquez sur le bouton **Ajouter**.
 
 2. Choisissez l'option **Ajouter un utilisateur**
-![Image ajout simple](../images/tutoriels/users/ajout_simple.png)
+![Image ajout simple](/api/admin/images/users/ajout_simple.png)
 
 3. Remplissez tous les champs, soit le prénom, le nom de famille et l'adresse courriel
 
@@ -63,31 +63,31 @@ Le bouton **Ajouter** ouvre un fenêtre permettant l'ajout simple ou multiple d'
 1. Cliquez sur le bouton **Ajouter**
 
 2. Glissez un fichier CSV ou cliquez sur l'espace réservé **Glissez un fichier CSV** pour sélectionner un fichier à importer. Assurez-vous que le fichier soit conforme au format décrit en dessous de l'espace de dépôt
-![Image ajout multiple](../images/tutoriels/users/ajout_multiple.png)
+![Image ajout multiple](/api/admin/images/users/ajout_multiple.png)
 
 ## Réinitialiser le mot de passe d'un utilisateur 
 En cliquant sur le bouton avec l'**icône de clé**, vous pouvez réinitialiser le mot de passe d'un utilisateur, le forçant ainsi à devoir le changer lors de sa prochaine connexion.
 
 ### Comment réinitialiser un mot de passe
 1. Cliquez sur le bouton avec l'**icône de clé**
-![Image réinitialisation mot de passe](../images/tutoriels/users/btn_reset_mdp.png)
+![Image réinitialisation mot de passe](/api/admin/images/users/btn_reset_mdp.png)
 
 2. Prenez connaissance des avertissements dans le dialogue de confirmation
 
 3. Cliquez sur **Confirmer la réinitialisation** pour réinitialiser le mot de passe de l'utilisateur 
-![Image confirmation réinitialisation](../images/tutoriels/users/conf_reset_mdp.png)
+![Image confirmation réinitialisation](/api/admin/images/users/conf_reset_mdp.png)
 
 ## Supprimer un utilisateur
 En cliquant sur le bouton avec l'**icône de poubelle**, vous pouvez supprimer un utilisateur.
 
 ### Comment supprimer un utilisateur
 1. Cliquez sur le bouton avec l'**icône de poubelle**
-![Image suppression d'utilisateur](../images/tutoriels/users/btn_delete.png)
+![Image suppression d'utilisateur](/api/admin/images/users/btn_delete.png)
 
 2. Prenez connaissance des avertissements dans le dialogue de confirmation
 
 3. Clique sur **Confirmer la supression** pour supprimer l'utilisateur
-![Image confirmation suppression](../images/tutoriels/users/conf_delete.png)
+![Image confirmation suppression](/api/admin/images/users/conf_delete.png)
 
 ## Afficher les détails d'un utilisateur
 En cliquant sur une ligne du tableau, donc sur un utilisateur, vous pouvez accèder à ses détails pour voir ses informations personnelles :
@@ -102,16 +102,16 @@ En cliquant sur une ligne du tableau, donc sur un utilisateur, vous pouvez accè
 
 ### Comment afficher les détails d'un utilisateur
 1. Cliquez sur la ligne du tableau correspondante à l'utilisateur souhaité
-![Image accès détails](../images/tutoriels/users/details.png)
+![Image accès détails](/api/admin/images/users/details.png)
 
 2. Une page avec ses détails sera affichée
 
 3. Cliquez sur **Retour** pour revenir au tableau des utilisateurs
-![Image retour détails](../images/tutoriels/users/details_back.png)
+![Image retour détails](/api/admin/images/users/details_back.png)
 
 ## Métriques des utilisateurs
 Vous trouverez en haut de l'onglet des utilisateurs des métriques concernant les utilisateurs :
-![Image métriques utilisateurs](../images/tutoriels/users/metrics_users.png)
+![Image métriques utilisateurs](/api/admin/images/users/metrics_users.png)
 
 1. Le nombre d'utilisateurs total
 
@@ -121,8 +121,8 @@ Vous trouverez en haut de l'onglet des utilisateurs des métriques concernant le
 
 ## Filtrage de utilisateurs
 Vous pouvez utiliser la barre de recherche pour filtrer la liste d'utilisateurs
-![Image barre de recherche utilisateurs](../images/tutoriels/users/search-bar_users.png)
+![Image barre de recherche utilisateurs](/api/admin/images/users/search-bar_users.png)
 
 ## Rafraîchissement
 Appuyez sur le bouton de rafraîchissement pour mettre à jour la liste des utilisateurs manuellement
-![Image rafraîchissement utilisateurs](../images/tutoriels/users/refresh.png)
+![Image rafraîchissement utilisateurs](/api/admin/images/users/refresh.png)
