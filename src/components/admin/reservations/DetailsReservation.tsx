@@ -12,7 +12,8 @@ import {
   Cable,
   Computer,
   User,
-  ExternalLink
+  ExternalLink,
+  ChevronLeft,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -63,7 +64,7 @@ interface ReservationDetailsProps {
 
 type AlertState = {
   show: boolean;
-  type: "success" | "error";
+  type: "success" | "destructive";
   title: string;
   message: string;
 } | null;
@@ -127,10 +128,7 @@ function GameCard({ game }: { game: Game }) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button
-                className="bg-cyan-500 hover:bg-cyan-600 transition-colors w-full"
-                size="default"
-              >
+              <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors w-full">
                 {t("reservation.details.detailsButton")}
               </Button>
             </Link>
@@ -231,6 +229,7 @@ function ReservationHeader({
   user_id,
   onAlert,
   onCancelSuccess,
+  router,
 }: {
   date: string;
   heure: string;
@@ -242,40 +241,50 @@ function ReservationHeader({
   lastname: string;
   email: string;
   user_id: number;
-  onAlert: (type: "success" | "error" | "info" | "warning", message: string, title?: string) => void;
+  router: ReturnType<typeof useRouter>;
+  onAlert: (
+    type: "success" | "destructive" | "info" | "warning",
+    message: string,
+    title?: string
+  ) => void;
   onCancelSuccess: () => void;
   onCancelError: (error: Error) => void;
 }) {
   const t = useTranslations();
 
   return (
-    <div className="relative overflow-hidden rounded-xl border bg-[white] shadow-sm p-8 mb-8 text-center lg:text-left">
-      <div className="flex flex-col items-center lg:flex-row lg:items-start lg:justify-between gap-6">
+    <div className="relative overflow-hidden rounded-xl border bg-[white] shadow-sm p-8 mb-8 lg:text-left">
+      <Button
+        onClick={() => router.back()}
+        className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit group"
+      >
+        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+        <span className="text-sm font-medium">Retour</span>
+      </Button>
+      <div className="flex  flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         <div className="flex-1 space-y-4">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
             Détails de la réservation
           </h1>
 
-          {firstname && lastname && (
-            <div className="flex items-center justify-center lg:justify-start gap-3 text-xl text-gray-700">
-              <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                <User className="h-5 w-5 text-cyan-600" />
-              </div>
-              <span className="font-semibold">
-                {firstname} {lastname}
-              </span>
-              <Link
-                href={`/admin/user/${user_id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-cyan-600 hover:text-cyan-700 transition-colors group"
-              >
-                <ExternalLink className="h-5 w-5" />
-              </Link>
+          <Link
+            href={`/admin/user/${user_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+            flex items-center lg:justify-start gap-3 text-xl md:w-fit group hover:border-b-cyan-500 border-b-2 border-transparent pb-1 transition-all"
+          >
+            <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+              <User className="h-5 w-5 text-cyan-600" />
             </div>
-          )}
+            <span className="font-semibold group-hover:text-cyan-500 transition-colors">
+              {firstname} {lastname}
+            </span>
 
-          <div className="flex flex-wrap justify-center md:justify-start gap-6 text-lg text-gray-600">
+            <ExternalLink className="h-5 w-5 group-hover:text-cyan-500 transition-colors" />
+          </Link>
+
+          <div className="flex flex-col sm:flex-row md:justify-start gap-6 text-lg text-gray-600">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
                 <Calendar className="h-5 w-5 text-cyan-600" />
@@ -294,20 +303,17 @@ function ReservationHeader({
               </time>
             </div>
 
-            {station && (
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
-                  <Computer className="h-5 w-5 text-cyan-600" />
-                </div>
-                <span className="font-medium">{station}</span>
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                <Computer className="h-5 w-5 text-cyan-600" />
               </div>
-            )}
+              <span className="font-medium">{station}</span>
+            </div>
           </div>
         </div>
 
         {!archived && (
-          <div className="flex flex-col items-center gap-4 max-w-80 lg:w-auto">
-
+          <div className="flex flex-col items-center gap-4  lg:w-auto">
             <DeleteReservationAction
               targetReservation={{
                 id: reservationId,
@@ -324,13 +330,11 @@ function ReservationHeader({
                   disabled={loading}
                   variant="destructive"
                   className="w-full"
-                  size="lg"
                 >
                   <AlertCircle className="h-5 w-5 mr-2" />
                   {loading
                     ? t("reservation.details.canceling")
-                    : t("reservation.details.cancelReservation")
-                  }
+                    : t("reservation.details.cancelReservation")}
                 </Button>
               )}
             </DeleteReservationAction>
@@ -374,58 +378,45 @@ export default function DetailsReservation({
   const handleCancelError = useCallback((error: Error) => {
     setAlert({
       show: true,
-      type: "error",
+      type: "destructive",
       title: "Erreur",
       message: error.message || "Impossible d'annuler la réservation.",
     });
   }, []);
 
-  const handleAlert = useCallback((type: "success" | "error" | "info" | "warning", message: string, title?: string) => {
-    setAlert({
-      show: true,
-      type: type === "success" ? "success" : "error",
-      title: title || (type === "success" ? "Succès" : "Erreur"),
-      message: message,
-    });
+  const handleAlert = useCallback(
+    (
+      type: "success" | "destructive" | "info" | "warning",
+      message: string,
+      title?: string
+    ) => {
+      setAlert({
+        show: true,
+        type: type === "success" ? "success" : "destructive",
+        title: title || (type === "success" ? "Succès" : "Erreur"),
+        message: message,
+      });
 
-    if (type === "success") {
-      setTimeout(() => {
-        router.replace("/admin/reservations");
-      }, 1600);
-    }
-  }, [router]);
+      if (type === "success") {
+        setTimeout(() => {
+          router.replace("/admin/reservations");
+        }, 1600);
+      }
+    },
+    [router]
+  );
 
   return (
     <div className="sm:bg-[white] rounded-lg mb-10">
       <div className="sm:px-4 sm:py-8 lg:px-8">
-        <nav className="mb-6" aria-label="Breadcrumb">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/admin"
-                  className="text-gray-600 hover:text-cyan-600"
-                >
-                  {t("reservation.layout.home")}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="text-gray-900 font-medium">
-                  {t("reservation.details.titleSection")}
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </nav>
-
         {alert?.show && (
           <Alert
-            variant={alert.type === "error" ? "destructive" : "default"}
-            className={`mb-6 ${alert.type === "success"
-              ? "border-green-200 bg-green-50 text-green-900"
-              : ""
-              }`}
+            variant={alert.type === "destructive" ? "destructive" : "default"}
+            className={`mb-6 ${
+              alert.type === "success"
+                ? "border-green-200 bg-green-50 text-green-900"
+                : ""
+            }`}
             role="status"
             aria-live="polite"
           >
@@ -441,19 +432,20 @@ export default function DetailsReservation({
                     {alert.title}
                   </AlertTitle>
                   <AlertDescription>
-                    {alert.type === "error"
+                    {alert.type === "destructive"
                       ? alert.message ||
-                      "Une erreur est survenue. Veuillez essayer ultérieurement."
+                        "Une erreur est survenue. Veuillez essayer ultérieurement."
                       : alert.message}
                   </AlertDescription>
                 </div>
               </div>
               <button
                 onClick={() => setAlert(null)}
-                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${alert.type === "error"
-                  ? "bg-red-100 text-red-600 hover:bg-red-200"
-                  : "bg-green-100 text-green-600 hover:bg-green-200"
-                  }`}
+                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
+                  alert.type === "destructive"
+                    ? "bg-red-100 text-red-600 hover:bg-red-200"
+                    : "bg-green-100 text-green-600 hover:bg-green-200"
+                }`}
                 aria-label="Fermer l'alerte"
               >
                 ×
@@ -476,6 +468,7 @@ export default function DetailsReservation({
           onAlert={handleAlert}
           onCancelSuccess={handleCancelSuccess}
           onCancelError={handleCancelError}
+          router={router}
         />
 
         {/* CONTAINER */}

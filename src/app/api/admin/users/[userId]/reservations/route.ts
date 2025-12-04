@@ -77,7 +77,7 @@ export async function GET(
         LEFT JOIN games g2 ON g2.id = r.game2_id
         LEFT JOIN games g3 ON g3.id = r.game3_id
         WHERE r.user_id = ?
-        ORDER BY TIMESTAMP(r.date, r.time)
+        ORDER BY TIMESTAMP(r.date, r.time) DESC
         `,
         [userId]
       );

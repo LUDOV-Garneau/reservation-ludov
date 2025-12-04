@@ -10,7 +10,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Cable,
-  Computer
+  Computer,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -58,7 +58,7 @@ interface ReservationDetailsProps {
 
 type AlertState = {
   show: boolean;
-  type: "success" | "error";
+  type: "success" | "destructive";
   title: string;
   message: string;
 } | null;
@@ -313,7 +313,6 @@ function ReservationHeader({
               </time>
             </div>
 
-
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
                 <Clock className="h-5 w-5 text-cyan-600" />
@@ -333,7 +332,6 @@ function ReservationHeader({
                 </div>
               </>
             )}
-
           </div>
         </div>
 
@@ -352,8 +350,8 @@ function ReservationHeader({
 
             <ReservationReminderDialog
               reservationId={reservationId}
-              onSendReminder={() => { }}
-              onError={() => { }}
+              onSendReminder={() => {}}
+              onError={() => {}}
             />
 
             <CancelReservationAlertDialog
@@ -397,7 +395,7 @@ export default function DetailsReservation({
   const handleCancelError = useCallback((error: Error) => {
     setAlert({
       show: true,
-      type: "error",
+      type: "destructive",
       title: "Erreur",
       message: error.message || "Impossible d'annuler la réservation.",
     });
@@ -429,11 +427,12 @@ export default function DetailsReservation({
 
         {alert?.show && (
           <Alert
-            variant={alert.type === "error" ? "destructive" : "default"}
-            className={`mb-6 ${alert.type === "success"
-              ? "border-green-200 bg-green-50 text-green-900"
-              : ""
-              }`}
+            variant={alert.type === "destructive" ? "destructive" : "default"}
+            className={`mb-6 ${
+              alert.type === "success"
+                ? "border-green-200 bg-green-50 text-green-900"
+                : ""
+            }`}
             role="status"
             aria-live="polite"
           >
@@ -449,19 +448,20 @@ export default function DetailsReservation({
                     {alert.title}
                   </AlertTitle>
                   <AlertDescription>
-                    {alert.type === "error"
+                    {alert.type === "destructive"
                       ? alert.message ||
-                      "Une erreur est survenue. Veuillez essayer ultérieurement."
+                        "Une erreur est survenue. Veuillez essayer ultérieurement."
                       : alert.message}
                   </AlertDescription>
                 </div>
               </div>
               <button
                 onClick={() => setAlert(null)}
-                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${alert.type === "error"
-                  ? "bg-red-100 text-red-600 hover:bg-red-200"
-                  : "bg-green-100 text-green-600 hover:bg-green-200"
-                  }`}
+                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
+                  alert.type === "destructive"
+                    ? "bg-red-100 text-red-600 hover:bg-red-200"
+                    : "bg-green-100 text-green-600 hover:bg-green-200"
+                }`}
                 aria-label="Fermer l'alerte"
               >
                 ×

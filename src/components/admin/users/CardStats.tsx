@@ -17,7 +17,11 @@ export default function CardUserStats({
   totalUserWithReservation,
   loading = false,
 }: CardUserStatsProps) {
-  const isLoading = loading || totalUser === undefined || totalUserNotBoarded === undefined || totalUserWithReservation === undefined;
+  const isLoading =
+    loading ||
+    totalUser === undefined ||
+    totalUserNotBoarded === undefined ||
+    totalUserWithReservation === undefined;
   const t = useTranslations();
 
   const Stat = ({
@@ -30,15 +34,32 @@ export default function CardUserStats({
     accent: "cyan" | "orange" | "green";
   }) => {
     const colorMap = {
-      cyan: { ring: "border-l-cyan-500", dot: "bg-cyan-500", text: "text-cyan-600", tint: "bg-cyan-100" },
-      orange: { ring: "border-l-orange-500", dot: "bg-orange-500", text: "text-orange-600", tint: "bg-orange-100" },
-      green: { ring: "border-l-green-500", dot: "bg-green-500", text: "text-green-600", tint: "bg-green-100" },
+      cyan: {
+        ring: "border-l-cyan-500",
+        dot: "bg-cyan-500",
+        text: "text-cyan-600",
+        tint: "bg-cyan-100",
+      },
+      orange: {
+        ring: "border-l-orange-500",
+        dot: "bg-orange-500",
+        text: "text-orange-600",
+        tint: "bg-orange-100",
+      },
+      green: {
+        ring: "border-l-green-500",
+        dot: "bg-green-500",
+        text: "text-green-600",
+        tint: "bg-green-100",
+      },
     }[accent];
 
     return (
       <Card className={`border-l-4 ${colorMap.ring}`}>
         <CardContent className="flex items-center gap-4">
-          <div className={`flex h-16 w-16 items-center justify-center rounded-full ${colorMap.tint}`}>
+          <div
+            className={`flex h-16 w-16 items-center justify-center rounded-full shrink-0 ${colorMap.tint}`}
+          >
             <div className={`rounded-full ${colorMap.dot} p-3 shadow-lg`}>
               <User className="h-6 w-6 text-white" />
             </div>
@@ -48,7 +69,11 @@ export default function CardUserStats({
             {isLoading ? (
               <Skeleton className="h-6 sm:h-8 w-12 sm:w-16" />
             ) : (
-              <div className={`text-2xl sm:text-3xl font-bold ${colorMap.text}`}>{value ?? 0}</div>
+              <div
+                className={`text-2xl sm:text-3xl font-bold ${colorMap.text}`}
+              >
+                {value ?? 0}
+              </div>
             )}
           </div>
         </CardContent>
@@ -57,10 +82,22 @@ export default function CardUserStats({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-      <Stat label={t("admin.users.stats.totalUsers")} value={totalUser} accent="cyan" />
-      <Stat label={t("admin.users.stats.userNotBoarded")} value={totalUserNotBoarded} accent="orange" />
-      <Stat label={t("admin.users.stats.userWithReservations")} value={totalUserWithReservation} accent="green" />
+    <div className="grid grid-cols-1 xl:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <Stat
+        label={t("admin.users.stats.totalUsers")}
+        value={totalUser}
+        accent="cyan"
+      />
+      <Stat
+        label={t("admin.users.stats.userNotBoarded")}
+        value={totalUserNotBoarded}
+        accent="orange"
+      />
+      <Stat
+        label={t("admin.users.stats.userWithReservations")}
+        value={totalUserWithReservation}
+        accent="green"
+      />
     </div>
   );
 }

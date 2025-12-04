@@ -9,7 +9,7 @@ import { useTranslations } from "next-intl";
 
 type Props = {
   onSuccess?: () => void;
-  onAlert?: (type: "success" | "error", message: string) => void;
+  onAlert?: (type: "success" | "destructive", message: string) => void;
 };
 
 export default function UsersForm({ onSuccess, onAlert }: Props) {
@@ -43,7 +43,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
       const data = await res.json();
 
       if (!res.ok || !data) {
-        onAlert?.("error", t("admin.users.usersForm.error.importFailed"));
+        onAlert?.("destructive", t("admin.users.usersForm.error.importFailed"));
         return;
       }
 
@@ -57,7 +57,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         );
       } else {
         onAlert?.(
-          "error",
+          "destructive",
           t("admin.users.usersForm.error.noUsersAdded", {
             skipped: data.skipped ?? 0,
           })
@@ -68,7 +68,10 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
       onSuccess?.();
       router.refresh();
     } catch {
-      onAlert?.("error", t("admin.users.usersForm.error.uploadException"));
+      onAlert?.(
+        "destructive",
+        t("admin.users.usersForm.error.uploadException")
+      );
     }
   };
 

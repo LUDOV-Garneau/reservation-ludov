@@ -216,7 +216,7 @@ export default function SpecificDatesSelection({
           </div>
         ))}
         <button
-          className="block w-full text-left text-[#02dcde] py-4 px-4 text-sm hover:underline"
+          className="block w-full text-left text-cyan-500 hover:text-cyan-700 py-4 px-4 text-sm hover:underline"
           type="button"
           onClick={addDate}
         >

@@ -37,7 +37,7 @@ const CoursTab = dynamic(() => import("@/components/admin/CoursTab"), {
 function TabLoader() {
   return (
     <div className="flex items-center justify-center py-12">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#02dcde]"></div>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
     </div>
   );
 }
@@ -102,7 +102,7 @@ function AdminContent() {
           <div className="mt-4 relative">
             {isPending && (
               <div className="absolute top-0 right-0">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#02dcde]"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cyan-500"></div>
               </div>
             )}
             <div
@@ -125,7 +125,7 @@ export default function AdminPage() {
       fallback={
         <div className="flex items-center justify-center min-h-screen">
           <div className="flex flex-col items-center gap-3">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#02dcde]"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500"></div>
             <p className="text-gray-500 text-sm">Chargement...</p>
           </div>
         </div>

@@ -1,12 +1,43 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Trash2, KeyRound, Users, Shield, User, Calendar, XCircle, Menu, CheckCircle2, AlertTriangle, Info } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Trash2,
+  KeyRound,
+  Users,
+  Shield,
+  User,
+  Calendar,
+  XCircle,
+  Menu,
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+  AlertCircle,
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
@@ -28,7 +59,7 @@ type User = {
 };
 
 type AlertState = {
-  type: "success" | "error" | "info" | "warning";
+  type: "success" | "destructive" | "info" | "warning";
   message: string;
   title?: string;
 } | null;
@@ -37,12 +68,12 @@ const ITEMS_PER_PAGE = 10;
 
 function getCurrentUserIdFromCookie(): number | null {
   if (typeof document === "undefined") return null;
-  
+
   const cookies = document.cookie.split(";");
   const sessionCookie = cookies.find((c) => c.trim().startsWith("SESSION="));
-  
+
   if (!sessionCookie) return null;
-  
+
   try {
     const token = sessionCookie.split("=")[1];
     const payload = JSON.parse(atob(token.split(".")[1]));
@@ -52,7 +83,10 @@ function getCurrentUserIdFromCookie(): number | null {
   }
 }
 
-function usePagination(totalItems: number, itemsPerPage: number = ITEMS_PER_PAGE) {
+function usePagination(
+  totalItems: number,
+  itemsPerPage: number = ITEMS_PER_PAGE
+) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
 
@@ -64,9 +98,12 @@ function usePagination(totalItems: number, itemsPerPage: number = ITEMS_PER_PAGE
     setPage((prev) => Math.max(prev - 1, 1));
   }, []);
 
-  const goToPage = useCallback((pageNum: number) => {
-    setPage(Math.max(1, Math.min(pageNum, totalPages)));
-  }, [totalPages]);
+  const goToPage = useCallback(
+    (pageNum: number) => {
+      setPage(Math.max(1, Math.min(pageNum, totalPages)));
+    },
+    [totalPages]
+  );
 
   const resetPage = useCallback(() => setPage(1), []);
 
@@ -86,16 +123,15 @@ function usePagination(totalItems: number, itemsPerPage: number = ITEMS_PER_PAGE
 function RoleBadge({ isAdmin }: { isAdmin: boolean }) {
   const t = useTranslations();
   return isAdmin ? (
-    <Badge className="bg-cyan-700 text-white border-0 text-xs">
+    <Badge className="bg-cyan-700 text-white border-0 text-xs rounded-full">
       <Shield className="h-3 w-3 mr-1" />
       <span className="hidden sm:inline">{t("admin.users.badge.admin")}</span>
       <span className="sm:hidden">A</span>
     </Badge>
   ) : (
-    <Badge variant="secondary" className="bg-gray-100 text-gray-700 border-gray-200 text-xs">
+    <Badge className="bg-gray-700 text-white border-0 text-xs mt-1 rounded-full">
       <User className="h-3 w-3 mr-1" />
-      <span className="hidden sm:inline">{t("admin.users.badge.user")}</span>
-      <span className="sm:hidden">U</span>
+      {t("admin.users.badge.user")}
     </Badge>
   );
 }
@@ -108,7 +144,11 @@ function UserTableRow({
 }: {
   user: User;
   isCurrentUser: boolean;
-  onAlert: (type: "success" | "error" | "info" | "warning", message: string, title?: string) => void;
+  onAlert: (
+    type: "success" | "destructive" | "info" | "warning",
+    message: string,
+    title?: string
+  ) => void;
   onSuccess: () => void;
   onRowClick: (user: User) => void;
 }) {
@@ -117,7 +157,7 @@ function UserTableRow({
 
   const handleRowClick = () => {
     router.push(`/admin/user/${user.id}`);
-  }
+  };
 
   return (
     <TableRow
@@ -126,7 +166,9 @@ function UserTableRow({
       onClick={handleRowClick}
     >
       <TableCell className="hidden lg:table-cell">{user.email}</TableCell>
-      <TableCell>{user.firstName} {user.lastName}</TableCell>
+      <TableCell>
+        {user.firstName} {user.lastName}
+      </TableCell>
       <TableCell className="hidden md:table-cell">
         <RoleBadge isAdmin={user.isAdmin} />
       </TableCell>
@@ -136,14 +178,17 @@ function UserTableRow({
           <span>{new Date(user.createdAt).toLocaleDateString("fr-FR")}</span>
         </div>
       </TableCell>
-      <TableCell
-        onClick={(e) => e.stopPropagation()}
-      >
+      <TableCell onClick={(e) => e.stopPropagation()}>
         {!isCurrentUser ? (
           <div className="">
             <div className="hidden sm:flex gap-2">
               <ResetPasswordAction
-                targetUser={{ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }}
+                targetUser={{
+                  id: user.id,
+                  email: user.email,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                }}
                 onAlert={onAlert}
                 onSuccess={onSuccess}
               >
@@ -160,13 +205,17 @@ function UserTableRow({
                           }}
                           disabled={loading}
                           className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
-                          aria-label={t("admin.users.table.ActionToolTips.resetPassword")}
+                          aria-label={t(
+                            "admin.users.table.ActionToolTips.resetPassword"
+                          )}
                         >
                           <KeyRound className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{t("admin.users.table.ActionToolTips.resetPassword")}</p>
+                        <p>
+                          {t("admin.users.table.ActionToolTips.resetPassword")}
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -174,7 +223,12 @@ function UserTableRow({
               </ResetPasswordAction>
 
               <DeleteUserAction
-                targetUser={{ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }}
+                targetUser={{
+                  id: user.id,
+                  email: user.email,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                }}
                 onAlert={onAlert}
                 onSuccess={onSuccess}
               >
@@ -191,13 +245,17 @@ function UserTableRow({
                           }}
                           disabled={loading}
                           className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
-                          aria-label={t("admin.users.table.ActionToolTips.deleteUser")}
+                          aria-label={t(
+                            "admin.users.table.ActionToolTips.deleteUser"
+                          )}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p>{t("admin.users.table.ActionToolTips.deleteUser")}</p>
+                        <p>
+                          {t("admin.users.table.ActionToolTips.deleteUser")}
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -219,12 +277,17 @@ function UserTableRow({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <ResetPasswordAction
-                    targetUser={{ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }}
+                    targetUser={{
+                      id: user.id,
+                      email: user.email,
+                      firstName: user.firstName,
+                      lastName: user.lastName,
+                    }}
                     onAlert={onAlert}
                     onSuccess={onSuccess}
                   >
                     {({ open }) => (
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -241,7 +304,12 @@ function UserTableRow({
                   </ResetPasswordAction>
                   <DropdownMenuSeparator />
                   <DeleteUserAction
-                    targetUser={{ id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName }}
+                    targetUser={{
+                      id: user.id,
+                      email: user.email,
+                      firstName: user.firstName,
+                      lastName: user.lastName,
+                    }}
                     onAlert={onAlert}
                     onSuccess={onSuccess}
                   >
@@ -265,7 +333,9 @@ function UserTableRow({
             </div>
           </div>
         ) : (
-          <span className="text-xs sm:text-sm text-muted-foreground px-2">-</span>
+          <span className="text-xs sm:text-sm text-muted-foreground px-2">
+            -
+          </span>
         )}
       </TableCell>
     </TableRow>
@@ -282,22 +352,33 @@ export function ModernAlert({
   if (!alert) return null;
 
   const icon =
-    alert.type === "success" ? <CheckCircle2 className="h-8 w-8 lg:h-6 lg:w-6 text-green-600" /> :
-    alert.type === "error"   ? <XCircle className="h-8 w-8 lg:h-6 lg:w-6 text-red-600" /> :
-    alert.type === "warning" ? <AlertTriangle className="h-8 w-8 lg:h-6 lg:w-6 text-yellow-600" /> :
-                               <Info className="h-8 w-8 lg:h-6 lg:w-6 text-blue-600" />;
+    alert.type === "success" ? (
+      <CheckCircle2 className="h-8 w-8 lg:h-6 lg:w-6 text-green-600" />
+    ) : alert.type === "destructive" ? (
+      <AlertCircle className="h-8 w-8 lg:h-6 lg:w-6 text-red-600" />
+    ) : alert.type === "warning" ? (
+      <AlertTriangle className="h-8 w-8 lg:h-6 lg:w-6 text-yellow-600" />
+    ) : (
+      <Info className="h-8 w-8 lg:h-6 lg:w-6 text-blue-600" />
+    );
 
   return (
     <Alert
       className="mb-4"
       variant={
-        alert.type === "success" ? "success" :
-        alert.type === "error"   ? "destructive" :
-        "default"
+        alert.type === "success"
+          ? "success"
+          : alert.type === "destructive"
+          ? "destructive"
+          : alert.type === "warning"
+          ? "warning"
+          : alert.type === "info"
+          ? "info"
+          : "default"
       }
     >
-      <div className="flex items-center gap-2 w-full">
-        <div className="flex items-center gap-2">
+      <div className="flex justify-between w-full items-center gap-2">
+        <div className="flex gap-2 items-center">
           {icon}
           <div>
             {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
@@ -305,7 +386,12 @@ export function ModernAlert({
           </div>
         </div>
 
-        <Button variant="ghost" size="icon" onClick={onClose} className="h-6 w-6 p-0 ml-auto">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onClose}
+          className="h-6 w-6 p-0"
+        >
           <XCircle className="h-4 w-4" />
         </Button>
       </div>
@@ -318,7 +404,7 @@ function useAlert() {
 
   const showAlert = useCallback(
     (
-      type: "success" | "error" | "info" | "warning",
+      type: "success" | "destructive" | "info" | "warning",
       message: string,
       title?: string
     ) => {
@@ -507,11 +593,21 @@ export default function UsersTable() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="hidden lg:table-cell">{t("admin.users.table.header.email")}</TableHead>
-                      <TableHead>{t("admin.users.table.header.name")}</TableHead>
-                      <TableHead className="hidden md:table-cell">{t("admin.users.table.header.role")}</TableHead>
-                      <TableHead className="hidden lg:table-cell">{t("admin.users.table.header.createdAt")}</TableHead>
-                      <TableHead>{t("admin.users.table.header.actions")}</TableHead>
+                      <TableHead className="hidden lg:table-cell">
+                        {t("admin.users.table.header.email")}
+                      </TableHead>
+                      <TableHead>
+                        {t("admin.users.table.header.name")}
+                      </TableHead>
+                      <TableHead className="hidden md:table-cell">
+                        {t("admin.users.table.header.role")}
+                      </TableHead>
+                      <TableHead className="hidden lg:table-cell">
+                        {t("admin.users.table.header.createdAt")}
+                      </TableHead>
+                      <TableHead>
+                        {t("admin.users.table.header.actions")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
 
@@ -520,7 +616,9 @@ export default function UsersTable() {
                       <UserTableRow
                         key={user.id}
                         user={user}
-                        isCurrentUser={currentUserId !== null && user.id === currentUserId}
+                        isCurrentUser={
+                          currentUserId !== null && user.id === currentUserId
+                        }
                         onAlert={showAlert}
                         onSuccess={handleRefresh}
                         onRowClick={handleRowClick}

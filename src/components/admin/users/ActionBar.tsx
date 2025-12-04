@@ -29,7 +29,7 @@ interface ActionBarProps {
   onRefresh: () => void;
   onSuccess: () => void;
   onAlert: (
-    type: "success" | "error" | "info" | "warning",
+    type: "success" | "destructive" | "info" | "warning",
     message: string,
     title?: string
   ) => void;
@@ -50,20 +50,17 @@ export default function CardUserStats({
   return (
     <TooltipProvider>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        {/* Barre de recherche */}
         <div className="relative w-full sm:flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder={t("admin.users.actionBar.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
+            className="w-full pl-10 border-gray-300"
           />
         </div>
 
-        {/* Boutons actions */}
         <div className="flex w-full items-center gap-2 sm:w-auto sm:justify-end">
-          {/* Refresh */}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -85,10 +82,9 @@ export default function CardUserStats({
             </TooltipContent>
           </Tooltip>
 
-          {/* Add user (CSV / single) */}
           <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <Button className="flex-1 bg-cyan-500 text-white shadow-md transition-all hover:bg-cyan-700 hover:shadow-lg sm:flex-initial">
+              <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors text-white">
                 <Plus className="h-4 w-4" />
                 <span className="ml-1 hidden md:inline">
                   {t("admin.users.actionBar.addUser")}
@@ -101,21 +97,14 @@ export default function CardUserStats({
             >
               <ScrollArea className="max-h-[calc(100vh-10rem)]">
                 <div className="space-y-6 p-4">
-                  {/* Import CSV */}
                   <div>
                     <DropdownMenuLabel className="px-0 pb-2 text-base font-semibold">
-                      {
-                        t(
-                          "admin.users.actionBar.dropDownMenuAddUser.importCSV"
-                        )
-                      }
+                      {t("admin.users.actionBar.dropDownMenuAddUser.importCSV")}
                     </DropdownMenuLabel>
                     <p className="mb-3 px-0 text-xs text-muted-foreground">
-                      {
-                        t(
-                          "admin.users.actionBar.dropDownMenuAddUser.importCSVDescription"
-                        )
-                      }
+                      {t(
+                        "admin.users.actionBar.dropDownMenuAddUser.importCSVDescription"
+                      )}
                     </p>
                     <UsersForm
                       onSuccess={() => {
@@ -130,7 +119,11 @@ export default function CardUserStats({
                       }}
                       onAlert={(type, message) =>
                         onAlert(
-                          type as "success" | "error" | "info" | "warning",
+                          type as
+                            | "success"
+                            | "destructive"
+                            | "info"
+                            | "warning",
                           message
                         )
                       }
@@ -139,30 +132,24 @@ export default function CardUserStats({
 
                   <DropdownMenuSeparator />
 
-                  {/* Add single user */}
                   <div>
                     <DropdownMenuLabel className="px-0 pb-2 text-base font-semibold">
-                      {
-                        t(
-                          "admin.users.actionBar.dropDownMenuAddUser.addSingleUser"
-                        )
-                      }
+                      {t(
+                        "admin.users.actionBar.dropDownMenuAddUser.addSingleUser"
+                      )}
                     </DropdownMenuLabel>
                     <p className="mb-3 px-0 text-xs text-muted-foreground">
-                      {
-                        t(
-                          "admin.users.actionBar.dropDownMenuAddUser.addSingleUserDescription"
-                        )
-                      }
+                      {t(
+                        "admin.users.actionBar.dropDownMenuAddUser.addSingleUserDescription"
+                      )}
                     </p>
                     <AddUserForm
                       trigger={
-                        <Button className="bg-cyan-500 text-white">
+                        <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors text-white">
                           Ajouter un utilisateur
                         </Button>
                       }
                     />
-
                   </div>
                 </div>
               </ScrollArea>
