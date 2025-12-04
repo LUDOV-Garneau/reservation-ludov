@@ -92,9 +92,9 @@ export default function DateFilter({ value, onChange, onClear }: DateFilterProps
     <div className="flex flex-col lg:flex-row gap-2 items-start lg:items-center">
       <div className="flex items-center gap-2 w-full lg:w-auto">
         <Funnel className="h-5 w-5 text-cyan-500 flex-shrink-0" />
-        
+
         <Select value={value.mode} onValueChange={handleModeChange}>
-          <SelectTrigger className="w-full md:w-[180px]">
+          <SelectTrigger className="w-full md:w-[180px] show-svg">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
