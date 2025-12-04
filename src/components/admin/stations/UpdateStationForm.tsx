@@ -119,7 +119,7 @@ export default function UpdateStationForm({
 
     const isDuplicate = selectedConsoles.some((c) => c.id === consoleToAdd.id);
     if (isDuplicate) {
-      setError("Cette unité console est déjà ajoutée !");
+      setError("Cette unité plateforme est déjà ajoutée !");
       return;
     }
 
@@ -214,7 +214,7 @@ export default function UpdateStationForm({
 
               <div className="space-y-3">
                 <Label className="text-sm font-semibold flex items-center gap-2">
-                  Consoles associées
+                  plateformes associées
                   <span className="text-xs text-red-500">*</span>
                 </Label>
 
@@ -224,12 +224,12 @@ export default function UpdateStationForm({
                     onValueChange={setSelectedConsoleId}
                   >
                     <SelectTrigger className="flex-1 border-2 text-base w-full">
-                      <SelectValue placeholder="Sélectionner une console..." />
+                      <SelectValue placeholder="Sélectionner une plateforme..." />
                     </SelectTrigger>
                     <SelectContent>
                       {availableConsoles.length === 0 ? (
                         <SelectItem value="none" disabled>
-                          Aucune console disponible
+                          Aucune plateforme disponible
                         </SelectItem>
                       ) : (
                         availableConsoles.map((c) => (
@@ -268,7 +268,7 @@ export default function UpdateStationForm({
                   <div className="mt-4 space-y-3">
                     <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      {selectedConsoles.length} console
+                      {selectedConsoles.length} plateforme
                       {selectedConsoles.length > 1 ? "s" : ""} sélectionnée
                       {selectedConsoles.length > 1 ? "s" : ""}
                     </p>
@@ -312,10 +312,10 @@ export default function UpdateStationForm({
                   <div className="mt-4 p-6 text-center border-2 border-dashed rounded-lg bg-muted/30">
                     <Monitor className="w-10 h-10 text-muted-foreground/40 mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground font-medium">
-                      Aucune console sélectionnée
+                      Aucune plateforme sélectionnée
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Ajoutez des consoles à votre station
+                      Ajoutez des plateforme à votre station
                     </p>
                   </div>
                 )}
