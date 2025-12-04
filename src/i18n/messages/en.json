@@ -449,7 +449,7 @@
       "table": {
         "header": {
           "user": "User",
-          "console": "Console",
+          "console": "Platform",
           "games": "Games",
           "date": "Date",
           "time": "Time",
@@ -554,7 +554,7 @@
           "openDialog": "Modify",
           "saveChanges": "Save",
           "loading": "Loading...",
-          "addConsole": "Add consoles",
+          "addConsole": "Add platforms",
           "submit": "Modify"
         },
         "titles": {
@@ -562,15 +562,15 @@
         },
         "fields": {
           "stationName": "Station Name",
-          "consoles": "Consoles",
+          "consoles": "Platforms",
           "isActive": "Active"
         },
         "select": {
-          "placeholder": "Select consoles"
+          "placeholder": "Select platforms"
         },
         "errors": {
           "missingFields": "Please fill in all required fields.",
-          "consoleFetch": "Error fetching consoles."
+          "consoleFetch": "Error fetching platforms."
         },
         "alerts": {
           "updateSuccess": "Station updated successfully!",
@@ -599,7 +599,7 @@
         "errors": {
           "missingFields": "Please fill in all fields",
           "invalidConsole": "Invalid platform",
-          "consoleAlreadyAdded": "The console has already been added",
+          "consoleAlreadyAdded": "The platform has already been added",
           "consoleFetch": "Error fetching platforms",
           "nameConflict": "A station with this name already exists"
         },
