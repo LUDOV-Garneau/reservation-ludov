@@ -36,33 +36,41 @@ Le bouton **Ajouter** ouvre un dialogue permettant l'ajout d'un cours
 
 ### Comment ajouter un cours
 1. Cliquez sur le bouton **Ajouter**.
+![Image bouton ajout cours](../images/tutoriels/cours/ajout_cours.png)
 
 2. Remplissez tous les champs, soit le nom et le code
 
 4. Finalement, cliquez sur **Ajouter le cours** pour confirmer l'ajout
+![Image confirmation ajout](../images/tutoriels/cours/conf_ajout_cours.png)
 
 ## Modifier un cours
 En cliquant sur le bouton avec l'**icône de crayon**, vous pouvez modifier un cours, soit changer son nom et son code.
 
 ### Comment modifier un cours
 1. Cliquez sur le bouton avec l'**icône de crayon**
+![Image modification cours](../images/tutoriels/cours/btn_modif_cours.png)
 
 2. Effectuez les changements nécessaires
 
 3. Cliquez sur **Enregistrer le modifications** pour confirmer
+![Image confirmation modification](../images/tutoriels/cours/conf_modif_cours.png)
 
 ## Supprimer un cours
 En cliquant sur le bouton avec l'**icône de poubelle**, vous pouvez supprimer un cours.
 
 ### Comment supprimer un cours
 1. Cliquez sur le bouton avec l'**icône de poubelle**
+![Image suppression cours](../images/tutoriels/cours/btn_del_cours.png)
 
 2. Prenez connaissance des avertissements dans le dialogue de confirmation
 
 3. Clique sur **Confirmer la supression** pour supprimer le cours
+![Image confirmation suppression](../images/tutoriels/cours/conf_del_cours.png)
 
 ## Filtrage de cours
 Vous pouvez utiliser la barre de recherche pour filtrer la liste de cours
+![Image barre de recherche cours](../images/tutoriels/cours/search-bar_cours.png)
 
 ## Rafraîchissement
 Appuyez sur le bouton de rafraîchissement pour mettre à jour la liste des cours manuellement
+![Image rafraîchissement cours](../images/tutoriels/cours/btn_refresh_cours.png)
