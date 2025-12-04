@@ -264,7 +264,7 @@ export default function GamesSelection() {
           <Button
             onClick={handleContinue}
             disabled={selectedGameObjects.length === 0 || isSaving}
-            className="w-full bg-cyan-500 hover:bg-cyan-600 text-white h-11"
+            className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors text-white h-11"
           >
             {isSaving ? (
               <>
@@ -273,7 +273,9 @@ export default function GamesSelection() {
               </>
             ) : (
               <>
-                {t("reservation.games.continue", { count: selectedGameObjects.length })}
+                {t("reservation.games.continue", {
+                  count: selectedGameObjects.length,
+                })}
               </>
             )}
           </Button>

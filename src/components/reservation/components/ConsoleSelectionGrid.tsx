@@ -3,7 +3,6 @@
 import { Console } from "@/types/console";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
 import {
   Search,
   Loader2,
@@ -75,7 +74,6 @@ export default function ConsoleSelectionGrid({
       setSelectedConsoleId(selectedId || null);
       setConsoles(validatedConsoles);
       setLoadingState("success");
-
     } catch (err) {
       console.error("Erreur lors du chargement:", err);
       let errorMessage = t("reservation.console.error");
@@ -234,7 +232,7 @@ export default function ConsoleSelectionGrid({
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 md:gap-6">
         {availableConsoles.map((console) => {
           const isSelected =
             selectedConsoleId === console.id || reservedId === console.id;
@@ -251,19 +249,9 @@ export default function ConsoleSelectionGrid({
               `}
             >
               <div className="relative w-full h-48 bg-gray-100">
-                {console.picture ? (
-                  <Image
-                    src={console.picture}
-                    alt={console.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
-                    <Monitor className="h-12 w-12" />
-                  </div>
-                )}
+                <div className="flex items-center justify-center h-full text-gray-400">
+                  <Monitor className="h-12 w-12" />
+                </div>
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
