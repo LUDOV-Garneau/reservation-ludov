@@ -18,6 +18,9 @@ Le tableau des stations affiche toutes les stations disponibles et inactives dan
 Pour une navigation plus facile, il est possible de chercher une station spécifique en utilisant la barre de recherche située en haut du tableau.
 ![Recherche d'une station](/src/private/images/tutoriels/station/Recherche_Station.png)
 
+Il est aussi possible de rafraîchir la liste des stations en cliquant sur le bouton de rafraîchissement situé à côté de la barre de recherche.
+![Bouton de rafraîchissement](/src/private/images/tutoriels/station/Refresh_Station.png)
+
 Situé en haut à droite du tableau, le bouton **Ajouter une nouvelle station** permet aux administrateurs d'ajouter rapidement une nouvelle station au système.
 ![Ajouter une nouvelle station](/src/private/images/tutoriels/station/Ajout_Station.png)
 
@@ -57,7 +60,7 @@ Le bouton **Modifier** dans la colonne des actions ouvre un formulaire pré-remp
 ## Supprimer une station
 Le bouton **Supprimer** dans la colonne des actions permet aux administrateurs de retirer une station du système. Une confirmation sera demandée avant la suppression définitive.
 
-### Comment modifer une station :
+### Comment supprimer une station :
 
 1. Cliquez sur le bouton **Supprimer** à côté de la station que vous souhaitez retirer.
 
