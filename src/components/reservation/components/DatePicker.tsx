@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { Calendar } from "@/components/ui/calendar";
 import { DatesBlocked } from "@/types/availabilities";
 import { frCA, enUS } from "date-fns/locale";
@@ -12,7 +14,7 @@ type DatePickerProps = {
   unavailableDates: DatesBlocked | null;
 };
 
-export function DatePicker({
+export const DatePicker = memo(function DatePicker({
   selected,
   onSelect,
   unavailableDates,
@@ -55,4 +57,4 @@ export function DatePicker({
       className="rounded-lg border shadow-sm text-lg p-4 sm:[&_button]:h-12 sm:[&_button]:w-12 sm:[&_button]:text-lg"
     />
   );
-}
+});

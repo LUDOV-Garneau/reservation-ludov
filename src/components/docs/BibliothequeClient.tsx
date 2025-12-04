@@ -15,28 +15,24 @@ import Link from "next/link";
 const TutoPage: TutorialCardsProps[] = [
     {
         title: "Se connecter à la plateforme",
-        description: "Apprenez à vous connecter à la plateforme LUDOV.",
         args: TutorialArgs.LOGIN,
         isAdminRessource: false,
         icons: LogIn,
     },
     {
         title: "Effectuer une réservation",
-        description: "Découvrez comment effectuer des réservations.",
         args: TutorialArgs.MAKE_RESERVATION,
         isAdminRessource: false,
         icons: Calendar,
     },
     {
         title: "Consulter ses réservations",
-        description: "Gérez vos réservations en toute simplicité.",
         args: TutorialArgs.CONSULT_RESERVATIONS,
         isAdminRessource: false,
         icons: CalendarSearch,
     },
     {
         title: "Activer les rappels de réservation",
-        description: "Optimisez la gestion des disponibilités.",
         args: TutorialArgs.REMINDERS,
         isAdminRessource: false,
         icons: Clock,

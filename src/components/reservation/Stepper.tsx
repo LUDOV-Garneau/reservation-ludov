@@ -52,17 +52,15 @@ export default function Stepper() {
                   className={`
                     w-12 h-12 rounded-full flex items-center justify-center 
                     text-sm font-semibold transition-all duration-200 z-10
-                    ${
-                      isActive
-                        ? "bg-cyan-400 text-white shadow-lg"
-                        : isCompleted
+                    ${isActive
+                      ? "bg-cyan-400 text-white shadow-lg"
+                      : isCompleted
                         ? "bg-cyan-400 text-white hover:bg-cyan-500"
                         : "bg-gray-200 text-gray-500"
                     }
-                    ${
-                      stepNumber < currentStep
-                        ? "cursor-pointer"
-                        : "cursor-not-allowed"
+                    ${stepNumber < currentStep
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed"
                     }
                   `}
                   disabled={stepNumber >= currentStep}
@@ -87,10 +85,9 @@ export default function Stepper() {
                 <span
                   className={`
                     mt-2 text-xs text-center max-w-32 leading-tight px-2
-                    ${
-                      isActive
-                        ? "text-cyan-600 font-medium"
-                        : isCompleted
+                    ${isActive
+                      ? "text-cyan-600 font-medium"
+                      : isCompleted
                         ? "text-cyan-600"
                         : "text-gray-600"
                     }

@@ -114,9 +114,8 @@ export default function AuthPage() {
 
           <div className="bg-[white]/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-[white]/20 relative overflow-hidden">
             <div
-              className={`${
-                mode === "login" && "hidden"
-              } absolute top-0 left-0 right-0 h-1 bg-gray-200`}
+              className={`${mode === "login" && "hidden"
+                } absolute top-0 left-0 right-0 h-1 bg-gray-200`}
             >
               <div
                 className="h-full bg-cyan-500 transition-all duration-500 ease-out"
@@ -125,10 +124,10 @@ export default function AuthPage() {
                     mode === "login"
                       ? "0%"
                       : mode === "signup-step1"
-                      ? "33%"
-                      : mode === "signup-step2"
-                      ? "66%"
-                      : "100%",
+                        ? "33%"
+                        : mode === "signup-step2"
+                          ? "66%"
+                          : "100%",
                 }}
               />
             </div>

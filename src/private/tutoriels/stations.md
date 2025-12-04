@@ -1,74 +1,71 @@
-# Guide d'administration des stations
+# Gestion des stations
 
-## Aperçu
+Ce guide explique comment gérer les stations de jeu dans le panneau d'administration. Vous pouvez ajouter, modifier et supprimer des stations, ainsi que gérer les consoles associées.
 
-Ce guide fournit des instructions détaillées pour les administrateurs sur la gestion des stations dans le système de réservation. Vous y trouverez des informations sur le fonctionnement de l'interface pour les stations.
+## 1. Accès au panneau des stations
 
-## Accéder au panneau d'administration des stations
-1. Accédez à la page d'administration
-2. Cliquez sur l'onglet *Stations*
+1.  Accédez à la page d'administration.
+2.  Cliquez sur l'onglet **Stations**.
 
-## Tableau des stations
-Le tableau des stations affiche toutes les stations disponibles et inactives dans le système. Chaque ligne du tableau représente une station avec les colonnes suivantes :
-- **Nom de la station** : Nom complet de la station.
-- **Date de création** : Date à laquelle la station a été ajoutée au système.
-- **Statut (Active/Inactif)** : Les stations actives sont mises en évidence en vert, tandis que les stations inactives sont en rouge.
-- **Actions (Modifier, Supprimer)** : Boutons pour modifier ou supprimer une station.
+## 2. Tableau des stations
 
-Pour une navigation plus facile, il est possible de chercher une station spécifique en utilisant la barre de recherche située en haut du tableau.
-![Recherche d'une station](/api/admin/images/station/Recherche_Station.png)
+Le tableau affiche toutes les stations du système. Chaque ligne représente une station avec :
+*   **Nom de la station** : Le nom complet.
+*   **Date de création** : La date d'ajout au système.
+*   **Statut** : Vert pour active, rouge pour inactive.
+*   **Actions** : Les options pour modifier ou supprimer.
 
-Il est aussi possible de rafraîchir la liste des stations en cliquant sur le bouton de rafraîchissement situé à côté de la barre de recherche.
-![Bouton de rafraîchissement](/api/admin/images/station/Refresh_Station.png)
+### Recherche et rafraîchissement
+*   Utilisez la barre de recherche pour trouver une station spécifique.
+*   Utilisez le bouton de rafraîchissement pour actualiser la liste.
 
-Situé en haut à droite du tableau, le bouton **Ajouter une nouvelle station** permet aux administrateurs d'ajouter rapidement une nouvelle station au système.
-![Ajouter une nouvelle station](/api/admin/images/station/Ajout_Station.png)
+![Recherche et rafraîchissement](/api/admin/images/stations/Recherche_Station.png)
 
-Situé dans la colonne des actions, le bouton **Modifier** permet de mettre à jour les informations d'une station existante, tandis que le bouton **Supprimer** permet de retirer une station du système. Un peu plus bas seront expliquées en détails ces fonctionnalités.
-![actions possibles sur une station](/api/admin/images/station/Actions_Station.png)
+## 3. Ajouter une station
 
-## Ajouter une nouvelle station
-Le bouton **Ajouter une nouvelle station** ouvre un formulaire où les administrateurs peuvent saisir les informations nécessaires pour créer une nouvelle station. Les champs obligatoires incluent :
-- **Nom de la station** : Le nom complet de la station.
-- **Consoles associées** : Sélectionner les consoles disponibles à cette station.
+Le bouton **Ajouter une nouvelle station** permet de créer une station.
 
-### Comment ajouter une station :
-1. Cliquez sur le bouton **Ajouter une nouvelle station**.
+![Ajout station](/api/admin/images/stations/Ajout_Station.png)
 
-2. Entrez le nom de la station dans le champ prévu à cet effet.
+### Procédure d'ajout
 
-3. Sélectionnez les consoles associées à cette station. Pour chaque consoles sélectionnée, assurez-vous de cliquer sur le bouton **Ajouter** pour l'associer correctement.
-![Ajouter une nouvelle console à une station](/api/admin/images/station/Ajouter_Console_Station.png)
+1.  Cliquez sur **Ajouter une nouvelle station**.
+2.  Entrez le nom de la station.
+3.  Sélectionnez les consoles associées et cliquez sur **Ajouter** pour chacune.
+4.  Cliquez sur le bouton **Ajouter** final pour créer la station.
 
-4. Cliquez sur le bouton **Ajouter** dans le bas du formulaire pour créer la station.
+![Ajout console](/api/admin/images/stations/Ajouter_Console_Station.png)
 
-## Modifier une station existante
-Le bouton **Modifier** dans la colonne des actions ouvre un formulaire pré-rempli avec les informations actuelles de la station sélectionnée. Les administrateurs peuvent mettre à jour le nom de la station et les consoles associées.
+## 4. Modifier une station
 
-### Comment modifer une station :
-1. Cliquez sur le bouton **Modifier** à côté de la station que vous souhaitez mettre à jour.
+Vous pouvez mettre à jour le nom, les consoles associées et le statut d'une station.
 
-2. Mettez à jour le nom de la station si nécessaire.
+### Procédure de modification
 
-3. Modifiez les consoles associées en ajoutant ou supprimant des consoles selon vos besoins. Il est impossible d'ajouter une console déjà associée à cette station. Comme pour l'ajout, assurez-vous de cliquer sur le bouton **Ajouter** pour chaque console que vous souhaitez associer.
+1.  Cliquez sur le bouton **Modifier** d'une station.
+2.  Mettez à jour le nom si nécessaire.
+3.  Ajoutez ou supprimez des consoles associées.
+4.  Cochez ou décochez **Active** pour changer le statut.
+5.  Cliquez sur **Modifier** pour enregistrer.
 
-4. Cochez le champ **Active** pour changer le statut de la station.
-![Changer le statut d'une station](/api/admin/images/station/Station_Active.png)
+![Modification station](/api/admin/images/stations/Station_Active.png)
 
-5. Cliquez sur le bouton **Modifier** pour appliquer les modifications.
+## 5. Supprimer une station
 
-## Supprimer une station
-Le bouton **Supprimer** dans la colonne des actions permet aux administrateurs de retirer une station du système. Une confirmation sera demandée avant la suppression définitive.
+La suppression retire définitivement la station du système.
 
-### Comment supprimer une station :
+### Procédure de suppression
 
-1. Cliquez sur le bouton **Supprimer** à côté de la station que vous souhaitez retirer.
+1.  Cliquez sur le bouton **Supprimer** d'une station.
+2.  Confirmez la suppression dans la fenêtre contextuelle.
 
-2. Confirmez la suppression dans la fenêtre contextuelle qui apparaît. **Attention : cette action est irréversible.**
+![Suppression station](/api/admin/images/stations/Suppression_Station.png)
 
-![Supression d'une station](/api/admin/images/station/Suppression_Station.png)
+## 6. Métriques
 
-## Métriques des stations
-Les administrateurs peuvent consulter diverses métriques liées aux stations, telles que le nombre de stations actives, le nombre de stations inactives, et la station la plus réservée. Ces informations sont accessibles en haut du tableau des stations et seront changés automatiquement pour correspondre aux données actuelles.
+Les métriques en haut du tableau affichent :
+*   Nombre de stations actives.
+*   Nombre de stations inactives.
+*   Station la plus réservée.
 
-![Métriques des stations](/api/admin/images/station/Metriques_Station.png)
+![Métriques](/api/admin/images/stations/Metriques_Station.png)

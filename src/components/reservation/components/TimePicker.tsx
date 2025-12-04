@@ -1,5 +1,7 @@
 "use client";
 
+import { memo } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -28,7 +30,11 @@ type TimePickerProps = {
   times: TimeSlot[];
 };
 
-export function TimePicker({ selectedTime, onSelect, times }: TimePickerProps) {
+export const TimePicker = memo(function TimePicker({
+  selectedTime,
+  onSelect,
+  times,
+}: TimePickerProps) {
   const t = useTranslations();
 
   const formatTime = (time: string): string => {
@@ -38,10 +44,13 @@ export function TimePicker({ selectedTime, onSelect, times }: TimePickerProps) {
   const getConflictReason = (slot: TimeSlot) => {
     if (!slot.conflicts) return null;
     if (slot.conflicts.past) return t("reservation.calendar.conflicts.past");
-    if (slot.conflicts.console) return t("reservation.calendar.conflicts.console");
+    if (slot.conflicts.console)
+      return t("reservation.calendar.conflicts.console");
     if (slot.conflicts.games) return t("reservation.calendar.conflicts.games");
-    if (slot.conflicts.accessories) return t("reservation.calendar.conflicts.accessories");
-    if (slot.conflicts.station) return t("reservation.calendar.conflicts.station");
+    if (slot.conflicts.accessories)
+      return t("reservation.calendar.conflicts.accessories");
+    if (slot.conflicts.station)
+      return t("reservation.calendar.conflicts.station");
     return t("reservation.calendar.conflicts.unavailable");
   };
 
@@ -83,7 +92,10 @@ export function TimePicker({ selectedTime, onSelect, times }: TimePickerProps) {
                           ? "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white shadow-md scale-105"
                           : "hover:border-cyan-400 hover:bg-cyan-50"
                         }
-                        ${!time.available ? "opacity-50 cursor-not-allowed bg-gray-100 hover:bg-gray-100 hover:border-gray-200" : ""}
+                        ${!time.available
+                          ? "opacity-50 cursor-not-allowed bg-gray-100 hover:bg-gray-100 hover:border-gray-200"
+                          : ""
+                        }
                       `}
                       onClick={() => time.available && onSelect(time.time)}
                       disabled={!time.available}
@@ -121,7 +133,7 @@ export function TimePicker({ selectedTime, onSelect, times }: TimePickerProps) {
       )}
     </div>
   );
-}
+});
 
 function addTwoHours(time: string): string {
   const [hours, minutes] = time.split(":").map(Number);
