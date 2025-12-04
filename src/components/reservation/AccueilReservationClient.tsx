@@ -71,7 +71,7 @@ export default function AccueilReservationsClient({
   }
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen p-3">
       <div className="max-w-7xl mx-auto">
         <Header username={username} />
 

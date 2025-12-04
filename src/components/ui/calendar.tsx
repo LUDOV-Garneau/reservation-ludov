@@ -201,7 +201,7 @@ function CalendarDayButton({
       data-range-end={modifiers.range_end}
       data-range-middle={modifiers.range_middle}
       className={cn(
-        "data-[selected-single=true]:bg-cyan-900",
+        "data-[selected-single=true]:bg-cyan-500",
         "data-[selected-single=true]:text-white",
         "data-[range-middle=true]:bg-cyan-300/20",
         "data-[range-middle=true]:text-black",

@@ -168,9 +168,9 @@ export default function CourseSelection() {
                     <SelectItem
                       key={c.id}
                       value={String(c.id)}
-                      className="text-sm sm:text-base py-2 sm:py-3 cursor-pointer hover:bg-cyan-50"
+                      className="text-sm sm:text-base py-2 sm:py-3 cursor-pointer hover:bg-cyan-50 overflow-auto"
                     >
-                      <div className="flex items-center gap-2 flex-wrap">
+                      <div className="flex flex-row items-center gap-2">
                         <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-cyan-600 flex-shrink-0" />
                         <span className="font-semibold text-cyan-700">
                           {c.code_cours}

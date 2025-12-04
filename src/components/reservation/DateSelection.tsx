@@ -106,9 +106,10 @@ export default function DateSelection() {
           selectedConsoleId
         )}&gameIds=${encodeURIComponent(
           selectedGames.join(",")
-        )}&accessoryIds=${encodeURIComponent(selectedAccessories.join(","))}${reservationId
-          ? `&reservationId=${encodeURIComponent(reservationId)}`
-          : ""
+        )}&accessoryIds=${encodeURIComponent(selectedAccessories.join(","))}${
+          reservationId
+            ? `&reservationId=${encodeURIComponent(reservationId)}`
+            : ""
         }`,
         {
           credentials: "include",
@@ -228,7 +229,7 @@ export default function DateSelection() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto sm:p-6">
+    <div className="max-w-7xl mx-auto">
       <div className="bg-[white] rounded-2xl shadow-lg px-10 py-10">
         <div className="mb-8">
           <div
@@ -346,7 +347,7 @@ export default function DateSelection() {
           </div>
         )}
 
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col md:flex-row justify-end gap-3">
           <Button
             variant="outline"
             onClick={() => setCurrentStep(currentStep - 1)}
