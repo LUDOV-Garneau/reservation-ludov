@@ -1,76 +1,71 @@
-# Guide Complet : Gestion des Cours dans le Panneau d'Administration
+# Gestion des cours
 
-## Table des matières
-1. [Introduction](#introduction)
-2. [Accès au panneau d'administration des cours](#accès-au-panneau-dadministration-des-cours)
-3. [Tableau des utilisateurs](#tableau-des-cours)
-4. [Ajouter un nouveau cours](#ajouter-un-nouveau-cours)
-5. [Modifier un cours](#modifier-un-cours)
-6. [Supprimer un cours](#supprimer-un-cours)
-7. [Filtrage de cours](#filtrage-de-cours)
-8. [Rafraîchissement](#rafraîchissement)
+Ce guide explique comment gérer les cours dans le panneau d'administration. Vous pouvez ajouter, modifier, supprimer et filtrer les cours associés aux réservations.
 
+## 1. Accès au panneau des cours
 
----
+1.  Accédez à la page d'administration.
+2.  Cliquez sur l'onglet **Cours**.
 
-## Introduction
+## 2. Tableau des cours
 
-### À propos de ce guide
+Le tableau affiche tous les cours du module de réservation. Chaque ligne représente un cours avec :
+*   **Nom** : Le nom complet du cours.
+*   **Code du cours** : Le code unique du cours.
+*   **Actions** : Les options pour modifier ou supprimer le cours.
 
-Ce guide détaillé vous accompagne dans toutes les étapes de la gestion des cours via le panneau d'administration.
+## 3. Ajouter un cours
 
----
+Le bouton **Ajouter** permet de créer un nouveau cours dans le système.
 
-## Accès au panneau d'administration des cours
-1. Accédez à la page d'administration
-2. Cliquez sur l'onglet *Cours*
+![Bouton ajout cours](/api/admin/images/cours/ajout_cours.png)
 
-## Tableau des cours
-Le tableau des cours affiche tous les cours du module de réservation du LUDOV. Chaque ligne du tableau représente un cours avec les colonnes suivantes :
-   - **Nom** : Nom du cours
-   - **Code du cours** : Code du cours
-   - **Actions** : Boutons permettant de modifier ou de supprimer un cours
+### Procédure d'ajout
 
-## Ajouter un nouveeau cours
-Le bouton **Ajouter** ouvre un dialogue permettant l'ajout d'un cours
+1.  Cliquez sur le bouton **Ajouter**.
+2.  Remplissez les champs **Nom** et **Code**.
+3.  Cliquez sur **Ajouter le cours** pour confirmer.
 
-### Comment ajouter un cours
-1. Cliquez sur le bouton **Ajouter**.
-![Image bouton ajout cours](/api/admin/images/cours/ajout_cours.png)
+![Confirmation ajout](/api/admin/images/cours/conf_ajout_cours.png)
 
-2. Remplissez tous les champs, soit le nom et le code
+## 4. Modifier un cours
 
-4. Finalement, cliquez sur **Ajouter le cours** pour confirmer l'ajout
-![Image confirmation ajout](/api/admin/images/cours/conf_ajout_cours.png)
+Vous pouvez mettre à jour le nom ou le code d'un cours existant.
 
-## Modifier un cours
-En cliquant sur le bouton avec l'**icône de crayon**, vous pouvez modifier un cours, soit changer son nom et son code.
+### Procédure de modification
 
-### Comment modifier un cours
-1. Cliquez sur le bouton avec l'**icône de crayon**
-![Image modification cours](/api/admin/images/cours/btn_modif_cours.png)
+1.  Cliquez sur l'icône de **crayon** dans la colonne Actions.
 
-2. Effectuez les changements nécessaires
+![Modification cours](/api/admin/images/cours/btn_modif_cours.png)
 
-3. Cliquez sur **Enregistrer le modifications** pour confirmer
-![Image confirmation modification](/api/admin/images/cours/conf_modif_cours.png)
+2.  Effectuez les changements nécessaires dans le formulaire.
+3.  Cliquez sur **Enregistrer les modifications**.
 
-## Supprimer un cours
-En cliquant sur le bouton avec l'**icône de poubelle**, vous pouvez supprimer un cours.
+![Confirmation modification](/api/admin/images/cours/conf_modif_cours.png)
 
-### Comment supprimer un cours
-1. Cliquez sur le bouton avec l'**icône de poubelle**
-![Image suppression cours](/api/admin/images/cours/btn_del_cours.png)
+## 5. Supprimer un cours
 
-2. Prenez connaissance des avertissements dans le dialogue de confirmation
+La suppression retire définitivement le cours du système.
 
-3. Clique sur **Confirmer la supression** pour supprimer le cours
-![Image confirmation suppression](/api/admin/images/cours/conf_del_cours.png)
+### Procédure de suppression
 
-## Filtrage de cours
-Vous pouvez utiliser la barre de recherche pour filtrer la liste de cours
-![Image barre de recherche cours](/api/admin/images/cours/search-bar_cours.png)
+1.  Cliquez sur l'icône de **poubelle** dans la colonne Actions.
 
-## Rafraîchissement
-Appuyez sur le bouton de rafraîchissement pour mettre à jour la liste des cours manuellement
-![Image rafraîchissement cours](/api/admin/images/cours/btn_refresh_cours.png)
+![Suppression cours](/api/admin/images/cours/btn_del_cours.png)
+
+2.  Lisez attentivement l'avertissement.
+3.  Cliquez sur **Confirmer la suppression**.
+
+![Confirmation suppression](/api/admin/images/cours/conf_del_cours.png)
+
+## 6. Filtrage et rafraîchissement
+
+### Filtrer la liste
+Utilisez la barre de recherche pour trouver rapidement un cours par son nom ou son code.
+
+![Barre de recherche](/api/admin/images/cours/search-bar_cours.png)
+
+### Actualiser les données
+Utilisez le bouton de rafraîchissement pour mettre à jour manuellement la liste des cours.
+
+![Bouton rafraîchissement](/api/admin/images/cours/btn_refresh_cours.png)

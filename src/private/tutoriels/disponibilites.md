@@ -1,63 +1,49 @@
-# Getting Started - Admin Guide
+# Gestion des disponibilités
 
-## Overview
+Ce guide explique comment définir les plages horaires d'ouverture du laboratoire LUDOV. Le système fonctionne avec deux types de disponibilités : les horaires hebdomadaires récurrents et les ouvertures spécifiques.
 
-Welcome to the LUDOV admin panel. This guide will help you get started with managing the reservation system.
+## 1. Disponibilités par semaine (récurrent)
 
-## Prerequisites
+L'onglet **Par semaine** permet de définir l'horaire standard qui se répète chaque semaine.
 
-- Admin account credentials
-- Access to the admin dashboard
-- Basic understanding of the reservation system
+![Vue d'ensemble de la semaine](/api/admin/images/disponibilites/semaine.png)
 
-## Accessing the Admin Panel
+### Configuration des jours
 
-1. Navigate to the admin login page
-2. Enter your admin credentials
-3. Click "Login" to access the dashboard
+1.  **Activation des jours** : Utilisez les interrupteurs (toggles) pour activer ou désactiver chaque jour de la semaine. Un jour désactivé signifie que le laboratoire est fermé.
+2.  **Plages horaires** : Pour chaque jour activé, définissez les heures d'ouverture (ex: 9h00 à 17h00). Vous pouvez ajouter plusieurs plages pour une même journée (ex: matin et après-midi).
 
-## Key Features
+![Configuration hebdomadaire](/api/admin/images/disponibilites/semaine-hebdomadaire.png)
 
-### User Management
+### Période de validité
 
-- View all registered users
-- Edit user permissions
-- Deactivate/activate accounts
+Vous pouvez définir pour quelle période cet horaire hebdomadaire est valide :
+*   **Toujours valide** : L'horaire s'applique indéfiniment.
+*   **Plage de dates** : L'horaire ne s'applique que pour une période donnée (ex: Session Automne 2025).
 
-### Reservation Management
+![Option de validité](/api/admin/images/disponibilites/semaine-disponibilite-toujours.png)
 
-- View all reservations
-- Approve or reject pending reservations
-- Modify existing reservations
-- Cancel reservations if needed
+### Exceptions (Blocage)
 
-### Resource Management
+Les exceptions dans cet onglet servent à **bloquer** des plages horaires pour des dates précises (ex: jour férié, absence du responsable).
+*   Sélectionnez une date spécifique.
+*   Indiquez les heures où le laboratoire sera fermé exceptionnellement, malgré l'horaire hebdomadaire.
 
-- Add new resources
-- Update resource availability
-- Set resource capacity and schedules
+![Exceptions de la semaine](/api/admin/images/disponibilites/semaine-exceptions.png)
 
-### Reports and Analytics
+## 2. Disponibilités spécifiques (ouvertures supplémentaires)
 
-- View reservation statistics
-- Generate usage reports
-- Monitor system activity
+L'onglet **Dates spécifiques** est utilisé pour ajouter des ouvertures ponctuelles qui ne font pas partie de l'horaire régulier (ex: ouverture spéciale fin de session, fin de semaine de jam).
 
-## Common Tasks
+![Sélection dates spécifiques](/api/admin/images/disponibilites/specifique-selection.png)
 
-### Approving a Reservation
+1.  Sélectionnez la ou les dates désirées dans le calendrier.
+2.  Définissez les plages horaires d'ouverture pour ces dates.
 
-1. Go to "Pending Reservations"
-2. Review the reservation details
-3. Click "Approve" or "Reject"
+![Configuration spécifique](/api/admin/images/disponibilites/specifique.png)
 
-### Adding a New Resource
+Ces disponibilités s'ajoutent à l'horaire hebdomadaire existant.
 
-1. Navigate to "Resources"
-2. Click "Add New Resource"
-3. Fill in the required information
-4. Save changes
+## Enregistrement
 
-## Support
-
-For additional help, contact the system administrator or refer to the full documentation.
+N'oubliez pas de sauvegarder vos modifications en cliquant sur le bouton de confirmation pour qu'elles soient prises en compte par le système de réservation.

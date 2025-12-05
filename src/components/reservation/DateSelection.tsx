@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { DatePicker } from "@/components/reservation/components/DatePicker";
 import { TimePicker } from "@/components/reservation/components/TimePicker";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -92,7 +92,7 @@ export default function DateSelection() {
     }
   }, []);
 
-  const loadAvailableTimes = async (selectedDate: Date) => {
+  const loadAvailableTimes = useCallback(async (selectedDate: Date) => {
     setIsLoadingTimes(true);
     setError(null);
 
@@ -145,9 +145,9 @@ export default function DateSelection() {
     } finally {
       setIsLoadingTimes(false);
     }
-  };
+  }, [selectedConsoleId, selectedGames, selectedAccessories, reservationId, t, time, setSelectedTime]);
 
-  const onSelectDate = async (newDate: Date | undefined) => {
+  const onSelectDate = useCallback(async (newDate: Date | undefined) => {
     if (!newDate) {
       setDate(undefined);
       setSelectedDate(undefined);
@@ -163,13 +163,13 @@ export default function DateSelection() {
     setSelectedDate(newDate);
 
     await loadAvailableTimes(newDate);
-  };
+  }, [loadAvailableTimes, setSelectedDate, setSelectedTime]);
 
-  const onSelectTime = (selectedTime: string) => {
+  const onSelectTime = useCallback((selectedTime: string) => {
     setTime(selectedTime);
     setSelectedTime(selectedTime);
     setError(null);
-  };
+  }, [setSelectedTime]);
 
   const handleContinue = async () => {
     if (!date) {

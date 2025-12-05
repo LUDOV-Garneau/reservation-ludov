@@ -13,7 +13,6 @@ export enum TutorialArgs {
 
 export interface TutorialCardsProps {
   title: string;
-  description: string;
   args: TutorialArgs;
   isAdminRessource: boolean;
   icons: React.ComponentType<{ className?: string }>;

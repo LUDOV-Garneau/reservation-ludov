@@ -16,42 +16,36 @@ import TutorialCards from "./tutorialCards";
 const TutoPage: TutorialCardsProps[] = [
   {
     title: "Gestion des utilisateurs",
-    description: "Apprenez à gérer les utilisateurs efficacement.",
     args: TutorialArgs.USERS,
     isAdminRessource: true,
     icons: User,
   },
   {
     title: "Gestion des réservations",
-    description: "Découvrez comment protéger vos données.",
     args: TutorialArgs.RESERVATIONS,
     isAdminRessource: true,
     icons: Calendar,
   },
   {
     title: "Gestion des stations",
-    description: "Maîtrisez la gestion des stations.",
     args: TutorialArgs.STATIONS,
     isAdminRessource: true,
     icons: MapPin,
   },
   {
     title: "Gestion des disponibilités",
-    description: "Optimisez la gestion des disponibilités.",
     args: TutorialArgs.AVAILABILITIES,
     isAdminRessource: true,
     icons: Clock,
   },
   {
     title: "Gestion des cours",
-    description: "Apprenez à gérer les cours efficacement.",
     args: TutorialArgs.COURSES,
     isAdminRessource: true,
     icons: BookOpenText,
   },
   {
     title: "Gestion de la politique de confidentialité",
-    description: "Personnalisez les paramètres de votre application.",
     args: TutorialArgs.PRIVACY_POLICY,
     isAdminRessource: true,
     icons: Book,

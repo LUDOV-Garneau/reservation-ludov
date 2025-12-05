@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -17,7 +16,6 @@ export default function TutorialCards(tuto: TutorialCardsProps) {
     <Card className="w-full hover:shadow-xl duration-300 ease-in-out hover:border-cyan-500 transition-all">
       <CardHeader>
         <CardTitle>{tuto.title}</CardTitle>
-        <CardDescription>{tuto.description}</CardDescription>
       </CardHeader>
       <CardContent className="mt-auto">
         <div className="bg-gray-100 p-5 flex justify-center items-center rounded-2xl">

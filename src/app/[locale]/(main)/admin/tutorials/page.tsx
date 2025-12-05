@@ -2,7 +2,7 @@ import { TutorialArgs } from "@/types/docs";
 import { notFound } from "next/navigation";
 import fs from "fs";
 import path from "path";
-import AdminTutorialsClient from "./AdminTutorialsClient";
+import AdminTutorialsClient from "@/components/admin/tutorials/AdminTutorialsClient";
 
 interface TutorialPageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;

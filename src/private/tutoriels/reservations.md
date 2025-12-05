@@ -1,63 +1,65 @@
-# Getting Started - Admin Guide
+# Gestion des réservations
 
-## Overview
+Ce guide explique comment gérer les réservations dans le panneau d'administration. Vous pouvez consulter l'historique, voir les détails complets et annuler des réservations.
 
-Welcome to the LUDOV admin panel. This guide will help you get started with managing the reservation system.
+## 1. Accès au panneau des réservations
 
-## Prerequisites
+1.  Accédez à la page d'administration.
+2.  Cliquez sur l'onglet **Réservations**.
 
-- Admin account credentials
-- Access to the admin dashboard
-- Basic understanding of the reservation system
+## 2. Tableau des réservations
 
-## Accessing the Admin Panel
+Le tableau affiche toutes les réservations du système. Chaque ligne représente une réservation avec :
+*   **Utilisateur** : Le nom de l'utilisateur ayant effectué la réservation.
+*   **Console** : La plateforme réservée.
+*   **Jeux** : La liste des jeux sélectionnés.
+*   **Date et Heure** : Le moment prévu pour la réservation.
+*   **Station** : La station assignée.
+*   **Statut** : L'état actuel (À venir, Passée, Annulée).
+*   **Actions** : Les options pour voir les détails ou supprimer.
 
-1. Navigate to the admin login page
-2. Enter your admin credentials
-3. Click "Login" to access the dashboard
+### Recherche et rafraîchissement
+*   Utilisez la barre de recherche pour trouver une réservation par nom d'utilisateur.
+*   Utilisez le bouton de rafraîchissement pour actualiser la liste manuellement.
 
-## Key Features
+![Recherche](/api/admin/images/reservations/recherche.png)
 
-### User Management
+![Rafraîchissement](/api/admin/images/reservations/refresh.png)
 
-- View all registered users
-- Edit user permissions
-- Deactivate/activate accounts
+## 3. Afficher les détails
 
-### Reservation Management
+Pour consulter les informations complètes d'une réservation, cliquez sur l'icône d'**œil** dans la colonne Actions ou directement sur la ligne de la réservation.
 
-- View all reservations
-- Approve or reject pending reservations
-- Modify existing reservations
-- Cancel reservations if needed
+![Actions](/api/admin/images/reservations/actions.png)
 
-### Resource Management
+La page de détails affiche :
+*   Les informations de l'utilisateur.
+*   Le statut de la réservation.
+*   La console, les jeux et les accessoires réservés.
+*   Le cours associé (si applicable).
 
-- Add new resources
-- Update resource availability
-- Set resource capacity and schedules
+![En-tête des détails](/api/admin/images/reservations/details-entete.png)
 
-### Reports and Analytics
+![Détails complets](/api/admin/images/reservations/details.png)
 
-- View reservation statistics
-- Generate usage reports
-- Monitor system activity
+## 4. Supprimer une réservation
 
-## Common Tasks
+La suppression annule la réservation et libère la plage horaire si elle est à venir.
 
-### Approving a Reservation
+### Procédure de suppression
 
-1. Go to "Pending Reservations"
-2. Review the reservation details
-3. Click "Approve" or "Reject"
+1.  Cliquez sur l'icône de **poubelle** dans la colonne Actions.
+2.  Confirmez la suppression dans la fenêtre contextuelle.
 
-### Adding a New Resource
+> **Attention** : Cette action est irréversible.
 
-1. Navigate to "Resources"
-2. Click "Add New Resource"
-3. Fill in the required information
-4. Save changes
+![Suppression](/api/admin/images/reservations/suppression.png)
 
-## Support
+## 5. Métriques
 
-For additional help, contact the system administrator or refer to the full documentation.
+Les métriques en haut du tableau affichent :
+*   Nombre total de réservations.
+*   Nombre de réservations à venir.
+*   Nombre de réservations passées.
+
+![Métriques](/api/admin/images/reservations/metriques.png)

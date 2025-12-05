@@ -1,34 +1,33 @@
 # Gestion de la politique de confidentialité
 
-Ce guide explique comment modifier la politique de confidentialité de l'application LUDOV. Cette politique est visible par tous les utilisateurs (connectés ou non) et lors de l'inscription.
+Ce guide explique comment modifier la politique de confidentialité de l'application LUDOV. Cette politique est visible par tous les utilisateurs et lors de l'inscription.
 
-## Accéder à l'éditeur
+## 1. Accès à l'éditeur
 
-1. Connectez-vous en tant qu'administrateur.
-2. Cliquez sur l'onglet **Politique de confidentialité** dans le menu de navigation supérieur.
+1.  Accédez à la page d'administration.
+2.  Cliquez sur l'onglet **Politique de confidentialité**.
 
 ![Interface de gestion de la politique](/api/admin/images/politique/politique.png)
 
-## Modifier le contenu
+## 2. Modifier le contenu
 
-L'interface propose un éditeur de texte riche qui vous permet de :
-- Mettre en forme le texte (gras, italique, souligné, barré).
-- Ajouter des titres (H1, H2).
-- Créer des listes (à puces ou numérotées).
-- Insérer des liens et des images.
-- Annuler ou rétablir des modifications.
+L'interface propose un éditeur de texte riche pour la mise en forme.
+
+### Fonctionnalités de l'éditeur
+*   Mise en forme (gras, italique, souligné).
+*   Titres et listes.
+*   Liens et images.
 
 ### Mise à jour automatique de la date
-La date de "Dernière mise à jour" affichée en haut de l'éditeur (ex: *2025-12-01*) sera automatiquement actualisée à la date d'aujourd'hui lorsque vous enregistrerez vos modifications.
+La date de "Dernière mise à jour" affichée en haut de l'éditeur sera automatiquement actualisée à la date d'aujourd'hui lors de l'enregistrement.
 
-## Enregistrer les modifications
+## 3. Enregistrer les modifications
 
 Une fois vos modifications terminées :
 
-1. Cliquez sur le bouton **Enregistrer** (bleu) en haut à droite de l'éditeur.
-2. Un message de confirmation apparaîtra pour valider la sauvegarde.
+1.  Cliquez sur le bouton **Enregistrer** (bleu).
+2.  Confirmez la sauvegarde.
 
-> **Attention**
-> Les modifications sont appliquées immédiatement et sont visibles par tous les utilisateurs dès l'enregistrement. Assurez-vous de relire votre texte avant de sauvegarder.
+> **Attention** : Les modifications sont appliquées immédiatement et sont visibles par tous les utilisateurs.
 
 Si vous souhaitez annuler vos modifications en cours sans sauvegarder, cliquez sur le bouton **Annuler** (gris).

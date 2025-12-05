@@ -112,7 +112,7 @@ export default function AccessoriesSelection() {
     fetchAccessories();
     fetchRequiredAccessories();
     return () => controller.abort();
-  }, [t]);
+  }, []);
 
   const handleSelect = (accessory: Accessory) => {
     if (requiredAccessories.includes(accessory.id)) return;
@@ -268,14 +268,14 @@ export default function AccessoriesSelection() {
                     {selectedAccessoriesData.some(
                       (a) => !requiredAccessories.includes(a.id)
                     ) && (
-                      <button
-                        onClick={handleClearAll}
-                        className="w-full text-sm text-gray-500 hover:text-red-500 py-2 transition-colors flex items-center justify-center rounded-lg border border-gray-200 hover:border-red-300 bg-gray-50 hover:bg-red-50"
-                      >
-                        <Trash2 className="inline-block h-4 w-4 mr-1" />
-                        {t("reservation.accessory.button_clear_all")}
-                      </button>
-                    )}
+                        <button
+                          onClick={handleClearAll}
+                          className="w-full text-sm text-gray-500 hover:text-red-500 py-2 transition-colors flex items-center justify-center rounded-lg border border-gray-200 hover:border-red-300 bg-gray-50 hover:bg-red-50"
+                        >
+                          <Trash2 className="inline-block h-4 w-4 mr-1" />
+                          {t("reservation.accessory.button_clear_all")}
+                        </button>
+                      )}
                   </>
                 )}
               </div>
