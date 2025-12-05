@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { Console } from "@/types/console";
 import {
   Loader2,
@@ -35,7 +34,7 @@ export default function SelectedConsoleCard({
 
   if (!console) {
     return (
-      <div className="p-8 border-dashed border-2 border-gray-300 rounded-2xl flex flex-col items-center gap-3 w-full">
+      <div className="p-8 border-dashed border-2 border-gray-300 rounded-2xl flex flex-col items-center gap-3">
         <Monitor className="h-12 w-12 text-gray-400" />
         <p className="text-center text-lg font-medium">
           {t("reservation.console.noneSelected")}
@@ -73,20 +72,9 @@ export default function SelectedConsoleCard({
   return (
     <div className="w-full space-y-4">
       <div className="relative w-full h-48 rounded-2xl overflow-hidden group bg-gray-100">
-        {console.picture ? (
-          <Image
-            src={console.picture}
-            alt={console.name}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <Monitor className="h-16 w-16" />
-          </div>
-        )}
-
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        <div className="flex items-center justify-center h-full text-gray-400">
+          <Monitor className="h-16 w-16" />
+        </div>
 
         <button
           onClick={onClear}
@@ -97,7 +85,7 @@ export default function SelectedConsoleCard({
         </button>
 
         {success && (
-          <div className="absolute top-4 left-4 bg-green-500 text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
+          <div className="absolute top-4 left-4 bg-cyan-500 text-white px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg">
             <Check className="h-3.5 w-3.5" />
             <span className="text-sm font-medium">
               {t("reservation.console.saved")}
@@ -126,7 +114,7 @@ export default function SelectedConsoleCard({
         <Button
           onClick={handleContinue}
           disabled={isLoading || success}
-          className="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-medium h-11 rounded-xl transition-all disabled:opacity-50"
+          className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors duration-300 text-white font-medium h-11 rounded-xl disabled:opacity-50"
         >
           {isLoading ? (
             <>

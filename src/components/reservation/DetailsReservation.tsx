@@ -144,7 +144,7 @@ function GameCard({ game }: { game: Game }) {
               src={game.picture}
               alt={game.nom}
               fill
-              className="object-contain p-4"
+              className="object-cover"
               priority={false}
             />
           ) : (
@@ -189,19 +189,9 @@ export function ConsoleCard({ item }: { item: Console }) {
     <Card className="h-full overflow-hidden group border-0 shadow-xl p-0">
       <CardContent className="p-0 relative h-full min-h-[280px]">
         <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-110">
-          {item.picture ? (
-            <Image
-              src={item.picture}
-              alt={item.nom}
-              fill
-              className="object-cover"
-              priority={false}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-cyan-500">
-              <Monitor className="h-32 w-32 text-cyan-900" aria-hidden="true" />
-            </div>
-          )}
+          <div className="flex h-full w-full items-center justify-center bg-cyan-500">
+            <Monitor className="h-32 w-32 text-cyan-900" aria-hidden="true" />
+          </div>
 
           <div
             className={
@@ -492,7 +482,7 @@ export default function DetailsReservation({
             </div>
             {/* LAYOUT DES CARTES */}
             {jeux.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {jeux.map((jeu, index) => (
                   <div
                     key={jeu.biblio ?? `game-${index}`}

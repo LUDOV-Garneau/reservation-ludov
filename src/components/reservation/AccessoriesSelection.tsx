@@ -158,7 +158,7 @@ export default function AccessoriesSelection() {
   );
 
   return (
-    <div className="min-h-screen p-6">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto">
         {selectedConsole && (
           <div className="bg-[white] rounded-2xl p-4 shadow-md mb-6 flex items-center gap-4">
@@ -174,8 +174,8 @@ export default function AccessoriesSelection() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
+        <div className="grid grid-cols-1 xl:grid-cols-6 gap-6">
+          <div className="col-span-1 xl:col-span-2">
             <div className="bg-[white] rounded-2xl shadow-lg sticky top-6">
               <div className="p-6 border-b border-gray-200">
                 <div
@@ -308,7 +308,7 @@ export default function AccessoriesSelection() {
             </div>
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="col-span-1 xl:col-span-4">
             <div className="bg-[white] rounded-2xl shadow-lg p-6">
               <div className="mb-6">
                 <h2 className="text-2xl font-bold mb-2">

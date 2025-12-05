@@ -35,14 +35,11 @@ export default function ConsolesSelection() {
         if (!isTimerActive) {
           await startTimer(consoleToUse.id);
         }
-      }
-      else if (selectedConsole.id !== consoleToUse.id) {
+      } else if (selectedConsole.id !== consoleToUse.id) {
         setSelectedConsole(consoleToUse);
         await updateReservationConsole(consoleToUse.id);
-      }
-      else {
+      } else {
         setSelectedConsole(consoleToUse);
-
       }
 
       setCurrentStep(2);
@@ -57,8 +54,8 @@ export default function ConsolesSelection() {
   const displayedConsole = selected || selectedConsole;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <div className="lg:col-span-1">
+    <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+      <div className="col-span-1">
         <div className="bg-[white] sticky top-10 rounded-2xl p-6 shadow-lg">
           <h2 className="text-3xl font-bold mb-4 text-center">
             {t("reservation.console.selectedConsole")}
@@ -76,7 +73,7 @@ export default function ConsolesSelection() {
         </div>
       </div>
 
-      <div className="lg:col-span-3 md:col-span-2">
+      <div className="col-span-1 xl:col-span-3">
         <div className="bg-[white] rounded-2xl p-6 shadow-lg">
           <h2 className="text-3xl font-bold mb-4">
             {t("reservation.console.consoleSelection")}
