@@ -45,6 +45,7 @@ import ActionBar from "./ActionBar";
 import CardReservationStats from "./CardStats";
 import DeleteReservationAction from "./DeleteReservationAction";
 import { useRouter } from "next/navigation";
+import DateFilter, { parseDateString, normalizeDate } from "./DateFilter";
 
 type Reservation = {
   id: string;
@@ -135,8 +136,8 @@ export function ModernAlert({
         alert.type === "success"
           ? "success"
           : alert.type === "destructive"
-          ? "destructive"
-          : "default"
+            ? "destructive"
+            : "default"
       }
     >
       <div className="flex items-center gap-2 w-full">
@@ -451,6 +452,15 @@ export default function ReservationsTable() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [total, setTotal] = useState(0);
 
+  const [dateFilter, setDateFilter] = useState<{
+    mode: 'specific' | 'range';
+    specificDate?: Date;
+    startDate?: Date;
+    endDate?: Date;
+  }>({
+    mode: 'specific'
+  });
+
   const { page, goToPage, resetPage } = usePagination(total, ITEMS_PER_PAGE);
 
   async function fetchReservations(page = 1, limit = ITEMS_PER_PAGE) {
@@ -515,12 +525,48 @@ export default function ReservationsTable() {
   const filteredReservations = reservations.filter((reservation) => {
     const search = searchQuery.toLowerCase();
 
-    return (
+    const matchesSearch =
       (reservation.userNom ?? "").toLowerCase().includes(search) ||
       reservation.console.toLowerCase().includes(search) ||
-      reservation.date.toLowerCase().includes(search)
-    );
+      reservation.date.toLowerCase().includes(search);
+
+    let matchesDate = true;
+
+    if (dateFilter.mode === 'specific' && dateFilter.specificDate) {
+      const reservationDate = parseDateString(reservation.date);
+      const filterDate = normalizeDate(dateFilter.specificDate);
+
+      matchesDate = reservationDate.getTime() === filterDate.getTime();
+    } else if (dateFilter.mode === 'range') {
+      const reservationDate = parseDateString(reservation.date);
+
+      if (dateFilter.startDate && dateFilter.endDate) {
+        const startDate = normalizeDate(dateFilter.startDate);
+        const endDate = normalizeDate(dateFilter.endDate);
+
+        matchesDate =
+          reservationDate.getTime() >= startDate.getTime() &&
+          reservationDate.getTime() <= endDate.getTime();
+      } else if (dateFilter.startDate) {
+        const startDate = normalizeDate(dateFilter.startDate);
+        matchesDate = reservationDate.getTime() >= startDate.getTime();
+      } else if (dateFilter.endDate) {
+        const endDate = normalizeDate(dateFilter.endDate);
+        matchesDate = reservationDate.getTime() <= endDate.getTime();
+      }
+    }
+
+    return matchesSearch && matchesDate;
   });
+
+  const handleClearDateFilter = () => {
+    setDateFilter({
+      mode: 'specific',
+      specificDate: undefined,
+      startDate: undefined,
+      endDate: undefined,
+    });
+  };
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -558,6 +604,14 @@ export default function ReservationsTable() {
             onAlert={showAlert}
             isRefreshing={isRefreshing}
           />
+
+          <div className="mt-4 pt-4 border-t">
+            <DateFilter
+              value={dateFilter}
+              onChange={setDateFilter}
+              onClear={handleClearDateFilter}
+            />
+          </div>
         </CardHeader>
 
         <CardContent className="p-0">
