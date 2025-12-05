@@ -157,9 +157,9 @@ export default function ConfirmReservation() {
   const isProcessing = confirmLoading || contextLoading;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+    <div className="max-w-7xl mx-auto">
+      <div className="grid xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 space-y-6">
           {data.console ? (
             <div className="bg-[white] rounded-xl shadow-sm border p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -168,12 +168,7 @@ export default function ConfirmReservation() {
               </h2>
               <div className="flex items-center gap-4">
                 <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
-                  <Image
-                    src={data.console.image || "/images/placeholder_consoles.jpg"}
-                    alt={data.console.nom}
-                    fill
-                    className="object-cover"
-                  />
+                  <Gamepad2 className="h-10 w-10 text-gray-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                 </div>
                 <div>
                   <p className="text-xl font-medium">{data.console.nom}</p>
@@ -197,35 +192,35 @@ export default function ConfirmReservation() {
             </h2>
 
             {data.jeux.length > 0 ? (
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {data.jeux.map((jeu) => (
                   <div
                     key={jeu.id}
-                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="relative group rounded-xl overflow-hidden shadow-md"
                   >
-                    <div className="relative w-16 h-20 rounded bg-gray-200 flex-shrink-0 overflow-hidden">
+                    <div className="w-full h-96 relative">
                       {jeu.picture ? (
                         <Image
                           src={jeu.picture}
                           alt={jeu.nom}
                           fill
-                          className="object-cover"
+                          className="object-cover object-center"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <Gamepad2 className="h-6 w-6 text-gray-400" />
+                        <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                          <Gamepad2 className="h-20 w-20 text-gray-400" />
                         </div>
                       )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 line-clamp-2 text-sm">
-                        {jeu.nom}
-                      </p>
-                      {jeu.author && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {jeu.author}
-                        </p>
-                      )}
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/100 to-transparent top-40"></div>
+
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <div className="flex flex-col gap-4 items-center">
+                          <p className="text-[white] text-lg font-semibold line-clamp-2 text-center">
+                            {jeu.nom}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -296,7 +291,7 @@ export default function ConfirmReservation() {
             </div>
           )}
         </div>
-        <div className="lg:col-span-1">
+        <div className="xl:col-span-1">
           <div className="bg-[white] rounded-xl shadow-sm border p-6 sticky top-6">
             <h2 className="text-lg font-semibold mb-4">
               {t("reservation.confirm.yourReservation")}
@@ -342,9 +337,7 @@ export default function ConfirmReservation() {
                   <span className="text-gray-600">
                     {t("reservation.confirm.station")}
                   </span>
-                  <span className="font-medium">
-                    {data.station.nom}
-                  </span>
+                  <span className="font-medium">{data.station.nom}</span>
                 </div>
               )}
 
@@ -385,7 +378,7 @@ export default function ConfirmReservation() {
               <Button
                 onClick={handleConfirm}
                 disabled={isProcessing}
-                className="w-full h-12 bg-cyan-500 hover:bg-cyan-600 text-white font-medium"
+                className="w-full h-12 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-[white] font-medium transition-colors"
               >
                 {isProcessing ? (
                   <>

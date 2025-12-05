@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, CheckCircle2 } from "lucide-react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 interface ConfirmedReservationProps {
@@ -17,7 +17,6 @@ export default function ConfirmedReservation({
   heure,
 }: ConfirmedReservationProps) {
   const t = useTranslations();
-  const locale = useLocale();
   const router = useRouter();
 
   return (
@@ -43,9 +42,7 @@ export default function ConfirmedReservation({
           <div className="flex items-center gap-3 mb-2">
             <Calendar className="h-5 w-5 text-cyan-700" />
             <span className="text-cyan-800 font-medium">
-              {date
-                ? String(date).split("T")[0]
-                : "—"}
+              {date ? String(date).split("T")[0] : "—"}
             </span>
           </div>
 
