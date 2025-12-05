@@ -183,7 +183,7 @@ export default function GameSelectionGrid({
             ) : totalGames > 0 ? (
               <span>
                 {t("reservation.games.gamesAvailable", {
-                  count: totalGames
+                  count: totalGames,
                 })}
               </span>
             ) : null}
@@ -222,7 +222,7 @@ export default function GameSelectionGrid({
       ) : (
         <>
           {/* Grille des jeux */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             {games.map((game) => {
               const isSelected = selectedIds.includes(game.id);
               const isDisabled = !isSelected && maxReached;
@@ -239,9 +239,10 @@ export default function GameSelectionGrid({
                     relative group rounded-xl overflow-hidden shadow-md
                     transition-all duration-200
                     ${isSelected ? "ring-2 ring-cyan-500 scale-[0.98]" : ""}
-                    ${isDisabled
-                      ? "opacity-60 cursor-not-allowed"
-                      : "cursor-pointer hover:shadow-xl hover:scale-[1.02]"
+                    ${
+                      isDisabled
+                        ? "opacity-60 cursor-not-allowed"
+                        : "cursor-pointer hover:shadow-xl hover:scale-[1.02]"
                     }
                   `}
                 >
@@ -257,7 +258,7 @@ export default function GameSelectionGrid({
                           src={game.picture}
                           alt={game.titre}
                           fill
-                          className="object-cover object-top sm:h-52"
+                          className="object-cover object-center"
                           loading="lazy"
                         />
                       </div>
@@ -268,7 +269,7 @@ export default function GameSelectionGrid({
                       className={`${
                         game.picture !== null &&
                         "2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity"
-                        } absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`}
+                      } absolute inset-0 bg-gradient-to-t from-black/100 via-black to-transparent top-40`}
                     />
 
                     {/* Badge sélectionné */}
@@ -282,7 +283,7 @@ export default function GameSelectionGrid({
                       className={`${
                         game.picture !== null &&
                         "2xl:group-hover:opacity-100 2xl:transition-opacity 2xl:opacity-0"
-                        } absolute bottom-0 left-0 right-0 p-4`}
+                      } absolute bottom-0 left-0 right-0 p-4`}
                     >
                       <div className="flex flex-col gap-4 items-center">
                         <p className="text-white text-lg font-bold line-clamp-2">
@@ -297,7 +298,7 @@ export default function GameSelectionGrid({
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
-                            className="bg-cyan-500 hover:bg-cyan-600 text-white text-xs lg:text-sm"
+                            className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
                           >
                             {t("reservation.games.details")}
                           </Button>
@@ -310,7 +311,6 @@ export default function GameSelectionGrid({
             })}
           </div>
 
-          {/* Observer target pour l'infinite scroll */}
           {!search && (
             <div ref={observerTarget} className="flex justify-center py-4">
               {loading && hasMore && (
@@ -328,12 +328,11 @@ export default function GameSelectionGrid({
             </div>
           )}
 
-          {/* Bouton "Charger plus" pour la recherche */}
           {search && hasMore && !loading && (
             <div className="flex justify-center pt-4">
               <button
                 onClick={handleLoadMore}
-                className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors font-medium"
+                className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white rounded-lg transition-colors font-medium"
               >
                 {t("reservation.games.loadMore")}
               </button>
@@ -344,4 +343,3 @@ export default function GameSelectionGrid({
     </div>
   );
 }
-

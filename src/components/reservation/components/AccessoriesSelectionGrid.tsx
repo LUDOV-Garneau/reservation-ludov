@@ -63,7 +63,7 @@ export default function AccessorySelectionGrid({
               className={`relative p-4 rounded-lg border text-center transition
                 ${
                   requiredIds.includes(a.id)
-                    ? "border-blue-500 bg-blue-50 cursor-not-allowed opacity-80"
+                    ? "border-cyan-500 bg-cyan-50 cursor-not-allowed opacity-80"
                     : selectedIds.includes(a.id)
                     ? "border-green-500 bg-green-50 cursor-pointer"
                     : "border-gray-200 hover:border-gray-400 cursor-pointer"
