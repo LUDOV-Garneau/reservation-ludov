@@ -45,9 +45,6 @@ export default function AccessoriesSelection() {
     const controller = new AbortController();
 
     const fetchAccessories = async () => {
-      setIsLoading(true);
-      setError(null);
-
       try {
         const res = await fetch("/api/reservation/accessories", {
           method: "GET",
@@ -69,14 +66,10 @@ export default function AccessoriesSelection() {
         setError(
           err instanceof Error ? err.message : t("reservation.accessory.error")
         );
-      } finally {
-        setIsLoading(false);
       }
     };
 
     const fetchRequiredAccessories = async () => {
-      setIsLoading(true);
-      setError(null);
       try {
         const params = new URLSearchParams();
         selectedGames.forEach((id) => params.append("gameIds", id));
@@ -104,15 +97,25 @@ export default function AccessoriesSelection() {
         setError(
           err instanceof Error ? err.message : t("reservation.accessory.error")
         );
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    fetchAccessories();
-    fetchRequiredAccessories();
+    const loadAll = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await Promise.all([
+        fetchAccessories(),
+        fetchRequiredAccessories(),
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  loadAll();
     return () => controller.abort();
-  }, []);
+  }, [t, selectedGames, setSelectedAccessories]);
 
   const handleSelect = (accessory: Accessory) => {
     if (requiredAccessories.includes(accessory.id)) return;
