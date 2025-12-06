@@ -6,10 +6,10 @@ import { Console } from "@/types/console";
 import {
   Loader2,
   Check,
-  X,
   AlertCircle,
   ArrowRight,
   Monitor,
+  Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -78,10 +78,12 @@ export default function SelectedConsoleCard({
 
         <button
           onClick={onClear}
-          className="absolute top-4 right-4 bg-black/40 backdrop-blur-sm text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/60"
+          className="absolute top-4 right-4 bg-white text-gray-400 border border-gray-200 
+                      rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-all
+                     hover:text-red-500 hover:border-red-300 hover:bg-red-50"
           aria-label={t("reservation.console.changeConsole")}
         >
-          <X className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" />
         </button>
 
         {success && (

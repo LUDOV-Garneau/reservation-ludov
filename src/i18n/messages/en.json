@@ -100,7 +100,8 @@
       "loadingMore": "Loading more games...",
       "listEnd": "End of list • {count} games displayed",
       "loadMore": "Load more results",
-      "errorLoading": "Error loading games"
+      "errorLoading": "Error loading games",
+      "buttonClearAll" : "Clear all"
     },
     "course": {
       "selectionTitle": "Course Selection",
