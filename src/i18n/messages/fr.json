@@ -100,7 +100,8 @@
       "loadingMore": "Chargement de plus de jeux...",
       "listEnd": "Fin de la liste • {count} jeux affichés",
       "loadMore": "Charger plus de résultats",
-      "errorLoading": "Erreur lors du chargement des jeux"
+      "errorLoading": "Erreur lors du chargement des jeux",
+      "buttonClearAll": "Tout supprimer"
     },
     "accessory": {
       "header_info": "Plateforme sélectionnée",
