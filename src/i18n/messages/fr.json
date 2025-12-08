@@ -54,7 +54,7 @@
       "consoleCountFound": "{count, plural, one {# plateforme trouvée} other {# plateformes trouvées}}",
       "noConsoleForSearch": "Aucune plateforme disponible pour {search}",
       "clearSearch": "Effacer la recherche",
-      "noneAvailable": "Aucune plateforme est actuellement disponible",
+      "noneAvailable": "Aucune plateforme n'est actuellement disponible",
       "allReserved": "Toutes les plateformes sont réservées",
       "reservedForYou": "Réservée pour vous",
       "available": "{count, plural, one {# disponible} other {# disponibles}}",
@@ -74,7 +74,7 @@
     },
     "games": {
       "error": {
-        "games_restore": "Erreur restauration jeux:",
+        "games_restore": "Erreur restauration jeux :",
         "max_3_games": "Maximum 3 jeux peuvent être sélectionnés",
         "selecte_at_least_one": "Sélectionnez au moins un jeu",
         "no_active_reservation": "Aucune réservation active",
@@ -130,8 +130,8 @@
       "title": "Réservation",
       "noValidDate": "Aucune plage horaire disponible",
       "continueBtn": "Continuer",
-      "errorLoadTimes": "Erreur chargement des horaires",
-      "errorLoadDates": "Erreur chargement des dates indisponibles",
+      "errorLoadTimes": "Erreur lors chargement des horaires",
+      "errorLoadDates": "Erreur lors du chargement des dates indisponibles",
       "errorServer": "Erreur serveur",
       "allSlotsTaken": "Soit vous avez déjà une réservation avec cette plateforme, soit toutes les plages horaires sont réservées pour cette date",
       "selectDate": "Sélectionnez une date et une heure pour votre réservation",
@@ -196,7 +196,7 @@
       "hour": "heure",
       "confirmationError": "Erreur lors de la confirmation",
       "missingData": "Données manquantes",
-      "loadingError": "Erreur chargement",
+      "loadingError": "Erreur lors du chargement",
       "noActiveReservation": "Aucune réservation active",
       "return": "Retour"
     },
@@ -264,7 +264,17 @@
       "configureEmailReminder": "Configurer le rappel par courriel",
       "receiveEmailReminder": "Recevez un courriel de rappel avant votre réservation",
       "configFailure": "Échec de la configuration du rappel",
-      "unknownError": "Erreur inconnue"
+      "unknownError": "Erreur inconnue",
+      "times": {
+        "1hour": "1 heure avant",
+        "2hours": "2 heures avant",
+        "3hours": "3 heures avant",
+        "6hours": "6 heures avant",
+        "12hours": "12 heures avant",
+        "1day": "1 jour avant",
+        "2days": "2 jours avant",
+        "3days": "3 jours avant"
+      }
     }
   },
   "auth": {
@@ -332,7 +342,7 @@
       "actionBar": {
         "searchPlaceholder": "Rechercher...",
         "addUser": "Ajouter",
-        "toolTipRefresh": "Actualiser",
+        "toolTipRefresh": "Rafraîchir",
         "dropDownMenuAddUser": {
           "importCSV": "Importer un fichier CSV",
           "importCSVDescription": "Importez plusieurs utilisateurs à partir d'un fichier CSV",
@@ -344,7 +354,7 @@
         }
       },
       "searchResult": {
-        "noUsersFound": "Aucun utilisateur(s) trouvé",
+        "noUsersFound": "Aucun utilisateur trouvé",
         "noMatch": "Aucun utilisateur ne correspond à votre recherche.",
         "startByAdding": "Commencez par ajouter votre premier utilisateur."
       },
@@ -387,7 +397,7 @@
         "dataDeleteAccordingToPolicy": "Les données associées essentielles seront retirées selon votre politique.",
         "CancelDelete": "Annuler la suppression",
         "deletingState": "Suppression...",
-        "confirmDelete": "Confirmer la suppresion"
+        "confirmDelete": "Confirmer la suppression"
       },
       "resetPasswordDialog": {
         "resetPassword": "Réinitialiser le mot de passe",
@@ -449,7 +459,7 @@
       "table": {
         "header": {
           "user": "Utilisateur",
-          "console": "Console",
+          "console": "Plateforme",
           "games": "Jeux",
           "date": "Date",
           "time": "Heure",
@@ -516,7 +526,7 @@
         "addStationSuccess": "Station ajoutée avec succès"
       },
       "searchResult": {
-        "noStationsFound": "Aucune station(s) trouvée(s)",
+        "noStationsFound": "Aucune station trouvée",
         "noMatch": "Aucune station ne correspond à votre recherche.",
         "startByAdding": "Commencez par ajouter votre première station."
       },
@@ -554,7 +564,7 @@
           "openDialog": "Modifier",
           "saveChanges": "Enregistrer",
           "loading": "Chargement...",
-          "addConsole": "Ajouter des consoles",
+          "addConsole": "Ajouter des plateformes",
           "submit": "Modifier"
         },
         "titles": {
@@ -562,15 +572,15 @@
         },
         "fields": {
           "stationName": "Nom de la station",
-          "consoles": "Consoles",
+          "consoles": "Plateformes",
           "isActive": "Active"
         },
         "select": {
-          "placeholder": "Sélectionnez les consoles"
+          "placeholder": "Sélectionnez les plateformes"
         },
         "errors": {
           "missingFields": "Veuillez remplir tous les champs requis.",
-          "consoleFetch": "Erreur lors de la récupération des consoles."
+          "consoleFetch": "Erreur lors de la récupération des plateformes."
         },
         "alerts": {
           "updateSuccess": "Station mise à jour avec succès !",
@@ -598,8 +608,8 @@
         },
         "errors": {
           "missingFields": "Veuillez remplir tous les champs",
-          "invalidConsole": "Console invalide",
-          "consoleAlreadyAdded": "La console a déjà été ajoutée",
+          "invalidConsole": "Plateforme invalide",
+          "consoleAlreadyAdded": "La plateforme a déjà été ajoutée",
           "consoleFetch": "Erreur lors de la récupération des plateformes",
           "nameConflict": "Une station avec ce nom existe déjà"
         },
@@ -618,7 +628,7 @@
         "reservationDeleted": "Les réservations à venir seront également supprimées.",
         "CancelDelete": "Annuler la suppression",
         "deletingState": "Suppression...",
-        "confirmDelete": "Confirmer la suppresion",
+        "confirmDelete": "Confirmer la suppression",
         "alerts": {
           "deleteSuccess": "Station supprimée avec succès",
           "deleteError": "Erreur lors de la suppression"
@@ -705,7 +715,7 @@
     "content": "Ce site web utilise des cookies strictement nécessaires afin de vous offrir la meilleure expérience utilisateur possible. Les informations contenues dans les cookies sont stockées dans votre navigateur et remplissent des fonctions telles que vous reconnaître lorsque vous revenez sur notre site web. En continuant à utiliser ce site, vous acceptez leur utilisation, conformément à notre politique de confidentialité."
   },
   "docs": {
-    "title": "Biblothèque de documentation",
+    "title": "Bibliothèque de documentation",
     "subtitle": "Trouvez des guides et des ressources pour utiliser la plateforme LUDOV",
     "sidebar": {
       "goBackToLibrary": "Retour",

@@ -629,7 +629,7 @@ export default function ReservationsTable() {
                         {t("admin.reservations.table.header.user")}
                       </TableHead>
                       <TableHead>
-                        {t("admin.reservations.table.header.console")}
+                        Plateforme
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
                         {t("admin.reservations.table.header.date")}
