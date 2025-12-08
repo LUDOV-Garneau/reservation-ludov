@@ -47,7 +47,7 @@
       "loadingDelay": "This may take a few seconds",
       "retry": "Retry",
       "retryAttempt": "Attempt {count} failed",
-      "noConsoleAvailable": "No platoform available",
+      "noConsoleAvailable": "No platform available",
       "refresh": "Refresh",
       "searchPlaceholder": "Search for a platform...",
       "consoleCount": "{count, plural, one {# platform available} other {# platforms available}}",
