@@ -17,10 +17,10 @@ import {
   BookOpen,
   Loader2,
   AlertCircle,
-  ArrowRight,
-  ArrowLeft,
   CheckCircle2,
+  MoveLeft,
 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CourseSelection() {
   const t = useTranslations();
@@ -96,40 +96,49 @@ export default function CourseSelection() {
   const selectedCoursDetails = cours.find((c) => c.id === selectedCours);
 
   return (
-    <div className="bg-[white] rounded-3xl p-4 sm:p-6 lg:p-8">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 sm:mb-3 px-4">
+    <div className="max-w-7xl mx-auto">
+      <div className="bg-[white] rounded-2xl shadow-lg px-10 py-10">
+        <div className="mb-8">
+          <div
+            onClick={() => setCurrentStep(currentStep - 1)}
+            className="cursor-pointer flex flex-row items-center mb-8 w-fit"
+          >
+            <MoveLeft className="h-6 w-6 mr-2" />
+            <p>{t("reservation.layout.previousStep")}</p>
+          </div>
+          <h2 className="text-4xl font-bold mb-2">
             {t("reservation.course.selectionTitle")}
-          </h1>
-          <p className="text-base sm:text-lg text-gray-600 px-4">
+          </h2>
+          <p className="text-gray-600">
             {t("reservation.course.instruction")}
           </p>
         </div>
 
-        <div className="bg-[white] rounded-2xl sm:rounded-3xl shadow-xl p-6 sm:p-8 lg:p-10 border border-gray-100">
-          {error && (
-            <div className="mb-6 p-3 sm:p-4 bg-red-50 border-2 border-red-200 rounded-xl sm:rounded-2xl">
-              <div className="flex items-start gap-2 sm:gap-3">
-                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-xs sm:text-sm font-bold text-red-800 mb-1">
-                    {t("reservation.course.error")}
-                  </p>
-                  <p className="text-xs sm:text-sm text-red-700">{error}</p>
-                </div>
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-red-800">
+                  {t("reservation.course.error")}
+                </p>
+                <p className="text-sm text-red-700">{error}</p>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
-            <Label
-              htmlFor="cours"
-              className="text-base sm:text-lg font-semibold text-gray-900"
-            >
-              {t("reservation.course.courseLabel")}
-            </Label>
+        <div className="max-w-xl mx-auto mb-8">
+          <Label
+            htmlFor="cours"
+            className="text-base font-semibold text-gray-900 mb-2 block"
+          >
+            {t("reservation.course.courseLabel")}
+          </Label>
 
+          {loading ? (
+            <Skeleton className="w-full h-14 rounded-lg" />
+          ) : (
             <Select
               onValueChange={handleSelectedCours}
               disabled={loading || saving}
@@ -137,7 +146,7 @@ export default function CourseSelection() {
             >
               <SelectTrigger
                 id="cours"
-                className="w-full h-12 sm:h-14 lg:h-16 text-sm sm:text-base border-2 border-gray-200 hover:border-cyan-400 focus:border-cyan-500 rounded-lg sm:rounded-xl transition-all"
+                className="w-full h-14 text-base px-4 border-2 border-gray-200 bg-[white] text-left font-normal rounded-lg transition-all focus:ring-0 focus:ring-offset-0 show-svg"
               >
                 <SelectValue
                   placeholder={
@@ -147,19 +156,10 @@ export default function CourseSelection() {
                   }
                 />
               </SelectTrigger>
-              <SelectContent className="rounded-lg sm:rounded-xl border-2">
-                {loading ? (
-                  <SelectItem value="loading" disabled>
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-                      <span className="text-sm sm:text-base">
-                        {t("reservation.course.loading")}
-                      </span>
-                    </div>
-                  </SelectItem>
-                ) : cours.length === 0 ? (
+              <SelectContent className="max-h-[300px] rounded-lg border-2">
+                {cours.length === 0 ? (
                   <SelectItem value="empty" disabled>
-                    <span className="text-sm sm:text-base">
+                    <span className="text-base text-gray-500">
                       {t("reservation.course.noCourseAvailable")}
                     </span>
                   </SelectItem>
@@ -168,90 +168,70 @@ export default function CourseSelection() {
                     <SelectItem
                       key={c.id}
                       value={String(c.id)}
-                      className="text-sm sm:text-base py-2 sm:py-3 cursor-pointer hover:bg-cyan-50 overflow-auto"
+                      className="text-base py-3 cursor-pointer hover:bg-cyan-50 focus:bg-cyan-50"
                     >
                       <div className="flex flex-row items-center gap-2">
-                        <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-cyan-600 flex-shrink-0" />
+                        <BookOpen className="h-4 w-4 text-cyan-600 flex-shrink-0" />
                         <span className="font-semibold text-cyan-700">
                           {c.code_cours}
                         </span>
-                        <span className="text-gray-600 hidden sm:inline">
-                          -
-                        </span>
-                        <span className="text-gray-900 break-words">
-                          {c.nom_cours}
-                        </span>
+                        <span className="text-gray-400 font-light">|</span>
+                        <span className="text-gray-900">{c.nom_cours}</span>
                       </div>
                     </SelectItem>
                   ))
                 )}
               </SelectContent>
             </Select>
-          </div>
+          )}
 
           {selectedCoursDetails && (
-            <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-cyan-500 rounded-xl sm:rounded-2xl shadow-lg">
-              <div className="flex items-start gap-2 sm:gap-3">
-                <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 text-white flex-shrink-0 mt-0.5 sm:mt-1" />
+            <div className="mt-6 p-4 bg-cyan-50 border border-cyan-200 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
+              <div className="flex items-start gap-3">
+                <div className="bg-cyan-100 p-2 rounded-full">
+                  <BookOpen className="h-5 w-5 text-cyan-700" />
+                </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs sm:text-sm font-semibold text-white/90 mb-1">
+                  <p className="text-sm font-medium text-cyan-900 mb-1">
                     {t("reservation.course.selectedCourseLabel")}
                   </p>
-                  <p className="text-white text-lg sm:text-xl font-bold break-words">
-                    {selectedCoursDetails.code_cours}
-                  </p>
-                  <p className="text-white/90 text-sm sm:text-base lg:text-lg break-words">
-                    {selectedCoursDetails.nom_cours}
-                  </p>
+                  <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
+                    <p className="text-lg font-bold text-cyan-800">
+                      {selectedCoursDetails.code_cours}
+                    </p>
+                    <p className="text-cyan-700 text-base">
+                      {selectedCoursDetails.nom_cours}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           )}
-
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => setCurrentStep(currentStep - 1)}
-              disabled={saving}
-              className="w-full sm:flex-1 h-12 sm:h-14 text-sm sm:text-base font-semibold rounded-lg sm:rounded-xl border-2 hover:bg-gray-50"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-              {t("reservation.course.return")}
-            </Button>
-            <Button
-              size="lg"
-              onClick={handleSave}
-              disabled={!selectedCours || loading || saving}
-              className="w-full sm:flex-1 h-12 sm:h-14 text-sm sm:text-base font-bold rounded-lg sm:rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                  <span className="truncate">
-                    {t("reservation.course.saveLoading")}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <span className="truncate">
-                    {t("reservation.course.continue")}
-                  </span>
-                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
-                </>
-              )}
-            </Button>
-          </div>
         </div>
 
-        {!loading && cours.length > 0 && (
-          <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm text-gray-500">
-            {t("reservation.course.coursesAvailable", {
-              count: cours.length,
-              plural: cours.length > 1 ? "s" : "",
-            })}
-          </div>
-        )}
+        <div className="flex flex-col md:flex-row justify-end gap-3 pt-6">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentStep(currentStep - 1)}
+            disabled={saving}
+          >
+            {t("reservation.course.return")}
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={!selectedCours || loading || saving}
+            className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 shadow-md transition-all hover:shadow-lg"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <span>{t("reservation.course.saveLoading")}</span>
+              </>
+            ) : (
+              t("reservation.course.continue")
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );
