@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useReservation } from "@/context/ReservationContext";
 import GameSelectionGrid from "@/components/reservation/components/GamesSelectionGrid";
-import { AlertCircle, Loader2, Gamepad2, MoveLeft } from "lucide-react";
+import { AlertCircle, Loader2, Gamepad2, MoveLeft, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -86,6 +86,13 @@ export default function GamesSelection() {
     const newSelection = selectedGameObjects.filter((g) => g.id !== gameId);
     setSelectedGameObjects(newSelection);
     setSelectedGames(newSelection.map((g) => String(g.id)));
+    clearError();
+    setLocalError(null);
+  };
+
+  const clearAllGames = () => {
+    setSelectedGameObjects([]);
+    setSelectedGames([]);
     clearError();
     setLocalError(null);
   };
@@ -238,25 +245,25 @@ export default function GamesSelection() {
                     </div>
                     <button
                       onClick={() => clearGame(game.id)}
-                      className="2xl:opacity-0 2xl:group-hover:opacity-100 2xl:transition-opacity text-red-500 hover:text-red-700 p-1.5 hover:bg-red-50 rounded"
+                      className="2xl:opacity-0 2xl:group-hover:opacity-100 transition-all
+                      h-8 w-8 flex items-center justify-center rounded-lg border
+                      bg-white border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50"
                       aria-label={`Retirer ${game.titre}`}
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 ))}
+
+                {selectedGameObjects.length > 0 && (
+                  <button
+                    onClick={clearAllGames}
+                    className="w-full text-sm text-gray-500 hover:text-red-500 py-2 transition-colors flex items-center justify-center rounded-lg border border-gray-200 hover:border-red-300 bg-gray-50 hover:bg-red-50"
+                  >
+                    <Trash2 className="inline-block h-4 w-4 mr-1" />
+                    {t("reservation.games.buttonClearAll")}
+                  </button>
+                )}
               </div>
             )}
           </div>
