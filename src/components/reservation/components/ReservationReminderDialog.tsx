@@ -25,22 +25,21 @@ interface ReservationReminderDialogProps {
   onError?: (error: Error) => void;
 }
 
-const REMINDER_OPTIONS = [
-  { value: "1", label: "1 heure avant", hours: 1 },
-  { value: "3", label: "3 heures avant", hours: 3 },
-  { value: "6", label: "6 heures avant", hours: 6 },
-  { value: "12", label: "12 heures avant", hours: 12 },
-  { value: "24", label: "1 jour avant", hours: 24 },
-  { value: "48", label: "2 jours avant", hours: 48 },
-  { value: "72", label: "3 jours avant", hours: 72 },
-];
-
 export default function ReservationReminderDialog({
   reservationId,
   onSendReminder,
   onError,
 }: ReservationReminderDialogProps) {
   const t = useTranslations();
+  const REMINDER_OPTIONS = [
+  { value: "1", label: t("reservation.reminder.times.1hour"), hours: 1 },
+  { value: "3", label: t("reservation.reminder.times.3hours"), hours: 3 },
+  { value: "6", label: t("reservation.reminder.times.6hours"), hours: 6 },
+  { value: "12", label: t("reservation.reminder.times.12hours"), hours: 12 },
+  { value: "24", label: t("reservation.reminder.times.1day"), hours: 24 },
+  { value: "48", label: t("reservation.reminder.times.2days"), hours: 48 },
+  { value: "72", label: t("reservation.reminder.times.3days"), hours: 72 },
+];
 
   const [open, setOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
