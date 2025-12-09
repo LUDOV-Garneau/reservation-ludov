@@ -67,7 +67,7 @@ export default function AccueilReservationsClient() {
 
   return (
     <div className="min-h-screen p-3">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto mt-6">
         <AccueilReservationSection
           title={t("reservation.accueil.upcomingReservations")}
           reservations={upcomingReservations}
