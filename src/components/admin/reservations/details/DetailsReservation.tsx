@@ -21,7 +21,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import DeleteReservationAction from "../DeleteReservationAction";
+import DeleteReservationAction from "../DeleteReservationAction/DeleteReservationAction";
 
 interface Game {
   nom: string;

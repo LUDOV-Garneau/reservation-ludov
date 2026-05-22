@@ -26,7 +26,7 @@ import {
   Menu,
   Eye,
 } from "lucide-react";
-import DeleteReservationAction from "../DeleteReservationAction";
+import DeleteReservationAction from "../DeleteReservationAction/DeleteReservationAction";
 import type { Reservation } from "./hooks/useReservations";
 import type { AlertType } from "./hooks/useAlert";
 
@@ -168,39 +168,41 @@ export default function ReservationTableRow({
             </Tooltip>
           </TooltipProvider>
 
-          <DeleteReservationAction
-            targetReservation={cancelTarget}
-            onAlert={onAlert}
-            onSuccess={onSuccess}
-          >
-            {({ open, loading }) => (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={open}
-                      disabled={loading || reservation.archived}
-                      className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
-                      aria-label={t(
-                        "admin.reservations.table.ActionToolTips.deleteReservation",
-                      )}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>
-                      {t(
-                        "admin.reservations.table.ActionToolTips.deleteReservation",
-                      )}
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </DeleteReservationAction>
+          {!reservation.archived && (
+            <DeleteReservationAction
+              targetReservation={cancelTarget}
+              onAlert={onAlert}
+              onSuccess={onSuccess}
+            >
+              {({ open, loading }) => (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={open}
+                        disabled={loading || reservation.archived}
+                        className="hover:bg-red-50 hover:text-red-600 hover:border-red-300 transition-colors h-8 w-8 p-0"
+                        aria-label={t(
+                          "admin.reservations.table.ActionToolTips.deleteReservation",
+                        )}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        {t(
+                          "admin.reservations.table.ActionToolTips.deleteReservation",
+                        )}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+            </DeleteReservationAction>
+          )}
         </div>
 
         {/* Mobile */}
@@ -216,30 +218,31 @@ export default function ReservationTableRow({
                 <Eye className="h-4 w-4 mr-2 text-cyan-600" />
                 {t("admin.reservations.table.ActionToolTips.viewDetails")}
               </DropdownMenuItem>
-
-              <DeleteReservationAction
-                targetReservation={cancelTarget}
-                onAlert={onAlert}
-                onSuccess={onSuccess}
-              >
-                {({ open }) => (
-                  <DropdownMenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      open();
-                    }}
-                    onSelect={(e) => e.preventDefault()}
-                    className="text-red-600 focus:text-red-600 focus:bg-red-50"
-                    disabled={reservation.archived}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2 text-red-600" />
-                    {t(
-                      "admin.reservations.table.ActionToolTips.deleteReservation",
-                    )}
-                  </DropdownMenuItem>
-                )}
-              </DeleteReservationAction>
+              {!reservation.archived && (
+                <DeleteReservationAction
+                  targetReservation={cancelTarget}
+                  onAlert={onAlert}
+                  onSuccess={onSuccess}
+                >
+                  {({ open }) => (
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        open();
+                      }}
+                      onSelect={(e) => e.preventDefault()}
+                      className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                      disabled={reservation.archived}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2 text-red-600" />
+                      {t(
+                        "admin.reservations.table.ActionToolTips.deleteReservation",
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                </DeleteReservationAction>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

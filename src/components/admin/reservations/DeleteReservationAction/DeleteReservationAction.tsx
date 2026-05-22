@@ -1,13 +1,15 @@
 "use client";
 
-import { ReactNode, useState, useCallback } from "react";
+import { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
   Calendar,
@@ -19,16 +21,14 @@ import {
   CircleQuestionMark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-type AlertType = "success" | "destructive" | "info" | "warning";
+import {
+  useDeleteReservationAction,
+  type AlertType,
+  type TargetReservation,
+} from "./hooks/useDeleteReservationAction";
 
 interface DeleteReservationActionProps {
-  targetReservation: {
-    id: string;
-    userEmail: string | null;
-    date: string;
-    heure: string;
-  };
+  targetReservation: TargetReservation;
   onAlert: (type: AlertType, message: string, title?: string) => void;
   onSuccess: () => void;
   children: (props: { open: () => void; loading: boolean }) => ReactNode;
@@ -40,77 +40,24 @@ export default function DeleteReservationAction({
   onSuccess,
   children,
 }: DeleteReservationActionProps) {
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const handleOpen = useCallback(() => {
-    setOpen(true);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    if (!loading) {
-      setOpen(false);
-    }
-  }, [loading]);
-
-  const handleConfirm = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      if (loading) return;
-
-      try {
-        setLoading(true);
-
-        const res = await fetch(
-          `/api/admin/cancel-reservation?id=${encodeURIComponent(
-            targetReservation.id,
-          )}`,
-          {
-            method: "DELETE",
-            credentials: "include",
-          },
-        );
-
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          const message =
-            (data && (data as { error?: string }).error) ||
-            "Erreur lors de la suppression de la réservation";
-
-          throw new Error(message);
-        }
-
-        onAlert(
-          "success",
-          "La réservation a été supprimée avec succès",
-          "Réservation supprimée",
-        );
-        onSuccess();
-        setOpen(false);
-      } catch (error) {
-        console.error("Error deleting reservation:", error);
-        onAlert(
-          "destructive",
-          error instanceof Error
-            ? error.message
-            : "Erreur lors de la suppression de la réservation",
-          "Erreur",
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    [targetReservation.id, onAlert, onSuccess, loading],
-  );
-
-  const emailOrPlaceholder =
-    targetReservation.userEmail || "Utilisateur inconnu";
+  const {
+    open,
+    loading,
+    reason,
+    reasonError,
+    emailOrPlaceholder,
+    handleOpen,
+    handleClose,
+    handleOpenChange,
+    handleReasonChange,
+    handleConfirm,
+  } = useDeleteReservationAction({ targetReservation, onAlert, onSuccess });
 
   return (
     <>
       {children({ open: handleOpen, loading })}
 
-      <Dialog open={open} onOpenChange={(v) => !loading && setOpen(v)}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] p-0 overflow-hidden">
           <div className="border-b px-6 py-4 bg-red-50">
             <div className="flex-1 pt-0.5">
@@ -143,12 +90,12 @@ export default function DeleteReservationAction({
 
             <Separator />
 
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                <CircleQuestionMark className="h-4 w-4 text-red-600" />
+            <div className="rounded-lg border border-gray-200 p-4 space-y-3">
+              <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                <CircleQuestionMark className="h-4 w-4 text-red-600 shrink-0" />
                 Que va-t-il se passer ?
               </h4>
-              <ul className="space-y-2.5 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-700">
                 <li className="flex items-start gap-2.5">
                   <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
                   <span>
@@ -172,7 +119,38 @@ export default function DeleteReservationAction({
               </ul>
             </div>
 
-            {/* Actions */}
+            <Separator />
+
+            <div className="space-y-2">
+              <Label
+                htmlFor="cancellation-reason"
+                className="text-sm font-medium text-gray-900"
+              >
+                Raison d&apos;annulation{" "}
+                <span className="text-red-600" aria-hidden>
+                  *
+                </span>
+              </Label>
+              <Textarea
+                id="cancellation-reason"
+                placeholder="Décrivez la raison de l'annulation..."
+                value={reason}
+                onChange={(e) => handleReasonChange(e.target.value)}
+                disabled={loading}
+                aria-invalid={reasonError}
+                className={cn(
+                  "resize-none min-h-[80px]",
+                  reasonError &&
+                    "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/20",
+                )}
+              />
+              {reasonError && (
+                <p className="text-xs text-red-600">
+                  Ce champ est obligatoire.
+                </p>
+              )}
+            </div>
+
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">
               <Button
                 type="button"
