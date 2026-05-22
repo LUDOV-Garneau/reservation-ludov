@@ -121,7 +121,7 @@ function useReservation(id: string) {
     const fetchReservation = async () => {
       try {
         const response = await fetch(
-          `/api/admin/details-reservation?id=${encodeURIComponent(id)}`
+          `/api/admin/details-reservation?id=${encodeURIComponent(id)}`,
         );
 
         if (!response.ok) {
@@ -169,7 +169,10 @@ export default function DetailsReservationClient({ id }: { id: string }) {
       lastname={reservation.lastname}
       email={reservation.email}
       jeux={reservation.jeux}
-      console={{ ...reservation.console, picture: reservation.console.picture ?? "" }}
+      console={{
+        ...reservation.console,
+        picture: reservation.console.picture ?? "",
+      }}
       archived={reservation.archived}
       accessoires={reservation.accessoires ?? []}
       station={reservation.station}

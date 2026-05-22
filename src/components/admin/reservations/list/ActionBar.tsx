@@ -21,7 +21,7 @@ interface ActionBarProps {
   onAlert: (
     type: "success" | "destructive" | "info" | "warning",
     message: string,
-    title?: string
+    title?: string,
   ) => void;
   isRefreshing: boolean;
 }

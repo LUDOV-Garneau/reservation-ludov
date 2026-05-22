@@ -49,6 +49,7 @@ import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 import DeleteStationAction from "./DialogConfirmationDeleteCours";
 import UpdateCoursForm from "./UpdateCoursForm";
 
@@ -74,43 +75,6 @@ type ConfirmDialogState = {
 } | null;
 
 const ITEMS_PER_PAGE = 10;
-
-function usePagination(
-  totalItems: number,
-  itemsPerPage: number = ITEMS_PER_PAGE
-) {
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-
-  const goToNextPage = useCallback(() => {
-    setPage((prev) => Math.min(prev + 1, totalPages));
-  }, [totalPages]);
-
-  const goToPrevPage = useCallback(() => {
-    setPage((prev) => Math.max(prev - 1, 1));
-  }, []);
-
-  const goToPage = useCallback(
-    (pageNum: number) => {
-      setPage(Math.max(1, Math.min(pageNum, totalPages)));
-    },
-    [totalPages]
-  );
-
-  const resetPage = useCallback(() => setPage(1), []);
-
-  return {
-    page,
-    totalPages,
-    itemsPerPage,
-    goToNextPage,
-    goToPrevPage,
-    goToPage,
-    resetPage,
-    isFirstPage: page === 1,
-    isLastPage: page === totalPages,
-  };
-}
 
 function CoursTableRow({
   cours,

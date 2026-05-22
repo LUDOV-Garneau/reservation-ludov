@@ -48,7 +48,7 @@ export async function DELETE(req: NextRequest) {
     ]);
 
     return NextResponse.json(
-      { message: "Reservation supprimée avec succès." },
+      { message: "Réservation annulée avec succès." },
       { status: 200 }
     );
   } catch (error) {

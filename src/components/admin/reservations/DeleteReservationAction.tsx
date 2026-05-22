@@ -62,13 +62,13 @@ export default function DeleteReservationAction({
         setLoading(true);
 
         const res = await fetch(
-          `/api/admin/delete-reservation?id=${encodeURIComponent(
-            targetReservation.id
+          `/api/admin/cancel-reservation?id=${encodeURIComponent(
+            targetReservation.id,
           )}`,
           {
             method: "DELETE",
             credentials: "include",
-          }
+          },
         );
 
         if (!res.ok) {
@@ -83,7 +83,7 @@ export default function DeleteReservationAction({
         onAlert(
           "success",
           "La réservation a été supprimée avec succès",
-          "Réservation supprimée"
+          "Réservation supprimée",
         );
         onSuccess();
         setOpen(false);
@@ -94,13 +94,13 @@ export default function DeleteReservationAction({
           error instanceof Error
             ? error.message
             : "Erreur lors de la suppression de la réservation",
-          "Erreur"
+          "Erreur",
         );
       } finally {
         setLoading(false);
       }
     },
-    [targetReservation.id, onAlert, onSuccess, loading]
+    [targetReservation.id, onAlert, onSuccess, loading],
   );
 
   const emailOrPlaceholder =
@@ -188,7 +188,7 @@ export default function DeleteReservationAction({
                 className={cn(
                   "w-full sm:w-auto",
                   "bg-red-600 hover:bg-red-700",
-                  "text-white shadow-md hover:shadow-lg transition-all"
+                  "text-white shadow-md hover:shadow-lg transition-all",
                 )}
                 disabled={loading}
               >

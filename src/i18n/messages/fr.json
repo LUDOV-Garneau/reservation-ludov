@@ -468,7 +468,7 @@
           "status": "Statut"
         },
         "ActionToolTips": {
-          "deleteReservation": "Supprimer la réservation",
+          "deleteReservation": "Annuler la réservation",
           "viewDetails": "Voir les détails"
         },
         "alert": {
@@ -501,7 +501,7 @@
         "cancelled": "Annulée"
       },
       "deleteDialog": {
-        "title": "Supprimer la réservation",
+        "title": "Annuler la réservation",
         "description": "Cette action est définitive. La réservation sera supprimée.",
         "confirm": "Supprimer",
         "cancel": "Annuler",
