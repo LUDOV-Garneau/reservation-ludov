@@ -1,93 +1,51 @@
 import { NextResponse, NextRequest } from "next/server";
-import pool from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
-import { RowDataPacket } from "mysql2/promise";
+import db from "@/db";
+import { stations, reservation } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {
   try {
     const token = req.cookies.get("SESSION")?.value;
-    if (!token) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    if (!token) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     const user = verifyToken(token);
-    if (!user?.id) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-    if (!user.isAdmin) {
-      return NextResponse.json(
-        { success: false, message: "Forbidden" },
-        { status: 403 }
-      );
-    }
-    const conn = await pool.getConnection();
+    if (!user?.id) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    if (!user.isAdmin) return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
 
-    // Fetch count stations active
-    const [activeStationsRows] = await conn.query(
-      `
-        SELECT COUNT(*) AS activeCount
-        FROM stations
-        WHERE isActive = 1
-      `
-    );
-    const activeStationsCount = (activeStationsRows as RowDataPacket[]).length > 0
-      ? (activeStationsRows as RowDataPacket[])[0].activeCount
-      : null;
+    const [activeRow] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(stations)
+      .where(eq(stations.isActive, 1));
 
-    // Fetch station créée récemment
-    const [inactiveStationsRows] = await conn.query(
-      `
-        SELECT COUNT(*) AS inactiveCount
-        FROM stations
-        WHERE isActive = 0
-      `
-    );
+    const [inactiveRow] = await db
+      .select({ count: sql<number>`COUNT(*)` })
+      .from(stations)
+      .where(eq(stations.isActive, 0));
 
-    const inactiveStationsCount =
-      (inactiveStationsRows as RowDataPacket[]).length > 0
-        ? (inactiveStationsRows as RowDataPacket[])[0].inactiveCount
-        : null;
+    const [mostUsed] = await db
+      .select({
+        name: stations.name,
+        reservationsCount: sql<number>`COUNT(${reservation.id})`,
+      })
+      .from(stations)
+      .leftJoin(
+        reservation,
+        sql`${reservation.station} = ${stations.id} AND (${reservation.archived} IS NULL OR ${reservation.archived} = 0)`
+      )
+      .groupBy(stations.id, stations.name)
+      .orderBy(sql`COUNT(${reservation.id}) DESC`)
+      .limit(1);
 
-    // Fetch station avec le plus de reservation
-    const [mostUsedStation] = await conn.query(
-      `
-        SELECT s.id, s.name, COUNT(r.id) AS reservationsCount
-        FROM stations s
-        LEFT JOIN reservation r ON r.station = s.id AND (r.archived IS NULL OR r.archived = 0)
-        GROUP BY s.id, s.name
-        ORDER BY reservationsCount DESC
-        LIMIT 1
-      `
-    );
-
-    conn.release();
-
-    const mostUsedName =
-      (mostUsedStation as RowDataPacket[]).length > 0
-        ? (mostUsedStation as RowDataPacket[])[0].name
-        : null;
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: {
-          totalActiveStations: activeStationsCount,
-          totalInactiveStations: inactiveStationsCount,
-          mostUsedStationName: mostUsedName,
-        },
+    return NextResponse.json({
+      success: true,
+      data: {
+        totalActiveStations: activeRow?.count ?? null,
+        totalInactiveStations: inactiveRow?.count ?? null,
+        mostUsedStationName: mostUsed?.name ?? null,
       },
-      { status: 200 }
-    );
+    }, { status: 200 });
   } catch (error) {
     console.error("Internal Server Error:", error);
-    return NextResponse.json(
-      { success: false, message: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
 }

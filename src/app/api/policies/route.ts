@@ -1,90 +1,45 @@
-import pool from "@/lib/db";
+import db from "@/db";
 import { verifyToken } from "@/lib/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { policies } from "@/db/schema";
 
 export async function GET() {
   try {
-    const conn = await pool.getConnection();
-    try {
-      const [policies] = await conn.query(
-        `SELECT * FROM policies`
-      );
-
-      conn.release();
-
-      if (Array.isArray(policies) && policies.length > 0) {
-        return NextResponse.json({ policies: policies[0] });
-      } else {
-        return NextResponse.json({ policies: null });
-      }
-    } catch (error) {
-      conn.release();
-      console.error("Error querying policies:", error);
-      return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
-    }
+    const row = await db.query.policies.findFirst();
+    return NextResponse.json({ policies: row ?? null });
   } catch (error) {
-    console.error("Error handling policies POST request:", error);
+    console.error("Error querying policies:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   const token = req.cookies.get("SESSION")?.value;
-  if (!token) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
+  if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   const user = verifyToken(token);
-  if (!user?.id) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
-  if (!user.isAdmin) {
-    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-  }
+  if (!user?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  if (!user.isAdmin) return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 
   try {
     const body = await req.json();
-    const { policies } = body;
+    const { policies: policiesText } = body;
 
-    if (!policies || policies.trim() === "") {
+    if (!policiesText || policiesText.trim() === "") {
       return NextResponse.json({ error: "Le champ politiques est requis." }, { status: 400 });
     }
 
-    const now = new Date();
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    const existing = await db.query.policies.findFirst({ columns: { id: true } });
 
-    const conn = await pool.getConnection();
-
-    try {
-      const [existingPolicies] = await conn.query(
-        `SELECT policies FROM policies LIMIT 1`
-      );
-
-      if (Array.isArray(existingPolicies) && existingPolicies.length > 0) {
-        await conn.query(
-
-          `
-                UPDATE policies
-                SET policies = ?, lastUpdatedAt = ?
-                `,
-          [policies, now]
-        );
-      } else {
-        await conn.query(
-          `
-                INSERT INTO policies (policies, lastUpdatedAt)
-                VALUES (?, ?)
-                `,
-          [policies, now]
-        );
-      }
-      conn.release();
-      return NextResponse.json({ success: true, message: "Politiques sauvegardées avec succès." });
-    } catch (error) {
-      conn.release();
-      console.error("Error saving policies:", error);
-      return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    if (existing) {
+      await db.update(policies).set({ policies: policiesText, lastUpdatedAt: now });
+    } else {
+      await db.insert(policies).values({ policies: policiesText, lastUpdatedAt: now });
     }
+
+    return NextResponse.json({ success: true, message: "Politiques sauvegardées avec succès." });
   } catch (error) {
-    console.error("Error handling policies POST request:", error);
+    console.error("Error saving policies:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
 }

@@ -1,59 +1,32 @@
-import pool from "@/lib/db";
+import db from "@/db";
 import { verifyToken } from "@/lib/jwt";
-import { RowDataPacket } from "mysql2";
 import { NextRequest, NextResponse } from "next/server";
+import { sql, isNull } from "drizzle-orm";
+import { users, reservation } from "@/db/schema";
 
 export async function GET(req: NextRequest) {
-    try {
-        const token = req.cookies.get("SESSION")?.value;
-        if (!token) {
-            return new Response(
-                JSON.stringify({ success: false, message: "Unauthorized" }),
-                { status: 401 }
-            );
-        }
+  try {
+    const token = req.cookies.get("SESSION")?.value;
+    if (!token) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    const user = verifyToken(token);
+    if (!user?.isAdmin) return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
+    if (!user?.id) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
-        const user = verifyToken(token);
-        if (!user?.isAdmin) {
-            return new Response(
-                JSON.stringify({ success: false, message: "Forbidden" }),
-                { status: 403 }
-            );
-        }
+    const [{ total }] = await db.select({ total: sql<number>`COUNT(*)` }).from(users);
+    const [{ totalNotBoarded }] = await db.select({ totalNotBoarded: sql<number>`COUNT(*)` }).from(users).where(isNull(users.password));
+    const [{ totalWithReservation }] = await db
+      .select({ totalWithReservation: sql<number>`COUNT(DISTINCT ${users.id})` })
+      .from(users)
+      .innerJoin(reservation, sql`${users.id} = ${reservation.userId}`);
 
-        if (!user?.id) {
-            return new Response(
-                JSON.stringify({ success: false, message: "Unauthorized" }),
-                { status: 401 }
-            );
-        }
-
-        const [totalUser] = await pool.query<RowDataPacket[]>(
-            `SELECT COUNT(*) AS total FROM users`
-        );
-
-        const [totalUserNotBoarded] = await pool.query<RowDataPacket[]>(
-            `SELECT COUNT(*) AS totalNotBoarded FROM users WHERE password IS NULL`
-        );
-
-        const [totalUserWithReservation] = await pool.query<RowDataPacket[]>(
-            `SELECT COUNT(DISTINCT u.id) AS totalWithReservation
-             FROM users u
-             JOIN reservation r ON u.id = r.user_id`
-        );
-
-        return NextResponse.json(
-        {
-            success: true,
-            totalUser: totalUser[0].total,
-            totalUserNotBoarded: totalUserNotBoarded[0].totalNotBoarded,
-            totalUserWithReservation: totalUserWithReservation[0].totalWithReservation,
-        });
-    } catch (error) {
-        console.error("Error fetching user stats:", error);
-        return NextResponse.json(
-            { success: false, message: "Internal Server Error" },
-            { status: 500 }
-        );
-    }
+    return NextResponse.json({
+      success: true,
+      totalUser: total,
+      totalUserNotBoarded: totalNotBoarded,
+      totalUserWithReservation: totalWithReservation,
+    });
+  } catch (error) {
+    console.error("Error fetching user stats:", error);
+    return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
+  }
 }

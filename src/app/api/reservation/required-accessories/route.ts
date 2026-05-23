@@ -1,12 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
-import { RowDataPacket } from "mysql2";
-
-type GameRow = RowDataPacket & {
-  required_accessories: number[];
-};
+import db from "@/db";
+import { accessoires, games } from "@/db/schema";
+import { inArray } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,52 +14,34 @@ export async function GET(request: NextRequest) {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
     } catch {
-      return NextResponse.json(
-        { success: false, message: "Invalid or expired token" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
     }
-    if (!user?.id) {
-      return NextResponse.json(
-        { success: false, message: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    if (!user?.id) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
 
     const { searchParams } = new URL(request.url);
-    const gameIds = searchParams.getAll("gameIds");
+    const gameIds = searchParams.getAll("gameIds").map(Number).filter((id) => !isNaN(id));
 
-    const [rows] = await pool.query<GameRow[]>(
-      `SELECT required_accessories FROM games WHERE id IN (?)`,
-      [gameIds]
-    );
+    if (gameIds.length === 0) return NextResponse.json({ required_accessories: [] });
+
+    const rows = await db.select({ requiredAccessories: games.requiredAccessories })
+      .from(games)
+      .where(inArray(games.id, gameIds));
 
     const kohaIds: number[] = [];
     rows.forEach((row) => {
-      if (row.required_accessories?.length > 0) {
-        kohaIds.push(row.required_accessories[0]);
-      }
+      const required = row.requiredAccessories as number[] | null;
+      if (required && required.length > 0) kohaIds.push(required[0]);
     });
 
-    if (kohaIds.length === 0) {
-      return NextResponse.json({ required_accessories: [] });
-    }
+    if (kohaIds.length === 0) return NextResponse.json({ required_accessories: [] });
 
-    const [mapped] = await pool.query<RowDataPacket[]>(
-      `SELECT id FROM accessoires WHERE koha_id IN (?)`,
-      [kohaIds]
-    );
+    const mapped = await db.select({ id: accessoires.id })
+      .from(accessoires)
+      .where(inArray(accessoires.kohaId, kohaIds));
 
-    const accessoryIds = mapped.map((row) => row.id);
-
-    return NextResponse.json({
-      required_accessories: accessoryIds,
-    });
+    return NextResponse.json({ required_accessories: mapped.map((r) => r.id) });
   } catch (error) {
     console.error("Error processing request:", error);
-    return NextResponse.json(
-      { message: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
   }
 }
