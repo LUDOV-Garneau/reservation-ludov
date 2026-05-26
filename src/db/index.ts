@@ -2,6 +2,7 @@ import "dotenv/config";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import * as schema from "./schema";
+import * as relations from "./relations";
 
 const pool = mysql.createPool({
   host: process.env.DATABASE_HOST!,
@@ -13,6 +14,6 @@ const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
-const db = drizzle(pool, { schema, mode: "default" });
+const db = drizzle(pool, { schema: { ...schema, ...relations }, mode: "default" });
 
 export default db;

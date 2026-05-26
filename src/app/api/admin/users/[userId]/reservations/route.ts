@@ -38,7 +38,7 @@ export async function GET(
       .select({
         id: reservation.id,
         date: sql<string>`DATE(${reservation.date})`,
-        time: reservation.time,
+        time: sql<string>`TIME_FORMAT(${reservation.time}, '%H:%i')`,
         consoleName: consoleType.name,
         game1Title: g1.titre,
         game2Title: g2.titre,
@@ -61,7 +61,7 @@ export async function GET(
         games: gamesArr,
         console: row.consoleName,
         date: dateStr,
-        heure: row.time.slice(0, 5),
+        heure: row.time ?? "",
         archived: row.archived === 1,
       };
     });

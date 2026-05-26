@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock } from "lucide-react";
 
 type Reservation = {
-  id: number;
+  id: string;
   station: number;
   date: string;
   heure: string;
@@ -159,7 +159,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
 
   return (
     <DetailsReservation
-      reservationId={reservation.id.toString()}
+      reservationId={reservation.id ?? id}
       jeux={reservation.jeux}
       console={{ ...reservation.console, picture: reservation.console.picture ?? "" }}
       archived={reservation.archived}

@@ -22,8 +22,8 @@ export async function GET(req: NextRequest) {
         id: reservation.id,
         consoleId: reservation.consoleId,
         consoleName: consoleStock.name,
-        date: reservation.date,
-        time: reservation.time,
+        date: sql<string>`DATE_FORMAT(${reservation.date}, '%Y-%m-%d')`,
+        time: sql<string>`TIME_FORMAT(${reservation.time}, '%H:%i')`,
         userId: reservation.userId,
         archived: reservation.archived,
         prenom: users.firstname,
@@ -37,13 +37,11 @@ export async function GET(req: NextRequest) {
       .offset(offset);
 
     const reservations = rows.map((row) => {
-      const formattedDate = String(row.date).split("T")[0];
-      const formattedTime = typeof row.time === "string" ? row.time.slice(0, 5) : "";
       return {
         id: String(row.id),
         console: row.consoleName ?? "",
-        date: formattedDate,
-        heure: formattedTime,
+        date: row.date ?? "",
+        heure: row.time ?? "",
         userNom: `${row.prenom} ${row.nom}`,
         archived: Boolean(row.archived),
       };

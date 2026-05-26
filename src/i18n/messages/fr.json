@@ -222,6 +222,7 @@
       "selectedAccessory": "Accessoires sélectionnés",
       "stationAssigned": "Station assignée",
       "titleSection": "Détails de la réservation",
+      "noGames": "Aucun jeu sélectionné",
       "noAccessory": "Aucun accessoire sélectionné",
       "cancelWarningTitle": "Action irréversible",
       "cancelWarning": "Cette action ne peut pas être annulée. Vous devrez créer une nouvelle réservation si vous changez d'avis.",
@@ -502,18 +503,18 @@
       },
       "deleteDialog": {
         "title": "Annuler la réservation",
-        "description": "Cette action est définitive. La réservation sera supprimée.",
-        "confirm": "Supprimer",
-        "cancel": "Annuler",
-        "deleting": "Suppression..."
+        "description": "Cette action est définitive. La réservation sera annulée et ne pourra pas être récupérée.",
+        "confirm": "Confirmer l'annulation",
+        "cancel": "Retour",
+        "deleting": "Annulation..."
       },
       "alert": {
         "deleteSuccess": {
-          "title": "Réservation supprimée",
-          "message": "La réservation a été supprimée avec succès."
+          "title": "Réservation annulée",
+          "message": "La réservation a été annulée avec succès."
         },
         "errorTitle": "Une erreur s'est produite",
-        "deleteError": "Une erreur s'est produite lors de la suppression de la réservation. Veuillez réessayer plus tard."
+        "deleteError": "Une erreur s'est produite lors de l'annulation de la réservation. Veuillez réessayer plus tard."
       }
     },
     "stations": {
