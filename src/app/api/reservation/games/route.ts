@@ -28,25 +28,27 @@ export async function GET(req: Request) {
       const searchPattern = `%${search}%`;
       const exactPattern = `${search}%`;
 
-      const rawRows = await db.execute<{ id: number; titre: string; author: string | null; picture: string | null; platform: string | null; biblio_id: number }>(
-        sql`SELECT DISTINCT id, titre, author, picture, platform, biblio_id
-            FROM games
-            WHERE LOWER(titre) LIKE LOWER(${searchPattern})
-              AND console_type_id = ${consoleId}
-              AND holding = 0
-            ORDER BY
-              CASE
-                WHEN LOWER(titre) LIKE LOWER(${exactPattern}) THEN 1
-                WHEN LOWER(titre) LIKE LOWER(${searchPattern}) THEN 2
-                ELSE 3
-              END,
-              titre ASC
-            LIMIT ${limit} OFFSET ${offset}`
-      );
-      gamesRows = (rawRows as { id: number; titre: string; author: string | null; picture: string | null; platform: string | null; biblio_id: number }[]).map((r) => ({
-        ...r,
-        biblioId: r.biblio_id,
-      }));
+      gamesRows = await db
+        .selectDistinct({
+          id: games.id,
+          titre: games.titre,
+          author: games.author,
+          picture: games.picture,
+          platform: games.platform,
+          biblioId: games.biblioId,
+        })
+        .from(games)
+        .where(and(
+          sql`LOWER(${games.titre}) LIKE LOWER(${searchPattern})`,
+          eq(games.consoleTypeId, consoleId),
+          eq(games.holding, 0),
+        ))
+        .orderBy(
+          sql`CASE WHEN LOWER(${games.titre}) LIKE LOWER(${exactPattern}) THEN 1 WHEN LOWER(${games.titre}) LIKE LOWER(${searchPattern}) THEN 2 ELSE 3 END`,
+          asc(games.titre),
+        )
+        .limit(limit)
+        .offset(offset);
 
       const [countRow] = await db
         .select({ total: sql<number>`COUNT(*)` })
