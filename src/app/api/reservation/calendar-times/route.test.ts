@@ -45,9 +45,9 @@ describe("API /reservation/calendar-times route", () => {
       isAdmin: false,
     });
 
-    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue({
-      consoleTypeId: 1,
-    } as any);
+    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue(
+      ({ consoleTypeId: 1 } as unknown) as Awaited<ReturnType<typeof db.query.reservationHold.findFirst>>
+    );
 
     vi.mocked(db.select)
       .mockReturnValueOnce(chain([]) as ReturnType<typeof db.select>)   // reservations
@@ -59,7 +59,7 @@ describe("API /reservation/calendar-times route", () => {
       .mockReturnValueOnce(chain([]) as ReturnType<typeof db.select>);  // userReservations
 
     vi.mocked(db.execute).mockResolvedValue(
-      [{ station_id: 1 }, { station_id: 2 }] as any
+      ([{ station_id: 1 }, { station_id: 2 }] as unknown) as Awaited<ReturnType<typeof db.execute>>
     );
 
     const mockRequest = new NextRequest(
@@ -168,9 +168,9 @@ describe("API /reservation/calendar-times route", () => {
       isAdmin: false,
     });
 
-    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue({
-      consoleTypeId: 1,
-    } as any);
+    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue(
+      ({ consoleTypeId: 1 } as unknown) as Awaited<ReturnType<typeof db.query.reservationHold.findFirst>>
+    );
 
     vi.mocked(db.select)
       .mockReturnValueOnce(
@@ -193,7 +193,9 @@ describe("API /reservation/calendar-times route", () => {
       )                                                                  // weeklyHours
       .mockReturnValueOnce(chain([]) as ReturnType<typeof db.select>);  // userReservations
 
-    vi.mocked(db.execute).mockResolvedValue([{ station_id: 1 }] as any);
+    vi.mocked(db.execute).mockResolvedValue(
+      ([{ station_id: 1 }] as unknown) as Awaited<ReturnType<typeof db.execute>>
+    );
 
     const mockRequest = new NextRequest(
       `http://localhost/api/reservation/calendar-times?date=${tomorrow}&consoleId=1`,
@@ -219,9 +221,9 @@ describe("API /reservation/calendar-times route", () => {
       isAdmin: false,
     });
 
-    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue({
-      consoleTypeId: 1,
-    } as any);
+    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue(
+      ({ consoleTypeId: 1 } as unknown) as Awaited<ReturnType<typeof db.query.reservationHold.findFirst>>
+    );
 
     vi.mocked(db.select)
       .mockReturnValueOnce(chain([]) as ReturnType<typeof db.select>)   // reservations
@@ -239,7 +241,9 @@ describe("API /reservation/calendar-times route", () => {
         ]) as ReturnType<typeof db.select>
       );                                                                 // games.requiredAccessories
 
-    vi.mocked(db.execute).mockResolvedValue([{ station_id: 1 }] as any);
+    vi.mocked(db.execute).mockResolvedValue(
+      ([{ station_id: 1 }] as unknown) as Awaited<ReturnType<typeof db.execute>>
+    );
 
     const mockRequest = new NextRequest(
       `http://localhost/api/reservation/calendar-times?date=${tomorrow}&consoleId=1&gameIds=1,2,3&accessoryIds=10,20`,

@@ -40,12 +40,12 @@ describe("API /reservation/accessories route", () => {
       isAdmin: false,
     });
 
-    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue({
-      consoleTypeId: 1,
-    } as any);
+    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue(
+      ({ consoleTypeId: 1 } as unknown) as Awaited<ReturnType<typeof db.query.reservationHold.findFirst>>
+    );
 
     vi.mocked(db.execute).mockResolvedValue(
-      [{ id: 1, name: "Controller" }, { id: 2, name: "Headset" }] as any
+      ([{ id: 1, name: "Controller" }, { id: 2, name: "Headset" }] as unknown) as Awaited<ReturnType<typeof db.execute>>
     );
 
     const response = await GET();
@@ -96,11 +96,13 @@ describe("API /reservation/accessories route", () => {
       isAdmin: false,
     });
 
-    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue({
-      consoleTypeId: 1,
-    } as any);
+    vi.mocked(db.query.reservationHold.findFirst).mockResolvedValue(
+      ({ consoleTypeId: 1 } as unknown) as Awaited<ReturnType<typeof db.query.reservationHold.findFirst>>
+    );
 
-    vi.mocked(db.execute).mockResolvedValue([] as any);
+    vi.mocked(db.execute).mockResolvedValue(
+      ([] as unknown) as Awaited<ReturnType<typeof db.execute>>
+    );
 
     const response = await GET();
     const json = await response.json();

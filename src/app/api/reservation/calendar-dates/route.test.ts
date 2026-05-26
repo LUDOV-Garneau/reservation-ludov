@@ -27,24 +27,26 @@ describe("API /reservation/calendar-dates route", () => {
       isAdmin: false,
     });
 
-    vi.mocked(db.query.weeklyAvailabilities.findMany).mockResolvedValue([
-      {
-        weeklyId: 1,
-        startDate: "2025-01-01",
-        endDate: "2025-12-31",
-        dayOfWeek: "monday",
-        enabled: 1,
-        alwaysAvailable: 0,
-      },
-      {
-        weeklyId: 2,
-        startDate: "2025-01-01",
-        endDate: "2025-12-31",
-        dayOfWeek: "sunday",
-        enabled: 0,
-        alwaysAvailable: 0,
-      },
-    ] as any);
+    vi.mocked(db.query.weeklyAvailabilities.findMany).mockResolvedValue(
+      ([
+        {
+          weeklyId: 1,
+          startDate: "2025-01-01",
+          endDate: "2025-12-31",
+          dayOfWeek: "monday",
+          enabled: 1,
+          alwaysAvailable: 0,
+        },
+        {
+          weeklyId: 2,
+          startDate: "2025-01-01",
+          endDate: "2025-12-31",
+          dayOfWeek: "sunday",
+          enabled: 0,
+          alwaysAvailable: 0,
+        },
+      ] as unknown) as Awaited<ReturnType<typeof db.query.weeklyAvailabilities.findMany>>
+    );
 
     const mockRequest = new NextRequest(
       "http://localhost/api/reservation/calendar-dates",
@@ -69,16 +71,18 @@ describe("API /reservation/calendar-dates route", () => {
       isAdmin: false,
     });
 
-    vi.mocked(db.query.weeklyAvailabilities.findMany).mockResolvedValue([
-      {
-        weeklyId: 1,
-        startDate: "2025-01-01",
-        endDate: "2025-12-31",
-        dayOfWeek: "monday",
-        enabled: 1,
-        alwaysAvailable: 1,
-      },
-    ] as any);
+    vi.mocked(db.query.weeklyAvailabilities.findMany).mockResolvedValue(
+      ([
+        {
+          weeklyId: 1,
+          startDate: "2025-01-01",
+          endDate: "2025-12-31",
+          dayOfWeek: "monday",
+          enabled: 1,
+          alwaysAvailable: 1,
+        },
+      ] as unknown) as Awaited<ReturnType<typeof db.query.weeklyAvailabilities.findMany>>
+    );
 
     const mockRequest = new NextRequest(
       "http://localhost/api/reservation/calendar-dates",

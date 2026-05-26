@@ -12,10 +12,12 @@ vi.mock("@/db", () => ({
 
 describe("API /reservation/cours route", () => {
   beforeEach(() => {
-    vi.mocked(db.query.cours.findMany).mockResolvedValue([
-      { id: 1, code_cours: "420-5B6-FX", nom_cours: "Projet intégrateur" },
-      { id: 2, code_cours: "420-4A5-FX", nom_cours: "Programmation web" },
-    ] as any);
+    vi.mocked(db.query.cours.findMany).mockResolvedValue(
+      ([
+        { id: 1, code_cours: "420-5B6-FX", nom_cours: "Projet intégrateur" },
+        { id: 2, code_cours: "420-4A5-FX", nom_cours: "Programmation web" },
+      ] as unknown) as Awaited<ReturnType<typeof db.query.cours.findMany>>
+    );
   });
 
   afterEach(() => {
