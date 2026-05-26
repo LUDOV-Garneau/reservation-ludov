@@ -38,7 +38,7 @@ export async function GET() {
       sql`SELECT id, name FROM accessoires WHERE consoles IS NOT NULL AND hidden = 0 AND JSON_VALID(consoles) AND JSON_CONTAINS(consoles, CAST(${consoleTypeId} AS JSON), '$')`
     );
 
-    const accessories = rows as { id: number; name: string }[];
+    const accessories = (rows as unknown) as { id: number; name: string }[];
 
     if (accessories.length === 0) {
       return NextResponse.json({ success: false, data: [], message: "No accessories found for the user's console" }, { status: 404 });

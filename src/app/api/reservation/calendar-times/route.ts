@@ -243,9 +243,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const stationRows = await db.execute<{ station_id: number }>(
+    const stationRows = (await db.execute<{ station_id: number }>(
       sql`SELECT id AS station_id FROM stations WHERE isActive = 1 AND JSON_CONTAINS(consoles, JSON_ARRAY(${requestedConsoleTypeId}))`
-    ) as { station_id: number }[];
+    ) as unknown) as { station_id: number }[];
 
     const allSlots = generateAllTimeSlots(validRanges);
 

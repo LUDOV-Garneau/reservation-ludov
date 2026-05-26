@@ -96,9 +96,9 @@ export async function POST(req: Request) {
         if (date !== undefined) setData.date = date;
 
         if (time !== undefined) {
-          const stationRows = await tx.execute<{ station_id: number }>(
+          const stationRows = (await tx.execute<{ station_id: number }>(
             sql`SELECT s.id AS station_id FROM stations s WHERE s.isActive = 1 AND JSON_CONTAINS(s.consoles, JSON_ARRAY(${currentConsoleTypeId})) AND s.id NOT IN (SELECT station FROM reservation WHERE date = ${date} AND time = ${time} AND archived = 0) AND s.id NOT IN (SELECT station_id FROM reservation_hold WHERE date = ${date} AND time = ${time} AND expireAt > NOW() AND id != ${reservationId})`
-          ) as { station_id: number }[];
+          ) as unknown) as { station_id: number }[];
 
           if (!stationRows || stationRows.length === 0) {
             throw new TxReturn(NextResponse.json({ success: false, message: "Aucune station disponible pour la date et l'heure choisies" }, { status: 409 }));

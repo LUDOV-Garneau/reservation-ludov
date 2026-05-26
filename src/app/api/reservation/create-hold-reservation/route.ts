@@ -66,9 +66,9 @@ export async function POST(req: Request) {
           }, { status: 200 });
         }
 
-        const units = await tx.execute<{ consoleStockId: number }>(
+        const units = (await tx.execute<{ consoleStockId: number }>(
           sql`SELECT cs.id AS consoleStockId FROM console_stock cs WHERE cs.console_type_id = ${consoleTypeId} AND cs.is_active = 1 AND cs.holding = 0 AND NOT EXISTS (SELECT 1 FROM reservation_hold h WHERE h.console_id = cs.id AND h.expireAt > NOW()) LIMIT 1 FOR UPDATE`
-        ) as { consoleStockId: number }[];
+        ) as unknown) as { consoleStockId: number }[];
 
         if (units.length === 0) {
           throw new TxReturn(NextResponse.json({ success: false, message: "Aucune unité disponible pour ce type." }, { status: 409 }));
