@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
 import { reservation } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export async function PATCH(req: NextRequest) {
   const token = req.cookies.get("SESSION")?.value;
@@ -16,11 +16,14 @@ export async function PATCH(req: NextRequest) {
     const { id, reason } = body as { id: string; reason: string };
 
     if (!id) return NextResponse.json({ error: "Missing or invalid id parameter." }, { status: 422 });
-    if (!reason) return NextResponse.json({ error: "La raison d'annulation est obligatoire." }, { status: 422 });
+
+    const trimmedReason = reason?.trim() ?? "";
+    if (!trimmedReason) return NextResponse.json({ error: "La raison d'annulation est obligatoire." }, { status: 422 });
+    if (trimmedReason.length > 500) return NextResponse.json({ error: "La raison d'annulation ne peut pas dépasser 500 caractères." }, { status: 422 });
 
     const existing = await db.query.reservation.findFirst({
       columns: { id: true },
-      where: (t) => eq(t.id, id),
+      where: (t) => and(eq(t.id, id), eq(t.archived, 0)),
     });
 
     if (!existing) {
@@ -28,8 +31,8 @@ export async function PATCH(req: NextRequest) {
     }
 
     await db.update(reservation)
-      .set({ archived: 1, cancellationReason: reason })
-      .where(eq(reservation.id, id));
+      .set({ archived: 1, cancellationReason: trimmedReason })
+      .where(and(eq(reservation.id, id), eq(reservation.archived, 0)));
 
     return NextResponse.json({ message: "Réservation annulée avec succès." }, { status: 200 });
   } catch (error) {

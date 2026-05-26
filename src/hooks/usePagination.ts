@@ -1,8 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 export function usePagination(totalItems: number, itemsPerPage: number = 10) {
   const [page, setPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+
+  useEffect(() => {
+    setPage((p) => Math.min(p, totalPages));
+  }, [totalPages]);
 
   const goToNextPage = useCallback(() => {
     setPage((prev) => Math.min(prev + 1, totalPages));

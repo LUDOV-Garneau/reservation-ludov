@@ -71,24 +71,24 @@ export function useDeleteReservationAction({
           const data = await res.json().catch(() => ({}));
           throw new Error(
             (data as { error?: string }).error ||
-              "Erreur lors de la suppression de la réservation",
+              "Erreur lors de l'annulation de la réservation",
           );
         }
 
         onAlert(
           "success",
-          "La réservation a été supprimée avec succès",
-          "Réservation supprimée",
+          "La réservation a été annulée avec succès",
+          "Réservation annulée",
         );
         onSuccess();
         setOpen(false);
       } catch (error) {
-        console.error("Error deleting reservation:", error);
+        console.error("Error cancelling reservation:", error);
         onAlert(
           "destructive",
           error instanceof Error
             ? error.message
-            : "Erreur lors de la suppression de la réservation",
+            : "Erreur lors de l'annulation de la réservation",
           "Erreur",
         );
       } finally {

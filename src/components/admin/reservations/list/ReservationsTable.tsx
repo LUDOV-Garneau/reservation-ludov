@@ -118,7 +118,7 @@ export default function ReservationsTable() {
 
   useEffect(() => {
     resetPage();
-  }, [searchQuery, resetPage]);
+  }, [searchQuery, dateFilter, resetPage]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);

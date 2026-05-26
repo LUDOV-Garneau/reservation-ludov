@@ -25,12 +25,16 @@ export async function GET(request: NextRequest) {
     }
 
     const row = await db.query.otp.findFirst({
-      columns: { id: true, otpCode: true, isUsed: true },
+      columns: { id: true, otpCode: true, isUsed: true, expiresAt: true },
       where: (t) => eq(t.userId, user.id),
       orderBy: (t, { desc }) => [desc(t.createdAt)],
     });
 
-    const isValid = row && row.otpCode === otpCode && row.isUsed === 0;
+    const isValid =
+      row &&
+      row.otpCode === otpCode &&
+      row.isUsed === 0 &&
+      new Date(row.expiresAt) > new Date();
 
     if (isValid) {
       await db.update(otp).set({ isUsed: 1 }).where(eq(otp.id, row.id));

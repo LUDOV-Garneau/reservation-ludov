@@ -55,8 +55,8 @@ import UpdateCoursForm from "./UpdateCoursForm";
 
 type Cours = {
   id: number;
-  nom_cours: string;
-  code_cours: string;
+  nomCours: string;
+  codeCours: string;
 };
 
 type AlertState = {
@@ -93,8 +93,8 @@ function CoursTableRow({
 }) {
   return (
     <TableRow key={cours.id}>
-      <TableCell className="md:table-cell hidden">{cours.nom_cours}</TableCell>
-      <TableCell className="table-cell">{cours.code_cours}</TableCell>
+      <TableCell className="md:table-cell hidden">{cours.nomCours}</TableCell>
+      <TableCell className="table-cell">{cours.codeCours}</TableCell>
       <TableCell className="table-cell text-right">
         <div>
           <div className="hidden md:flex gap-2 justify-end">
@@ -117,7 +117,7 @@ function CoursTableRow({
             </TooltipProvider>
 
             <DeleteStationAction
-              targetCours={{ id: cours.id, name: cours.nom_cours }}
+              targetCours={{ id: cours.id, name: cours.nomCours }}
               onAlert={onAlert}
               onSuccess={onSuccess}
             >
@@ -159,7 +159,7 @@ function CoursTableRow({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DeleteStationAction
-                  targetCours={{ id: cours.id, name: cours.nom_cours }}
+                  targetCours={{ id: cours.id, name: cours.nomCours }}
                   onAlert={onAlert}
                   onSuccess={onSuccess}
                 >
@@ -391,7 +391,7 @@ export default function CoursTable() {
 
   const filteredStations = cours.filter((cours) => {
     const search = searchQuery.toLowerCase();
-    return cours.nom_cours.toLowerCase().includes(search);
+    return cours.nomCours.toLowerCase().includes(search);
   });
 
   const handleRefresh = useCallback(async () => {
