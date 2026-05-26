@@ -2,30 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
-import { games, stations, accessoires } from "@/db/schema";
-import { inArray, eq, sql } from "drizzle-orm";
-
-interface ReservationRow {
-  reservationId: string;
-  userId: number;
-  consoleStockId: number | null;
-  consoleTypeId: number | null;
-  game1Id: number | null;
-  game2Id: number | null;
-  game3Id: number | null;
-  stationId: number | null;
-  accessoirs: unknown;
-  date: string | null;
-  time: string | null;
-  expireAt: string;
-  createdAt: string;
-  consoleName: string | null;
-  consoleImage: string | null;
-  expiresIn: number;
-  coursId: number | null;
-  code_cours: string | null;
-  nom_cours: string | null;
-}
+import { games, stations, accessoires, reservationHold, consoleStock, consoleType, cours as coursTable } from "@/db/schema";
+import { and, inArray, eq, sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
   try {
@@ -49,36 +27,35 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: false, message: "Reservation ID is required" }, { status: 400 });
     }
 
-    const rows = await db.execute<ReservationRow>(
-      sql`SELECT
-        rh.id AS reservationId,
-        rh.user_id AS userId,
-        rh.console_id AS consoleStockId,
-        cs.console_type_id AS consoleTypeId,
-        rh.game1_id AS game1Id,
-        rh.game2_id AS game2Id,
-        rh.game3_id AS game3Id,
-        rh.station_id AS stationId,
-        rh.accessoirs,
-        rh.date,
-        rh.time,
-        rh.expireAt,
-        rh.createdAt,
-        ct.name AS consoleName,
-        ct.picture AS consoleImage,
-        GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), rh.expireAt)) AS expiresIn,
-        co.id AS coursId,
-        co.code_cours,
-        co.nom_cours
-      FROM reservation_hold rh
-      LEFT JOIN console_stock cs ON rh.console_id = cs.id
-      LEFT JOIN console_type ct ON cs.console_type_id = ct.id
-      LEFT JOIN cours co ON rh.cours = co.id
-      WHERE rh.id = ${reservationId} AND rh.user_id = ${userId}
-      LIMIT 1`
-    );
+    const [r] = await db
+      .select({
+        reservationId: reservationHold.id,
+        userId: reservationHold.userId,
+        consoleStockId: reservationHold.consoleId,
+        consoleTypeId: consoleStock.consoleTypeId,
+        game1Id: reservationHold.game1Id,
+        game2Id: reservationHold.game2Id,
+        game3Id: reservationHold.game3Id,
+        stationId: reservationHold.stationId,
+        accessoirs: reservationHold.accessoirs,
+        date: reservationHold.date,
+        time: reservationHold.time,
+        expireAt: reservationHold.expireAt,
+        createdAt: reservationHold.createdAt,
+        consoleName: consoleType.name,
+        consoleImage: consoleType.picture,
+        expiresIn: sql<number>`GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), ${reservationHold.expireAt}))`,
+        coursId: coursTable.id,
+        codeCours: coursTable.codeCours,
+        nomCours: coursTable.nomCours,
+      })
+      .from(reservationHold)
+      .leftJoin(consoleStock, eq(reservationHold.consoleId, consoleStock.id))
+      .leftJoin(consoleType, eq(consoleStock.consoleTypeId, consoleType.id))
+      .leftJoin(coursTable, eq(reservationHold.cours, coursTable.id))
+      .where(and(eq(reservationHold.id, reservationId), eq(reservationHold.userId, userId)))
+      .limit(1);
 
-    const r = (rows as ReservationRow[])[0];
     if (!r) {
       return NextResponse.json({ success: false, message: "Réservation non trouvée" }, { status: 404 });
     }
@@ -121,8 +98,8 @@ export async function GET(req: Request) {
       ? { id: r.consoleStockId, nom: r.consoleName ?? "Console", image: r.consoleImage }
       : null;
 
-    const cours = r.coursId !== null && r.code_cours && r.nom_cours
-      ? { id: r.coursId, code_cours: r.code_cours, nom_cours: r.nom_cours }
+    const cours = r.coursId !== null && r.codeCours && r.nomCours
+      ? { id: r.coursId, code_cours: r.codeCours, nom_cours: r.nomCours }
       : null;
 
     return NextResponse.json({
