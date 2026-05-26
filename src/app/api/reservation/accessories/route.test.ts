@@ -18,12 +18,27 @@ vi.mock("next/headers", () => ({
 
 vi.mock("@/db", () => ({
   default: {
-    execute: vi.fn(),
+    select: vi.fn(),
     query: {
       reservationHold: { findFirst: vi.fn() },
     },
   },
 }));
+
+function chain(result: unknown) {
+  const obj: Record<string, unknown> = {
+    then(
+      onfulfilled?: ((v: unknown) => unknown) | null,
+      onrejected?: ((e: unknown) => unknown) | null,
+    ) {
+      return Promise.resolve(result).then(onfulfilled, onrejected);
+    },
+  };
+  for (const m of ["from", "where", "orderBy", "limit", "offset", "innerJoin"]) {
+    obj[m] = () => obj;
+  }
+  return obj;
+}
 
 describe("API /reservation/accessories route", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -44,8 +59,8 @@ describe("API /reservation/accessories route", () => {
       ({ consoleTypeId: 1 } as unknown) as Awaited<ReturnType<typeof db.query.reservationHold.findFirst>>
     );
 
-    vi.mocked(db.execute).mockResolvedValue(
-      ([{ id: 1, name: "Controller" }, { id: 2, name: "Headset" }] as unknown) as Awaited<ReturnType<typeof db.execute>>
+    vi.mocked(db.select).mockReturnValueOnce(
+      chain([{ id: 1, name: "Controller" }, { id: 2, name: "Headset" }]) as ReturnType<typeof db.select>
     );
 
     const response = await GET();
@@ -100,8 +115,8 @@ describe("API /reservation/accessories route", () => {
       ({ consoleTypeId: 1 } as unknown) as Awaited<ReturnType<typeof db.query.reservationHold.findFirst>>
     );
 
-    vi.mocked(db.execute).mockResolvedValue(
-      ([] as unknown) as Awaited<ReturnType<typeof db.execute>>
+    vi.mocked(db.select).mockReturnValueOnce(
+      chain([]) as ReturnType<typeof db.select>
     );
 
     const response = await GET();

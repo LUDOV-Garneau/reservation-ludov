@@ -56,11 +56,8 @@ describe("API /reservation/calendar-times route", () => {
       .mockReturnValueOnce(
         chain([{ startHour: "9", startMinute: "0", endHour: "17", endMinute: "0" }]) as ReturnType<typeof db.select>
       )                                                                  // weeklyHours
-      .mockReturnValueOnce(chain([]) as ReturnType<typeof db.select>);  // userReservations
-
-    vi.mocked(db.execute).mockResolvedValue(
-      ([{ station_id: 1 }, { station_id: 2 }] as unknown) as Awaited<ReturnType<typeof db.execute>>
-    );
+      .mockReturnValueOnce(chain([]) as ReturnType<typeof db.select>)   // userReservations
+      .mockReturnValueOnce(chain([{ stationId: 1 }, { stationId: 2 }]) as ReturnType<typeof db.select>); // stations
 
     const mockRequest = new NextRequest(
       `http://localhost/api/reservation/calendar-times?date=${tomorrow}&consoleId=1`,
@@ -191,11 +188,8 @@ describe("API /reservation/calendar-times route", () => {
       .mockReturnValueOnce(
         chain([{ startHour: "9", startMinute: "0", endHour: "17", endMinute: "0" }]) as ReturnType<typeof db.select>
       )                                                                  // weeklyHours
-      .mockReturnValueOnce(chain([]) as ReturnType<typeof db.select>);  // userReservations
-
-    vi.mocked(db.execute).mockResolvedValue(
-      ([{ station_id: 1 }] as unknown) as Awaited<ReturnType<typeof db.execute>>
-    );
+      .mockReturnValueOnce(chain([]) as ReturnType<typeof db.select>)   // userReservations
+      .mockReturnValueOnce(chain([{ stationId: 1 }]) as ReturnType<typeof db.select>); // stations
 
     const mockRequest = new NextRequest(
       `http://localhost/api/reservation/calendar-times?date=${tomorrow}&consoleId=1`,
@@ -239,11 +233,8 @@ describe("API /reservation/calendar-times route", () => {
           { requiredAccessories: [] },
           { requiredAccessories: [] },
         ]) as ReturnType<typeof db.select>
-      );                                                                 // games.requiredAccessories
-
-    vi.mocked(db.execute).mockResolvedValue(
-      ([{ station_id: 1 }] as unknown) as Awaited<ReturnType<typeof db.execute>>
-    );
+      )                                                                  // games.requiredAccessories
+      .mockReturnValueOnce(chain([{ stationId: 1 }]) as ReturnType<typeof db.select>); // stations
 
     const mockRequest = new NextRequest(
       `http://localhost/api/reservation/calendar-times?date=${tomorrow}&consoleId=1&gameIds=1,2,3&accessoryIds=10,20`,

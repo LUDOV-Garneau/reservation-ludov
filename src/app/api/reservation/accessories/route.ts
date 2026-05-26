@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import db from "@/db";
-import { reservationHold } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { accessoires, reservationHold } from "@/db/schema";
+import { and, eq, isNotNull, sql } from "drizzle-orm";
 
 export async function GET() {
   try {
@@ -34,17 +34,20 @@ export async function GET() {
       return NextResponse.json({ success: false, data: [], message: "No recent reservation hold found for user" }, { status: 404 });
     }
 
-    const rows = await db.execute<{ id: number; name: string }>(
-      sql`SELECT id, name FROM accessoires WHERE consoles IS NOT NULL AND hidden = 0 AND JSON_VALID(consoles) AND JSON_CONTAINS(consoles, CAST(${consoleTypeId} AS JSON), '$')`
-    );
+    const data = await db.select({ id: accessoires.id, name: accessoires.name })
+      .from(accessoires)
+      .where(and(
+        isNotNull(accessoires.consoles),
+        eq(accessoires.hidden, 0),
+        sql`JSON_VALID(${accessoires.consoles})`,
+        sql`JSON_CONTAINS(${accessoires.consoles}, CAST(${consoleTypeId} AS JSON), '$')`,
+      ));
 
-    const accessories = (rows as unknown) as { id: number; name: string }[];
-
-    if (accessories.length === 0) {
+    if (data.length === 0) {
       return NextResponse.json({ success: false, data: [], message: "No accessories found for the user's console" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: accessories });
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Error processing request:", error);
     return NextResponse.json({ success: false, data: [], message: "Internal server error" }, { status: 500 });

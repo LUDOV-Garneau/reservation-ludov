@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
-import { reservationHold, consoleStock, games } from "@/db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { reservationHold, consoleStock, games, stations, reservation } from "@/db/schema";
+import { and, eq, inArray, ne, sql } from "drizzle-orm";
 
 type Body = {
   reservationId: string;
@@ -17,7 +17,7 @@ type Body = {
   time?: string | null;
 };
 
-interface HoldRow {
+interface HoldForUpdate {
   id: string;
   user_id: number;
   console_id: number;
@@ -71,9 +71,10 @@ export async function POST(req: Request) {
 
     try {
       const response = await db.transaction(async (tx) => {
-        const rows = await tx.execute<HoldRow>(
+        // FOR UPDATE n'est pas supporté par Drizzle MySQL — raw SQL requis ici
+        const rows = (await tx.execute<HoldForUpdate>(
           sql`SELECT r.*, GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), r.expireAt)) AS expiresIn FROM reservation_hold r WHERE r.id = ${reservationId} AND r.user_id = ${userId} AND r.expireAt > NOW() FOR UPDATE`
-        ) as HoldRow[];
+        ) as unknown) as HoldForUpdate[];
 
         if (!rows || rows.length === 0) throw new TxReturn(NextResponse.json({ success: false, message: "Réservation expirée", status: "expired" }, { status: 410 }));
 
@@ -96,14 +97,19 @@ export async function POST(req: Request) {
         if (date !== undefined) setData.date = date;
 
         if (time !== undefined) {
-          const stationRows = (await tx.execute<{ station_id: number }>(
-            sql`SELECT s.id AS station_id FROM stations s WHERE s.isActive = 1 AND JSON_CONTAINS(s.consoles, JSON_ARRAY(${currentConsoleTypeId})) AND s.id NOT IN (SELECT station FROM reservation WHERE date = ${date} AND time = ${time} AND archived = 0) AND s.id NOT IN (SELECT station_id FROM reservation_hold WHERE date = ${date} AND time = ${time} AND expireAt > NOW() AND id != ${reservationId})`
-          ) as unknown) as { station_id: number }[];
+          const stationRows = await tx.select({ stationId: stations.id })
+            .from(stations)
+            .where(and(
+              eq(stations.isActive, 1),
+              sql`JSON_CONTAINS(${stations.consoles}, JSON_ARRAY(${currentConsoleTypeId}))`,
+              sql`${stations.id} NOT IN (SELECT station FROM reservation WHERE date = ${date} AND time = ${time} AND archived = 0)`,
+              sql`${stations.id} NOT IN (SELECT station_id FROM reservation_hold WHERE date = ${date} AND time = ${time} AND expireAt > NOW() AND id != ${reservationId})`,
+            ));
 
           if (!stationRows || stationRows.length === 0) {
             throw new TxReturn(NextResponse.json({ success: false, message: "Aucune station disponible pour la date et l'heure choisies" }, { status: 409 }));
           }
-          setData.stationId = stationRows[0].station_id;
+          setData.stationId = stationRows[0].stationId;
           setData.time = time;
         }
 
@@ -168,13 +174,23 @@ export async function POST(req: Request) {
           await tx.update(reservationHold).set(setData).where(and(eq(reservationHold.id, reservationId), eq(reservationHold.userId, userId)));
         }
 
-        const updatedRows = await tx.execute<HoldRow>(
-          sql`SELECT id, user_id, console_id, console_type_id, game1_id, game2_id, game3_id, accessoirs, cours, date, time, expireAt, GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expireAt)) AS expiresIn FROM reservation_hold WHERE id = ${reservationId} AND user_id = ${userId}`
-        ) as HoldRow[];
+        const [updated] = await tx.select({
+          consoleId: reservationHold.consoleId,
+          consoleTypeId: reservationHold.consoleTypeId,
+          game1Id: reservationHold.game1Id,
+          game2Id: reservationHold.game2Id,
+          game3Id: reservationHold.game3Id,
+          accessoirs: reservationHold.accessoirs,
+          cours: reservationHold.cours,
+          date: reservationHold.date,
+          time: reservationHold.time,
+          expireAt: reservationHold.expireAt,
+          expiresIn: sql<number>`GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), ${reservationHold.expireAt}))`,
+        }).from(reservationHold)
+          .where(and(eq(reservationHold.id, reservationId), eq(reservationHold.userId, userId)));
 
-        if (!updatedRows || updatedRows.length === 0) throw new TxReturn(NextResponse.json({ success: false, message: "Réservation introuvable après mise à jour" }, { status: 500 }));
+        if (!updated) throw new TxReturn(NextResponse.json({ success: false, message: "Réservation introuvable après mise à jour" }, { status: 500 }));
 
-        const updated = updatedRows[0];
         let accessoriesArray: number[] = [];
         if (updated.accessoirs) {
           try {
@@ -187,9 +203,9 @@ export async function POST(req: Request) {
         return NextResponse.json({
           success: true,
           reservationId,
-          consoleId: Number(updated.console_id),
-          consoleTypeId: Number(updated.console_type_id),
-          games: [updated.game1_id, updated.game2_id, updated.game3_id].filter((id): id is number => id !== null),
+          consoleId: Number(updated.consoleId),
+          consoleTypeId: Number(updated.consoleTypeId),
+          games: [updated.game1Id, updated.game2Id, updated.game3Id].filter((id): id is number => id !== null),
           accessories: accessoriesArray,
           coursId: updated.cours ?? null,
           date: updated.date,

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
-import { reservation, reservationHold, specificDates, hourRanges, weeklyAvailabilities, games, accessoires } from "@/db/schema";
+import { reservation, reservationHold, specificDates, hourRanges, weeklyAvailabilities, games, accessoires, stations } from "@/db/schema";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 
 type Range = { start: number; end: number };
@@ -243,9 +243,12 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const stationRows = (await db.execute<{ station_id: number }>(
-      sql`SELECT id AS station_id FROM stations WHERE isActive = 1 AND JSON_CONTAINS(consoles, JSON_ARRAY(${requestedConsoleTypeId}))`
-    ) as unknown) as { station_id: number }[];
+    const stationRows = await db.select({ stationId: stations.id })
+      .from(stations)
+      .where(and(
+        eq(stations.isActive, 1),
+        sql`JSON_CONTAINS(${stations.consoles}, JSON_ARRAY(${requestedConsoleTypeId}))`,
+      ));
 
     const allSlots = generateAllTimeSlots(validRanges);
 
@@ -253,7 +256,7 @@ export async function GET(request: NextRequest) {
       const atTime = reservations.filter((r) => r.time === time);
       const fallback = resolveAccessoryFallbacks(time, atTime, requestedAccessoryIds, requiredAccessoryIdMap);
       if (!fallback.valid) return { time, available: false, conflicts: { accessories: [-1] } };
-      const check = checkSlotAvailability(time, reservations, holds, requestedConsoleId, requestedGameIds, requestedAccessoryIds, stationRows.map((s) => s.station_id));
+      const check = checkSlotAvailability(time, reservations, holds, requestedConsoleId, requestedGameIds, requestedAccessoryIds, stationRows.map((s) => s.stationId));
       return { time, available: check.available, ...(check.conflicts ? { conflicts: check.conflicts } : {}) };
     });
 

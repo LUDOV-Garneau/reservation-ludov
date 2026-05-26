@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
 import { reservationHold, consoleStock } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import crypto from "crypto";
 
 type Body = { consoleTypeId: number; minutes?: number };
@@ -48,11 +48,16 @@ export async function POST(req: Request) {
 
     try {
       const response = await db.transaction(async (tx) => {
-        await tx.execute(sql`DELETE FROM reservation_hold WHERE expireAt <= NOW()`);
+        await tx.delete(reservationHold).where(sql`${reservationHold.expireAt} <= NOW()`);
 
-        const existing = await tx.execute<HoldRow>(
-          sql`SELECT id AS holdId, console_id AS consoleStockId, expireAt AS expiresAt, GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expireAt)) AS expiresIn FROM reservation_hold WHERE user_id = ${userId} AND expireAt > NOW() LIMIT 1`
-        ) as HoldRow[];
+        const existing = await tx.select({
+          holdId: reservationHold.id,
+          consoleStockId: reservationHold.consoleId,
+          expiresAt: reservationHold.expireAt,
+          expiresIn: sql<number>`GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), ${reservationHold.expireAt}))`,
+        }).from(reservationHold)
+          .where(and(eq(reservationHold.userId, userId), sql`${reservationHold.expireAt} > NOW()`))
+          .limit(1);
 
         if (existing.length > 0) {
           return NextResponse.json({
@@ -66,6 +71,7 @@ export async function POST(req: Request) {
           }, { status: 200 });
         }
 
+        // FOR UPDATE n'est pas supporté par Drizzle MySQL — raw SQL requis ici
         const units = (await tx.execute<{ consoleStockId: number }>(
           sql`SELECT cs.id AS consoleStockId FROM console_stock cs WHERE cs.console_type_id = ${consoleTypeId} AND cs.is_active = 1 AND cs.holding = 0 AND NOT EXISTS (SELECT 1 FROM reservation_hold h WHERE h.console_id = cs.id AND h.expireAt > NOW()) LIMIT 1 FOR UPDATE`
         ) as unknown) as { consoleStockId: number }[];
@@ -77,23 +83,30 @@ export async function POST(req: Request) {
         const consoleStockId = Number(units[0].consoleStockId);
         const reservationId = `HOLD-${crypto.randomUUID()}`;
 
-        await tx.execute(
-          sql`INSERT INTO reservation_hold (id, user_id, console_id, console_type_id, expireAt, createdAt) VALUES (${reservationId}, ${userId}, ${consoleStockId}, ${consoleTypeId}, DATE_ADD(NOW(), INTERVAL ${minutes} MINUTE), NOW())`
-        );
+        await tx.insert(reservationHold).values({
+          id: reservationId,
+          userId,
+          consoleId: consoleStockId,
+          consoleTypeId,
+          expireAt: sql`DATE_ADD(NOW(), INTERVAL ${minutes} MINUTE)`,
+        });
 
-        const created = await tx.execute<HoldRow>(
-          sql`SELECT id AS holdId, console_id AS consoleStockId, expireAt AS expiresAt, GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), expireAt)) AS expiresIn FROM reservation_hold WHERE id = ${reservationId} LIMIT 1`
-        ) as HoldRow[];
+        const [created] = await tx.select({
+          holdId: reservationHold.id,
+          consoleStockId: reservationHold.consoleId,
+          expiresAt: reservationHold.expireAt,
+          expiresIn: sql<number>`GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), ${reservationHold.expireAt}))`,
+        }).from(reservationHold).where(eq(reservationHold.id, reservationId));
 
         await tx.update(consoleStock).set({ holding: 1 }).where(eq(consoleStock.id, consoleStockId));
 
         return NextResponse.json({
           success: true,
           reservationId,
-          holdId: created[0].holdId,
-          consoleStockId: created[0].consoleStockId,
-          expiresAt: new Date(created[0].expiresAt).toISOString(),
-          expiresIn: Number(created[0].expiresIn),
+          holdId: created.holdId,
+          consoleStockId: created.consoleStockId,
+          expiresAt: new Date(created.expiresAt).toISOString(),
+          expiresIn: Number(created.expiresIn),
           message: "Réservation temporaire créée avec succès",
         }, { status: 201 });
       });

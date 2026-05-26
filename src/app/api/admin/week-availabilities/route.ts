@@ -121,10 +121,8 @@ export async function POST(request: NextRequest) {
         const endDate = parsedAvailability.dateRange.alwaysApplies ? null : parsedAvailability.dateRange.range?.endDate?.toISOString().slice(0, 10) ?? null;
         const alwaysAvailable = parsedAvailability.dateRange.alwaysApplies ? 1 : 0;
 
-        await tx.insert(weeklyAvailabilities).values({ startDate, endDate, dayOfWeek: day, enabled: enabled ? 1 : 0, alwaysAvailable });
-
-        const [{ lastId }] = (await tx.execute<{ lastId: number }>(sql`SELECT LAST_INSERT_ID() AS lastId`) as unknown) as { lastId: number }[];
-        const weeklyId = Number(lastId);
+        const [{ weeklyId: insertedId }] = await tx.insert(weeklyAvailabilities).values({ startDate, endDate, dayOfWeek: day, enabled: enabled ? 1 : 0, alwaysAvailable }).$returningId();
+        const weeklyId = Number(insertedId);
 
         if (enabled) {
           for (const hr of ranges) {
