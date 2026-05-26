@@ -4,8 +4,8 @@ import { GET } from "./route";
 
 vi.mock("@/db", () => ({
   default: {
-    execute: vi.fn(),
     select: vi.fn(),
+    selectDistinct: vi.fn(),
   },
 }));
 
@@ -26,7 +26,7 @@ function chain(result: unknown) {
 }
 
 describe("GET /reservation/games", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => vi.resetAllMocks());
 
   it("returns empty result when consoleId is 0 with no DB call", async () => {
     const res = await GET(
@@ -41,7 +41,7 @@ describe("GET /reservation/games", () => {
     expect(json.pagination.total).toBe(0);
     expect(json.hasMore).toBe(false);
     expect(vi.mocked(db.select)).not.toHaveBeenCalled();
-    expect(vi.mocked(db.execute)).not.toHaveBeenCalled();
+    expect(vi.mocked(db.selectDistinct)).not.toHaveBeenCalled();
   });
 
   it("returns games via db.select when no search query is provided", async () => {
@@ -92,20 +92,22 @@ describe("GET /reservation/games", () => {
       totalPages: 1,
     });
     expect(json.hasMore).toBe(false);
-    expect(vi.mocked(db.execute)).not.toHaveBeenCalled();
+    expect(vi.mocked(db.selectDistinct)).not.toHaveBeenCalled();
   });
 
-  it("returns filtered games via db.execute when search query is provided", async () => {
-    vi.mocked(db.execute).mockResolvedValue([
-      {
-        id: 1,
-        titre: "God of War",
-        author: "Sony",
-        picture: "gow.jpg",
-        platform: "PS5",
-        biblio_id: 123,
-      },
-    ] as unknown as Awaited<ReturnType<typeof db.execute>>);
+  it("returns filtered games via db.selectDistinct when search query is provided", async () => {
+    vi.mocked(db.selectDistinct).mockReturnValueOnce(
+      chain([
+        {
+          id: 1,
+          titre: "God of War",
+          author: "Sony",
+          picture: "gow.jpg",
+          platform: "PS5",
+          biblioId: 123,
+        },
+      ]) as unknown as ReturnType<typeof db.selectDistinct>,
+    );
     vi.mocked(db.select).mockReturnValueOnce(
       chain([{ total: 1 }]) as unknown as ReturnType<typeof db.select>,
     );
@@ -124,7 +126,7 @@ describe("GET /reservation/games", () => {
       titre: "God of War",
       biblio_id: 123,
     });
-    expect(vi.mocked(db.execute)).toHaveBeenCalledOnce();
+    expect(vi.mocked(db.selectDistinct)).toHaveBeenCalledOnce();
   });
 
   it("computes pagination metadata correctly for page 2 of 25 items", async () => {
