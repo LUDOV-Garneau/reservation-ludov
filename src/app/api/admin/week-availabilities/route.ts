@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
         await tx.insert(weeklyAvailabilities).values({ startDate, endDate, dayOfWeek: day, enabled: enabled ? 1 : 0, alwaysAvailable });
 
-        const [{ lastId }] = await tx.execute<{ lastId: number }>(sql`SELECT LAST_INSERT_ID() AS lastId`) as { lastId: number }[];
+        const [{ lastId }] = (await tx.execute<{ lastId: number }>(sql`SELECT LAST_INSERT_ID() AS lastId`) as unknown) as { lastId: number }[];
         const weeklyId = Number(lastId);
 
         if (enabled) {
