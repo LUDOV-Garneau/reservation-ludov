@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
-import { reservationHold, consoleStock, games, stations, reservation } from "@/db/schema";
-import { and, eq, inArray, ne, sql } from "drizzle-orm";
+import { reservationHold, consoleStock, games, stations } from "@/db/schema";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 type Body = {
   reservationId: string;

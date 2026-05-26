@@ -8,13 +8,6 @@ import crypto from "crypto";
 
 type Body = { consoleTypeId: number; minutes?: number };
 
-interface HoldRow {
-  holdId: string;
-  consoleStockId: number;
-  expiresAt: string;
-  expiresIn: number;
-}
-
 class TxReturn extends Error {
   constructor(public readonly resp: NextResponse) { super("tx_return"); }
 }
@@ -89,6 +82,7 @@ export async function POST(req: Request) {
           consoleId: consoleStockId,
           consoleTypeId,
           expireAt: sql`DATE_ADD(NOW(), INTERVAL ${minutes} MINUTE)`,
+          createdAt: sql`NOW()`,
         });
 
         const [created] = await tx.select({

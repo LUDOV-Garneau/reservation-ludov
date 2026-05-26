@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
 import { weeklyAvailabilities, specificDates, hourRanges } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 type HourRange = {
   id: number;
@@ -121,8 +121,8 @@ export async function POST(request: NextRequest) {
         const endDate = parsedAvailability.dateRange.alwaysApplies ? null : parsedAvailability.dateRange.range?.endDate?.toISOString().slice(0, 10) ?? null;
         const alwaysAvailable = parsedAvailability.dateRange.alwaysApplies ? 1 : 0;
 
-        const [{ weeklyId: insertedId }] = await tx.insert(weeklyAvailabilities).values({ startDate, endDate, dayOfWeek: day, enabled: enabled ? 1 : 0, alwaysAvailable }).$returningId();
-        const weeklyId = Number(insertedId);
+        const ids = (await tx.insert(weeklyAvailabilities).values({ startDate, endDate, dayOfWeek: day, enabled: enabled ? 1 : 0, alwaysAvailable }).$returningId()) as unknown as { weeklyId: number }[];
+        const weeklyId = Number(ids[0].weeklyId);
 
         if (enabled) {
           for (const hr of ranges) {
