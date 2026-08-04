@@ -1,7 +1,7 @@
 name: Deploy
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 
 env:
   REGISTRY: registry.72-60-124-92.sslip.io
@@ -17,8 +17,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: 24
+          cache: "npm"
 
       - name: Install deps
         run: npm ci
@@ -61,14 +61,14 @@ jobs:
       - name: SSH deploy (pull + up -d)
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.SSH_HOST }}      # 72.60.124.92
-          username: ${{ secrets.SSH_USER }}  # root
-          key: ${{ secrets.SSH_KEY }}        # clé privée OpenSSH
+          host: ${{ secrets.SSH_HOST }} # 72.60.124.92
+          username: ${{ secrets.SSH_USER }} # root
+          key: ${{ secrets.SSH_KEY }} # clé privée OpenSSH
           script: |
             set -e
             export REGISTRY=${{ env.REGISTRY }}
             export IMAGE_TAG=${{ env.IMAGE_TAG }}
-            cd /opt/ludoReservation
+            cd /opt/ludovReservation
             # login (utile si le serveur a besoin d’auth pour pull)
             docker login $REGISTRY -u '${{ secrets.REGISTRY_USERNAME }}' -p '${{ secrets.REGISTRY_PASSWORD }}'
             IMAGE_TAG=$IMAGE_TAG docker compose pull web

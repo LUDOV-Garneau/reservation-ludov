@@ -1,7 +1,30 @@
+# Dépendances et artéfacts de build
+
 node_modules
-.git
 .next
+out
+
+# Secrets et config locale
+
+.env
+.env.\*
+!.env.example
+
+# Git et CI
+
+.git
+.gitignore
+.github
+
+# Docker
+
 Dockerfile
-# keep scripts
-!scripts/
-!scripts/**
+.dockerignore
+docker-compose\*.yml
+
+# Tests et outillage
+
+coverage
+\*.log
+.vscode
+.idea
