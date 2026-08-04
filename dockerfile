@@ -1,84 +1,55 @@
-FROM node:20-alpine AS build
-WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
+# syntax=docker/dockerfile:1.7
 
+# ---------- deps (dev + prod, pour le build) ----------
+FROM node:20-alpine AS deps
+WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+# ---------- prod-deps ----------
+# Nécessaire parce que scripts/ n'est pas dans le graphe de Next,
+# donc ses dépendances ne sont pas tracées par output: standalone.
+# Supprimable si tu ajoutes outputFileTracingIncludes dans next.config.
+FROM node:20-alpine AS prod-deps
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+# ---------- build ----------
+FROM node:20-alpine AS build
+WORKDIR /app
+ENV NEXT_TELEMETRY_DISABLED=1
+# Si tu utilises t3-env / une validation zod au build.
+# Aucun vrai secret ici : JWT_SECRET est injecté au runtime par Coolify.
+ENV SKIP_ENV_VALIDATION=1
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-ARG JWT_SECRET
-ENV JWT_SECRET=$JWT_SECRET
-
 RUN npm run build
 
+# ---------- runner ----------
 FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/.next/static ./.next/static
-COPY --from=build /app/public ./public
+RUN addgroup -g 1001 -S nodejs \
+ && adduser  -u 1001 -S nextjs -G nodejs
 
-COPY --from=build /app/src/scripts ./scripts
+# standalone contient déjà server.js, package.json et le node_modules tracé
+COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=build --chown=nextjs:nodejs /app/.next/static    ./.next/static
+COPY --from=build --chown=nextjs:nodejs /app/public          ./public
 
-COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/package.json ./package.json
+# Le script one-shot exécuté par les Scheduled Tasks de Coolify,
+# plus ses dépendances de prod.
+COPY --from=build     --chown=nextjs:nodejs /app/src/scripts  ./scripts
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
+USER nextjs
 EXPOSE 3000
 
-RUN echo '#!/bin/sh' > /app/start.sh && \
-    echo 'set -e' >> /app/start.sh && \
-    echo '' >> /app/start.sh && \
-    echo 'echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"' >> /app/start.sh && \
-    echo 'echo "LUDOV - Démarrage de l'\''application"' >> /app/start.sh && \
-    echo 'echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"' >> /app/start.sh && \
-    echo 'echo ""' >> /app/start.sh && \
-    echo '' >> /app/start.sh && \
-    echo '# Démarrer Next.js en arrière-plan' >> /app/start.sh && \
-    echo 'echo "Lancement du serveur Next.js..."' >> /app/start.sh && \
-    echo 'node server.js &' >> /app/start.sh && \
-    echo 'NEXTJS_PID=$!' >> /app/start.sh && \
-    echo 'echo "Next.js démarré (PID: $NEXTJS_PID)"' >> /app/start.sh && \
-    echo 'echo ""' >> /app/start.sh && \
-    echo '' >> /app/start.sh && \
-    echo '# Attendre que Next.js soit prêt' >> /app/start.sh && \
-    echo 'echo "Attente du démarrage de Next.js..."' >> /app/start.sh && \
-    echo 'sleep 10' >> /app/start.sh && \
-    echo '' >> /app/start.sh && \
-    echo '# Démarrer le cron en arrière-plan' >> /app/start.sh && \
-    echo 'echo "Lancement du planificateur de rappels..."' >> /app/start.sh && \
-    echo 'node scripts/cron-scheduler.js &' >> /app/start.sh && \
-    echo 'CRON_PID=$!' >> /app/start.sh && \
-    echo 'echo "Planificateur démarré (PID: $CRON_PID)"' >> /app/start.sh && \
-    echo 'echo ""' >> /app/start.sh && \
-    echo '' >> /app/start.sh && \
-    echo 'echo "Application prête !"' >> /app/start.sh && \
-    echo 'echo "   - Next.js sur le port 3000"' >> /app/start.sh && \
-    echo 'echo "   - Cron job actif"' >> /app/start.sh && \
-    echo 'echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"' >> /app/start.sh && \
-    echo 'echo ""' >> /app/start.sh && \
-    echo '' >> /app/start.sh && \
-    echo '# Fonction pour arrêter proprement les processus' >> /app/start.sh && \
-    echo 'cleanup() {' >> /app/start.sh && \
-    echo '    echo ""' >> /app/start.sh && \
-    echo '    echo "Arrêt gracieux..."' >> /app/start.sh && \
-    echo '    kill -TERM $CRON_PID 2>/dev/null || true' >> /app/start.sh && \
-    echo '    kill -TERM $NEXTJS_PID 2>/dev/null || true' >> /app/start.sh && \
-    echo '    wait $CRON_PID 2>/dev/null || true' >> /app/start.sh && \
-    echo '    wait $NEXTJS_PID 2>/dev/null || true' >> /app/start.sh && \
-    echo '    echo "Arrêt terminé"' >> /app/start.sh && \
-    echo '    exit 0' >> /app/start.sh && \
-    echo '}' >> /app/start.sh && \
-    echo '' >> /app/start.sh && \
-    echo '# Capturer les signaux d'\''arrêt' >> /app/start.sh && \
-    echo 'trap cleanup SIGTERM SIGINT' >> /app/start.sh && \
-    echo '' >> /app/start.sh && \
-    echo '# Attendre indéfiniment (les processus tournent en arrière-plan)' >> /app/start.sh && \
-    echo 'wait' >> /app/start.sh && \
-    chmod +x /app/start.sh
-
-CMD ["/app/start.sh"]
+# Un seul processus. Si server.js meurt, le conteneur meurt et Coolify redémarre.
+CMD ["node", "server.js"]
