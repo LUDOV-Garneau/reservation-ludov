@@ -19,17 +19,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import DeleteReservationAction from "./DeleteReservationAction";
+import DeleteReservationAction from "../DeleteReservationAction/DeleteReservationAction";
 
 interface Game {
   nom: string;
@@ -68,27 +60,6 @@ type AlertState = {
   title: string;
   message: string;
 } | null;
-
-function pad2(n: number) {
-  return String(n).padStart(2, "0");
-}
-
-function formatICSDateTimeLocal(date: Date) {
-  return `${date.getFullYear()}${pad2(date.getMonth() + 1)}${pad2(
-    date.getDate()
-  )}T${pad2(date.getHours())}${pad2(date.getMinutes())}00`;
-}
-
-function toICSDateRange(dateStr: string, timeStr: string) {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const [hh, mm] = timeStr.split(":").map(Number);
-  const start = new Date(y, m - 1, d, hh, mm, 0);
-  const end = new Date(start.getTime() + 60 * 120 * 1000);
-  return {
-    dtStart: formatICSDateTimeLocal(start),
-    dtEnd: formatICSDateTimeLocal(end),
-  };
-}
 
 function GameCard({ game }: { game: Game }) {
   const t = useTranslations();
@@ -245,7 +216,7 @@ function ReservationHeader({
   onAlert: (
     type: "success" | "destructive" | "info" | "warning",
     message: string,
-    title?: string
+    title?: string,
   ) => void;
   onCancelSuccess: () => void;
   onCancelError: (error: Error) => void;
@@ -388,7 +359,7 @@ export default function DetailsReservation({
     (
       type: "success" | "destructive" | "info" | "warning",
       message: string,
-      title?: string
+      title?: string,
     ) => {
       setAlert({
         show: true,
@@ -403,7 +374,7 @@ export default function DetailsReservation({
         }, 1600);
       }
     },
-    [router]
+    [router],
   );
 
   return (
@@ -471,18 +442,14 @@ export default function DetailsReservation({
           router={router}
         />
 
-        {/* CONTAINER */}
         <div className="md:mx-5 flex flex-col gap-10">
-          {/* JEUX */}
           <div>
-            {/* TEXTE DE SECTION */}
             <div className="flex items-center gap-3 mb-6">
               <Gamepad2 className="h-6 w-6 text-cyan-600" />
               <h2 className="text-2xl font-bold text-gray-900">
                 {t("reservation.details.selectedGames")}
               </h2>
             </div>
-            {/* LAYOUT DES CARTES */}
             {jeux.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {jeux.map((jeu, index) => (
@@ -495,47 +462,35 @@ export default function DetailsReservation({
                 ))}
               </div>
             ) : (
-              <div>
-                <Card>
-                  <CardContent className="p-12 text-center">
-                    <Gamepad2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 font-medium">
-                      {t("reservation.details.noGames")}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Gamepad2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500 font-medium">
+                    {t("reservation.details.noGames")}
+                  </p>
+                </CardContent>
+              </Card>
             )}
           </div>
-          {/* CONSOLE ET ACCESSOIRS */}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CONSOLES */}
             <div>
-              {/* TEXTE DE SECTION */}
               <div className="flex items-center gap-3 mb-6">
                 <Monitor className="h-6 w-6 text-cyan-600" />
                 <h2 className="text-2xl font-bold text-gray-900">
                   {t("reservation.details.selectedConsole")}
                 </h2>
               </div>
-              {/* CONSOLES */}
-              <div>
-                <ConsoleCard item={console} />
-              </div>
+              <ConsoleCard item={console} />
             </div>
-            {/* ACCESSOIRS */}
             <div>
-              {/* TEXTE DE SECTION */}
               <div className="flex items-center gap-3 mb-6">
                 <Cable className="h-6 w-6 text-cyan-600" />
                 <h2 className="text-2xl font-bold text-gray-900">
                   {t("reservation.details.selectedAccessory")}
                 </h2>
               </div>
-              {/* CARTE */}
-              <div>
-                <AccessoriesSection accessories={accessoires} />
-              </div>
+              <AccessoriesSection accessories={accessoires} />
             </div>
           </div>
         </div>

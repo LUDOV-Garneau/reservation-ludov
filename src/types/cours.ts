@@ -1,5 +1,5 @@
 export interface Cours {
-    id : number,
-    code_cours: string,
-    nom_cours: string
+  id: number;
+  codeCours: string;
+  nomCours: string;
 }

@@ -1,85 +1,57 @@
-// app/api/reservations/upcoming/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
-import { RowDataPacket } from "mysql2";
-
-type ReservationRow = RowDataPacket & {
-  id: number;
-  createdAt: Date | string;
-  console_name: string;
-  station_name: string;
-  game1_title: string | null;
-  game2_title: string | null;
-  game3_title: string | null;
-};
+import db from "@/db";
+import { reservation, consoleType, stations, games } from "@/db/schema";
+import { and, eq, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/mysql-core";
 
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get("SESSION")?.value;
-    if(!token) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
+    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     const user = verifyToken(token);
-    if (!user?.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    if (!user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const userId = user.id;
+    const userId = Number(user.id);
+    const g1 = alias(games, "g1");
+    const g2 = alias(games, "g2");
+    const g3 = alias(games, "g3");
 
-    const [rows] = await pool.query<ReservationRow[]>(
-      `
-      SELECT 
-        r.id,
-        DATE(r.date) AS date,
-        r.time,
-        c.name AS console_name,
-        g1.titre AS game1_title,
-        g2.titre AS game2_title,
-        g3.titre AS game3_title,
-        s.name AS station_name
-      FROM reservation r
-      JOIN console_type c ON c.id = r.console_type_id
-      LEFT JOIN stations s ON s.id = r.station
-      LEFT JOIN games g1 ON g1.id = r.game1_id
-      LEFT JOIN games g2 ON g2.id = r.game2_id
-      LEFT JOIN games g3 ON g3.id = r.game3_id
-      WHERE r.user_id = ?  AND TIMESTAMP(r.date, r.time) >= NOW() 
-      AND r.archived = 0
-      ORDER BY TIMESTAMP(r.date, r.time)`,
-      [userId]
-    );
+    const rows = await db
+      .select({
+        id: reservation.id,
+        date: sql<string>`DATE(${reservation.date})`,
+        time: reservation.time,
+        consoleName: consoleType.name,
+        game1Title: g1.titre,
+        game2Title: g2.titre,
+        game3Title: g3.titre,
+        stationName: stations.name,
+      })
+      .from(reservation)
+      .innerJoin(consoleType, eq(reservation.consoleTypeId, consoleType.id))
+      .leftJoin(stations, eq(reservation.station, stations.id))
+      .leftJoin(g1, eq(reservation.game1Id, g1.id))
+      .leftJoin(g2, eq(reservation.game2Id, g2.id))
+      .leftJoin(g3, eq(reservation.game3Id, g3.id))
+      .where(and(
+        eq(reservation.userId, userId),
+        sql`TIMESTAMP(${reservation.date}, ${reservation.time}) >= NOW()`,
+        eq(reservation.archived, 0)
+      ))
+      .orderBy(sql`TIMESTAMP(${reservation.date}, ${reservation.time})`);
 
-    if (!rows.length) {
-      return NextResponse.json([]);
-    }
+    if (!rows.length) return NextResponse.json([]);
+
     const reservations = rows.map((row) => {
-      const games = [row.game1_title, row.game2_title, row.game3_title]
-        .filter(Boolean) as string[];
-
-      let formattedDate: string;
-      if (row.date instanceof Date) {
-        const year = row.date.getFullYear();
-        const month = String(row.date.getMonth() + 1).padStart(2, '0');
-        const day = String(row.date.getDate()).padStart(2, '0');
-        formattedDate = `${year}-${month}-${day}`;
-      } else {
-        formattedDate = String(row.date).split('T')[0];
-      }
-
+      const gamesArr = [row.game1Title, row.game2Title, row.game3Title].filter(Boolean) as string[];
+      const dateStr = String(row.date).split("T")[0];
       return {
         id: String(row.id),
-        games,
-        station: row.station_name,
-        console: row.console_name,
-        date: formattedDate,
+        games: gamesArr,
+        station: row.stationName,
+        console: row.consoleName,
+        date: dateStr,
         heure: row.time.slice(0, 5),
       };
     });
@@ -87,9 +59,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(reservations);
   } catch (error) {
     console.error("ERREUR UPCOMING RÉSERVATIONS:", error);
-    return NextResponse.json(
-      { error: "Erreur lors de la récupération des réservations à venir." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Erreur lors de la récupération des réservations à venir." }, { status: 500 });
   }
 }

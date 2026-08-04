@@ -26,6 +26,7 @@ export default async function Header() {
             width={1010}
             height={247}
             className="md:w-52 w-[128px] h-auto"
+            priority
           />
         </Link>
         <HeaderMenu

@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock } from "lucide-react";
 
 type Reservation = {
-  id: number;
+  id: string;
   user_id: number;
   firstname: string;
   lastname: string;
@@ -121,7 +121,7 @@ function useReservation(id: string) {
     const fetchReservation = async () => {
       try {
         const response = await fetch(
-          `/api/admin/details-reservation?id=${encodeURIComponent(id)}`
+          `/api/admin/details-reservation?id=${encodeURIComponent(id)}`,
         );
 
         if (!response.ok) {
@@ -163,13 +163,16 @@ export default function DetailsReservationClient({ id }: { id: string }) {
 
   return (
     <DetailsReservation
-      reservationId={reservation.id.toString()}
+      reservationId={reservation.id ?? id}
       user_id={reservation.user_id}
       firstname={reservation.firstname}
       lastname={reservation.lastname}
       email={reservation.email}
       jeux={reservation.jeux}
-      console={{ ...reservation.console, picture: reservation.console.picture ?? "" }}
+      console={{
+        ...reservation.console,
+        picture: reservation.console.picture ?? "",
+      }}
       archived={reservation.archived}
       accessoires={reservation.accessoires ?? []}
       station={reservation.station}

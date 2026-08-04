@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import DetailsReservationClient from "@/components/admin/reservations/DetailsReservationClient";
+import DetailsReservationClient from "@/components/admin/reservations/details/DetailsReservationClient";
 
 export default async function ReservationDetails({
   params,

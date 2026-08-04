@@ -49,13 +49,14 @@ import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import PaginationControls from "../users/Pagination";
+import { usePagination } from "@/hooks/usePagination";
 import DeleteStationAction from "./DialogConfirmationDeleteCours";
 import UpdateCoursForm from "./UpdateCoursForm";
 
 type Cours = {
   id: number;
-  nom_cours: string;
-  code_cours: string;
+  nomCours: string;
+  codeCours: string;
 };
 
 type AlertState = {
@@ -75,43 +76,6 @@ type ConfirmDialogState = {
 
 const ITEMS_PER_PAGE = 10;
 
-function usePagination(
-  totalItems: number,
-  itemsPerPage: number = ITEMS_PER_PAGE
-) {
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
-
-  const goToNextPage = useCallback(() => {
-    setPage((prev) => Math.min(prev + 1, totalPages));
-  }, [totalPages]);
-
-  const goToPrevPage = useCallback(() => {
-    setPage((prev) => Math.max(prev - 1, 1));
-  }, []);
-
-  const goToPage = useCallback(
-    (pageNum: number) => {
-      setPage(Math.max(1, Math.min(pageNum, totalPages)));
-    },
-    [totalPages]
-  );
-
-  const resetPage = useCallback(() => setPage(1), []);
-
-  return {
-    page,
-    totalPages,
-    itemsPerPage,
-    goToNextPage,
-    goToPrevPage,
-    goToPage,
-    resetPage,
-    isFirstPage: page === 1,
-    isLastPage: page === totalPages,
-  };
-}
-
 function CoursTableRow({
   cours,
   onAlert,
@@ -129,8 +93,8 @@ function CoursTableRow({
 }) {
   return (
     <TableRow key={cours.id}>
-      <TableCell className="md:table-cell hidden">{cours.nom_cours}</TableCell>
-      <TableCell className="table-cell">{cours.code_cours}</TableCell>
+      <TableCell className="md:table-cell hidden">{cours.nomCours}</TableCell>
+      <TableCell className="table-cell">{cours.codeCours}</TableCell>
       <TableCell className="table-cell text-right">
         <div>
           <div className="hidden md:flex gap-2 justify-end">
@@ -153,7 +117,7 @@ function CoursTableRow({
             </TooltipProvider>
 
             <DeleteStationAction
-              targetCours={{ id: cours.id, name: cours.nom_cours }}
+              targetCours={{ id: cours.id, name: cours.nomCours }}
               onAlert={onAlert}
               onSuccess={onSuccess}
             >
@@ -195,7 +159,7 @@ function CoursTableRow({
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DeleteStationAction
-                  targetCours={{ id: cours.id, name: cours.nom_cours }}
+                  targetCours={{ id: cours.id, name: cours.nomCours }}
                   onAlert={onAlert}
                   onSuccess={onSuccess}
                 >
@@ -427,7 +391,7 @@ export default function CoursTable() {
 
   const filteredStations = cours.filter((cours) => {
     const search = searchQuery.toLowerCase();
-    return cours.nom_cours.toLowerCase().includes(search);
+    return cours.nomCours.toLowerCase().includes(search);
   });
 
   const handleRefresh = useCallback(async () => {

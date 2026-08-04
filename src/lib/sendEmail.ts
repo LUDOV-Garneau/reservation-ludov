@@ -15,7 +15,7 @@ export async function sendEmail({
   html,
 }: SendEmailProps): Promise<SMTPTransport.SentMessageInfo> {
   const response = await mailer.sendMail({
-    from: `"LUDOV - réservation" <no-reply@dyonisos.store>`,
+    from: process.env.SMTP_FROM,
     to,
     subject,
     text,

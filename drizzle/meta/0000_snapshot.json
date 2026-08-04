@@ -1,0 +1,1705 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "5",
+  "dialect": "mysql",
+  "tables": {
+    "accessoires": {
+      "name": "accessoires",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consoles": {
+          "autoincrement": false,
+          "name": "consoles",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "koha_id": {
+          "autoincrement": false,
+          "name": "koha_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "hidden": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "hidden",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastUpdatedAt": {
+          "autoincrement": false,
+          "name": "lastUpdatedAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "accessoires_id": {
+          "name": "accessoires_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "columns": [
+            "id"
+          ]
+        },
+        "uq_accessoires_koha": {
+          "name": "uq_accessoires_koha",
+          "columns": [
+            "koha_id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "console_stock": {
+      "name": "console_stock",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "console_type_id": {
+          "autoincrement": false,
+          "name": "console_type_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "biblio_id": {
+          "autoincrement": false,
+          "name": "biblio_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "picture": {
+          "autoincrement": false,
+          "name": "picture",
+          "type": "longtext",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_active": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "is_active",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "holding": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "holding",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastUpdatedAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "lastUpdatedAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "console_stock_id": {
+          "name": "console_stock_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "idx_active": {
+          "name": "idx_active",
+          "columns": [
+            "is_active"
+          ],
+          "isUnique": false
+        },
+        "idx_console_type": {
+          "name": "idx_console_type",
+          "columns": [
+            "console_type_id"
+          ],
+          "isUnique": false
+        },
+        "ix_stock_biblio": {
+          "name": "ix_stock_biblio",
+          "columns": [
+            "biblio_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "console_stock_ibfk_1": {
+          "name": "console_stock_ibfk_1",
+          "tableFrom": "console_stock",
+          "tableTo": "console_type",
+          "columnsFrom": [
+            "console_type_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "console_type": {
+      "name": "console_type",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "picture": {
+          "autoincrement": false,
+          "name": "picture",
+          "type": "longtext",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "autoincrement": false,
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "console_type_id": {
+          "name": "console_type_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "columns": [
+            "id"
+          ]
+        },
+        "name": {
+          "name": "name",
+          "columns": [
+            "name"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "cours": {
+      "name": "cours",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "code_cours": {
+          "autoincrement": false,
+          "name": "code_cours",
+          "type": "varchar(7)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nom_cours": {
+          "autoincrement": false,
+          "name": "nom_cours",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "cours_id": {
+          "name": "cours_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "email_logs": {
+      "name": "email_logs",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reservation_id": {
+          "autoincrement": false,
+          "name": "reservation_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email_type": {
+          "autoincrement": false,
+          "name": "email_type",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "recipient": {
+          "autoincrement": false,
+          "name": "recipient",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status": {
+          "autoincrement": false,
+          "name": "status",
+          "type": "enum('sent','failed')",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "error_message": {
+          "autoincrement": false,
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "email_logs_id": {
+          "name": "email_logs_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "idx_created": {
+          "name": "idx_created",
+          "columns": [
+            "created_at"
+          ],
+          "isUnique": false
+        },
+        "idx_reservation": {
+          "name": "idx_reservation",
+          "columns": [
+            "reservation_id"
+          ],
+          "isUnique": false
+        },
+        "idx_status": {
+          "name": "idx_status",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "games": {
+      "name": "games",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titre": {
+          "autoincrement": false,
+          "name": "titre",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "author": {
+          "autoincrement": false,
+          "name": "author",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "platform": {
+          "autoincrement": false,
+          "name": "platform",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "console_type_id": {
+          "autoincrement": false,
+          "name": "console_type_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "platform_id": {
+          "autoincrement": false,
+          "name": "platform_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "biblio_id": {
+          "autoincrement": false,
+          "name": "biblio_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "console_koha_id": {
+          "autoincrement": false,
+          "name": "console_koha_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "picture": {
+          "autoincrement": false,
+          "name": "picture",
+          "type": "longtext",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "holding": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "holding",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "required_accessories": {
+          "autoincrement": false,
+          "name": "required_accessories",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastUpdatedAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "lastUpdatedAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "games_id": {
+          "name": "games_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "ix_games_console_type": {
+          "name": "ix_games_console_type",
+          "columns": [
+            "console_type_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "games_fk_console_type": {
+          "name": "games_fk_console_type",
+          "tableFrom": "games",
+          "tableTo": "console_type",
+          "columnsFrom": [
+            "console_type_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "columns": [
+            "id"
+          ]
+        },
+        "uq_games_biblio": {
+          "name": "uq_games_biblio",
+          "columns": [
+            "biblio_id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "hour_ranges": {
+      "name": "hour_ranges",
+      "columns": {
+        "range_id": {
+          "autoincrement": true,
+          "name": "range_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weekly_id": {
+          "autoincrement": false,
+          "name": "weekly_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_hour": {
+          "autoincrement": false,
+          "name": "start_hour",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_minute": {
+          "autoincrement": false,
+          "name": "start_minute",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_hour": {
+          "autoincrement": false,
+          "name": "end_hour",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_minute": {
+          "autoincrement": false,
+          "name": "end_minute",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "hour_ranges_range_id": {
+          "name": "hour_ranges_range_id",
+          "columns": [
+            "range_id"
+          ]
+        }
+      },
+      "indexes": {
+        "weekly_id": {
+          "name": "weekly_id",
+          "columns": [
+            "weekly_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "hour_ranges_ibfk_1": {
+          "name": "hour_ranges_ibfk_1",
+          "tableFrom": "hour_ranges",
+          "tableTo": "weekly_availabilities",
+          "columnsFrom": [
+            "weekly_id"
+          ],
+          "columnsTo": [
+            "weekly_id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "otp": {
+      "name": "otp",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "autoincrement": false,
+          "name": "user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "otp_code": {
+          "autoincrement": false,
+          "name": "otp_code",
+          "type": "varchar(6)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "created_at",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "expires_at": {
+          "autoincrement": false,
+          "name": "expires_at",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_used": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "is_used",
+          "type": "tinyint(1)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "otp_id": {
+          "name": "otp_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "user_id": {
+          "name": "user_id",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "otp_ibfk_1": {
+          "name": "otp_ibfk_1",
+          "tableFrom": "otp",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "policies": {
+      "name": "policies",
+      "columns": {
+        "id": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "id",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "policies": {
+          "autoincrement": false,
+          "name": "policies",
+          "type": "longtext",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastUpdatedAt": {
+          "autoincrement": false,
+          "name": "lastUpdatedAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "policies_id": {
+          "name": "policies_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraint": {
+        "singleton_policies": {
+          "name": "singleton_policies",
+          "value": "(`id` = 1)"
+        }
+      }
+    },
+    "reservation": {
+      "name": "reservation",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "console_id": {
+          "autoincrement": false,
+          "name": "console_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "console_type_id": {
+          "autoincrement": false,
+          "name": "console_type_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "autoincrement": false,
+          "name": "user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game1_id": {
+          "autoincrement": false,
+          "name": "game1_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "game2_id": {
+          "autoincrement": false,
+          "name": "game2_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game3_id": {
+          "autoincrement": false,
+          "name": "game3_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "accessory_ids": {
+          "autoincrement": false,
+          "name": "accessory_ids",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cours_id": {
+          "autoincrement": false,
+          "name": "cours_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "station": {
+          "autoincrement": false,
+          "name": "station",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "autoincrement": false,
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time": {
+          "autoincrement": false,
+          "name": "time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "archived": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "archived",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cancellation_reason": {
+          "autoincrement": false,
+          "name": "cancellation_reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reminder_enabled": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "reminder_enabled",
+          "type": "tinyint(1)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reminder_hours_before": {
+          "autoincrement": false,
+          "name": "reminder_hours_before",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reminder_sent": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "reminder_sent",
+          "type": "tinyint(1)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reminder_sent_at": {
+          "autoincrement": false,
+          "name": "reminder_sent_at",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastUpdatedAt": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "lastUpdatedAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "reservation_id": {
+          "name": "reservation_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "idx_reminder_pending": {
+          "name": "idx_reminder_pending",
+          "columns": [
+            "reminder_enabled",
+            "reminder_sent",
+            "date",
+            "time"
+          ],
+          "isUnique": false
+        },
+        "ix_res_console": {
+          "name": "ix_res_console",
+          "columns": [
+            "console_id"
+          ],
+          "isUnique": false
+        },
+        "ix_res_console_type": {
+          "name": "ix_res_console_type",
+          "columns": [
+            "console_type_id"
+          ],
+          "isUnique": false
+        },
+        "ix_res_cours": {
+          "name": "ix_res_cours",
+          "columns": [
+            "cours_id"
+          ],
+          "isUnique": false
+        },
+        "ix_res_game1": {
+          "name": "ix_res_game1",
+          "columns": [
+            "game1_id"
+          ],
+          "isUnique": false
+        },
+        "ix_res_game2": {
+          "name": "ix_res_game2",
+          "columns": [
+            "game2_id"
+          ],
+          "isUnique": false
+        },
+        "ix_res_game3": {
+          "name": "ix_res_game3",
+          "columns": [
+            "game3_id"
+          ],
+          "isUnique": false
+        },
+        "ix_res_station": {
+          "name": "ix_res_station",
+          "columns": [
+            "station"
+          ],
+          "isUnique": false
+        },
+        "ix_res_user": {
+          "name": "ix_res_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "reservation_fk1": {
+          "name": "reservation_fk1",
+          "tableFrom": "reservation",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "reservation_fk3": {
+          "name": "reservation_fk3",
+          "tableFrom": "reservation",
+          "tableTo": "console_stock",
+          "columnsFrom": [
+            "console_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "reservation_fk4": {
+          "name": "reservation_fk4",
+          "tableFrom": "reservation",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "reservation_fk5": {
+          "name": "reservation_fk5",
+          "tableFrom": "reservation",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "reservation_fk6": {
+          "name": "reservation_fk6",
+          "tableFrom": "reservation",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game3_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "reservation_hold": {
+      "name": "reservation_hold",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "autoincrement": false,
+          "name": "user_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "console_id": {
+          "autoincrement": false,
+          "name": "console_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "console_type_id": {
+          "autoincrement": false,
+          "name": "console_type_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game1_id": {
+          "autoincrement": false,
+          "name": "game1_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game2_id": {
+          "autoincrement": false,
+          "name": "game2_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "game3_id": {
+          "autoincrement": false,
+          "name": "game3_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "station_id": {
+          "autoincrement": false,
+          "name": "station_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "accessoirs": {
+          "autoincrement": false,
+          "name": "accessoirs",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cours": {
+          "autoincrement": false,
+          "name": "cours",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "autoincrement": false,
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "time": {
+          "autoincrement": false,
+          "name": "time",
+          "type": "time",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expireAt": {
+          "autoincrement": false,
+          "name": "expireAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "reservation_hold_id": {
+          "name": "reservation_hold_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "ix_hold_console": {
+          "name": "ix_hold_console",
+          "columns": [
+            "console_id"
+          ],
+          "isUnique": false
+        },
+        "ix_hold_game1": {
+          "name": "ix_hold_game1",
+          "columns": [
+            "game1_id"
+          ],
+          "isUnique": false
+        },
+        "ix_hold_game2": {
+          "name": "ix_hold_game2",
+          "columns": [
+            "game2_id"
+          ],
+          "isUnique": false
+        },
+        "ix_hold_game3": {
+          "name": "ix_hold_game3",
+          "columns": [
+            "game3_id"
+          ],
+          "isUnique": false
+        },
+        "ix_hold_station": {
+          "name": "ix_hold_station",
+          "columns": [
+            "station_id"
+          ],
+          "isUnique": false
+        },
+        "ix_hold_user": {
+          "name": "ix_hold_user",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "reservation_hold_console_type_id_fk": {
+          "name": "reservation_hold_console_type_id_fk",
+          "tableFrom": "reservation_hold",
+          "tableTo": "console_type",
+          "columnsFrom": [
+            "console_type_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        },
+        "reservation_hold_fk1": {
+          "name": "reservation_hold_fk1",
+          "tableFrom": "reservation_hold",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "reservation_hold_fk2": {
+          "name": "reservation_hold_fk2",
+          "tableFrom": "reservation_hold",
+          "tableTo": "console_stock",
+          "columnsFrom": [
+            "console_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "cascade"
+        },
+        "reservation_hold_fk3": {
+          "name": "reservation_hold_fk3",
+          "tableFrom": "reservation_hold",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game1_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        },
+        "reservation_hold_fk4": {
+          "name": "reservation_hold_fk4",
+          "tableFrom": "reservation_hold",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game2_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        },
+        "reservation_hold_fk5": {
+          "name": "reservation_hold_fk5",
+          "tableFrom": "reservation_hold",
+          "tableTo": "games",
+          "columnsFrom": [
+            "game3_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        },
+        "reservation_hold_fk6": {
+          "name": "reservation_hold_fk6",
+          "tableFrom": "reservation_hold",
+          "tableTo": "stations",
+          "columnsFrom": [
+            "station_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "specific_dates": {
+      "name": "specific_dates",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "autoincrement": false,
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_hour": {
+          "autoincrement": false,
+          "name": "start_hour",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_minute": {
+          "autoincrement": false,
+          "name": "start_minute",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_hour": {
+          "autoincrement": false,
+          "name": "end_hour",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_minute": {
+          "autoincrement": false,
+          "name": "end_minute",
+          "type": "varchar(2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_exception": {
+          "autoincrement": false,
+          "name": "is_exception",
+          "type": "tinyint(1)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "specific_dates_id": {
+          "name": "specific_dates_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "stations": {
+      "name": "stations",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isActive": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "isActive",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "consoles": {
+          "autoincrement": false,
+          "name": "consoles",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastUpdatedAt": {
+          "autoincrement": false,
+          "name": "lastUpdatedAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "stations_id": {
+          "name": "stations_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "id": {
+          "autoincrement": true,
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "firstname": {
+          "autoincrement": false,
+          "name": "firstname",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastname": {
+          "autoincrement": false,
+          "name": "lastname",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "autoincrement": false,
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "password": {
+          "autoincrement": false,
+          "name": "password",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isAdmin": {
+          "autoincrement": false,
+          "name": "isAdmin",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastUpdatedAt": {
+          "autoincrement": false,
+          "name": "lastUpdatedAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "autoincrement": false,
+          "name": "createdAt",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lastLogin": {
+          "autoincrement": false,
+          "name": "lastLogin",
+          "type": "datetime",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "users_id": {
+          "name": "users_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {
+        "id": {
+          "name": "id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
+    "weekly_availabilities": {
+      "name": "weekly_availabilities",
+      "columns": {
+        "weekly_id": {
+          "autoincrement": true,
+          "name": "weekly_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_date": {
+          "autoincrement": false,
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_date": {
+          "autoincrement": false,
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "day_of_week": {
+          "autoincrement": false,
+          "name": "day_of_week",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enabled": {
+          "autoincrement": false,
+          "name": "enabled",
+          "type": "tinyint(1)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "always_available": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "always_available",
+          "type": "tinyint(1)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "weekly_availabilities_weekly_id": {
+          "name": "weekly_availabilities_weekly_id",
+          "columns": [
+            "weekly_id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    }
+  },
+  "views": {
+    "console_catalog": {
+      "columns": {
+        "console_type_id": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "console_type_id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "autoincrement": false,
+          "name": "name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "picture": {
+          "autoincrement": false,
+          "name": "picture",
+          "type": "longtext",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "description": {
+          "autoincrement": false,
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_units": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "total_units",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "active_units": {
+          "autoincrement": false,
+          "name": "active_units",
+          "type": "decimal(23,0)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inactive_units": {
+          "autoincrement": false,
+          "name": "inactive_units",
+          "type": "decimal(23,0)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "isExisting": false,
+      "name": "console_catalog",
+      "algorithm": "undefined",
+      "definition": "select `ct`.`id` AS `console_type_id`,`ct`.`name` AS `name`,`ct`.`picture` AS `picture`,`ct`.`description` AS `description`,count(`cs`.`id`) AS `total_units`,sum((case when ((`cs`.`is_active` = 1) and (`cs`.`holding` = 0)) then 1 else 0 end)) AS `active_units`,sum((case when (`cs`.`is_active` = 0) then 1 else 0 end)) AS `inactive_units` from (`ludov_dev`.`console_type` `ct` left join `ludov_dev`.`console_stock` `cs` on((`ct`.`id` = `cs`.`console_type_id`))) where exists(select 1 from `ludov_dev`.`stations` `s` where json_contains(`s`.`consoles`,cast(`ct`.`id` as json),'$')) group by `ct`.`id`,`ct`.`name` order by `ct`.`name`",
+      "sqlSecurity": "definer"
+    }
+  },
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {
+      "console_stock": {
+        "columns": {
+          "createdAt": {
+            "isDefaultAnExpression": true
+          },
+          "lastUpdatedAt": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "email_logs": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "games": {
+        "columns": {
+          "lastUpdatedAt": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "otp": {
+        "columns": {
+          "created_at": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "reservation": {
+        "columns": {
+          "createdAt": {
+            "isDefaultAnExpression": true
+          },
+          "lastUpdatedAt": {
+            "isDefaultAnExpression": true
+          }
+        }
+      }
+    },
+    "indexes": {}
+  }
+}

@@ -69,7 +69,7 @@ function pad2(n: number) {
 
 function formatICSDateTimeLocal(date: Date) {
   return `${date.getFullYear()}${pad2(date.getMonth() + 1)}${pad2(
-    date.getDate()
+    date.getDate(),
   )}T${pad2(date.getHours())}${pad2(date.getMinutes())}00`;
 }
 
@@ -277,7 +277,7 @@ function ReservationHeader({
     downloadICS({
       title: t("reservation.details.pageDetailsTitle"),
       description: `${t(
-        "reservation.details.selectedConsole"
+        "reservation.details.selectedConsole",
       )}: ${consoleName}`,
       date,
       time: heure,
@@ -340,8 +340,8 @@ function ReservationHeader({
 
             <ReservationReminderDialog
               reservationId={reservationId}
-              onSendReminder={() => { }}
-              onError={() => { }}
+              onSendReminder={() => {}}
+              onError={() => {}}
             />
 
             <CancelReservationAlertDialog
@@ -418,10 +418,11 @@ export default function DetailsReservation({
         {alert?.show && (
           <Alert
             variant={alert.type === "destructive" ? "destructive" : "default"}
-            className={`mb-6 ${alert.type === "success"
-              ? "border-green-200 bg-green-50 text-green-900"
-              : ""
-              }`}
+            className={`mb-6 ${
+              alert.type === "success"
+                ? "border-green-200 bg-green-50 text-green-900"
+                : ""
+            }`}
             role="status"
             aria-live="polite"
           >
@@ -439,17 +440,18 @@ export default function DetailsReservation({
                   <AlertDescription>
                     {alert.type === "destructive"
                       ? alert.message ||
-                      "Une erreur est survenue. Veuillez essayer ultérieurement."
+                        "Une erreur est survenue. Veuillez essayer ultérieurement."
                       : alert.message}
                   </AlertDescription>
                 </div>
               </div>
               <button
                 onClick={() => setAlert(null)}
-                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${alert.type === "destructive"
-                  ? "bg-red-100 text-red-600 hover:bg-red-200"
-                  : "bg-green-100 text-green-600 hover:bg-green-200"
-                  }`}
+                className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-lg leading-none transition-colors ${
+                  alert.type === "destructive"
+                    ? "bg-red-100 text-red-600 hover:bg-red-200"
+                    : "bg-green-100 text-green-600 hover:bg-green-200"
+                }`}
                 aria-label="Fermer l'alerte"
               >
                 ×

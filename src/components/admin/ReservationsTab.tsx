@@ -1,6 +1,6 @@
 "use client";
 
-import ReservationTable from "@/components/admin/reservations/ReservationTable";
+import ReservationTable from "@/components/admin/reservations/list/ReservationsTable";
 import { TabsContent } from "@/components/ui/tabs";
 
 export default function ReservationsTab() {

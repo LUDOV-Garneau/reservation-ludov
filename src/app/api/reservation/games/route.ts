@@ -1,16 +1,7 @@
 import { NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
-
-interface GameRow extends RowDataPacket {
-  id: number;
-  titre: string;
-  author: string | null;
-  picture: string | null;
-  available: number;
-  biblio_id: number | null;
-  platform: string | null;
-}
+import db from "@/db";
+import { games } from "@/db/schema";
+import { and, asc, eq, sql } from "drizzle-orm";
 
 export async function GET(req: Request) {
   try {
@@ -19,91 +10,85 @@ export async function GET(req: Request) {
     const limit = parseInt(searchParams.get("limit") || "12", 10);
     const search = searchParams.get("search") || "";
     const consoleId = parseInt(searchParams.get("consoleId") || "0", 10);
-
     const offset = (page - 1) * limit;
-
-    let query: string;
-    let queryParams: (string | number)[];
-    let countQuery: string;
-    let countParams: (string | number)[];
 
     if (consoleId === 0) {
       return NextResponse.json({
         success: true,
         games: [],
-        pagination: {
-          page,
-          limit,
-          total: 0,
-          totalPages: 0,
-          hasMore: false,
-        },
+        pagination: { page, limit, total: 0, totalPages: 0, hasMore: false },
         hasMore: false,
       });
     }
 
+    let gamesRows: { id: number; titre: string; author: string | null; picture: string | null; platform: string | null; biblioId: number }[];
+    let totalCount: number;
+
     if (search) {
-      query = `
-        SELECT DISTINCT
-          id, titre, author, picture, platform, biblio_id
-        FROM games
-        WHERE LOWER(titre) LIKE LOWER(?)
-          AND console_type_id = ?
-          AND holding = 0
-        ORDER BY 
-          CASE 
-            WHEN LOWER(titre) LIKE LOWER(?) THEN 1
-            WHEN LOWER(titre) LIKE LOWER(?) THEN 2
-            ELSE 3
-          END,
-          titre ASC
-        LIMIT ? OFFSET ?
-      `;
       const searchPattern = `%${search}%`;
       const exactPattern = `${search}%`;
-      queryParams = [searchPattern, consoleId, exactPattern, searchPattern, limit, offset];
 
-      countQuery = `
-        SELECT COUNT(*) as total
-        FROM games
-        WHERE LOWER(titre) LIKE LOWER(?)
-          AND console_type_id = ?
-          AND holding = 0
-      `;
-      countParams = [searchPattern, consoleId];
+      gamesRows = await db
+        .selectDistinct({
+          id: games.id,
+          titre: games.titre,
+          author: games.author,
+          picture: games.picture,
+          platform: games.platform,
+          biblioId: games.biblioId,
+        })
+        .from(games)
+        .where(and(
+          sql`LOWER(${games.titre}) LIKE LOWER(${searchPattern})`,
+          eq(games.consoleTypeId, consoleId),
+          eq(games.holding, 0),
+        ))
+        .orderBy(
+          sql`CASE WHEN LOWER(${games.titre}) LIKE LOWER(${exactPattern}) THEN 1 WHEN LOWER(${games.titre}) LIKE LOWER(${searchPattern}) THEN 2 ELSE 3 END`,
+          asc(games.titre),
+        )
+        .limit(limit)
+        .offset(offset);
+
+      const [countRow] = await db
+        .select({ total: sql<number>`COUNT(*)` })
+        .from(games)
+        .where(and(
+          sql`LOWER(${games.titre}) LIKE LOWER(${searchPattern})`,
+          eq(games.consoleTypeId, consoleId),
+          eq(games.holding, 0)
+        ));
+      totalCount = countRow.total;
     } else {
-      query = `
-        SELECT DISTINCT
-          id, titre, author, picture, platform, biblio_id
-        FROM games
-        WHERE console_type_id = ?
-        AND holding = 0
-        ORDER BY titre ASC
-        LIMIT ? OFFSET ?
-      `;
-      queryParams = [consoleId, limit, offset];
+      gamesRows = await db
+        .select({
+          id: games.id,
+          titre: games.titre,
+          author: games.author,
+          picture: games.picture,
+          platform: games.platform,
+          biblioId: games.biblioId,
+        })
+        .from(games)
+        .where(and(eq(games.consoleTypeId, consoleId), eq(games.holding, 0)))
+        .orderBy(asc(games.titre))
+        .limit(limit)
+        .offset(offset);
 
-      countQuery = `
-        SELECT COUNT(*) as total
-        FROM games
-        WHERE console_type_id = ?
-        AND holding = 0
-      `;
-      countParams = [consoleId];
+      const [countRow] = await db
+        .select({ total: sql<number>`COUNT(*)` })
+        .from(games)
+        .where(and(eq(games.consoleTypeId, consoleId), eq(games.holding, 0)));
+      totalCount = countRow.total;
     }
-
-    const [gamesRows] = await pool.query<GameRow[]>(query, queryParams);
-    const [countRows] = await pool.query<RowDataPacket[]>(countQuery, countParams);
-
-    const totalCount = (countRows[0] as { total: number })?.total || 0;
 
     const formattedGames = gamesRows.map((game) => ({
       id: game.id,
       titre: game.titre || "Jeu sans nom",
       author: game.author || "",
       picture: game.picture,
-      available: Number(game.available) || 0,
-      biblio_id: game.biblio_id,
+      available: 0,
+      biblio_id: game.biblioId,
       platform: game.platform || "Unknown",
     }));
 
@@ -113,24 +98,15 @@ export async function GET(req: Request) {
     return NextResponse.json({
       success: true,
       games: formattedGames,
-      pagination: {
-        page,
-        limit,
-        total: totalCount,
-        totalPages,
-        hasMore,
-      },
+      pagination: { page, limit, total: totalCount, totalPages, hasMore },
       hasMore,
     });
-  } catch (err: unknown) {
+  } catch (err) {
     console.error("Erreur SQL:", err);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Erreur lors de la récupération des jeux",
-        error: err instanceof Error ? err.message : "Unknown error",
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({
+      success: false,
+      message: "Erreur lors de la récupération des jeux",
+      error: err instanceof Error ? err.message : "Unknown error",
+    }, { status: 500 });
   }
 }

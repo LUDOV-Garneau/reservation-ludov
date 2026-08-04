@@ -109,9 +109,7 @@ export default function CourseSelection() {
           <h2 className="text-4xl font-bold mb-2">
             {t("reservation.course.selectionTitle")}
           </h2>
-          <p className="text-gray-600">
-            {t("reservation.course.instruction")}
-          </p>
+          <p className="text-gray-600">{t("reservation.course.instruction")}</p>
         </div>
 
         {error && (
@@ -164,19 +162,19 @@ export default function CourseSelection() {
                     </span>
                   </SelectItem>
                 ) : (
-                  cours.map((c) => (
+                  cours.map((cour) => (
                     <SelectItem
-                      key={c.id}
-                      value={String(c.id)}
+                      key={cour.id}
+                      value={String(cour.id)}
                       className="text-base py-3 cursor-pointer hover:bg-cyan-50 focus:bg-cyan-50"
                     >
                       <div className="flex flex-row items-center gap-2">
                         <BookOpen className="h-4 w-4 text-cyan-600 flex-shrink-0" />
                         <span className="font-semibold text-cyan-700">
-                          {c.code_cours}
+                          {cour.codeCours}
                         </span>
                         <span className="text-gray-400 font-light">|</span>
-                        <span className="text-gray-900">{c.nom_cours}</span>
+                        <span className="text-gray-900">{cour.nomCours}</span>
                       </div>
                     </SelectItem>
                   ))
@@ -197,10 +195,10 @@ export default function CourseSelection() {
                   </p>
                   <div className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
                     <p className="text-lg font-bold text-cyan-800">
-                      {selectedCoursDetails.code_cours}
+                      {selectedCoursDetails.codeCours}
                     </p>
                     <p className="text-cyan-700 text-base">
-                      {selectedCoursDetails.nom_cours}
+                      {selectedCoursDetails.nomCours}
                     </p>
                   </div>
                 </div>

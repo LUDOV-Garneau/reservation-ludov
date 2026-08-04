@@ -223,6 +223,7 @@
       "stationAssigned": "Assigned station",
       "titleSection": "Reservation details",
       "selectedAccessory": "Selected accessories",
+      "noGames": "No games selected",
       "noAccessory": "No accessories selected",
       "cancelWarningTitle": "Irreversible action",
       "cancelWarning": "This action cannot be undone. You will need to create a new reservation if you change your mind.",
@@ -502,19 +503,19 @@
         "cancelled": "Cancelled"
       },
       "deleteDialog": {
-        "title": "Delete reservation",
-        "description": "This action is irreversible. The reservation will be permanently deleted.",
-        "confirm": "Delete",
-        "cancel": "Cancel",
-        "deleting": "Deleting..."
+        "title": "Cancel reservation",
+        "description": "This action is irreversible. The reservation will be cancelled and cannot be recovered.",
+        "confirm": "Confirm cancellation",
+        "cancel": "Go back",
+        "deleting": "Cancelling..."
       },
       "alert": {
         "deleteSuccess": {
-          "title": "Reservation deleted",
-          "message": "The reservation has been successfully deleted."
+          "title": "Reservation cancelled",
+          "message": "The reservation has been successfully cancelled."
         },
         "errorTitle": "An error occurred",
-        "deleteError": "An error occurred while deleting the reservation. Please try again later."
+        "deleteError": "An error occurred while cancelling the reservation. Please try again later."
       }
     },
     "stations": {

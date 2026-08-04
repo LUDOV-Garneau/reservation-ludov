@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
+import db from "@/db";
+import { consoleCatalog } from "@/db/schema";
+import { gt } from "drizzle-orm";
 
 export interface ConsoleCatalogItem {
   id: number;
@@ -12,19 +13,19 @@ export interface ConsoleCatalogItem {
 
 export async function GET() {
   try {
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT 
-        console_type_id as id,
-        name,
-        picture,
-        active_units,
-        total_units
-       FROM console_catalog 
-       WHERE active_units > 0
-       ORDER BY name`
-    );
+    const consoles = await db
+      .select({
+        id: consoleCatalog.consoleTypeId,
+        name: consoleCatalog.name,
+        picture: consoleCatalog.picture,
+        active_units: consoleCatalog.activeUnits,
+        total_units: consoleCatalog.totalUnits,
+      })
+      .from(consoleCatalog)
+      .where(gt(consoleCatalog.activeUnits, "0"))
+      .orderBy(consoleCatalog.name);
 
-    return NextResponse.json(rows);
+    return NextResponse.json(consoles);
   } catch (err) {
     console.error(err);
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });

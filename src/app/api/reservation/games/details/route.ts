@@ -1,26 +1,14 @@
-// app/api/reservation/games/details/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/db";
-import { RowDataPacket } from "mysql2";
-
-interface GameRow extends RowDataPacket {
-  id: number;
-  titre: string;
-  picture: string | null;
-  available: number;
-  biblio_id?: number;
-  author?: string;
-}
+import db from "@/db";
+import { inArray } from "drizzle-orm";
+import { games } from "@/db/schema";
 
 export async function GET(req: NextRequest) {
   try {
     const idsParam = req.nextUrl.searchParams.get("ids");
 
     if (!idsParam) {
-      return NextResponse.json(
-        { success: false, message: "ids param is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "ids param is required" }, { status: 400 });
     }
 
     const ids = idsParam
@@ -29,36 +17,22 @@ export async function GET(req: NextRequest) {
       .filter((id) => !isNaN(id));
 
     if (ids.length === 0) {
-      return NextResponse.json(
-        { success: false, message: "No valid game IDs provided" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, message: "No valid game IDs provided" }, { status: 400 });
     }
 
-    // On récupère les jeux de la BD
-    const [rows] = await pool.query<GameRow[]>(
-      `SELECT id, titre, picture, biblio_id, author
-       FROM games
-       WHERE id IN (?)`,
-      [ids]
-    );
+    const rows = await db.select({
+      id: games.id,
+      titre: games.titre,
+      picture: games.picture,
+      biblio_id: games.biblioId,
+      author: games.author,
+    })
+    .from(games)
+    .where(inArray(games.id, ids));
 
-    return NextResponse.json(
-      rows.map((g) => ({
-        id: g.id,
-        titre: g.titre,
-        picture: g.picture,
-        available: g.available,
-        biblio_id: g.biblio_id,
-        author: g.author,
-      })),
-      { status: 200 }
-    );
+    return NextResponse.json(rows, { status: 200 });
   } catch (err) {
     console.error("Erreur API game details:", err);
-    return NextResponse.json(
-      { success: false, message: "Erreur serveur" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, message: "Erreur serveur" }, { status: 500 });
   }
 }
