@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     }
 
     const targetUser = await db.query.users.findFirst({
-      columns: { id: true, email: true },
+      columns: { id: true, email: true, preferredLocale: true },
       where: (t) => eq(t.id, targetUserId),
     });
 
@@ -30,7 +30,10 @@ export async function POST(req: NextRequest) {
 
     await db.update(users).set({ password: null }).where(eq(users.id, targetUserId));
 
-    const res = await sendResetPasswordEmail({ to: targetUser.email });
+    const res = await sendResetPasswordEmail({
+      to: targetUser.email,
+      locale: targetUser.preferredLocale,
+    });
     if (res.rejected.length > 0) throw new Error();
 
     return NextResponse.json({ success: true, message: "Mot de passe réinitialisé avec succès" }, { status: 200 });

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import PolitiquesClient from "@/components/politiques/PolitiquesClient";
@@ -37,6 +37,12 @@ export default function FooterInfos() {
           >
             {t("footer.policy")}
           </button>
+          <Link
+            href="/politique-utilisation"
+            className="text-black hover:text-[#aaaaaa] transition-all duration-300"
+          >
+            {t("politique.footerLink")}
+          </Link>
         </div>
       </div>
 

@@ -48,7 +48,7 @@ import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "./Pagination";
 import ResetPasswordAction from "./DialogConfirmationResetsPassword";
 import DeleteUserAction from "./DialogConfirmationDeleteUser";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 type User = {
   id: number;
@@ -67,18 +67,12 @@ type AlertState = {
 
 const ITEMS_PER_PAGE = 10;
 
-function getCurrentUserIdFromCookie(): number | null {
-  if (typeof document === "undefined") return null;
-
-  const cookies = document.cookie.split(";");
-  const sessionCookie = cookies.find((c) => c.trim().startsWith("SESSION="));
-
-  if (!sessionCookie) return null;
-
+async function fetchCurrentUserId(): Promise<number | null> {
   try {
-    const token = sessionCookie.split("=")[1];
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload.id ? Number(payload.id) : null;
+    const res = await fetch("/api/auth/me");
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.id ? Number(data.id) : null;
   } catch {
     return null;
   }
@@ -421,21 +415,26 @@ export default function UsersTable() {
   const [selectedUser, setSelectedUser] = useState<number | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
+  // Recherche débouncée (350 ms), envoyée au serveur : couvre toutes les pages.
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   useEffect(() => {
-    const userId = getCurrentUserIdFromCookie();
-    setCurrentUserId(userId);
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
-    if (userId === null) {
-      console.warn("Unable to retrieve current user ID from cookies");
-    }
-
+  useEffect(() => {
+    fetchCurrentUserId().then(setCurrentUserId);
+    // Les statistiques ne changent pas en paginant : un seul chargement.
     fetchMetrics();
-    fetchUsers(pagination.page, ITEMS_PER_PAGE);
-  }, [pagination.page]);
+  }, []);
+
+  useEffect(() => {
+    fetchUsers(pagination.page, ITEMS_PER_PAGE, debouncedSearch);
+  }, [pagination.page, debouncedSearch]);
 
   useEffect(() => {
     pagination.resetPage();
-  }, [searchQuery]);
+  }, [debouncedSearch]);
 
   async function fetchMetrics() {
     try {
@@ -463,14 +462,20 @@ export default function UsersTable() {
     }
   }
 
-  async function fetchUsers(page = 1, limit = ITEMS_PER_PAGE) {
+  async function fetchUsers(page = 1, limit = ITEMS_PER_PAGE, search = "") {
     try {
       setLoading(true);
-      const res = await fetch(`/api/admin/users?page=${page}&limit=${limit}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-      });
+      const searchParam = search
+        ? `&search=${encodeURIComponent(search)}`
+        : "";
+      const res = await fetch(
+        `/api/admin/users?page=${page}&limit=${limit}${searchParam}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        },
+      );
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -492,23 +497,17 @@ export default function UsersTable() {
     }
   }
 
-  const filteredUsers = users.filter((user) => {
-    const search = searchQuery.toLowerCase();
-    return (
-      user.email.toLowerCase().includes(search) ||
-      user.firstName.toLowerCase().includes(search) ||
-      user.lastName.toLowerCase().includes(search)
-    );
-  });
+  // La recherche est faite côté serveur : la liste reçue est déjà filtrée.
+  const filteredUsers = users;
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await Promise.all([
       fetchMetrics(),
-      fetchUsers(pagination.page, pagination.itemsPerPage),
+      fetchUsers(pagination.page, pagination.itemsPerPage, debouncedSearch),
     ]);
     setIsRefreshing(false);
-  }, [pagination.page, pagination.itemsPerPage]);
+  }, [pagination.page, pagination.itemsPerPage, debouncedSearch]);
 
   const handleRowClick = useCallback((user: User) => {
     setSelectedUser(user.id);

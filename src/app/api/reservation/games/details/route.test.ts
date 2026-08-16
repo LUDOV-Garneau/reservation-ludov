@@ -1,12 +1,20 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { NextRequest } from "next/server";
 import db from "@/db";
 import { GET } from "./route";
+import { createNextRequestWithCookie } from "../../test-helpers";
 
 vi.mock("@/db", () => ({
   default: {
     select: vi.fn(),
   },
+}));
+
+vi.mock("@/lib/jwt", () => ({
+  verifyToken: vi.fn((token: string) =>
+    token === "mock-token"
+      ? { id: 1, name: "Test User", email: "test@example.com", isAdmin: false }
+      : null,
+  ),
 }));
 
 function chain(result: unknown) {
@@ -39,7 +47,7 @@ describe("API /reservation/games/details route", () => {
       ]) as ReturnType<typeof db.select>
     );
 
-    const mockRequest = new NextRequest(
+    const mockRequest = createNextRequestWithCookie(
       "http://localhost/api/reservation/games/details?ids=1,2"
     );
 
@@ -55,7 +63,7 @@ describe("API /reservation/games/details route", () => {
   });
 
   it("returns 400 when ids parameter is missing", async () => {
-    const mockRequest = new NextRequest(
+    const mockRequest = createNextRequestWithCookie(
       "http://localhost/api/reservation/games/details"
     );
 
@@ -68,7 +76,7 @@ describe("API /reservation/games/details route", () => {
   });
 
   it("returns 400 when no valid IDs provided", async () => {
-    const mockRequest = new NextRequest(
+    const mockRequest = createNextRequestWithCookie(
       "http://localhost/api/reservation/games/details?ids=abc,xyz"
     );
 
@@ -87,7 +95,7 @@ describe("API /reservation/games/details route", () => {
       ]) as ReturnType<typeof db.select>
     );
 
-    const mockRequest = new NextRequest(
+    const mockRequest = createNextRequestWithCookie(
       "http://localhost/api/reservation/games/details?ids=1,abc,2xyz"
     );
 
@@ -104,7 +112,7 @@ describe("API /reservation/games/details route", () => {
       throw new Error("Database error");
     });
 
-    const mockRequest = new NextRequest(
+    const mockRequest = createNextRequestWithCookie(
       "http://localhost/api/reservation/games/details?ids=1,2"
     );
 

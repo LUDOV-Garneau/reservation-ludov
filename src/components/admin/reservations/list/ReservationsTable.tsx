@@ -28,21 +28,12 @@ const ITEMS_PER_PAGE = 10;
 
 const EMPTY_DATE_FILTER: DateFilterValue = { mode: "specific" };
 
+// La recherche texte est faite côté serveur ; seul le filtre de date reste local.
 function filterReservations(
   reservations: Reservation[],
-  searchQuery: string,
   dateFilter: DateFilterValue,
 ): Reservation[] {
-  const search = searchQuery.toLowerCase();
-
   return reservations.filter((r) => {
-    const matchesSearch =
-      (r.userNom ?? "").toLowerCase().includes(search) ||
-      r.console.toLowerCase().includes(search) ||
-      r.date.toLowerCase().includes(search);
-
-    if (!matchesSearch) return false;
-
     if (dateFilter.mode === "specific" && dateFilter.specificDate) {
       return (
         parseDateString(r.date).getTime() ===
@@ -107,24 +98,48 @@ export default function ReservationsTable() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
 
+  // Recherche débouncée (350 ms), envoyée au serveur.
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const { page, goToPage, resetPage } = usePagination(total, ITEMS_PER_PAGE);
-  const { reservations, metrics, loading, metricsLoading, refresh } =
-    useReservations(page, ITEMS_PER_PAGE, showAlert, setTotal);
+  const {
+    reservations,
+    metrics,
+    loading,
+    metricsLoading,
+    refresh,
+    refreshSilent,
+    markCancelled,
+  } = useReservations(page, ITEMS_PER_PAGE, showAlert, setTotal, debouncedSearch);
 
   const filteredReservations = useMemo(
-    () => filterReservations(reservations, searchQuery, dateFilter),
-    [reservations, searchQuery, dateFilter],
+    () => filterReservations(reservations, dateFilter),
+    [reservations, dateFilter],
   );
 
   useEffect(() => {
     resetPage();
-  }, [searchQuery, dateFilter, resetPage]);
+  }, [debouncedSearch, dateFilter, resetPage]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await refresh();
     setIsRefreshing(false);
   }, [refresh]);
+
+  // Annulation : la ligne passe immédiatement à "annulée" (pas de squelette),
+  // puis les stats sont resynchronisées en arrière-plan.
+  const handleCancelSuccess = useCallback(
+    (id: string) => {
+      markCancelled(id);
+      refreshSilent();
+    },
+    [markCancelled, refreshSilent],
+  );
 
   const handleClearDateFilter = useCallback(() => {
     setDateFilter(EMPTY_DATE_FILTER);
@@ -204,7 +219,7 @@ export default function ReservationsTable() {
                         key={reservation.id}
                         reservation={reservation}
                         onAlert={showAlert}
-                        onSuccess={handleRefresh}
+                        onSuccess={() => handleCancelSuccess(reservation.id)}
                       />
                     ))}
                   </TableBody>

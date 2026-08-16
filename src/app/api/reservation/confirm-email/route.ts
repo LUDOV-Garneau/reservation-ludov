@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
         date: reservation.date,
         time: reservation.time,
         consoleName: consoleType.name,
+        preferredLocale: users.preferredLocale,
       })
       .from(reservation)
       .innerJoin(users, eq(reservation.userId, users.id))
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest) {
       date: r.date,
       time: r.time,
       consoleName: r.consoleName,
+      locale: r.preferredLocale,
     });
 
     return NextResponse.json({ success: true, reservationId: r.id, email: r.email, message: "Reservation confirmed and email sent" }, { status: 200 });

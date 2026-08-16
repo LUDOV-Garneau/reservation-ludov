@@ -16,6 +16,7 @@ interface ReservationToRemind {
   email: string;
   firstname: string;
   lastname: string;
+  preferred_locale: string;
   console_name: string;
 }
 
@@ -95,7 +96,7 @@ export async function GET(request: NextRequest) {
       return (await tx.execute<ReservationToRemind>(
         sql`SELECT
           r.id, r.user_id, r.date, r.time, r.reminder_hours_before, r.station,
-          u.email, u.firstname, u.lastname,
+          u.email, u.firstname, u.lastname, u.preferred_locale,
           ct.name as console_name
         FROM reservation r
         INNER JOIN users u ON u.id = r.user_id
@@ -123,6 +124,7 @@ export async function GET(request: NextRequest) {
           date: dateFormatted,
           time: r.time,
           consoleName: r.console_name,
+          locale: r.preferred_locale,
         });
 
         // Anti-double-envoi: UPDATE conditionnel sur reminder_sent = 0

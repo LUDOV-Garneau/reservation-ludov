@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,7 +26,7 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 type UserDetails = {
   id: number;
@@ -33,9 +34,9 @@ type UserDetails = {
   lastname: string;
   email: string;
   isAdmin: number;
-  lastUpdated: Date;
-  createdAt: Date;
-  LastLogin: Date;
+  lastUpdatedAt: string | null;
+  createdAt: string;
+  lastLogin: string | null;
 };
 
 type Reservation = {
@@ -45,6 +46,7 @@ type Reservation = {
   date: string;
   heure: string;
   archived: boolean;
+  accessories: string[];
   status?: "upcoming" | "ongoing" | "completed" | "canceled";
 };
 
@@ -303,8 +305,8 @@ export default function UserDetailPage() {
                   <p className="font-bold text-cyan-700">Dernière connexion</p>
                 </div>
                 <p className="font-medium text-sm">
-                  {userData.LastLogin
-                    ? new Date(userData.LastLogin).toLocaleDateString("fr-CA", {
+                  {userData.lastLogin
+                    ? new Date(userData.lastLogin).toLocaleDateString("fr-CA", {
                         year: "numeric",
                         month: "long",
                         day: "numeric",
@@ -364,21 +366,20 @@ export default function UserDetailPage() {
               ) : (
                 <div className="space-y-4">
                   {reservations.map((reservation) => (
-                    <Card
+                    <Link
                       key={reservation.id}
-                      className="border-2 py-0 hover:shadow-lg transition-all duration-300 hover:border-cyan-500 ease-in-out"
+                      href={`/admin/reservation/details/${reservation.id}`}
+                      className="block"
                     >
+                      <Card className="border-2 py-0 cursor-pointer hover:shadow-lg transition-all duration-300 hover:border-cyan-500 ease-in-out">
                       <CardContent className="p-4">
                         <div className="flex flex-col md:flex-row gap-2 items-start justify-between mb-3">
-                          <Link
-                            href={`/admin/reservation/details/${reservation.id}`}
-                            className="flex gap-2 items-center hover:border-b-cyan-500 border-b-2 pb-1 transition-colors"
-                          >
+                          <div className="flex gap-2 items-center pb-1">
                             <Link2 className="w-8 h-8 sm:w-4 sm:h-4 text-cyan-700" />
                             <h4 className="font-semibold text-xl text-cyan-600 line-clamp-1">
                               {reservation.id}
                             </h4>
-                          </Link>
+                          </div>
                           {getStatusBadge(reservation.status)}
                         </div>
 
@@ -450,8 +451,32 @@ export default function UserDetailPage() {
                             </div>
                           </div>
                         )}
+
+                        {reservation.accessories.length > 0 && (
+                          <>
+                            <Separator className="my-2" />
+                            <div>
+                              <div className="flex items-center gap-3 mb-3">
+                                <KeyRound className="h-5 w-5 text-cyan-700" />
+                                <p className="text-cyan-700">Accessoires</p>
+                              </div>
+                              <div className="flex flex-wrap gap-2 overflow-clip">
+                                {reservation.accessories.map((accessory, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant={"reservationDetails"}
+                                    className="text-sm"
+                                  >
+                                    {accessory}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </CardContent>
-                    </Card>
+                      </Card>
+                    </Link>
                   ))}
                 </div>
               )}

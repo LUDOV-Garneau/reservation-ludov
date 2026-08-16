@@ -388,8 +388,12 @@ export default function StationsTable() {
 
   const pagination = usePagination(total, ITEMS_PER_PAGE);
 
+  // Les statistiques ne changent pas en paginant : un seul chargement.
   useEffect(() => {
     fetchMetrics();
+  }, []);
+
+  useEffect(() => {
     fetchStations(pagination.page, ITEMS_PER_PAGE);
   }, [pagination.page]);
 

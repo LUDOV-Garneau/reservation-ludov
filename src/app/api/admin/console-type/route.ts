@@ -1,17 +1,11 @@
-import { NextResponse, NextRequest } from "next/server";
-import { verifyToken } from "@/lib/jwt";
+import { NextResponse } from "next/server";
 import db from "@/db";
+import { withAdmin } from "@/lib/withAuth";
 
-export async function GET(req: NextRequest) {
-  const token = req.cookies.get("SESSION")?.value;
-  if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const user = verifyToken(token);
-  if (!user?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  if (!user.isAdmin) return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-
+export const GET = withAdmin(async () => {
   try {
     const rows = await db.query.consoleType.findMany({
-      columns: { id: true, name: true },
+      columns: { id: true, name: true, picture: true },
       orderBy: (t, { asc }) => [asc(t.name)],
     });
     return NextResponse.json(rows, { status: 200 });
@@ -19,4 +13,4 @@ export async function GET(req: NextRequest) {
     console.error("Erreur lors du fetch consoleType :", error);
     return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
   }
-}
+});

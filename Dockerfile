@@ -43,6 +43,15 @@ COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static    ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public          ./public
 
+# Images historiques des tutoriels admin, servies par /api/admin/images —
+# sans cette copie elles renvoient 404 en production. (Les textes des
+# tutoriels vivent désormais en base de données ; les nouvelles images vont
+# sur le volume UPLOADS_DIR.)
+COPY --from=build --chown=nextjs:nodejs /app/src/private ./src/private
+
+# Migrations Drizzle appliquées au démarrage (scripts/migrate.js)
+COPY --from=build --chown=nextjs:nodejs /app/drizzle ./drizzle
+
 # Script exécuté par les Scheduled Tasks de Coolify + ses dépendances de prod
 # (node-cron, nodemailer, drizzle-orm, mysql2, dotenv)
 COPY --from=build     --chown=nextjs:nodejs /app/src/scripts  ./scripts
@@ -51,4 +60,5 @@ COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 USER nextjs
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Les migrations s'appliquent avant le démarrage du serveur.
+CMD ["sh", "-c", "node scripts/migrate.js && node server.js"]

@@ -9,6 +9,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useReservation } from "@/context/ReservationContext";
 import { Loader2, AlertCircle, Calendar, Clock, MoveLeft } from "lucide-react";
 import { DatesBlocked } from "@/types/availabilities";
+import { toLocalYmd } from "@/lib/dates";
 
 type TimeSlot = {
   time: string;
@@ -97,7 +98,7 @@ export default function DateSelection() {
     setError(null);
 
     try {
-      const dateString = selectedDate.toISOString().split("T")[0];
+      const dateString = toLocalYmd(selectedDate);
 
       const response = await fetch(
         `/api/reservation/calendar-times?date=${encodeURIComponent(
@@ -129,9 +130,13 @@ export default function DateSelection() {
         throw new Error(data.error || t("reservation.calendar.errorServer"));
       }
 
-      setAvailableTimes(data.availability || []);
+      const slots: TimeSlot[] = data.availability || [];
+      setAvailableTimes(slots);
 
-      if (time && !data.availability.includes(time)) {
+      const stillAvailable = slots.some(
+        (slot) => slot.time === time && slot.available,
+      );
+      if (time && !stillAvailable) {
         setTime("");
         setSelectedTime("");
       }
@@ -191,7 +196,7 @@ export default function DateSelection() {
     setError(null);
 
     try {
-      const dateString = date.toISOString().split("T")[0];
+      const dateString = toLocalYmd(date);
 
       const response = await fetch("/api/reservation/update-hold-reservation", {
         method: "POST",

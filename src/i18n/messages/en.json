@@ -1,5 +1,6 @@
 {
   "header": {
+    "home": "Back to home",
     "help": "Help",
     "logout": "Logout",
     "logoutLoading": "Logging out...",
@@ -101,7 +102,7 @@
       "listEnd": "End of list • {count} games displayed",
       "loadMore": "Load more results",
       "errorLoading": "Error loading games",
-      "buttonClearAll" : "Clear all"
+      "buttonClearAll": "Clear all"
     },
     "course": {
       "selectionTitle": "Course Selection",
@@ -229,7 +230,10 @@
       "cancelWarning": "This action cannot be undone. You will need to create a new reservation if you change your mind.",
       "cancelConfirmButton": "Confirm cancellation",
       "canceling": "Cancelling...",
-      "cancelReservation": "Cancel reservation"
+      "cancelReservation": "Cancel reservation",
+      "cancelledTitle": "Reservation cancelled",
+      "cancelledDescription": "This reservation has been cancelled.",
+      "cancelledReason": "Reason: {reason}"
     },
     "accueil": {
       "upcomingReservations": "Upcoming reservations",
@@ -567,7 +571,8 @@
           "saveChanges": "Save",
           "loading": "Loading...",
           "addConsole": "Add platforms",
-          "submit": "Modify"
+          "submit": "Modify",
+          "addAll": "Add all"
         },
         "titles": {
           "dialogTitle": "Modify Station"
@@ -594,7 +599,8 @@
           "openDialog": "Add a station",
           "loading": "Adding...",
           "submit": "Add",
-          "addConsole": "Add a platform"
+          "addConsole": "Add a platform",
+          "addAll": "Add all"
         },
         "titles": {
           "dialogTitle": "Add a station"
@@ -710,6 +716,115 @@
     "tutorials": {
       "title": "Tutorials",
       "subtitle": "User guide for the LUDOV platform - Administrators"
+    },
+    "imageUpload": {
+      "dropzone": "Click or drop an image (PNG, JPEG, WebP, GIF — max 5 MB)",
+      "uploading": "Uploading...",
+      "urlPlaceholder": "IGDB or MobyGames link (https://...)",
+      "importUrl": "Import",
+      "error": "An error occurred while uploading the image."
+    },
+    "accessories": {
+      "title": "Accessories",
+      "subtitle": "Manage accessory visibility and compatible platforms",
+      "count": "{count} accessories",
+      "empty": "No accessories in the catalog.",
+      "noConsole": "No platform",
+      "editConsoles": "Platforms",
+      "editDialogTitle": "Compatible platforms — {name}",
+      "cancel": "Cancel",
+      "save": "Save",
+      "table": {
+        "name": "Name",
+        "kohaId": "Koha ID",
+        "consoles": "Compatible platforms",
+        "visible": "Visible",
+        "actions": "Actions"
+      },
+      "alerts": {
+        "fetchError": "An error occurred while loading accessories.",
+        "updateSuccess": "Accessory updated successfully.",
+        "updateError": "An error occurred while updating the accessory.",
+        "successTitle": "Success",
+        "errorTitle": "Error"
+      }
+    },
+    "consolePhotos": {
+      "title": "Console photos",
+      "subtitle": "Add and replace platform photos",
+      "empty": "No platforms found.",
+      "alerts": {
+        "fetchError": "An error occurred while loading platforms.",
+        "updateSuccess": "Photo updated successfully.",
+        "updateError": "An error occurred while updating the photo.",
+        "successTitle": "Success",
+        "errorTitle": "Error"
+      }
+    },
+    "gamesImages": {
+      "title": "Game images",
+      "subtitle": "List games and manage their artwork",
+      "searchPlaceholder": "Search a game by title...",
+      "count": "{count} games",
+      "empty": "No games found.",
+      "importImage": "Image",
+      "importDialogTitle": "Import an image — {title}",
+      "filter": {
+        "all": "All games",
+        "withImage": "With image",
+        "withoutImage": "Without image"
+      },
+      "status": {
+        "withImage": "With image",
+        "withoutImage": "Without image"
+      },
+      "table": {
+        "image": "Image",
+        "title": "Title",
+        "platform": "Platform",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "alerts": {
+        "fetchError": "An error occurred while loading games.",
+        "updateSuccess": "Game image updated successfully.",
+        "updateError": "An error occurred while updating the image.",
+        "successTitle": "Success",
+        "errorTitle": "Error"
+      }
+    },
+    "emails": {
+      "title": "Emails",
+      "subtitle": "Edit transactional email content (subject and text zones)",
+      "subjectLabel": "Subject",
+      "variablesHint": "Available variables (replaced when sending):",
+      "lineHint": "Each line becomes a paragraph (or a bullet, depending on the zone).",
+      "testSend": "Send me a test",
+      "saveBeforeTest": "Save your changes before sending a test.",
+      "save": "Save",
+      "templates": {
+        "confirmation": "Reservation confirmation",
+        "reminder": "Reservation reminder",
+        "reset_password": "Password reset",
+        "welcome": "Welcome",
+        "otp": "OTP code (sign-up)",
+        "cancellation": "Reservation cancellation"
+      },
+      "zones": {
+        "intro": "Introduction",
+        "important": "Important information (one per line)",
+        "outro": "Closing",
+        "body": "Message body"
+      },
+      "alerts": {
+        "fetchError": "An error occurred while loading templates.",
+        "saveSuccess": "Template saved successfully.",
+        "saveError": "An error occurred while saving the template.",
+        "testSuccess": "Test email sent to {email}.",
+        "testError": "An error occurred while sending the test email.",
+        "successTitle": "Success",
+        "errorTitle": "Error"
+      }
     }
   },
   "privacy": {
@@ -723,5 +838,10 @@
       "goBackToLibrary": "Back to library",
       "title": "Documentation"
     }
+  },
+  "politique": {
+    "usageTitle": "Usage policy",
+    "backHome": "Back to home",
+    "footerLink": "Usage policy"
   }
 }

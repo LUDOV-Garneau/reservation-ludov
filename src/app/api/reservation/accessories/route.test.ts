@@ -103,7 +103,7 @@ describe("API /reservation/accessories route", () => {
     expect(json.message).toBe("No recent reservation hold found for user");
   });
 
-  it("returns 404 when no accessories found for console", async () => {
+  it("returns 200 with an empty list when the console has no accessories", async () => {
     vi.spyOn(jwtModule, "verifyToken").mockReturnValue({
       id: 1,
       name: "Test User",
@@ -122,9 +122,9 @@ describe("API /reservation/accessories route", () => {
     const response = await GET();
     const json = await response.json();
 
-    expect(response.status).toBe(404);
-    expect(json.success).toBe(false);
-    expect(json.message).toBe("No accessories found for the user's console");
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual([]);
   });
 
   it("returns 400 when user ID is invalid", async () => {

@@ -31,7 +31,8 @@ export function useReservations(
   page: number,
   itemsPerPage: number,
   onError: (type: AlertType, message: string) => void,
-  setTotal: (total: number) => void
+  setTotal: (total: number) => void,
+  search = ""
 ) {
   const t = useTranslations();
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -39,13 +40,19 @@ export function useReservations(
   const [loading, setLoading] = useState(false);
   const [metricsLoading, setMetricsLoading] = useState(true);
 
-  const fetchReservations = useCallback(async () => {
+  const fetchReservations = useCallback(async (opts?: { silent?: boolean }) => {
     try {
-      setLoading(true);
-      setMetricsLoading(true);
+      // En mode silencieux (mise à jour optimiste), on rafraîchit les données
+      // sans faire clignoter le squelette de chargement.
+      if (!opts?.silent) {
+        setLoading(true);
+        setMetricsLoading(true);
+      }
 
       const res = await fetch(
-        `/api/admin/reservations?page=${page}&limit=${itemsPerPage}`,
+        `/api/admin/reservations?page=${page}&limit=${itemsPerPage}${
+          search ? `&search=${encodeURIComponent(search)}` : ""
+        }`,
         { credentials: "include" }
       );
 
@@ -83,11 +90,22 @@ export function useReservations(
       setLoading(false);
       setMetricsLoading(false);
     }
-  }, [page, itemsPerPage, onError, setTotal, t]);
+  }, [page, itemsPerPage, search, onError, setTotal, t]);
 
   useEffect(() => {
     fetchReservations();
   }, [fetchReservations]);
+
+  const markCancelled = useCallback((id: string) => {
+    setReservations((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, archived: true } : r)),
+    );
+  }, []);
+
+  const refreshSilent = useCallback(
+    () => fetchReservations({ silent: true }),
+    [fetchReservations],
+  );
 
   return {
     reservations,
@@ -95,5 +113,7 @@ export function useReservations(
     loading,
     metricsLoading,
     refresh: fetchReservations,
+    refreshSilent,
+    markCancelled,
   };
 }

@@ -41,6 +41,7 @@ export type DateSelection = {
 
 export type DatesBlocked = {
   dayOfWeek: number[];
-  before: Date | null;
-  after: Date | null;
+  /** Jour local "YYYY-MM-DD" (renvoyé tel quel par l'API) */
+  before: string | null;
+  after: string | null;
 };

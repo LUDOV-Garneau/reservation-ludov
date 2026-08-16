@@ -28,7 +28,6 @@ import {
   CheckCircle2,
   AlertCircle,
   MonitorCheck,
-  PiSquare,
 } from "lucide-react";
 
 type ConsoleStock = {
@@ -74,21 +73,19 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
 
   const clearError = () => setError(null);
 
-  const handleAddConsole = () => {
-    if (!selectedConsoleId) return;
-
-    const consoleToAdd = consoleList.find(
-      (c) => c.id === Number(selectedConsoleId)
-    );
+  // Ajout immédiat dès la sélection dans la liste (pas de bouton "Ajouter").
+  const handleSelectConsole = (value: string) => {
+    const consoleToAdd = consoleList.find((c) => c.id === Number(value));
     if (!consoleToAdd) return;
-
-    const isDuplicate = selectedConsoles.some((c) => c.id === consoleToAdd.id);
-    if (isDuplicate) {
-      setError("Cette unité plateforme est déjà ajoutée !");
-      return;
-    }
+    if (selectedConsoles.some((c) => c.id === consoleToAdd.id)) return;
 
     setSelectedConsoles((prev) => [...prev, consoleToAdd]);
+    setSelectedConsoleId("");
+    clearError();
+  };
+
+  const handleAddAll = () => {
+    setSelectedConsoles(consoleList);
     setSelectedConsoleId("");
     clearError();
   };
@@ -192,7 +189,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
                 <div className="flex flex-col md:flex-row gap-2">
                   <Select
                     value={selectedConsoleId}
-                    onValueChange={setSelectedConsoleId}
+                    onValueChange={handleSelectConsole}
                   >
                     <SelectTrigger className="flex-1 border-2 text-base w-full">
                       <SelectValue placeholder="Sélectionner une plateforme..." />
@@ -224,14 +221,12 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
 
                   <Button
                     type="button"
-                    onClick={handleAddConsole}
-                    disabled={
-                      !selectedConsoleId || availableConsoles.length === 0
-                    }
+                    onClick={handleAddAll}
+                    disabled={availableConsoles.length === 0}
                     className="sm:w-auto w-full gap-2 font-semibold bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
                   >
                     <Plus className="w-4 h-4" />
-                    Ajouter
+                    {t("button.addAll")}
                   </Button>
                 </div>
 

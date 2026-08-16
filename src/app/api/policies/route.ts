@@ -1,11 +1,30 @@
 import db from "@/db";
-import { verifyToken } from "@/lib/jwt";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { policies } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { withAdmin } from "@/lib/withAuth";
 
-export async function GET() {
+const POLICY_TYPES = ["privacy", "usage"] as const;
+type PolicyType = (typeof POLICY_TYPES)[number];
+
+function parseType(url: string): PolicyType | null {
+  const value = new URL(url).searchParams.get("type") ?? "privacy";
+  return (POLICY_TYPES as readonly string[]).includes(value)
+    ? (value as PolicyType)
+    : null;
+}
+
+// GET public : les politiques sont consultées dès la page d'authentification.
+export async function GET(req: Request) {
   try {
-    const row = await db.query.policies.findFirst();
+    const type = parseType(req.url);
+    if (!type) {
+      return NextResponse.json({ message: "Type de politique invalide." }, { status: 400 });
+    }
+
+    const row = await db.query.policies.findFirst({
+      where: eq(policies.type, type),
+    });
     return NextResponse.json({ policies: row ?? null });
   } catch (error) {
     console.error("Error querying policies:", error);
@@ -13,14 +32,13 @@ export async function GET() {
   }
 }
 
-export async function POST(req: NextRequest) {
-  const token = req.cookies.get("SESSION")?.value;
-  if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  const user = verifyToken(token);
-  if (!user?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  if (!user.isAdmin) return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-
+export const POST = withAdmin(async (req) => {
   try {
+    const type = parseType(req.url);
+    if (!type) {
+      return NextResponse.json({ message: "Type de politique invalide." }, { status: 400 });
+    }
+
     const body = await req.json();
     const { policies: policiesText } = body;
 
@@ -29,12 +47,20 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date().toISOString().slice(0, 19).replace("T", " ");
-    const existing = await db.query.policies.findFirst({ columns: { id: true } });
+    const existing = await db.query.policies.findFirst({
+      columns: { id: true },
+      where: eq(policies.type, type),
+    });
 
     if (existing) {
-      await db.update(policies).set({ policies: policiesText, lastUpdatedAt: now });
+      await db
+        .update(policies)
+        .set({ policies: policiesText, lastUpdatedAt: now })
+        .where(eq(policies.type, type));
     } else {
-      await db.insert(policies).values({ policies: policiesText, lastUpdatedAt: now });
+      await db
+        .insert(policies)
+        .values({ type, policies: policiesText, lastUpdatedAt: now });
     }
 
     return NextResponse.json({ success: true, message: "Politiques sauvegardées avec succès." });
@@ -42,4 +68,4 @@ export async function POST(req: NextRequest) {
     console.error("Error saving policies:", error);
     return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
   }
-}
+});

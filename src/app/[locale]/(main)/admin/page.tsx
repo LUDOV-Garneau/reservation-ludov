@@ -21,6 +21,27 @@ const ReservationsTab = dynamic(
 const StationsTab = dynamic(() => import("@/components/admin/StationsTab"), {
   loading: () => <TabLoader />,
 });
+const AccessoriesTab = dynamic(
+  () => import("@/components/admin/AccessoriesTab"),
+  {
+    loading: () => <TabLoader />,
+  }
+);
+const ConsolePhotosTab = dynamic(
+  () => import("@/components/admin/ConsolePhotosTab"),
+  {
+    loading: () => <TabLoader />,
+  }
+);
+const GamesImagesTab = dynamic(
+  () => import("@/components/admin/GamesImagesTab"),
+  {
+    loading: () => <TabLoader />,
+  }
+);
+const EmailsTab = dynamic(() => import("@/components/admin/EmailsTab"), {
+  loading: () => <TabLoader />,
+});
 const AvailabilitiesTab = dynamic(
   () => import("@/components/admin/availabilities/AvailabilitiesTab"),
   {
@@ -72,6 +93,14 @@ function AdminContent() {
         return <ReservationsTab />;
       case "stations":
         return <StationsTab />;
+      case "accessories":
+        return <AccessoriesTab />;
+      case "consolePhotos":
+        return <ConsolePhotosTab />;
+      case "games":
+        return <GamesImagesTab />;
+      case "emails":
+        return <EmailsTab />;
       case "availabilities":
         return <AvailabilitiesTab />;
       case "cours":

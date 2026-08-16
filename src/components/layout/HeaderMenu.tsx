@@ -2,7 +2,7 @@
 
 import LocaleSwitcher from "./LocaleSwitcher";
 import { usePathname } from "next/navigation";
-import { HelpCircleIcon, LogOut, ShieldCheck, UserIcon } from "lucide-react";
+import { HelpCircleIcon, Home, LogOut, ShieldCheck, UserIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
@@ -77,6 +77,16 @@ export default function HeaderMenu({ username, isAdmin }: HeaderMenuProps) {
               <DropdownMenuSeparator />
             </>
           )}
+          <DropdownMenuItem className="px-2 py-1">
+            <Link
+              href="/"
+              className="hover:opacity-70 cursor-pointer flex items-center gap-2"
+            >
+              <Home size={20} />
+              <p className="text-base">{t("home")}</p>
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem className="px-2 py-1">
             <Link
               href="/biblio"

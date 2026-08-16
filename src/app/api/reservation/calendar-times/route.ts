@@ -3,6 +3,7 @@ import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
 import { reservation, reservationHold, specificDates, hourRanges, weeklyAvailabilities, games, accessoires, stations } from "@/db/schema";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
+import { toLocalYmd, isFutureSlot } from "@/lib/dates";
 
 type Range = { start: number; end: number };
 
@@ -142,11 +143,6 @@ function resolveAccessoryFallbacks(
   return { valid: true, finalAccessoryIds: finalAccessories };
 }
 
-function isSlotInFuture(time: string, currentHour: number): boolean {
-  const [slotHour] = time.split(":").map(Number);
-  return slotHour > currentHour;
-}
-
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get("SESSION")?.value;
@@ -166,7 +162,7 @@ export async function GET(request: NextRequest) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return NextResponse.json({ success: false, error: "Invalid date format. Expected YYYY-MM-DD" }, { status: 400 });
 
     const now = new Date();
-    const todayStr = now.toISOString().split("T")[0];
+    const todayStr = toLocalYmd(now);
     if (date < todayStr) return NextResponse.json({ success: false, error: "Cannot check availability for past dates" }, { status: 400 });
 
     const requestedConsoleId = parseInt(consoleId, 10);
@@ -224,11 +220,10 @@ export async function GET(request: NextRequest) {
 
     const requiredAccessoryMap: Record<number, number[]> = {};
     if (requestedGameIds.length > 0) {
-      const requiredRows = await db.select({ requiredAccessories: games.requiredAccessories }).from(games).where(inArray(games.id, requestedGameIds));
-      requiredRows.forEach((row, index) => {
-        const gameId = requestedGameIds[index];
-        const kohaList = (row.requiredAccessories as number[] | null) || [];
-        requiredAccessoryMap[gameId] = kohaList.length > 0 ? [kohaList[0]] : [];
+      const requiredRows = await db.select({ id: games.id, requiredAccessories: games.requiredAccessories }).from(games).where(inArray(games.id, requestedGameIds));
+      requiredRows.forEach((row) => {
+        // Tous les accessoires requis comptent, pas seulement le premier.
+        requiredAccessoryMap[row.id] = (row.requiredAccessories as number[] | null) || [];
       });
     }
 
@@ -262,9 +257,8 @@ export async function GET(request: NextRequest) {
 
     let finalAvailability = availability;
     if (date === todayStr) {
-      const currentHour = now.getHours();
       finalAvailability = availability.map((slot) =>
-        !isSlotInFuture(slot.time, currentHour)
+        !isFutureSlot(date, slot.time, now)
           ? { ...slot, available: false, conflicts: { ...slot.conflicts, past: true } }
           : slot
       );

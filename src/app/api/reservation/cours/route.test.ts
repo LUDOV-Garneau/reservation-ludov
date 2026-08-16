@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import db from "@/db";
 import { GET } from "./route";
+import { createNextRequestWithCookie } from "../test-helpers";
 
 vi.mock("@/db", () => ({
   default: {
@@ -9,6 +10,17 @@ vi.mock("@/db", () => ({
     },
   },
 }));
+
+vi.mock("@/lib/jwt", () => ({
+  verifyToken: vi.fn((token: string) =>
+    token === "mock-token"
+      ? { id: 1, name: "Test User", email: "test@example.com", isAdmin: false }
+      : null,
+  ),
+}));
+
+const authedRequest = () =>
+  createNextRequestWithCookie("http://localhost/api/reservation/cours");
 
 describe("API /reservation/cours route", () => {
   beforeEach(() => {
@@ -25,7 +37,7 @@ describe("API /reservation/cours route", () => {
   });
 
   it("returns list of courses successfully", async () => {
-    const response = await GET();
+    const response = await GET(authedRequest());
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -39,7 +51,7 @@ describe("API /reservation/cours route", () => {
   it("returns empty array when no courses found", async () => {
     vi.mocked(db.query.cours.findMany).mockResolvedValue([]);
 
-    const response = await GET();
+    const response = await GET(authedRequest());
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -52,10 +64,21 @@ describe("API /reservation/cours route", () => {
       new Error("Database connection failed")
     );
 
-    const response = await GET();
+    const response = await GET(authedRequest());
     const json = await response.json();
 
     expect(response.status).toBe(500);
     expect(json).toHaveProperty("message");
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    const response = await GET(
+      createNextRequestWithCookie(
+        "http://localhost/api/reservation/cours",
+        "SESSION=invalid-token",
+      ),
+    );
+
+    expect(response.status).toBe(401);
   });
 });

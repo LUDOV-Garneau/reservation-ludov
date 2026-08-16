@@ -12,13 +12,14 @@ type Reservation = {
   firstname: string;
   lastname: string;
   email: string;
-  station: number;
+  station: string | null;
   date: string;
   heure: string;
   console: { nom: string; picture?: string };
   jeux: { nom: string; picture: string; biblio: number }[];
   accessoires?: { id: number; nom: string }[];
   archived: boolean;
+  cancellationReason?: string | null;
 };
 
 type ReservationState = {
@@ -131,7 +132,6 @@ function useReservation(id: string) {
         }
 
         const data = await response.json();
-        console.log("Reservation fetched:", data);
         setState({ data, isLoading: false, error: false });
       } catch (error) {
         console.error("Error fetching reservation:", error);
@@ -174,6 +174,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
         picture: reservation.console.picture ?? "",
       }}
       archived={reservation.archived}
+      cancellationReason={reservation.cancellationReason}
       accessoires={reservation.accessoires ?? []}
       station={reservation.station}
       date={reservation.date}

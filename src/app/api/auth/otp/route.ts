@@ -1,4 +1,5 @@
 import { sendEmail } from "@/lib/sendEmail";
+import { getTemplate, renderZoneTextPlain } from "@/lib/emailTemplates";
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import db from "@/db";
@@ -55,22 +56,25 @@ export async function POST(request: NextRequest) {
     const otpValue = parseInt(randomBuffer.toString("hex"), 16) % 1000000;
     const otpCode = otpValue.toString().padStart(6, "0");
 
-    const otpMessage = `Merci de vous être inscrit sur la plateforme de réservation LUDOV.\n\nVotre code de sécurité : ${otpCode}\n\nDemande effectuée en date du ${new Date().toLocaleString()}.`;
-
-    const response = await sendEmail({
-      to: email,
-      subject: "Code OTP - LUDOV réservation",
-      text: otpMessage,
-    });
-
-    if (response.rejected.length >= 1) throw new Error();
-
     const user = await db.query.users.findFirst({
-      columns: { id: true },
+      columns: { id: true, preferredLocale: true },
       where: (t) => eq(t.email, email),
     });
 
     if (!user) throw new Error("User not found");
+
+    const template = await getTemplate("otp", user.preferredLocale);
+    const otpMessage = renderZoneTextPlain(template.zones.body ?? "", {
+      otpCode,
+    });
+
+    const response = await sendEmail({
+      to: email,
+      subject: template.subject,
+      text: otpMessage,
+    });
+
+    if (response.rejected.length >= 1) throw new Error();
 
     const now = new Date();
     const expiresAt = new Date(now.getTime() + 15 * 60 * 1000);

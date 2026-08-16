@@ -1,5 +1,6 @@
 {
   "header": {
+    "home": "Retour à l'accueil",
     "help": "Aide",
     "logout": "Se déconnecter",
     "logoutLoading": "Déconnexion...",
@@ -228,7 +229,10 @@
       "cancelWarning": "Cette action ne peut pas être annulée. Vous devrez créer une nouvelle réservation si vous changez d'avis.",
       "cancelConfirmButton": "Confirmer l'annulation",
       "canceling": "Annulation en cours...",
-      "cancelReservation": "Annuler la réservation"
+      "cancelReservation": "Annuler la réservation",
+      "cancelledTitle": "Réservation annulée",
+      "cancelledDescription": "Cette réservation a été annulée.",
+      "cancelledReason": "Raison : {reason}"
     },
     "accueil": {
       "upcomingReservations": "Réservations à venir",
@@ -566,7 +570,8 @@
           "saveChanges": "Enregistrer",
           "loading": "Chargement...",
           "addConsole": "Ajouter des plateformes",
-          "submit": "Modifier"
+          "submit": "Modifier",
+          "addAll": "Ajouter tout"
         },
         "titles": {
           "dialogTitle": "Modifier la station"
@@ -593,7 +598,8 @@
           "openDialog": "Ajouter une station",
           "loading": "Ajout...",
           "submit": "Ajouter",
-          "addConsole": "Ajouter une plateforme"
+          "addConsole": "Ajouter une plateforme",
+          "addAll": "Ajouter tout"
         },
         "titles": {
           "dialogTitle": "Ajouter une station"
@@ -709,6 +715,115 @@
     "tutorials": {
       "title": "Tutoriels",
       "subtitle": "Guide d'utilisation de la plateforme LUDOV - Administrateurs"
+    },
+    "imageUpload": {
+      "dropzone": "Cliquez ou déposez une image (PNG, JPEG, WebP, GIF — max 5 Mo)",
+      "uploading": "Téléversement en cours...",
+      "urlPlaceholder": "Lien IGDB ou MobyGames (https://...)",
+      "importUrl": "Importer",
+      "error": "Erreur lors du téléversement de l'image."
+    },
+    "accessories": {
+      "title": "Accessoires",
+      "subtitle": "Gérer la visibilité et les plateformes compatibles des accessoires",
+      "count": "{count} accessoires",
+      "empty": "Aucun accessoire dans le catalogue.",
+      "noConsole": "Aucune plateforme",
+      "editConsoles": "Plateformes",
+      "editDialogTitle": "Plateformes compatibles — {name}",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "table": {
+        "name": "Nom",
+        "kohaId": "ID Koha",
+        "consoles": "Plateformes compatibles",
+        "visible": "Visible",
+        "actions": "Actions"
+      },
+      "alerts": {
+        "fetchError": "Erreur lors du chargement des accessoires.",
+        "updateSuccess": "Accessoire mis à jour avec succès.",
+        "updateError": "Erreur lors de la mise à jour de l'accessoire.",
+        "successTitle": "Succès",
+        "errorTitle": "Erreur"
+      }
+    },
+    "consolePhotos": {
+      "title": "Photos consoles",
+      "subtitle": "Ajouter et remplacer les photos des plateformes",
+      "empty": "Aucune plateforme trouvée.",
+      "alerts": {
+        "fetchError": "Erreur lors du chargement des plateformes.",
+        "updateSuccess": "Photo mise à jour avec succès.",
+        "updateError": "Erreur lors de la mise à jour de la photo.",
+        "successTitle": "Succès",
+        "errorTitle": "Erreur"
+      }
+    },
+    "gamesImages": {
+      "title": "Images des jeux",
+      "subtitle": "Lister les jeux et gérer leurs visuels",
+      "searchPlaceholder": "Rechercher un jeu par titre...",
+      "count": "{count} jeux",
+      "empty": "Aucun jeu trouvé.",
+      "importImage": "Image",
+      "importDialogTitle": "Importer une image — {title}",
+      "filter": {
+        "all": "Tous les jeux",
+        "withImage": "Avec image",
+        "withoutImage": "Sans image"
+      },
+      "status": {
+        "withImage": "Avec image",
+        "withoutImage": "Sans image"
+      },
+      "table": {
+        "image": "Image",
+        "title": "Titre",
+        "platform": "Plateforme",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "alerts": {
+        "fetchError": "Erreur lors du chargement des jeux.",
+        "updateSuccess": "Image du jeu mise à jour avec succès.",
+        "updateError": "Erreur lors de la mise à jour de l'image.",
+        "successTitle": "Succès",
+        "errorTitle": "Erreur"
+      }
+    },
+    "emails": {
+      "title": "Courriels",
+      "subtitle": "Modifier le contenu des courriels transactionnels (sujet et zones de texte)",
+      "subjectLabel": "Sujet",
+      "variablesHint": "Variables disponibles (remplacées à l'envoi) :",
+      "lineHint": "Chaque ligne devient un paragraphe (ou une puce, selon la zone).",
+      "testSend": "M'envoyer un test",
+      "saveBeforeTest": "Enregistrez vos modifications avant d'envoyer un test.",
+      "save": "Enregistrer",
+      "templates": {
+        "confirmation": "Confirmation de réservation",
+        "reminder": "Rappel de réservation",
+        "reset_password": "Réinitialisation du mot de passe",
+        "welcome": "Bienvenue",
+        "otp": "Code OTP (inscription)",
+        "cancellation": "Annulation de réservation"
+      },
+      "zones": {
+        "intro": "Introduction",
+        "important": "Informations importantes (une par ligne)",
+        "outro": "Conclusion",
+        "body": "Corps du message"
+      },
+      "alerts": {
+        "fetchError": "Erreur lors du chargement des gabarits.",
+        "saveSuccess": "Gabarit enregistré avec succès.",
+        "saveError": "Erreur lors de la sauvegarde du gabarit.",
+        "testSuccess": "Courriel de test envoyé à {email}.",
+        "testError": "Erreur lors de l'envoi du courriel de test.",
+        "successTitle": "Succès",
+        "errorTitle": "Erreur"
+      }
     }
   },
   "privacy": {
@@ -722,5 +837,10 @@
       "goBackToLibrary": "Retour",
       "title": "Documentation"
     }
+  },
+  "politique": {
+    "usageTitle": "Politique d'utilisation",
+    "backHome": "Retour à l'accueil",
+    "footerLink": "Politique d'utilisation"
   }
 }

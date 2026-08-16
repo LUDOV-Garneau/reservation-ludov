@@ -98,6 +98,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
+          locale,
         }),
         credentials: "include",
       });

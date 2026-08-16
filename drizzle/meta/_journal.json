@@ -8,6 +8,27 @@
       "when": 1779485598155,
       "tag": "0000_sparkling_skreet",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1786394727327,
+      "tag": "0001_policies_type",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1786395484054,
+      "tag": "0002_email_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1786395886242,
+      "tag": "0003_docs",
+      "breakpoints": true
     }
   ]
 }

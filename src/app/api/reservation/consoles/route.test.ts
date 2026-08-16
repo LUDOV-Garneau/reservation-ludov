@@ -2,12 +2,24 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import db from "@/db";
 import { GET } from "./route";
 import type { ConsoleCatalogItem } from "./route";
+import { createNextRequestWithCookie } from "../test-helpers";
 
 vi.mock("@/db", () => ({
   default: {
     select: vi.fn(),
   },
 }));
+
+vi.mock("@/lib/jwt", () => ({
+  verifyToken: vi.fn((token: string) =>
+    token === "mock-token"
+      ? { id: 1, name: "Test User", email: "test@example.com", isAdmin: false }
+      : null,
+  ),
+}));
+
+const authedRequest = () =>
+  createNextRequestWithCookie("http://localhost/api/reservation/consoles");
 
 function chain(result: unknown) {
   const obj: Record<string, unknown> = {
@@ -39,7 +51,7 @@ describe("API /reservation/consoles route", () => {
   });
 
   it("returns list of active consoles successfully", async () => {
-    const response = await GET();
+    const response = await GET(authedRequest());
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -57,7 +69,7 @@ describe("API /reservation/consoles route", () => {
       ]) as ReturnType<typeof db.select>
     );
 
-    const response = await GET();
+    const response = await GET(authedRequest());
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -69,7 +81,7 @@ describe("API /reservation/consoles route", () => {
       chain([]) as ReturnType<typeof db.select>
     );
 
-    const response = await GET();
+    const response = await GET(authedRequest());
     const json = await response.json();
 
     expect(response.status).toBe(200);
@@ -82,10 +94,21 @@ describe("API /reservation/consoles route", () => {
       throw new Error("Database error");
     });
 
-    const response = await GET();
+    const response = await GET(authedRequest());
     const json = await response.json();
 
     expect(response.status).toBe(500);
     expect(json).toHaveProperty("message", "Erreur serveur");
+  });
+
+  it("returns 401 when not authenticated", async () => {
+    const response = await GET(
+      createNextRequestWithCookie(
+        "http://localhost/api/reservation/consoles",
+        "SESSION=invalid-token",
+      ),
+    );
+
+    expect(response.status).toBe(401);
   });
 });

@@ -11,6 +11,9 @@ import {
   BookOpen,
   HelpCircle,
   Book,
+  Gamepad2,
+  ImageIcon,
+  Mail,
 } from "lucide-react";
 
 const TABS = [
@@ -22,11 +25,27 @@ const TABS = [
   },
   { value: "stations", translationKey: "stations.title", icon: MapPin },
   {
+    value: "accessories",
+    translationKey: "accessories.title",
+    icon: Gamepad2,
+  },
+  {
+    value: "consolePhotos",
+    translationKey: "consolePhotos.title",
+    icon: ImageIcon,
+  },
+  {
+    value: "games",
+    translationKey: "gamesImages.title",
+    icon: Gamepad2,
+  },
+  {
     value: "availabilities",
     translationKey: "availabilities.title",
     icon: Clock,
   },
   { value: "cours", translationKey: "cours.title", icon: BookOpen },
+  { value: "emails", translationKey: "emails.title", icon: Mail },
   { value: "policies", translationKey: "politique.title", icon: Book },
   {
     value: "tutorials",

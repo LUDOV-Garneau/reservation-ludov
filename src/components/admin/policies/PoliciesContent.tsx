@@ -16,7 +16,24 @@ type PolicyData = {
   lastUpdatedAt: Date;
 };
 
-export default function PoliciesContent() {
+type PolicyType = "privacy" | "usage";
+
+const POLICY_LABELS: Record<PolicyType, { title: string; subtitle: string }> = {
+  privacy: {
+    title: "Politique de confidentialité",
+    subtitle: "Gérer la politique de confidentialité",
+  },
+  usage: {
+    title: "Politique d'utilisation",
+    subtitle: "Gérer la politique d'utilisation",
+  },
+};
+
+export default function PoliciesContent({
+  type = "privacy",
+}: {
+  type?: PolicyType;
+}) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [policyData, setPolicyData] = useState<PolicyData | null>(null);
@@ -27,13 +44,14 @@ export default function PoliciesContent() {
 
   useEffect(() => {
     fetchPolicyData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [type]);
 
   async function fetchPolicyData() {
     try {
       setIsLoading(true);
       setError(null);
-      const res = await fetch("/api/policies", {
+      const res = await fetch(`/api/policies?type=${type}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -45,10 +63,10 @@ export default function PoliciesContent() {
       }
 
       const data = await res.json();
-      const payload: PolicyData = data.policies;
+      const payload: PolicyData | null = data.policies ?? null;
 
       setPolicyData(payload);
-      setEditedPolicyContent(payload.policies);
+      setEditedPolicyContent(payload?.policies ?? "");
     } catch (error) {
       setError({
         title: "Erreur de chargement",
@@ -71,7 +89,7 @@ export default function PoliciesContent() {
       setError(null);
       setSaveSuccess(false);
 
-      const res = await fetch("/api/policies", {
+      const res = await fetch(`/api/policies?type=${type}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -81,12 +99,14 @@ export default function PoliciesContent() {
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
-      const data = await res.json();
+      // Le POST renvoie { success, message } : le contenu sauvegardé est
+      // celui de l'éditeur.
+      await res.json();
 
-      const updated: PolicyData = data.policies;
-
-      setPolicyData(updated);
-      setEditedPolicyContent(updated.policies);
+      setPolicyData({
+        policies: editedPolicyContent,
+        lastUpdatedAt: new Date(),
+      });
       setSaveSuccess(true);
 
       setTimeout(() => setSaveSuccess(false), 3500);
@@ -131,10 +151,10 @@ export default function PoliciesContent() {
     <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
       <div className="flex flex-col gap-1 sm:gap-2">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          Politique de confidentialité
+          {POLICY_LABELS[type].title}
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base">
-          Gérer la politique de confidentialité
+          {POLICY_LABELS[type].subtitle}
         </p>
       </div>
 
@@ -162,7 +182,7 @@ export default function PoliciesContent() {
         <div className="flex flex-col md:flex-row items-center justify-between mb-4">
           {policyData?.lastUpdatedAt && (
             <p className="mb-4 text-muted-foreground">
-              Dernière mise à jour
+              Dernière mise à jour :{" "}
               {new Date(policyData.lastUpdatedAt).toLocaleDateString("fr-CA")}
             </p>
           )}

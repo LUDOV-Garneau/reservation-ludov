@@ -1,12 +1,21 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import db from "@/db";
 import { GET } from "./route";
+import { createNextRequestWithCookie } from "../test-helpers";
 
 vi.mock("@/db", () => ({
   default: {
     select: vi.fn(),
     selectDistinct: vi.fn(),
   },
+}));
+
+vi.mock("@/lib/jwt", () => ({
+  verifyToken: vi.fn((token: string) =>
+    token === "mock-token"
+      ? { id: 1, name: "Test User", email: "test@example.com", isAdmin: false }
+      : null,
+  ),
 }));
 
 /** Chainable thenable resolving to `result`. Covers .from/.where/.orderBy/.limit/.offset. */
@@ -30,7 +39,7 @@ describe("GET /reservation/games", () => {
 
   it("returns empty result when consoleId is 0 with no DB call", async () => {
     const res = await GET(
-      new Request(
+      createNextRequestWithCookie(
         "http://localhost/api/reservation/games?consoleId=0&page=1&limit=12",
       ),
     );
@@ -71,7 +80,7 @@ describe("GET /reservation/games", () => {
       );
 
     const res = await GET(
-      new Request(
+      createNextRequestWithCookie(
         "http://localhost/api/reservation/games?consoleId=1&page=1&limit=12",
       ),
     );
@@ -113,7 +122,7 @@ describe("GET /reservation/games", () => {
     );
 
     const res = await GET(
-      new Request(
+      createNextRequestWithCookie(
         "http://localhost/api/reservation/games?consoleId=1&page=1&limit=12&search=god",
       ),
     );
@@ -148,7 +157,7 @@ describe("GET /reservation/games", () => {
       );
 
     const res = await GET(
-      new Request(
+      createNextRequestWithCookie(
         "http://localhost/api/reservation/games?consoleId=1&page=2&limit=12",
       ),
     );
@@ -172,7 +181,7 @@ describe("GET /reservation/games", () => {
       );
 
     const res = await GET(
-      new Request(
+      createNextRequestWithCookie(
         "http://localhost/api/reservation/games?consoleId=1&page=1&limit=12",
       ),
     );
@@ -189,7 +198,7 @@ describe("GET /reservation/games", () => {
     });
 
     const res = await GET(
-      new Request(
+      createNextRequestWithCookie(
         "http://localhost/api/reservation/games?consoleId=1&page=1&limit=12",
       ),
     );

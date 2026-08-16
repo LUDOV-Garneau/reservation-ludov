@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import db from "@/db";
 import { inArray } from "drizzle-orm";
 import { games } from "@/db/schema";
+import { withAuth } from "@/lib/withAuth";
 
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async (req) => {
   try {
     const idsParam = req.nextUrl.searchParams.get("ids");
 
@@ -35,4 +36,4 @@ export async function GET(req: NextRequest) {
     console.error("Erreur API game details:", err);
     return NextResponse.json({ success: false, message: "Erreur serveur" }, { status: 500 });
   }
-}
+});

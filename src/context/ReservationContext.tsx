@@ -1,6 +1,7 @@
 "use client";
 
 import { Console } from "@/types/console";
+import { toLocalYmd, parseYmdLocal } from "@/lib/dates";
 import React, {
   createContext,
   useContext,
@@ -88,11 +89,6 @@ const API_TIMEOUT = 10000; // 10 secondes
 // ============================================================================
 // UTILITAIRES
 // ============================================================================
-
-const toLocalYmd = (d: Date): string =>
-  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
-    d.getDate()
-  ).padStart(2, "0")}`;
 
 const tzAwareIso = (s: string): string =>
   /Z$|[+-]\d{2}:\d{2}$/.test(s) ? s : `${s}Z`;
@@ -423,8 +419,12 @@ export function ReservationProvider({
     async (accessories: number[]) => {
       if (!reservationId) return;
 
-      // Mise à jour optimiste
-      setSelectedAccessories(accessories);
+      // Mise à jour optimiste, avec retour en arrière si la sauvegarde échoue.
+      let previous: number[] = [];
+      setSelectedAccessories((prev) => {
+        previous = prev;
+        return accessories;
+      });
 
       try {
         const data = await ReservationAPI.updateHold({
@@ -435,7 +435,10 @@ export function ReservationProvider({
         if (!data.success) throw new Error("Échec côté serveur");
       } catch (e) {
         console.error("Erreur update accessoires:", e);
+        setSelectedAccessories(previous);
         setError(e instanceof Error ? e.message : "Erreur update accessoires");
+        // Propagé pour que l'étape ne s'avance pas quand la sauvegarde échoue.
+        throw e;
       }
     },
     [reservationId]
@@ -565,7 +568,7 @@ export function ReservationProvider({
         setSelectedGames(data.games || []);
         setSelectedAccessories(data.accessories || []);
         setSelectedDate(
-          data.selectedDate ? new Date(data.selectedDate) : undefined
+          data.selectedDate ? parseYmdLocal(String(data.selectedDate)) : undefined
         );
         setSelectedTime(data.selectedTime || undefined);
         setCurrentStep(data.currentStep || 1);
