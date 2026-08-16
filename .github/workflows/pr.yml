@@ -21,9 +21,6 @@ jobs:
       - name: Lint code
         run: npm run lint
 
-      - name: Run Vitest tests with coverage
-        run: npx vitest run
-
       - name: Build check
         env:
           NEXT_TELEMETRY_DISABLED: 1

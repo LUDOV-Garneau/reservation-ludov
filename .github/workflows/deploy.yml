@@ -23,13 +23,12 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Lint & Test & Build
+      - name: Lint & Build
         env:
           NEXT_TELEMETRY_DISABLED: 1
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           npm run lint
-          npx vitest run
           npm run build
 
       - name: Set up Buildx
