@@ -14,20 +14,63 @@ concurrency:
   group: deploy-production
   cancel-in-progress: false
 
+# Pas de job CI ici : lint, tests et build de l'image tournent déjà sur la PR
+# via pr.yml. Les rejouer au merge doublerait le build Docker sans rien
+# apprendre de neuf.
+#
+# Ce qui garantit qu'on ne déploie pas du code cassé, c'est la protection de
+# branche sur main : checks requis + « Require branches to be up to date
+# before merging ». Sans ce second réglage, une PR verte sur une base périmée
+# peut être fusionnée et déployée sans avoir jamais été testée telle quelle.
 jobs:
-  ci:
-    uses: ./.github/workflows/ci.yml
-    secrets: inherit
-
   deploy:
     name: Déploiement Coolify
-    needs: ci
     runs-on: ubuntu-latest
     # Rattache le job à l'environnement « production » : historique des
     # déploiements dans GitHub, et point d'accroche si vous voulez plus tard
     # exiger une approbation manuelle ou restreindre les branches.
     environment: production
     steps:
+      # Sans ce contrôle, un secret absent produit une URL sans hôte et un
+      # « curl: (3) URL rejected: No host part in the URL » qui ne dit rien du
+      # vrai problème. On échoue tôt, en nommant ce qui manque.
+      - name: Vérifier la présence des secrets
+        env:
+          COOLIFY_URL: ${{ secrets.COOLIFY_URL }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+          COOLIFY_APP_UUID: ${{ secrets.COOLIFY_APP_UUID }}
+        run: |
+          set -eu
+
+          manquants=""
+          [ -n "${COOLIFY_URL:-}" ]      || manquants="${manquants} COOLIFY_URL"
+          [ -n "${COOLIFY_TOKEN:-}" ]    || manquants="${manquants} COOLIFY_TOKEN"
+          [ -n "${COOLIFY_APP_UUID:-}" ] || manquants="${manquants} COOLIFY_APP_UUID"
+
+          if [ -n "$manquants" ]; then
+            echo "::error::Secrets GitHub absents ou vides :${manquants}"
+            echo "À créer dans Settings → Secrets and variables → Actions,"
+            echo "onglet « Secrets » (et non « Variables »), au niveau du dépôt."
+            echo "Si vous les avez définis au niveau de l'organisation, vérifiez"
+            echo "que la politique d'accès inclut ce dépôt : il est public, et"
+            echo "une politique « Private repositories » l'exclurait."
+            exit 1
+          fi
+
+          # La valeur est masquée dans les logs : on ne l'affiche jamais.
+          case "$COOLIFY_URL" in
+            https://*) ;;
+            http://*)
+              echo "::warning::COOLIFY_URL est en HTTP : le token transite en clair."
+              ;;
+            *)
+              echo "::error::COOLIFY_URL doit commencer par https:// — vérifiez le secret."
+              exit 1
+              ;;
+          esac
+
+          echo "Les trois secrets sont présents."
+
       - name: Déclencher le déploiement
         id: trigger
         env:
@@ -38,7 +81,12 @@ jobs:
           set -euo pipefail
 
           base="${COOLIFY_URL%/}"
-          code=$(curl -sS --retry 3 --retry-all-errors \
+          # Volontairement SANS --retry : ce POST n'est pas idempotent. Si
+          # Coolify traite la demande mais que la réponse tarde ou revient en
+          # 5xx, une nouvelle tentative met un second déploiement en file et
+          # l'application est déployée deux fois. Mieux vaut échouer et
+          # relancer sciemment que dédoubler en silence.
+          code=$(curl -sS --max-time 30 \
             -o response.json -w '%{http_code}' \
             -X POST "${base}/api/v1/deploy?uuid=${COOLIFY_APP_UUID}&force=false" \
             -H "Authorization: Bearer ${COOLIFY_TOKEN}")
