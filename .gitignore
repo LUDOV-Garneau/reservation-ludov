@@ -42,3 +42,7 @@ yarn-error.log*
 next-env.d.ts
 
 .claude/settings.local.json
+
+# Fichiers temporaires écrits par le workflow de déploiement Coolify
+/response.json
+/status.json
