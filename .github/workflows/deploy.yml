@@ -81,7 +81,12 @@ jobs:
           set -euo pipefail
 
           base="${COOLIFY_URL%/}"
-          code=$(curl -sS --retry 3 --retry-all-errors \
+          # Volontairement SANS --retry : ce POST n'est pas idempotent. Si
+          # Coolify traite la demande mais que la réponse tarde ou revient en
+          # 5xx, une nouvelle tentative met un second déploiement en file et
+          # l'application est déployée deux fois. Mieux vaut échouer et
+          # relancer sciemment que dédoubler en silence.
+          code=$(curl -sS --max-time 30 \
             -o response.json -w '%{http_code}' \
             -X POST "${base}/api/v1/deploy?uuid=${COOLIFY_APP_UUID}&force=false" \
             -H "Authorization: Bearer ${COOLIFY_TOKEN}")
