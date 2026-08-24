@@ -14,14 +14,17 @@ concurrency:
   group: deploy-production
   cancel-in-progress: false
 
+# Pas de job CI ici : lint, tests et build de l'image tournent déjà sur la PR
+# via pr.yml. Les rejouer au merge doublerait le build Docker sans rien
+# apprendre de neuf.
+#
+# Ce qui garantit qu'on ne déploie pas du code cassé, c'est la protection de
+# branche sur main : checks requis + « Require branches to be up to date
+# before merging ». Sans ce second réglage, une PR verte sur une base périmée
+# peut être fusionnée et déployée sans avoir jamais été testée telle quelle.
 jobs:
-  ci:
-    uses: ./.github/workflows/ci.yml
-    secrets: inherit
-
   deploy:
     name: Déploiement Coolify
-    needs: ci
     runs-on: ubuntu-latest
     # Rattache le job à l'environnement « production » : historique des
     # déploiements dans GitHub, et point d'accroche si vous voulez plus tard
