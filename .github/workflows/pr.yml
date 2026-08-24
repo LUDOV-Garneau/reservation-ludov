@@ -1,31 +1,17 @@
 name: PR CI
+
 on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: pr-ci-${{ github.head_ref }}
+  cancel-in-progress: true
+
 jobs:
   ci:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: "npm"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Lint code
-        run: npm run lint
-
-      - name: Run Vitest tests with coverage
-        run: npx vitest run
-
-      - name: Build check
-        env:
-          NEXT_TELEMETRY_DISABLED: 1
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: npm run build
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
