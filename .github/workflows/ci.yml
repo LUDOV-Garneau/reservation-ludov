@@ -63,8 +63,8 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Test de fumée : la seule vérification qui prouve que bcrypt se charge
-      # sur musl, que Next écoute bien sur 0.0.0.0 et que l'image démarre.
+      # Test de fumée en deux temps, parce que les deux échecs possibles ont
+      # des causes différentes et méritent des messages différents.
       - name: Démarrage de l'image et sonde /api/health
         run: |
           set -euo pipefail
@@ -73,6 +73,8 @@ jobs:
             -e JWT_SECRET=smoke-test-only \
             ludov:ci
 
+          # Temps 1 — l'application sert-elle la route ? Prouve que l'image se
+          # construit, que Next démarre et qu'il écoute bien sur 0.0.0.0.
           ok=0
           for _ in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:3000/api/health; then
@@ -83,15 +85,47 @@ jobs:
           done
 
           echo ""
-          echo "--- logs du conteneur ---"
-          docker logs ludov-ci
-
           if [ "$ok" -ne 1 ]; then
+            echo "--- logs du conteneur ---"
+            docker logs ludov-ci
             echo "::error::L'image ne répond pas sur /api/health après 60 s"
             exit 1
           fi
+          echo "L'application répond sur /api/health."
 
-          echo "L'image démarre et répond correctement."
+          # Temps 2 — la directive HEALTHCHECK du Dockerfile fonctionne-t-elle ?
+          # C'est elle, et non le curl ci-dessus, que Coolify interroge pour
+          # décider de basculer le trafic. Elle peut être cassée (wget absent,
+          # commande mal formée) alors que la route répond parfaitement.
+          etat=""
+          for _ in $(seq 1 60); do
+            etat=$(docker inspect \
+              --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}absent{{end}}' \
+              ludov-ci)
+            case "$etat" in
+              healthy|unhealthy|absent) break ;;
+            esac
+            sleep 2
+          done
+
+          echo "--- logs du conteneur ---"
+          docker logs ludov-ci
+
+          case "$etat" in
+            healthy)
+              echo "Docker rapporte « healthy » : la directive HEALTHCHECK fonctionne."
+              ;;
+            absent)
+              echo "::error::Aucun HEALTHCHECK dans l'image — Coolify basculerait le trafic à l'aveugle."
+              exit 1
+              ;;
+            *)
+              echo "--- détail des sondes ---"
+              docker inspect --format '{{json .State.Health}}' ludov-ci
+              echo "::error::HEALTHCHECK en échec (état: ${etat}) alors que /api/health répond. Vérifier la commande du HEALTHCHECK, notamment la présence de wget dans l'image."
+              exit 1
+              ;;
+          esac
 
       - name: Nettoyage
         if: always()
