@@ -1,0 +1,133 @@
+# Contrôles partagés par pr.yml et deploy.yml. Les deux workflows avaient
+# jusqu'ici une copie du même job, qui finissait forcément par diverger.
+name: CI
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  qualite:
+    name: Lint & tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      # Pas de `npm run build` ici : le job « image » ci-dessous lance le vrai
+      # build Next dans l'image Docker, qui fait aussi la vérification de
+      # types. Les deux jobs tournent en parallèle, on ne compile donc pas
+      # l'application deux fois.
+      # Les tests unitaires et vitest ont été retirés (voir d62ff44) : il n'y a
+      # plus de script `test`. La vérification de types prend leur place et
+      # passe maintenant sans erreur, les fichiers .test.ts qui la faisaient
+      # échouer ayant disparu avec eux.
+      - name: Vérification des types
+        run: npx tsc --noEmit
+
+  image:
+    name: Image Docker & démarrage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Le job « qualité » valide le code sur un runner Ubuntu avec toutes les
+      # dépendances : il ne prouve rien sur l'image que Coolify va réellement
+      # construire. Sans ce job, une PR qui casse le Dockerfile passe le CI et
+      # n'échoue qu'au déploiement.
+      # Pas de build-arg : le Dockerfile fixe lui-même un JWT_SECRET factice
+      # pour le build, le vrai secret étant injecté au runtime par Coolify.
+      - name: Build de l'image (sans push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          load: true
+          tags: ludov:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Test de fumée en deux temps, parce que les deux échecs possibles ont
+      # des causes différentes et méritent des messages différents.
+      - name: Démarrage de l'image et sonde /api/health
+        run: |
+          set -euo pipefail
+
+          docker run -d --name ludov-ci -p 3000:3000 \
+            -e JWT_SECRET=smoke-test-only \
+            ludov:ci
+
+          # Temps 1 — l'application sert-elle la route ? Prouve que l'image se
+          # construit, que Next démarre et qu'il écoute bien sur 0.0.0.0.
+          ok=0
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:3000/api/health; then
+              ok=1
+              break
+            fi
+            sleep 2
+          done
+
+          echo ""
+          if [ "$ok" -ne 1 ]; then
+            echo "--- logs du conteneur ---"
+            docker logs ludov-ci
+            echo "::error::L'image ne répond pas sur /api/health après 60 s"
+            exit 1
+          fi
+          echo "L'application répond sur /api/health."
+
+          # Temps 2 — la directive HEALTHCHECK du Dockerfile fonctionne-t-elle ?
+          # C'est elle, et non le curl ci-dessus, que Coolify interroge pour
+          # décider de basculer le trafic. Elle peut être cassée (wget absent,
+          # commande mal formée) alors que la route répond parfaitement.
+          etat=""
+          for _ in $(seq 1 60); do
+            etat=$(docker inspect \
+              --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}absent{{end}}' \
+              ludov-ci)
+            case "$etat" in
+              healthy|unhealthy|absent) break ;;
+            esac
+            sleep 2
+          done
+
+          echo "--- logs du conteneur ---"
+          docker logs ludov-ci
+
+          case "$etat" in
+            healthy)
+              echo "Docker rapporte « healthy » : la directive HEALTHCHECK fonctionne."
+              ;;
+            absent)
+              echo "::error::Aucun HEALTHCHECK dans l'image — Coolify basculerait le trafic à l'aveugle."
+              exit 1
+              ;;
+            *)
+              echo "--- détail des sondes ---"
+              docker inspect --format '{{json .State.Health}}' ludov-ci
+              echo "::error::HEALTHCHECK en échec (état: ${etat}) alors que /api/health répond. Vérifier la commande du HEALTHCHECK, notamment la présence de wget dans l'image."
+              exit 1
+              ;;
+          esac
+
+      - name: Nettoyage
+        if: always()
+        run: docker rm -f ludov-ci || true

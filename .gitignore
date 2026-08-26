@@ -45,3 +45,7 @@ next-env.d.ts
 
 # Volume local des images téléversées (consoles, jeux, documentation)
 /uploads/
+
+# Fichiers temporaires écrits par le workflow de déploiement Coolify
+/response.json
+/status.json

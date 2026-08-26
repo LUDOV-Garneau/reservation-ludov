@@ -60,5 +60,11 @@ COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 USER nextjs
 EXPOSE 3000
 
+# Coolify s'appuie dessus pour savoir quand le nouveau conteneur est prêt et
+# basculer le trafic. La sonde n'interroge pas la base : une coupure MySQL
+# passagère ne doit pas faire redémarrer le conteneur.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget -q -O /dev/null "http://127.0.0.1:${PORT}/api/health" || exit 1
+
 # Les migrations s'appliquent avant le démarrage du serveur.
 CMD ["sh", "-c", "node scripts/migrate.js && node server.js"]
