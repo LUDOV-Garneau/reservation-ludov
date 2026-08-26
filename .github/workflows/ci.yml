@@ -63,13 +63,51 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # L'image applique les migrations Drizzle avant de démarrer le serveur.
+      # Sans base, `scripts/migrate.js` sort en erreur et Next ne démarre jamais.
+      # Ce MySQL jetable donne au test de fumée de quoi fonctionner — et fait au
+      # passage tourner les migrations pour de vrai, ce qui les valide aussi.
+      - name: MySQL jetable pour le test de fumée
+        run: |
+          set -euo pipefail
+
+          docker network create ludov-ci-net
+
+          docker run -d --name ludov-ci-db --network ludov-ci-net \
+            -e MYSQL_ROOT_PASSWORD=ci-smoke-test \
+            -e MYSQL_DATABASE=ludov_ci \
+            mysql:8
+
+          echo "Attente de la disponibilité de MySQL..."
+          pret=0
+          for _ in $(seq 1 60); do
+            if docker exec ludov-ci-db mysqladmin ping -h 127.0.0.1 \
+                 -u root -pci-smoke-test --silent 2>/dev/null; then
+              pret=1
+              break
+            fi
+            sleep 2
+          done
+
+          if [ "$pret" -ne 1 ]; then
+            docker logs ludov-ci-db
+            echo "::error::MySQL n'est pas prêt après 120 s"
+            exit 1
+          fi
+          echo "MySQL est prêt."
+
       # Test de fumée en deux temps, parce que les deux échecs possibles ont
       # des causes différentes et méritent des messages différents.
       - name: Démarrage de l'image et sonde /api/health
         run: |
           set -euo pipefail
 
-          docker run -d --name ludov-ci -p 3000:3000 \
+          docker run -d --name ludov-ci --network ludov-ci-net -p 3000:3000 \
+            -e DATABASE_HOST=ludov-ci-db \
+            -e DATABASE_PORT=3306 \
+            -e DATABASE_USER=root \
+            -e DATABASE_PASSWORD=ci-smoke-test \
+            -e DATABASE_NAME=ludov_ci \
             -e JWT_SECRET=smoke-test-only \
             ludov:ci
 
@@ -86,8 +124,10 @@ jobs:
 
           echo ""
           if [ "$ok" -ne 1 ]; then
-            echo "--- logs du conteneur ---"
+            echo "--- logs de l'application ---"
             docker logs ludov-ci
+            echo "--- logs de MySQL ---"
+            docker logs --tail 30 ludov-ci-db
             echo "::error::L'image ne répond pas sur /api/health après 60 s"
             exit 1
           fi
@@ -129,4 +169,6 @@ jobs:
 
       - name: Nettoyage
         if: always()
-        run: docker rm -f ludov-ci || true
+        run: |
+          docker rm -f ludov-ci ludov-ci-db || true
+          docker network rm ludov-ci-net || true
