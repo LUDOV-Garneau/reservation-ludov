@@ -109,7 +109,7 @@ export default function ImageUploadField({
         className={`relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-4 text-center transition-colors cursor-pointer ${
           isDragging
             ? "border-cyan-500 bg-cyan-50"
-            : "border-gray-300 hover:border-cyan-400 bg-muted/30"
+            : "border-gray-300 hover:border-cyan-500 bg-muted/30"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         <input

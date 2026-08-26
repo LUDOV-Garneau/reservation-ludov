@@ -14,7 +14,7 @@
   },
   "footer": {
     "contact": "Contact",
-    "policy": "Policy",
+    "policy": "Privacy policy",
     "developedBy": "Developed by students from Cégep Garneau",
     "copyright": "© Copyright 2025 LUDOV (University Laboratory for Video Game Documentation and Observation) - All rights reserved"
   },
@@ -134,7 +134,7 @@
       "subtitle_accessory": "Choose the accessories you want to add to your reservation.",
       "loading_accessory": "Loading accessories...",
       "title_no_accessory_available": "No accessories available",
-      "no_accessory_available": "No accessories are currently available.",
+      "no_accessory_available": "No accessories are currently available",
       "skip_step": "Skip this step",
       "previousStep": "Previous step",
       "selection": "Selection",
@@ -178,7 +178,8 @@
         "accessories": "One or more selected accessories are unavailable",
         "station": "No station available for this selection",
         "unavailable": "Unavailable"
-      }
+      },
+      "slotNoLongerAvailable": "The time slot you had chosen is no longer available for this selection. Please pick another one."
     },
     "confirm": {
       "loadingReservation": "Loading your reservation...",
@@ -238,8 +239,8 @@
     "accueil": {
       "upcomingReservations": "Upcoming reservations",
       "pastReservations": "Reservation history",
-      "noUpcomingReservations": "You have no upcoming reservations.",
-      "noPastReservations": "You have no past reservations.",
+      "noUpcomingReservations": "You have no upcoming reservations",
+      "noPastReservations": "You have no past reservations",
       "detailsButton": "Details",
       "loadingReservations": "Loading...",
       "errorLoadingReservations": "An error occurred while loading reservations.",
@@ -348,7 +349,6 @@
     },
     "users": {
       "title": "Users",
-      "subtitle": "Manage users on the LUDOV platform",
       "actionBar": {
         "searchPlaceholder": "Search...",
         "addUser": "Add",
@@ -365,7 +365,6 @@
       },
       "searchResult": {
         "noUsersFound": "No user(s) found",
-        "noMatch": "No user matches your search.",
         "startByAdding": "Start by adding your first user."
       },
       "table": {
@@ -442,7 +441,6 @@
           "lastName": "Last name",
           "email": "Email address",
           "adminAccess": "Administrator access",
-          "active": "Active",
           "adminAcessDescription": "Grants access to the admin panel and sensitive actions. Reserved for trusted staff.",
           "cancel": "Cancel",
           "submit": "Add user",
@@ -452,15 +450,12 @@
     },
     "reservations": {
       "title": "Reservations",
-      "subtitle": "Manage LUDOV platform reservations",
       "actionBar": {
         "toolTipRefresh": "Search...",
         "searchPlaceholder": "Search"
       },
       "searchResult": {
-        "noReservationsFound": "No reservations found",
-        "noMatch": "No reservation matches your search.",
-        "empty": "No reservations yet."
+        "noReservationsFound": "No reservations found"
       },
       "table": {
         "header": {
@@ -484,7 +479,6 @@
           "loading_error": "Error loading reservations:"
         },
         "delete": "Delete",
-        "no_reservations": "No reservations found.",
         "Previous": "Previous",
         "Next": "Next",
         "confirm_title": "Confirm deletion",
@@ -524,7 +518,6 @@
     },
     "stations": {
       "title": "Stations",
-      "subtitle": "Manage stations on the LUDOV platform",
       "actionBar": {
         "searchPlaceholder": "Search...",
         "addStation": "Add",
@@ -533,7 +526,6 @@
       },
       "searchResult": {
         "noStationsFound": "No station(s) found",
-        "noMatch": "No station matches your search.",
         "startByAdding": "Start by adding your first station."
       },
       "table": {
@@ -556,8 +548,7 @@
         "activeStations": "Number of active stations",
         "inactiveStations": "Number of inactive stations",
         "mostUsedStation": "Most reserved station",
-        "noStations": "No stations created",
-        "noReservations": "No reservations made"
+        "noStations": "No stations created"
       },
       "pagination": {
         "affichageDe": "Displaying",
@@ -718,20 +709,19 @@
       "subtitle": "User guide for the LUDOV platform - Administrators"
     },
     "imageUpload": {
-      "dropzone": "Click or drop an image (PNG, JPEG, WebP, GIF — max 5 MB)",
+      "dropzone": "Click or drop an image (PNG, JPEG, WebP, GIF, max 5 MB)",
       "uploading": "Uploading...",
-      "urlPlaceholder": "IGDB or MobyGames link (https://...)",
+      "urlPlaceholder": "Direct image link (https://cdn.mobygames.com/...)",
       "importUrl": "Import",
       "error": "An error occurred while uploading the image."
     },
     "accessories": {
       "title": "Accessories",
       "subtitle": "Manage accessory visibility and compatible platforms",
-      "count": "{count} accessories",
-      "empty": "No accessories in the catalog.",
+      "empty": "No accessories in the catalog",
       "noConsole": "No platform",
       "editConsoles": "Platforms",
-      "editDialogTitle": "Compatible platforms — {name}",
+      "editDialogTitle": "Compatible platforms: {name}",
       "cancel": "Cancel",
       "save": "Save",
       "table": {
@@ -747,28 +737,34 @@
         "updateError": "An error occurred while updating the accessory.",
         "successTitle": "Success",
         "errorTitle": "Error"
-      }
+      },
+      "searchPlaceholder": "Search for an accessory by name...",
+      "refresh": "Refresh"
     },
     "consolePhotos": {
       "title": "Console photos",
       "subtitle": "Add and replace platform photos",
-      "empty": "No platforms found.",
+      "empty": "No platforms found",
       "alerts": {
         "fetchError": "An error occurred while loading platforms.",
         "updateSuccess": "Photo updated successfully.",
         "updateError": "An error occurred while updating the photo.",
         "successTitle": "Success",
-        "errorTitle": "Error"
-      }
+        "errorTitle": "Error",
+        "removeSuccess": "Photo removed successfully.",
+        "removeError": "Error while removing the photo."
+      },
+      "searchPlaceholder": "Search for a platform by name...",
+      "refresh": "Refresh",
+      "removeImage": "Remove photo"
     },
     "gamesImages": {
       "title": "Game images",
       "subtitle": "List games and manage their artwork",
       "searchPlaceholder": "Search a game by title...",
-      "count": "{count} games",
-      "empty": "No games found.",
+      "empty": "No games found",
       "importImage": "Image",
-      "importDialogTitle": "Import an image — {title}",
+      "importDialogTitle": "Import an image: {title}",
       "filter": {
         "all": "All games",
         "withImage": "With image",
@@ -791,7 +787,8 @@
         "updateError": "An error occurred while updating the image.",
         "successTitle": "Success",
         "errorTitle": "Error"
-      }
+      },
+      "refresh": "Refresh"
     },
     "emails": {
       "title": "Emails",

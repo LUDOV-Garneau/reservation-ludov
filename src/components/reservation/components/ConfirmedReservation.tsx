@@ -40,15 +40,15 @@ export default function ConfirmedReservation({
           </p>
 
           <div className="flex items-center gap-3 mb-2">
-            <Calendar className="h-5 w-5 text-cyan-700" />
+            <Calendar className="h-5 w-5 text-cyan-500" />
             <span className="text-cyan-800 font-medium">
-              {date ? String(date).split("T")[0] : "—"}
+              {date ? String(date).split("T")[0] : "-"}
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <Clock className="h-5 w-5 text-cyan-700" />
-            <span className="text-cyan-800 font-medium">{heure ?? "—"}</span>
+            <Clock className="h-5 w-5 text-cyan-500" />
+            <span className="text-cyan-800 font-medium">{heure ?? "-"}</span>
           </div>
         </div>
 
@@ -62,7 +62,7 @@ export default function ConfirmedReservation({
           </Button>
 
           <Button
-            className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700"
+            className="px-6 py-3 bg-cyan-500 hover:bg-cyan-600"
             onClick={() => router.push(`/reservation/details/${reservationId}`)}
           >
             {t("reservation.confirmation.detailsBtn")}

@@ -10,15 +10,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, BookOpen, Loader2, X } from "lucide-react";
+import { AlertCircle, BookOpen } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import ImageUploadField from "@/components/admin/ImageUploadField";
+
+/** Ce que l'éditeur expose au parent pour alimenter le bouton d'en-tête. */
+export type DocEditorApi = {
+  save: () => void;
+  isSaving: boolean;
+  canSave: boolean;
+};
 
 type Props = {
   slug: string;
   /** Appelé après une sauvegarde réussie (contenu de la langue sauvegardée). */
   onSaved: (locale: "fr" | "en", content: string) => void;
-  onClose: () => void;
+  /** Reçoit l'action d'enregistrement, déclenchée depuis l'en-tête de la page. */
+  onApiChange: (api: DocEditorApi) => void;
 };
 
 /**
@@ -26,7 +34,7 @@ type Props = {
  * aperçu, bilingue (l'anglais part du contenu français si absent), et
  * insertion d'images téléversées sur le volume local.
  */
-export default function DocEditor({ slug, onSaved, onClose }: Props) {
+export default function DocEditor({ slug, onSaved, onApiChange }: Props) {
   const [locale, setLocale] = useState<"fr" | "en">("fr");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -83,39 +91,41 @@ export default function DocEditor({ slug, onSaved, onClose }: Props) {
     }
   }, [slug, locale, title, content, onSaved]);
 
+  // Le parent affiche « Enregistrer » à côté de « Arrêter l'édition » : il a
+  // besoin de l'action et de l'état courant du formulaire.
+  const canSave = Boolean(title.trim()) && Boolean(content.trim());
+  useEffect(() => {
+    onApiChange({ save: handleSave, isSaving, canSave });
+  }, [onApiChange, handleSave, isSaving, canSave]);
+
   const handleImageUploaded = useCallback((path: string) => {
     setContent((prev) => `${prev}\n\n![](${path})\n`);
     setShowUpload(false);
   }, []);
 
   return (
-    <div className="bg-white rounded-xl border-2 border-cyan-200 p-4 sm:p-6 space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <h2 className="text-xl font-bold">Édition de la documentation</h2>
-        <div className="flex items-center gap-2">
-          <Tabs
-            value={locale}
-            onValueChange={(value) => setLocale(value as "fr" | "en")}
-          >
-            <TabsList>
-              <TabsTrigger value="fr">Français</TabsTrigger>
-              <TabsTrigger value="en">English</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button variant="ghost" size="icon" onClick={onClose} aria-label="Fermer">
-            <X className="h-4 w-4" />
-          </Button>
-        </div>
+    <div className="bg-[white] rounded-xl shadow-lg border border-gray-200 p-4 sm:p-6 space-y-4">
+      <div className="flex items-center gap-3">
+        <Tabs
+          value={locale}
+          onValueChange={(value) => setLocale(value as "fr" | "en")}
+        >
+          <TabsList>
+            <TabsTrigger value="fr">Français</TabsTrigger>
+            <TabsTrigger value="en">English</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
-      <Link
-        href={`/admin/tutorials?page=markdown-guide&adminRessources=true`}
-        className="inline-flex items-center gap-2 text-sm text-cyan-600 hover:text-cyan-700"
-        target="_blank"
-      >
-        <BookOpen className="h-4 w-4" />
-        Guide de la syntaxe Markdown
-      </Link>
+      <Button asChild variant="outline" size="sm" className="w-fit gap-2">
+        <Link
+          href={`/admin/tutorials?page=markdown-guide&adminRessources=true`}
+          target="_blank"
+        >
+          <BookOpen className="h-4 w-4" />
+          Guide de la syntaxe Markdown
+        </Link>
+      </Button>
 
       {error && (
         <Alert variant="destructive">
@@ -139,49 +149,50 @@ export default function DocEditor({ slug, onSaved, onClose }: Props) {
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <Label className="font-semibold">Contenu (Markdown)</Label>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowUpload((prev) => !prev)}
-            >
-              Insérer une image
-            </Button>
-          </div>
-
-          {showUpload && (
-            <ImageUploadField category="docs" onUploaded={handleImageUploaded} />
-          )}
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={24}
-              className="font-mono text-sm resize-y"
-              aria-label="Contenu Markdown"
-            />
-            <div className="border rounded-lg p-4 overflow-auto max-h-[600px] prose prose-sm max-w-none">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                {content}
-              </ReactMarkdown>
-            </div>
-          </div>
+            <div className="space-y-2">
+              {/* min-h-8 : garde les deux colonnes alignées, la hauteur de
+                  l'en-tête étant imposée par le bouton (size="sm"). */}
+              <div className="flex min-h-8 items-center justify-between gap-2">
+                <Label htmlFor="doc-content" className="font-semibold">
+                  Contenu (Markdown)
+                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowUpload((prev) => !prev)}
+                >
+                  Insérer une image
+                </Button>
+              </div>
 
-          <div className="flex justify-end gap-3 pt-2 border-t">
-            <Button variant="outline" onClick={onClose} disabled={isSaving}>
-              Annuler
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={isSaving || !title.trim() || !content.trim()}
-              className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 gap-2"
-            >
-              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-              Enregistrer
-            </Button>
+              {showUpload && (
+                <ImageUploadField
+                  category="docs"
+                  onUploaded={handleImageUploaded}
+                />
+              )}
+
+              <Textarea
+                id="doc-content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                rows={24}
+                className="bg-white font-mono text-sm resize-y max-h-[600px] overflow-auto"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex min-h-8 items-center">
+                <Label className="font-semibold">Aperçu</Label>
+              </div>
+              <div className="border rounded-lg bg-white p-4 overflow-auto max-h-[600px] prose prose-sm max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {content}
+                </ReactMarkdown>
+              </div>
+            </div>
           </div>
         </>
       )}

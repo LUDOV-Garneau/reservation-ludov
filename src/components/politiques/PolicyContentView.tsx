@@ -93,7 +93,7 @@ export default function PolicyContentView({ type, active = true }: Props) {
   if (!policy?.policies) {
     return (
       <div className="text-center py-12 text-gray-600">
-        Aucune politique disponible pour le moment.
+        Aucune politique disponible pour le moment
       </div>
     );
   }
@@ -160,12 +160,12 @@ export default function PolicyContentView({ type, active = true }: Props) {
         }
 
         .policy-content :global(a) {
-          color: #2563eb;
+          color: #0092b8;
           text-decoration: underline;
         }
 
         .policy-content :global(a:hover) {
-          color: #1d4ed8;
+          color: #00b8db;
         }
 
         .policy-content :global(code) {

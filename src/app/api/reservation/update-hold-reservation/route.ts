@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
-import db from "@/db";
-import { reservationHold, consoleStock, games, stations } from "@/db/schema";
+import db, { executeRows } from "@/db";
+import { reservationHold, consoleStock, games } from "@/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
+import { checkSlotBookable, isLockContentionError, runWithLockRetry, SLOT_TX_CONFIG } from "@/lib/availability";
 
 type Body = {
   reservationId: string;
@@ -32,6 +33,20 @@ interface HoldForUpdate {
   time: string | null;
   expireAt: string;
   expiresIn: number;
+}
+
+/** `accessoirs` est une colonne JSON : tableau, chaîne JSON ou NULL. */
+function parseAccessories(value: unknown): number[] {
+  if (Array.isArray(value)) return value.map(Number).filter(Number.isFinite);
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.map(Number).filter(Number.isFinite) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 class TxReturn extends Error {
@@ -70,11 +85,13 @@ export async function POST(req: Request) {
     const time = body.time === undefined ? undefined : body.time ?? null;
 
     try {
-      const response = await db.transaction(async (tx) => {
-        // FOR UPDATE n'est pas supporté par Drizzle MySQL — raw SQL requis ici
-        const rows = (await tx.execute<HoldForUpdate>(
-          sql`SELECT r.*, GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), r.expireAt)) AS expiresIn FROM reservation_hold r WHERE r.id = ${reservationId} AND r.user_id = ${userId} AND r.expireAt > NOW() FOR UPDATE`
-        ) as unknown) as HoldForUpdate[];
+      const response = await runWithLockRetry(() => db.transaction(async (tx) => {
+        // FOR UPDATE n'est pas supporté par Drizzle MySQL, raw SQL requis ici
+        const rows = executeRows<HoldForUpdate>(
+          await tx.execute(
+            sql`SELECT r.*, GREATEST(0, TIMESTAMPDIFF(SECOND, NOW(), r.expireAt)) AS expiresIn FROM reservation_hold r WHERE r.id = ${reservationId} AND r.user_id = ${userId} AND r.expireAt > NOW() FOR UPDATE`
+          )
+        );
 
         if (!rows || rows.length === 0) throw new TxReturn(NextResponse.json({ success: false, message: "Réservation expirée", status: "expired" }, { status: 410 }));
 
@@ -95,22 +112,51 @@ export async function POST(req: Request) {
 
         if (coursId !== undefined) setData.cours = coursId;
         if (date !== undefined) setData.date = date;
+        if (time !== undefined) setData.time = time;
 
-        if (time !== undefined) {
-          const stationRows = await tx.select({ stationId: stations.id })
-            .from(stations)
-            .where(and(
-              eq(stations.isActive, 1),
-              sql`JSON_CONTAINS(${stations.consoles}, JSON_ARRAY(${currentConsoleTypeId}))`,
-              sql`${stations.id} NOT IN (SELECT station FROM reservation WHERE date = ${date} AND time = ${time} AND archived = 0)`,
-              sql`${stations.id} NOT IN (SELECT station_id FROM reservation_hold WHERE date = ${date} AND time = ${time} AND expireAt > NOW() AND id != ${reservationId})`,
-            ));
+        // La station dépend du créneau complet : dès que la date OU l'heure
+        // change, on la réattribue sur le créneau résultant (le client peut
+        // revenir à l'étape 4 et ne renvoyer qu'une des deux valeurs).
+        if (date !== undefined || time !== undefined) {
+          const effectiveDate = date !== undefined ? date : hold.date ? String(hold.date).slice(0, 10) : null;
+          const effectiveTime = time !== undefined ? time : hold.time;
 
-          if (!stationRows || stationRows.length === 0) {
-            throw new TxReturn(NextResponse.json({ success: false, message: "Aucune station disponible pour la date et l'heure choisies" }, { status: 409 }));
+          if (effectiveDate && effectiveTime) {
+            // Heures d'ouverture, créneau à venir, station/console/jeux/
+            // accessoires encore libres : tout est revalidé côté serveur, avec
+            // verrouillage, pour que deux usagers ne retiennent pas le même
+            // créneau en même temps.
+            const effectiveGames = [
+              game1Id === undefined ? hold.game1_id : game1Id,
+              game2Id === undefined ? hold.game2_id : game2Id,
+              game3Id === undefined ? hold.game3_id : game3Id,
+            ].filter((id): id is number => typeof id === "number");
+
+            const effectiveAccessories =
+              accessories !== undefined
+                ? accessories ?? []
+                : parseAccessories(hold.accessoirs);
+
+            const slot = await checkSlotBookable(tx, {
+              date: effectiveDate,
+              time: effectiveTime,
+              userId,
+              consoleStockId: currentConsoleId,
+              consoleTypeId: currentConsoleTypeId,
+              gameIds: effectiveGames,
+              accessoryIds: effectiveAccessories,
+              excludeHoldId: reservationId,
+            });
+
+            if (!slot.ok) {
+              throw new TxReturn(NextResponse.json({ success: false, message: slot.message }, { status: slot.status }));
+            }
+            setData.stationId = slot.stationId;
+          } else {
+            // Créneau redevenu incomplet : la station est libérée, elle sera
+            // réattribuée quand la date et l'heure seront connues.
+            setData.stationId = null;
           }
-          setData.stationId = stationRows[0].stationId;
-          setData.time = time;
         }
 
         let consoleChanged = false;
@@ -133,7 +179,7 @@ export async function POST(req: Request) {
           await tx.update(consoleStock).set({ holding: 0 }).where(eq(consoleStock.id, currentConsoleId));
           await tx.update(consoleStock).set({ holding: 1 }).where(eq(consoleStock.id, stockId));
 
-          Object.assign(setData, { consoleId: stockId, consoleTypeId: newConsoleTypeId, game1Id: null, game2Id: null, game3Id: null, accessoirs: null, cours: null, date: null, time: null });
+          Object.assign(setData, { consoleId: stockId, consoleTypeId: newConsoleTypeId, game1Id: null, game2Id: null, game3Id: null, accessoirs: null, cours: null, date: null, time: null, stationId: null });
           consoleChanged = true;
         }
 
@@ -149,7 +195,8 @@ export async function POST(req: Request) {
           const finalSet = new Set<number>(desiredList);
           const toAdd = [...finalSet].filter((id) => !currentSet.has(id));
           const toRemove = [...currentSet].filter((id) => !finalSet.has(id));
-          const lockIds = [...new Set([...toAdd, ...toRemove])];
+          // Ordre croissant : même séquence de verrous partout, pas d'interblocage.
+          const lockIds = [...new Set([...toAdd, ...toRemove])].sort((a, b) => a - b);
 
           if (lockIds.length > 0) {
             await tx.execute(sql`SELECT id FROM games WHERE id IN (${sql.join(lockIds.map((id) => sql`${id}`), sql`, `)}) FOR UPDATE`);
@@ -213,7 +260,7 @@ export async function POST(req: Request) {
           expiresAt: new Date(updated.expireAt).toISOString(),
           expiresIn: Number(updated.expiresIn),
         });
-      });
+      }, SLOT_TX_CONFIG));
 
       return response;
     } catch (e) {
@@ -221,6 +268,9 @@ export async function POST(req: Request) {
       throw e;
     }
   } catch (err) {
+    if (isLockContentionError(err)) {
+      return NextResponse.json({ success: false, message: "Ce créneau vient d'être demandé par quelqu'un d'autre. Veuillez réessayer." }, { status: 409 });
+    }
     console.error("update-hold-reservation error:", err);
     return NextResponse.json({ success: false, message: err instanceof Error ? err.message : "Erreur lors de la mise à jour du hold" }, { status: 500 });
   }

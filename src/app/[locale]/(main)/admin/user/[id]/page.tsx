@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
@@ -14,7 +13,6 @@ import {
   Mail,
   Calendar,
   KeyRound,
-  ArrowLeft,
   Clock,
   Gamepad2,
   AlertCircle,
@@ -22,10 +20,10 @@ import {
   Monitor,
   CircleX,
   Link as Link2,
-  ChevronLeft,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Separator } from "@/components/ui/separator";
+import { PageShell, BackLink } from "@/components/layout/PageShell";
 import { Link } from "@/i18n/navigation";
 
 type UserDetails = {
@@ -178,11 +176,12 @@ export default function UserDetailPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-        <Skeleton className="h-10 w-48 mb-6" />
+      <PageShell>
+        <Skeleton className="h-5 w-24 mb-6" />
+        <Skeleton className="h-9 w-64 mb-6" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <Card>
+            <Card className="shadow-md border-gray-200">
               <CardHeader>
                 <Skeleton className="h-6 w-32" />
               </CardHeader>
@@ -194,7 +193,7 @@ export default function UserDetailPage() {
             </Card>
           </div>
           <div className="lg:col-span-2">
-            <Card>
+            <Card className="shadow-md border-gray-200">
               <CardHeader>
                 <Skeleton className="h-6 w-40" />
               </CardHeader>
@@ -204,17 +203,14 @@ export default function UserDetailPage() {
             </Card>
           </div>
         </div>
-      </div>
+      </PageShell>
     );
   }
 
   if (error || !userData) {
     return (
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-        <Button variant="ghost" onClick={() => router.back()} className="mb-6">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Retour
-        </Button>
+      <PageShell>
+        <BackLink onClick={() => router.back()} label="Retour" />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Erreur</AlertTitle>
@@ -222,32 +218,30 @@ export default function UserDetailPage() {
             {error || "Impossible de charger les données de l'utilisateur"}
           </AlertDescription>
         </Alert>
-      </div>
+      </PageShell>
     );
   }
 
+  // Les réservations annulées sont comptées à part : elles ne font plus partie
+  // du total « Réservations ».
+  const canceledCount = reservations.filter((r) => r.status === "canceled").length;
+  const activeCount = reservations.length - canceledCount;
+  const completedCount = reservations.filter((r) => r.status === "completed").length;
+
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
-      <Button
-        onClick={() => router.back()}
-        className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit group"
-      >
-        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-        <span className="text-sm font-medium">Retour</span>
-      </Button>
+    <PageShell>
+      <BackLink onClick={() => router.back()} label="Retour" />
 
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">
-          Profil de {userData.firstname} {userData.lastname}
-        </h1>
-        <p className="text-muted-foreground">
-          Informations détaillées et historique des réservations
-        </p>
-      </div>
+      <div className="w-full mx-auto space-y-4 sm:space-y-6">
+        <div className="flex flex-col gap-1 sm:gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Profil de {userData.firstname} {userData.lastname}
+          </h1>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <Card className="sticky top-5">
+          <Card className="sticky top-5 shadow-md border-gray-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5 text-cyan-600" />
@@ -261,7 +255,7 @@ export default function UserDetailPage() {
                     {userData.firstname} {userData.lastname}
                   </h4>
                   {userData.isAdmin ? (
-                    <Badge className="bg-cyan-700 text-white border-0 text-sm mt-1 rounded-full">
+                    <Badge className="bg-cyan-500 text-white border-0 text-sm mt-1 rounded-full">
                       <Shield className="h-5 w-5" />
                       Administrateur
                     </Badge>
@@ -276,8 +270,8 @@ export default function UserDetailPage() {
 
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-5 w-5 text-cyan-700" />
-                  <p className="text-cyan-700 font-bold">Courriel</p>
+                  <Mail className="h-5 w-5 text-cyan-500" />
+                  <p className="text-cyan-500 font-bold">Courriel</p>
                 </div>
                 <p className="font-medium break-all text-sm">
                   {userData.email}
@@ -286,8 +280,8 @@ export default function UserDetailPage() {
 
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-cyan-700" />
-                  <p className="text-cyan-700 font-bold">Créé le</p>
+                  <Calendar className="h-5 w-5 text-cyan-500" />
+                  <p className="text-cyan-500 font-bold">Créé le</p>
                 </div>
 
                 <p className="font-medium text-sm">
@@ -301,8 +295,8 @@ export default function UserDetailPage() {
 
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <KeyRound className="h-5 w-5 text-cyan-700" />
-                  <p className="font-bold text-cyan-700">Dernière connexion</p>
+                  <KeyRound className="h-5 w-5 text-cyan-500" />
+                  <p className="font-bold text-cyan-500">Dernière connexion</p>
                 </div>
                 <p className="font-medium text-sm">
                   {userData.lastLogin
@@ -318,10 +312,10 @@ export default function UserDetailPage() {
               </div>
 
               <div className="pt-4 border-t">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <p className="text-2xl font-bold text-cyan-600">
-                      {reservations.length}
+                      {activeCount}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Réservations
@@ -329,12 +323,15 @@ export default function UserDetailPage() {
                   </div>
                   <div className="text-center p-3 bg-gray-50 rounded-lg">
                     <p className="text-2xl font-bold text-green-600">
-                      {
-                        reservations.filter((r) => r.status === "completed")
-                          .length
-                      }
+                      {completedCount}
                     </p>
                     <p className="text-xs text-muted-foreground">Complétées</p>
+                  </div>
+                  <div className="text-center p-3 bg-gray-50 rounded-lg">
+                    <p className="text-2xl font-bold text-red-600">
+                      {canceledCount}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Annulées</p>
                   </div>
                 </div>
               </div>
@@ -343,7 +340,7 @@ export default function UserDetailPage() {
         </div>
 
         <div className="lg:col-span-2">
-          <Card>
+          <Card className="h-full shadow-md border-gray-200">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Gamepad2 className="h-5 w-5 text-cyan-600" />
@@ -359,9 +356,6 @@ export default function UserDetailPage() {
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Aucune réservation
                   </h3>
-                  <p className="text-muted-foreground text-sm">
-                    Cet utilisateur n&apos;a pas encore effectué de réservation.
-                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -375,7 +369,7 @@ export default function UserDetailPage() {
                       <CardContent className="p-4">
                         <div className="flex flex-col md:flex-row gap-2 items-start justify-between mb-3">
                           <div className="flex gap-2 items-center pb-1">
-                            <Link2 className="w-8 h-8 sm:w-4 sm:h-4 text-cyan-700" />
+                            <Link2 className="w-8 h-8 sm:w-4 sm:h-4 text-cyan-500" />
                             <h4 className="font-semibold text-xl text-cyan-600 line-clamp-1">
                               {reservation.id}
                             </h4>
@@ -385,7 +379,7 @@ export default function UserDetailPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
                           <div className="flex items-center gap-2 text-md">
-                            <Calendar className="h-4 w-4 text-cyan-700" />
+                            <Calendar className="h-4 w-4 text-cyan-500" />
                             <span>
                               {new Date(
                                 `${reservation.date}T${reservation.heure}`
@@ -393,7 +387,7 @@ export default function UserDetailPage() {
                             </span>
                           </div>
                           <div className="flex items-center gap-2 text-md">
-                            <Clock className="h-4 w-4 text-cyan-700" />
+                            <Clock className="h-4 w-4 text-cyan-500" />
                             <span>
                               {new Date(
                                 `${reservation.date}T${reservation.heure}`
@@ -419,8 +413,8 @@ export default function UserDetailPage() {
 
                         <div>
                           <div className="flex items-center gap-3 mb-3">
-                            <Monitor className="h-5 w-5 text-cyan-700" />
-                            <p className="text-cyan-700">Console</p>
+                            <Monitor className="h-5 w-5 text-cyan-500" />
+                            <p className="text-cyan-500">Console</p>
                           </div>
                           <Badge
                             variant={"reservationDetails"}
@@ -435,8 +429,8 @@ export default function UserDetailPage() {
                         {reservation.games.length > 0 && (
                           <div>
                             <div className="flex items-center gap-3 mb-3">
-                              <Gamepad2 className="h-5 w-5 text-cyan-700" />
-                              <p className="text-cyan-700">Jeux sélectionnés</p>
+                              <Gamepad2 className="h-5 w-5 text-cyan-500" />
+                              <p className="text-cyan-500">Jeux sélectionnés</p>
                             </div>
                             <div className="flex flex-wrap gap-2 overflow-clip">
                               {reservation.games.map((game, index) => (
@@ -457,8 +451,8 @@ export default function UserDetailPage() {
                             <Separator className="my-2" />
                             <div>
                               <div className="flex items-center gap-3 mb-3">
-                                <KeyRound className="h-5 w-5 text-cyan-700" />
-                                <p className="text-cyan-700">Accessoires</p>
+                                <KeyRound className="h-5 w-5 text-cyan-500" />
+                                <p className="text-cyan-500">Accessoires</p>
                               </div>
                               <div className="flex flex-wrap gap-2 overflow-clip">
                                 {reservation.accessories.map((accessory, index) => (
@@ -483,7 +477,8 @@ export default function UserDetailPage() {
             </CardContent>
           </Card>
         </div>
+        </div>
       </div>
-    </div>
+    </PageShell>
   );
 }

@@ -95,7 +95,9 @@ export const GET = withAuth(async (request, user) => {
       },
       jeux,
       accessoires: accessoiresRows.map((a) => ({ id: a.id, nom: a.name })),
-      archived: row.archived,
+      // tinyint MySQL : sans conversion, un 0 arrive au client et React
+      // l'affiche tel quel dans `{archived && …}`.
+      archived: Boolean(row.archived),
       cancellationReason: row.cancellationReason ?? null,
       station: stationRow?.name ?? null,
       date: row.date,

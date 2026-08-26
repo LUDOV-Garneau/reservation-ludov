@@ -36,7 +36,7 @@ export function GameCard({ game }: { game: DetailsGame }) {
   const t = useTranslations();
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-xl rounded-xl flex flex-col p-0 flex-1">
+    <Card className="overflow-hidden transition-all hover:shadow-lg rounded-xl border-gray-200 shadow-md flex flex-col p-0 flex-1">
       <CardContent className="p-0 flex flex-col flex-1">
         <div className="relative w-full h-96 bg-gray-100">
           {game.picture ? (
@@ -67,7 +67,7 @@ export function GameCard({ game }: { game: DetailsGame }) {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors w-full">
+              <Button className="bg-cyan-500 hover:bg-cyan-600 transition-colors w-full">
                 {t("reservation.details.detailsButton")}
               </Button>
             </Link>
@@ -80,8 +80,8 @@ export function GameCard({ game }: { game: DetailsGame }) {
 
 export function ConsoleCard({ item }: { item: DetailsConsole }) {
   return (
-    <Card className="h-full overflow-hidden group border-0 shadow-xl p-0">
-      <CardContent className="p-0 relative h-full min-h-[280px]">
+    <Card className="flex-1 overflow-hidden group border-gray-200 shadow-md p-0">
+      <CardContent className="p-0 relative flex-1 min-h-[280px]">
         <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-110">
           {item.picture ? (
             <Image
@@ -128,7 +128,7 @@ export function AccessoriesSection({
   const t = useTranslations();
   if (!accessories?.length) {
     return (
-      <Card className="w-full h-full">
+      <Card className="w-full flex-1 border-gray-200 shadow-md">
         <CardContent className="p-6 flex flex-col items-center justify-center min-h-[160px]">
           <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
           <p className="text-lg text-gray-400 italic">
@@ -140,13 +140,13 @@ export function AccessoriesSection({
   }
 
   return (
-    <Card className="w-full h-full p-0">
+    <Card className="w-full flex-1 p-0 border-gray-200 shadow-md">
       <CardContent className="p-6">
         <div className="flex gap-2 flex-wrap">
           {accessories.map((accessory) => (
             <div
               key={accessory.id}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-cyan-200 hover:border-cyan-400 hover:bg-cyan-50 transition-all duration-200 shadow-sm hover:shadow-md group"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-cyan-200 hover:border-cyan-500 hover:bg-cyan-50 transition-all duration-200 shadow-sm hover:shadow-md group"
             >
               <div className="w-2 h-2 rounded-full bg-cyan-500 group-hover:animate-pulse" />
               <span className="text-sm font-medium text-gray-700">

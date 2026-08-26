@@ -20,14 +20,7 @@ import {
   AccessoriesSection,
   GAMES_GRID_CLASSES,
 } from "@/components/reservation/details/SharedCards";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { PageShell, BackLink } from "@/components/layout/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import CancelReservationAlertDialog from "./components/CancelReservationAlertDialog";
@@ -256,7 +249,7 @@ export default function DetailsReservation({
   const t = useTranslations();
   const [alert, setAlert] = useState<AlertState>(null);
   // Feedback immédiat : l'annulation bascule l'affichage sans rechargement.
-  const [isCancelled, setIsCancelled] = useState(archived);
+  const [isCancelled, setIsCancelled] = useState(Boolean(archived));
 
   const handleCancelSuccess = useCallback(() => {
     setIsCancelled(true);
@@ -278,28 +271,8 @@ export default function DetailsReservation({
   }, []);
 
   return (
-    <div className="sm:bg-[white] rounded-lg mb-10">
-      <div className="sm:px-4 sm:py-8 lg:px-8">
-        <nav className="mb-6" aria-label="Breadcrumb">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/"
-                  className="text-gray-600 hover:text-cyan-600"
-                >
-                  {t("reservation.layout.home")}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="text-gray-900 font-medium">
-                  {t("reservation.details.titleSection")}
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </nav>
+    <PageShell>
+      <BackLink href="/" label={t("reservation.layout.goBackHome")} />
 
         {alert?.show && (
           <Alert
@@ -397,8 +370,10 @@ export default function DetailsReservation({
           </div>
           {/* CONSOLE ET ACCESSOIRS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CONSOLES */}
-            <div>
+            {/* CONSOLES — colonne en flex : la carte occupe la hauteur restante
+                sous son titre (avec h-full elle valait 100 % de la cellule et
+                débordait de la hauteur du titre). */}
+            <div className="flex flex-col">
               {/* TEXTE DE SECTION */}
               <div className="flex items-center gap-3 mb-6">
                 <Monitor className="h-6 w-6 text-cyan-600" />
@@ -412,7 +387,7 @@ export default function DetailsReservation({
               </div>
             </div>
             {/* ACCESSOIRS */}
-            <div>
+            <div className="flex flex-col">
               {/* TEXTE DE SECTION */}
               <div className="flex items-center gap-3 mb-6">
                 <Cable className="h-6 w-6 text-cyan-600" />
@@ -427,7 +402,6 @@ export default function DetailsReservation({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }

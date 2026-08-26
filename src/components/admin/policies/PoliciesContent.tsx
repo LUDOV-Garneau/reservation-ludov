@@ -1,15 +1,11 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircleIcon, CheckCircle2Icon } from "lucide-react";
+import { toast } from "sonner";
+
 import { useEffect, useState } from "react";
 import SimpleEditor from "./editor";
 import { Button } from "@/components/ui/button";
-
-type Error = {
-  title: string;
-  message: string;
-};
+import CancelPolicyEditsAction from "./DialogConfirmationCancelPolicy";
 
 type PolicyData = {
   policies: string;
@@ -18,15 +14,9 @@ type PolicyData = {
 
 type PolicyType = "privacy" | "usage";
 
-const POLICY_LABELS: Record<PolicyType, { title: string; subtitle: string }> = {
-  privacy: {
-    title: "Politique de confidentialité",
-    subtitle: "Gérer la politique de confidentialité",
-  },
-  usage: {
-    title: "Politique d'utilisation",
-    subtitle: "Gérer la politique d'utilisation",
-  },
+const POLICY_LABELS: Record<PolicyType, { title: string }> = {
+  privacy: { title: "Politique de confidentialité" },
+  usage: { title: "Politique d'utilisation" },
 };
 
 export default function PoliciesContent({
@@ -35,11 +25,9 @@ export default function PoliciesContent({
   type?: PolicyType;
 }) {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const [policyData, setPolicyData] = useState<PolicyData | null>(null);
   const [editedPolicyContent, setEditedPolicyContent] = useState<string>("");
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
   const [editorKey, setEditorKey] = useState<number>(0); // <-- key pour forcer remount
 
   useEffect(() => {
@@ -50,7 +38,6 @@ export default function PoliciesContent({
   async function fetchPolicyData() {
     try {
       setIsLoading(true);
-      setError(null);
       const res = await fetch(`/api/policies?type=${type}`, {
         method: "GET",
         headers: {
@@ -68,9 +55,8 @@ export default function PoliciesContent({
       setPolicyData(payload);
       setEditedPolicyContent(payload?.policies ?? "");
     } catch (error) {
-      setError({
-        title: "Erreur de chargement",
-        message:
+      toast.error("Erreur de chargement", {
+        description:
           "Une erreur est survenue lors du chargement de la politique de confidentialité.",
       });
       console.error("Failed to set document title:", error);
@@ -86,8 +72,6 @@ export default function PoliciesContent({
 
     try {
       setIsSaving(true);
-      setError(null);
-      setSaveSuccess(false);
 
       const res = await fetch(`/api/policies?type=${type}`, {
         method: "POST",
@@ -107,13 +91,12 @@ export default function PoliciesContent({
         policies: editedPolicyContent,
         lastUpdatedAt: new Date(),
       });
-      setSaveSuccess(true);
-
-      setTimeout(() => setSaveSuccess(false), 3500);
+      toast.success("Enregistré", {
+        description: "La politique a été sauvegardée avec succès.",
+      });
     } catch (error) {
-      setError({
-        title: "Erreur de sauvegarde",
-        message:
+      toast.error("Erreur de sauvegarde", {
+        description:
           "Une erreur est survenue lors de la sauvegarde de la politique de confidentialité.",
       });
       console.error("Failed to save policies:", error);
@@ -122,19 +105,14 @@ export default function PoliciesContent({
     }
   }
 
+  // La confirmation est gérée par <CancelPolicyEditsAction> : ce handler n'est
+  // appelé qu'une fois l'abandon confirmé.
   function handleCancel() {
-    if (editedPolicyContent !== policyData?.policies) {
-      const confirmCancel = window.confirm(
-        "Êtes-vous sûr de vouloir annuler vos modifications ? Toutes les modifications non enregistrées seront perdues."
-      );
-      if (!confirmCancel) return;
-    }
-
     setEditedPolicyContent(policyData?.policies || "");
     setEditorKey((prevKey) => prevKey + 1);
-    setError(null);
-    setSaveSuccess(false);
   }
+
+  const hasUnsavedChanges = editedPolicyContent !== policyData?.policies;
 
   if (isLoading) {
     return (
@@ -148,62 +126,48 @@ export default function PoliciesContent({
   }
 
   return (
-    <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div className="flex flex-col gap-1 sm:gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {POLICY_LABELS[type].title}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          {POLICY_LABELS[type].subtitle}
-        </p>
-      </div>
+    <div className="w-full mx-auto mt-4 space-y-4 sm:space-y-6">
 
-      {error && (
-        <Alert variant="destructive" className="grid">
-          <AlertCircleIcon />
-          <AlertTitle className="font-bold">{error.title}</AlertTitle>
-          <AlertDescription>
-            <p>{error.message}</p>
-          </AlertDescription>
-        </Alert>
-      )}
 
-      {saveSuccess && (
-        <Alert variant="default" className="grid">
-          <CheckCircle2Icon />
-          <AlertTitle className="font-bold">Enregistré</AlertTitle>
-          <AlertDescription>
-            <p>La politique a été sauvegardée avec succès.</p>
-          </AlertDescription>
-        </Alert>
-      )}
 
       <div className="w-full">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-          {policyData?.lastUpdatedAt && (
-            <p className="mb-4 text-muted-foreground">
-              Dernière mise à jour :{" "}
-              {new Date(policyData.lastUpdatedAt).toLocaleDateString("fr-CA")}
-            </p>
-          )}
-          <div className="flex gap-2 w-full md:w-auto">
-            <Button
-              className="bg-gray-400 hover:bg-red-500 flex-1 md:flex-0"
-              onClick={handleCancel}
-              disabled={
-                isSaving || editedPolicyContent === policyData?.policies
-              }
+        {/* La date est toujours rendue et les boutons sont poussés à droite
+            par `md:ml-auto` : sans cela, une politique jamais enregistrée
+            (lastUpdatedAt absent) faisait remonter les boutons à gauche, et
+            les deux onglets n'avaient pas la même disposition. */}
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between mb-4">
+          <p className="text-muted-foreground">
+            Dernière mise à jour :{" "}
+            {policyData?.lastUpdatedAt
+              ? new Date(policyData.lastUpdatedAt).toLocaleDateString("fr-CA")
+              : "jamais"}
+          </p>
+          <div className="flex gap-2 w-full md:w-auto md:ml-auto">
+            <CancelPolicyEditsAction
+              policyTitle={POLICY_LABELS[type].title}
+              onConfirm={handleCancel}
             >
-              Annuler
-            </Button>
+              {({ open }) => (
+                <Button
+                  // Même style que les autres « Annuler » de l'admin
+                  // (variant outline) : le fond gris plein donnait un bouton
+                  // qui paraissait désactivé.
+                  variant="outline"
+                  className="flex-1 md:flex-0 hover:bg-gray-50"
+                  // Toujours actif (donc jamais grisé) : sans modification en
+                  // cours, la confirmation n'a pas lieu d'être et le clic
+                  // réinitialise simplement l'éditeur.
+                  onClick={hasUnsavedChanges ? open : handleCancel}
+                  disabled={isSaving}
+                >
+                  Annuler
+                </Button>
+              )}
+            </CancelPolicyEditsAction>
             <Button
               className="bg-cyan-500 hover:bg-cyan-700 flex-1 md:flex-0"
               onClick={handleSave}
-              disabled={
-                isSaving ||
-                !editedPolicyContent ||
-                editedPolicyContent === policyData?.policies
-              }
+              disabled={isSaving || !editedPolicyContent || !hasUnsavedChanges}
             >
               {isSaving ? "Enregistrement..." : "Enregistrer"}
             </Button>

@@ -31,7 +31,7 @@ export default function ReservationLayout() {
     isReservationCancelled,
     currentStep,
     setCurrentStep,
-    resetTimer,
+    abandonReservation,
     cancelReservation,
   } = useReservation();
   const router = useRouter();
@@ -48,8 +48,11 @@ export default function ReservationLayout() {
       .padStart(2, "0")}`;
   };
 
-  const handleBackHome = () => {
-    resetTimer();
+  // Quitter le parcours relâche le hold : sans cela la console et les jeux
+  // restent bloqués jusqu'à l'expiration, et le hold orphelin est réutilisé au
+  // retour avec l'ancienne plateforme.
+  const handleBackHome = async () => {
+    await abandonReservation();
     router.push("/");
   };
 

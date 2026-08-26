@@ -97,7 +97,8 @@ export const GET = withAdmin(async (request) => {
       email: row.user?.email ?? null,
       jeux,
       accessoires: accessoiresRows.map((a) => ({ id: a.id, nom: a.name })),
-      archived: row.archived,
+      // tinyint MySQL : converti en booléen, comme dans les autres routes.
+      archived: Boolean(row.archived),
       cancellationReason: row.cancellationReason ?? null,
       station: stationRow?.name ?? null,
       date: row.date,

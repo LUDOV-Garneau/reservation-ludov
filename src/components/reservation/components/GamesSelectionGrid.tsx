@@ -298,7 +298,7 @@ export default function GameSelectionGrid({
                             onClick={(e) => {
                               e.stopPropagation();
                             }}
-                            className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
+                            className="bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
                           >
                             {t("reservation.games.details")}
                           </Button>
@@ -332,7 +332,7 @@ export default function GameSelectionGrid({
             <div className="flex justify-center pt-4">
               <button
                 onClick={handleLoadMore}
-                className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white rounded-lg transition-colors font-medium"
+                className="px-6 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white rounded-lg transition-colors font-medium"
               >
                 {t("reservation.games.loadMore")}
               </button>

@@ -8,7 +8,10 @@ import PolitiquesClient from "@/components/politiques/PolitiquesClient";
 
 export default function FooterInfos() {
   const t = useTranslations();
-  const [policyOpen, setPolicyOpen] = useState(false);
+  // Les deux politiques s'ouvrent en dialogue, jamais en page.
+  const [openPolicy, setOpenPolicy] = useState<"privacy" | "usage" | null>(
+    null
+  );
 
   return (
     <>
@@ -32,17 +35,17 @@ export default function FooterInfos() {
             {t("footer.contact")}
           </a>
           <button
-            onClick={() => setPolicyOpen(true)}
+            onClick={() => setOpenPolicy("privacy")}
             className="text-black hover:text-[#aaaaaa] transition-all duration-300"
           >
             {t("footer.policy")}
           </button>
-          <Link
-            href="/politique-utilisation"
+          <button
+            onClick={() => setOpenPolicy("usage")}
             className="text-black hover:text-[#aaaaaa] transition-all duration-300"
           >
             {t("politique.footerLink")}
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -59,7 +62,11 @@ export default function FooterInfos() {
         <p className="mt-6">{t("footer.copyright")}</p>
       </div>
 
-      <PolitiquesClient open={policyOpen} onOpenChange={setPolicyOpen} />
+      <PolitiquesClient
+        open={openPolicy !== null}
+        onOpenChange={(open) => !open && setOpenPolicy(null)}
+        type={openPolicy ?? "privacy"}
+      />
     </>
   );
 }

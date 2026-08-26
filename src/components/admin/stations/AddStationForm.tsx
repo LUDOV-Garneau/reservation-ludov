@@ -223,7 +223,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
                     type="button"
                     onClick={handleAddAll}
                     disabled={availableConsoles.length === 0}
-                    className="sm:w-auto w-full gap-2 font-semibold bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
+                    className="sm:w-auto w-full gap-2 font-semibold bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     {t("button.addAll")}
@@ -243,7 +243,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
                       {selectedConsoles.map((c) => (
                         <div
                           key={c.id}
-                          className="group p-3.5 bg-gradient-to-r from-cyan-50 to-cyan-50/50 dark:from-cyan-950/30 dark:to-cyan-950/10 rounded-lg border-2 border-cyan-200 dark:border-cyan-800 hover:border-cyan-400 dark:hover:border-cyan-600 transition-all"
+                          className="group p-3.5 bg-gradient-to-r from-cyan-50 to-cyan-50/50 dark:from-cyan-950/30 dark:to-cyan-950/10 rounded-lg border-2 border-cyan-200 dark:border-cyan-800 hover:border-cyan-500 dark:hover:border-cyan-500 transition-all"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -304,7 +304,7 @@ export default function AddStationForm({ onSuccess, onAlert, trigger }: Props) {
               disabled={
                 loading || !stationName.trim() || selectedConsoles.length === 0
               }
-              className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
+              className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
             >
               {loading ? (
                 <>

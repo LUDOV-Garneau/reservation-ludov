@@ -54,11 +54,11 @@ export default function AuthPage() {
 
   return (
     <Suspense>
-      <div className="min-h-screen bg-gradient-to-r from-cyan-50 via-blue-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-r from-cyan-50 via-cyan-50 to-purple-50 flex items-center justify-center p-4 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-20 left-20 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
           <div className="absolute top-40 right-20 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-2000"></div>
-          <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
+          <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-cyan-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob animation-delay-4000"></div>
         </div>
 
         <style jsx>{`
@@ -105,8 +105,8 @@ export default function AuthPage() {
               href="/docs?page=connexion&adminRessources=false"
               className="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-cyan-50 transition-all group"
             >
-              <HelpCircle className="w-4 h-4 text-gray-600 group-hover:text-cyan-600 transition-colors" />
-              <span className="text-sm font-medium text-gray-700 group-hover:text-cyan-600 transition-colors">
+              <HelpCircle className="w-4 h-4 text-gray-600 group-hover:text-cyan-500 transition-colors" />
+              <span className="text-sm font-medium text-gray-700 group-hover:text-cyan-500 transition-colors">
                 Aide
               </span>
             </Link>

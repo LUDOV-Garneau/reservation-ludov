@@ -89,7 +89,7 @@ export default function DateRangeSelection({
                   ? `${localRange.from.toLocaleDateString()} - ${localRange.to.toLocaleDateString()}`
                   : localRange.from.toLocaleDateString()
                 : t("admin.availabilities.dateRange.select")}
-              <ChevronDownIcon className="ml-2 h-4 w-4" />
+              <ChevronDownIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -104,10 +104,10 @@ export default function DateRangeSelection({
             />
           </PopoverContent>
         </Popover>
-        <Label className="w-full md:w-auto hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-cyan-700 has-[[aria-checked=true]]:bg-cyan-500/10 cursor-pointer">
+        <Label className="w-full md:w-auto hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-cyan-500 has-[[aria-checked=true]]:bg-cyan-500/10 cursor-pointer">
           <Checkbox
             id="toggle-always"
-            className="data-[state=checked]:border-cyan-700 data-[state=checked]:bg-cyan-700 data-[state=checked]:text-white"
+            className="data-[state=checked]:border-cyan-500 data-[state=checked]:bg-cyan-500 data-[state=checked]:text-white"
             checked={alwaysApplies}
             onCheckedChange={onToggleAlways}
           />

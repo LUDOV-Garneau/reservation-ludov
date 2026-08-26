@@ -328,7 +328,12 @@ export default function AvailabilitiesTab() {
   }
 
   return (
-    <TabsContent value="availabilities" className="max-w-5xl mx-auto">
+    <TabsContent value="availabilities">
+      {/* Même en-tête et mêmes marges que les autres onglets ; la largeur
+          réduite du formulaire est conservée par le conteneur interne. */}
+      <div className="w-full mx-auto mt-2 sm:mt-4 space-y-4 sm:space-y-6 px-2 sm:px-0">
+
+        <div className="max-w-5xl mx-auto space-y-4 sm:space-y-6">
       <AvailabilitiesTypeSelection
         selectedCard={selectedCard}
         setSelectedCard={setSelectedCard}
@@ -385,7 +390,7 @@ export default function AvailabilitiesTab() {
             }
             onClick={handleSubmitWeekly}
             type="submit"
-            className="mt-4 w-fit mx-auto font-semibold text-base bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors"
+            className="mt-4 w-fit mx-auto font-semibold text-base bg-cyan-500 hover:bg-cyan-600 transition-colors"
           >
             {isLoading
               ? t("admin.availabilities.actions.setting")
@@ -411,7 +416,7 @@ export default function AvailabilitiesTab() {
           <Button
             disabled={isLoading || specificDatesErrors.length > 0}
             type="submit"
-            className="mt-4 w-fit mx-auto font-semibold text-base bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors"
+            className="mt-4 w-fit mx-auto font-semibold text-base bg-cyan-500 hover:bg-cyan-600 transition-colors"
             onClick={handleSubmitSpecificDates}
           >
             {isLoading
@@ -420,6 +425,8 @@ export default function AvailabilitiesTab() {
           </Button>
         </Card>
       )}
+        </div>
+      </div>
     </TabsContent>
   );
 }

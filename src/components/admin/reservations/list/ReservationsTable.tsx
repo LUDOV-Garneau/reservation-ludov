@@ -13,10 +13,10 @@ import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { useAlert } from "./hooks/useAlert";
+import EmptyState from "@/components/admin/EmptyState";
 import { usePagination } from "@/hooks/usePagination";
 import { useReservations } from "./hooks/useReservations";
 import type { Reservation } from "./hooks/useReservations";
-import { ModernAlert } from "./ModernAlert";
 import PaginationControls from "./Pagination";
 import ActionBar from "./ActionBar";
 import CardReservationStats from "./CardStats";
@@ -70,28 +70,9 @@ function TableSkeleton() {
   );
 }
 
-function EmptyState({ searchQuery }: { searchQuery: string }) {
-  const t = useTranslations();
-  return (
-    <div className="text-center py-12 sm:py-16 px-4 sm:px-6">
-      <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 mb-3 sm:mb-4">
-        <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
-      </div>
-      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-        {t("admin.reservations.searchResult.noReservationsFound")}
-      </h3>
-      <p className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6 mx-auto">
-        {searchQuery
-          ? t("admin.reservations.searchResult.noMatch")
-          : t("admin.reservations.searchResult.empty")}
-      </p>
-    </div>
-  );
-}
-
 export default function ReservationsTable() {
   const t = useTranslations();
-  const { alert, showAlert, clearAlert } = useAlert();
+  const { showAlert } = useAlert();
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] =
     useState<DateFilterValue>(EMPTY_DATE_FILTER);
@@ -146,15 +127,7 @@ export default function ReservationsTable() {
   }, []);
 
   return (
-    <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div className="flex flex-col gap-1 sm:gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {t("admin.reservations.title")}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          {t("admin.reservations.subtitle")}
-        </p>
-      </div>
+    <div className="w-full mx-auto mt-2 sm:mt-4 space-y-4 sm:space-y-6 px-2 sm:px-0">
 
       <CardReservationStats
         loading={metricsLoading}
@@ -162,8 +135,6 @@ export default function ReservationsTable() {
         futureReservations={metrics.future}
         pastReservations={metrics.past}
       />
-
-      <ModernAlert alert={alert} onClose={clearAlert} />
 
       <Card className="shadow-md border-gray-200">
         <CardHeader className="pb-3 sm:pb-4 border-b p-4 sm:p-6">
@@ -238,7 +209,10 @@ export default function ReservationsTable() {
               )}
             </>
           ) : (
-            <EmptyState searchQuery={searchQuery} />
+            <EmptyState
+              icon={Calendar}
+              title={t("admin.reservations.searchResult.noReservationsFound")}
+            />
           )}
         </CardContent>
       </Card>

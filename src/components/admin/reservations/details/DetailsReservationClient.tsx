@@ -5,6 +5,7 @@ import DetailsReservation from "./DetailsReservation";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock } from "lucide-react";
+import { PageShell } from "@/components/layout/PageShell";
 
 type Reservation = {
   id: string;
@@ -151,9 +152,9 @@ export default function DetailsReservationClient({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg h-full">
+      <PageShell>
         <LoadingSkeleton />
-      </div>
+      </PageShell>
     );
   }
 

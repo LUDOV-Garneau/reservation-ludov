@@ -13,9 +13,9 @@ import {
   Computer,
   User,
   ExternalLink,
-  ChevronLeft,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { PageShell, BackLink } from "@/components/layout/PageShell";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Card, CardContent } from "@/components/ui/card";
@@ -105,15 +105,8 @@ function ReservationHeader({
   const t = useTranslations();
 
   return (
-    <div className="relative overflow-hidden rounded-xl border bg-[white] shadow-sm p-8 mb-8 lg:text-left">
-      <Button
-        onClick={() => router.back()}
-        className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit group"
-      >
-        <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-        <span className="text-sm font-medium">Retour</span>
-      </Button>
-      <div className="flex  flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+    <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-[white] shadow-md p-6 sm:p-8 mb-8 lg:text-left">
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         <div className="flex-1 space-y-4">
           <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
             Détails de la réservation
@@ -257,9 +250,10 @@ export default function DetailsReservation({
   );
 
   return (
-    <div className="sm:bg-[white] rounded-lg mb-10">
-      <div className="sm:px-4 sm:py-8 lg:px-8">
-        {alert?.show && (
+    <PageShell>
+      <BackLink onClick={() => router.back()} label="Retour" />
+
+      {alert?.show && (
           <Alert
             variant={alert.type === "destructive" ? "destructive" : "default"}
             className={`mb-6 ${
@@ -355,7 +349,10 @@ export default function DetailsReservation({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+            {/* Colonnes en flex : la carte occupe la hauteur restante sous son
+                titre (avec h-full elle valait 100 % de la cellule et débordait
+                de la hauteur du titre). */}
+            <div className="flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <Monitor className="h-6 w-6 text-cyan-600" />
                 <h2 className="text-2xl font-bold text-gray-900">
@@ -364,7 +361,7 @@ export default function DetailsReservation({
               </div>
               <ConsoleCard item={console} />
             </div>
-            <div>
+            <div className="flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <Cable className="h-6 w-6 text-cyan-600" />
                 <h2 className="text-2xl font-bold text-gray-900">
@@ -375,7 +372,6 @@ export default function DetailsReservation({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }

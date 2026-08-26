@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, Funnel, X } from "lucide-react";
+import { Calendar, ChevronDownIcon, Funnel, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -83,10 +83,12 @@ export default function DateFilter({
   return (
     <div className="flex flex-col lg:flex-row gap-2 items-start lg:items-center">
       <div className="flex items-center gap-2 w-full lg:w-auto">
-        <Funnel className="h-5 w-5 text-cyan-500 flex-shrink-0" />
-
         <Select value={value.mode} onValueChange={handleModeChange}>
-          <SelectTrigger className="w-full md:w-[180px] show-svg">
+          {/* L'icône vit dans le déclencheur, comme l'icône calendrier dans le
+              bouton de sélection de date. `flex-1` sur la valeur l'ancre à
+              l'icône et garde le chevron collé à droite. */}
+          <SelectTrigger className="w-full md:w-[220px] *:data-[slot=select-value]:flex-1">
+            <Funnel className="mr-2 h-4 w-4 text-cyan-500" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -106,6 +108,7 @@ export default function DateFilter({
               >
                 <Calendar className="mr-2 h-4 w-4 text-cyan-500" />
                 {formatDate(value.specificDate, "Sélectionner une date")}
+                <ChevronDownIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
@@ -129,6 +132,7 @@ export default function DateFilter({
                 >
                   <Calendar className="mr-2 h-4 w-4 text-cyan-500" />
                   {formatDate(value.startDate, "Date de début")}
+                  <ChevronDownIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
@@ -149,6 +153,7 @@ export default function DateFilter({
                 >
                   <Calendar className="mr-2 h-4 w-4 text-cyan-500" />
                   {formatDate(value.endDate, "Date de fin")}
+                  <ChevronDownIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">

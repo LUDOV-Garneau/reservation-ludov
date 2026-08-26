@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useCallback, useEffect, useState } from "react";
 import {
   Table,
@@ -12,10 +14,18 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import EmptyState from "@/components/admin/EmptyState";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -24,9 +34,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  AlertCircle,
-  CheckCircle2,
   Gamepad2,
+  RefreshCw,
+  Search,
   Loader2,
   Monitor,
   Pencil,
@@ -55,17 +65,26 @@ export default function AccessoriesTable() {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [consoleTypes, setConsoleTypes] = useState<ConsoleTypeOption[]>([]);
   const [loading, setLoading] = useState(true);
-  const [alert, setAlert] = useState<AlertState>(null);
   const [togglingId, setTogglingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const [editing, setEditing] = useState<Accessory | null>(null);
   const [editSelection, setEditSelection] = useState<number[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
-  const showAlert = useCallback((next: NonNullable<AlertState>) => {
-    setAlert(next);
-    setTimeout(() => setAlert(null), 3500);
-  }, []);
+  // Rétroaction sous forme de toast (sonner) plutôt que de bannière dans la
+  // page ; le <Toaster> est monté dans app/[locale]/layout.tsx.
+  const showAlert = useCallback(
+    (next: NonNullable<AlertState>) => {
+      if (next.type === "success") {
+        toast.success(t("alerts.successTitle"), { description: next.message });
+      } else {
+        toast.error(t("alerts.errorTitle"), { description: next.message });
+      }
+    },
+    [t]
+  );
 
   const fetchAccessories = useCallback(async () => {
     try {
@@ -153,43 +172,55 @@ export default function AccessoriesTable() {
     }
   }, [editing, editSelection, patchAccessory, fetchAccessories, showAlert, t]);
 
-  return (
-    <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div className="flex flex-col gap-1 sm:gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {t("title")}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          {t("subtitle")}
-        </p>
-      </div>
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchAccessories();
+    setIsRefreshing(false);
+  };
 
-      {alert && (
-        <Alert
-          variant={alert.type === "destructive" ? "destructive" : "default"}
-          className={
-            alert.type === "success"
-              ? "border-green-200 bg-green-50 text-green-900"
-              : ""
-          }
-        >
-          {alert.type === "success" ? (
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-          ) : (
-            <AlertCircle className="h-4 w-4" />
-          )}
-          <AlertTitle className="font-semibold">
-            {alert.type === "success" ? t("alerts.successTitle") : t("alerts.errorTitle")}
-          </AlertTitle>
-          <AlertDescription>{alert.message}</AlertDescription>
-        </Alert>
-      )}
+  // Filtrage côté client : la liste complète est déjà chargée.
+  const visibleAccessories = accessories.filter((accessory) =>
+    accessory.name.toLowerCase().includes(search.trim().toLowerCase())
+  );
+
+  return (
+    <div className="w-full mx-auto mt-2 sm:mt-4 space-y-4 sm:space-y-6 px-2 sm:px-0">
+
 
       <Card className="shadow-md border-gray-200">
         <CardHeader className="pb-3 sm:pb-4 border-b p-4 sm:p-6">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Gamepad2 className="h-4 w-4" />
-            {t("count", { count: accessories.length })}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="relative w-full sm:flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t("searchPlaceholder")}
+                className="pl-9"
+              />
+            </div>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    className="hover:bg-gray-100 flex-shrink-0"
+                    aria-busy={isRefreshing}
+                    aria-live="polite"
+                  >
+                    <RefreshCw
+                      className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("refresh")}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -199,10 +230,8 @@ export default function AccessoriesTable() {
                 <Skeleton key={i} className="h-10 w-full" />
               ))}
             </div>
-          ) : accessories.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {t("empty")}
-            </div>
+          ) : visibleAccessories.length === 0 ? (
+            <EmptyState icon={Gamepad2} title={t("empty")} />
           ) : (
             <div className="px-6">
               <Table>
@@ -222,7 +251,7 @@ export default function AccessoriesTable() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {accessories.map((accessory) => (
+                  {visibleAccessories.map((accessory) => (
                     <TableRow key={accessory.id}>
                       <TableCell className="font-medium">
                         {accessory.name}
@@ -292,7 +321,7 @@ export default function AccessoriesTable() {
               return (
                 <label
                   key={c.id}
-                  className="flex items-center gap-3 rounded-lg border-2 p-3 cursor-pointer hover:border-cyan-400 transition-colors"
+                  className="flex items-center gap-3 rounded-lg border-2 p-3 cursor-pointer hover:border-cyan-500 transition-colors"
                 >
                   <Checkbox
                     checked={checked}
@@ -322,7 +351,7 @@ export default function AccessoriesTable() {
             <Button
               onClick={handleSaveEdit}
               disabled={isSavingEdit}
-              className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 gap-2"
+              className="bg-cyan-500 hover:bg-cyan-600 gap-2"
             >
               {isSavingEdit && <Loader2 className="h-4 w-4 animate-spin" />}
               {t("save")}

@@ -14,7 +14,7 @@
   },
   "footer": {
     "contact": "Contact",
-    "policy": "Politique",
+    "policy": "Politique de confidentialité",
     "developedBy": "Développé par des étudiants du Cégep Garneau",
     "copyright": "© Copyright 2025 LUDOV (Laboratoire universitaire de documentation et d'observation vidéoludiques) - Tous droits réservés"
   },
@@ -123,7 +123,7 @@
       "remove_aria_label": "Retirer",
       "accessoryName": "Nom de l'accessoire...",
       "noAccessoryFound": "Aucun accessoire trouvé",
-      "no_accessory_available": "Il n'y a pas d'accessoire disponible pour cette plateforme.",
+      "no_accessory_available": "Il n'y a pas d'accessoire disponible pour cette plateforme",
       "skip_step": "Passer cette étape",
       "required": "Requis"
     },
@@ -161,7 +161,8 @@
         "accessories": "Un ou plusieurs accessoires sélectionnés sont indisponibles",
         "station": "Aucune station disponible pour cette sélection",
         "unavailable": "Indisponible"
-      }
+      },
+      "slotNoLongerAvailable": "Le créneau que vous aviez choisi n'est plus disponible pour cette sélection. Veuillez en choisir un autre."
     },
     "course": {
       "selectionTitle": "Sélection du cours",
@@ -237,8 +238,8 @@
     "accueil": {
       "upcomingReservations": "Réservations à venir",
       "pastReservations": "Historique des réservations",
-      "noUpcomingReservations": "Vous n'avez aucune réservation à venir.",
-      "noPastReservations": "Vous n'avez aucune réservation passée.",
+      "noUpcomingReservations": "Vous n'avez aucune réservation à venir",
+      "noPastReservations": "Vous n'avez aucune réservation passée",
       "detailsButton": "Détails",
       "loadingReservations": "Chargement...",
       "errorLoadingReservations": "Une erreur s'est produite lors du chargement des réservations.",
@@ -343,7 +344,6 @@
   "admin": {
     "users": {
       "title": "Utilisateurs",
-      "subtitle": "Gérez les utilisateurs de la plateforme LUDOV",
       "actionBar": {
         "searchPlaceholder": "Rechercher...",
         "addUser": "Ajouter",
@@ -360,7 +360,6 @@
       },
       "searchResult": {
         "noUsersFound": "Aucun utilisateur trouvé",
-        "noMatch": "Aucun utilisateur ne correspond à votre recherche.",
         "startByAdding": "Commencez par ajouter votre premier utilisateur."
       },
       "table": {
@@ -437,7 +436,6 @@
           "lastName": "Nom de famille",
           "email": "Adresse courriel",
           "adminAccess": "Accès administrateur",
-          "active": "Actif",
           "adminAcessDescription": "Donne accès au panneau d’administration et aux actions sensibles. À réserver au personnel de confiance.",
           "cancel": "Annuler",
           "submit": "Ajouter l'utilisateur",
@@ -451,15 +449,12 @@
     },
     "reservations": {
       "title": "Réservations",
-      "subtitle": "Gérer les réservations de la plateforme LUDOV",
       "actionBar": {
         "toolTipRefresh": "Rechercher...",
         "searchPlaceholder": "Rechercher"
       },
       "searchResult": {
-        "noReservationsFound": "Aucune réservation trouvée",
-        "noMatch": "Aucune réservation ne correspond à votre recherche.",
-        "empty": "Aucune réservation pour le moment."
+        "noReservationsFound": "Aucune réservation trouvée"
       },
       "table": {
         "header": {
@@ -483,7 +478,6 @@
           "loading_error": "Erreur lors du chargement des réservations:"
         },
         "delete": "Supprimer",
-        "no_reservations": "Aucune réservation trouvée.",
         "Previous": "Précédent",
         "Next": "Suivant",
         "confirm_title": "Confirmer la suppression",
@@ -523,7 +517,6 @@
     },
     "stations": {
       "title": "Stations",
-      "subtitle": "Gérez les stations de la plateforme LUDOV",
       "actionBar": {
         "searchPlaceholder": "Recherche...",
         "addStation": "Ajouter",
@@ -532,7 +525,6 @@
       },
       "searchResult": {
         "noStationsFound": "Aucune station trouvée",
-        "noMatch": "Aucune station ne correspond à votre recherche.",
         "startByAdding": "Commencez par ajouter votre première station."
       },
       "table": {
@@ -555,8 +547,7 @@
         "activeStations": "Nombre de stations actives",
         "inactiveStations": "Nombre de stations inactives",
         "mostUsedStation": "Station la plus réservée",
-        "noStations": "Aucune station créée",
-        "noReservations": "Aucune réservation effectuée"
+        "noStations": "Aucune station créée"
       },
       "pagination": {
         "affichageDe": "Affichage de",
@@ -717,20 +708,19 @@
       "subtitle": "Guide d'utilisation de la plateforme LUDOV - Administrateurs"
     },
     "imageUpload": {
-      "dropzone": "Cliquez ou déposez une image (PNG, JPEG, WebP, GIF — max 5 Mo)",
+      "dropzone": "Cliquez ou déposez une image (PNG, JPEG, WebP, GIF, max 5 Mo)",
       "uploading": "Téléversement en cours...",
-      "urlPlaceholder": "Lien IGDB ou MobyGames (https://...)",
+      "urlPlaceholder": "Lien direct de l'image (https://cdn.mobygames.com/...)",
       "importUrl": "Importer",
       "error": "Erreur lors du téléversement de l'image."
     },
     "accessories": {
       "title": "Accessoires",
       "subtitle": "Gérer la visibilité et les plateformes compatibles des accessoires",
-      "count": "{count} accessoires",
-      "empty": "Aucun accessoire dans le catalogue.",
+      "empty": "Aucun accessoire dans le catalogue",
       "noConsole": "Aucune plateforme",
       "editConsoles": "Plateformes",
-      "editDialogTitle": "Plateformes compatibles — {name}",
+      "editDialogTitle": "Plateformes compatibles : {name}",
       "cancel": "Annuler",
       "save": "Enregistrer",
       "table": {
@@ -746,28 +736,34 @@
         "updateError": "Erreur lors de la mise à jour de l'accessoire.",
         "successTitle": "Succès",
         "errorTitle": "Erreur"
-      }
+      },
+      "searchPlaceholder": "Rechercher un accessoire par nom...",
+      "refresh": "Rafraîchir"
     },
     "consolePhotos": {
       "title": "Photos consoles",
       "subtitle": "Ajouter et remplacer les photos des plateformes",
-      "empty": "Aucune plateforme trouvée.",
+      "empty": "Aucune plateforme trouvée",
       "alerts": {
         "fetchError": "Erreur lors du chargement des plateformes.",
         "updateSuccess": "Photo mise à jour avec succès.",
         "updateError": "Erreur lors de la mise à jour de la photo.",
         "successTitle": "Succès",
-        "errorTitle": "Erreur"
-      }
+        "errorTitle": "Erreur",
+        "removeSuccess": "Photo retirée avec succès.",
+        "removeError": "Erreur lors du retrait de la photo."
+      },
+      "searchPlaceholder": "Rechercher une plateforme par nom...",
+      "refresh": "Rafraîchir",
+      "removeImage": "Retirer la photo"
     },
     "gamesImages": {
       "title": "Images des jeux",
       "subtitle": "Lister les jeux et gérer leurs visuels",
       "searchPlaceholder": "Rechercher un jeu par titre...",
-      "count": "{count} jeux",
-      "empty": "Aucun jeu trouvé.",
+      "empty": "Aucun jeu trouvé",
       "importImage": "Image",
-      "importDialogTitle": "Importer une image — {title}",
+      "importDialogTitle": "Importer une image : {title}",
       "filter": {
         "all": "Tous les jeux",
         "withImage": "Avec image",
@@ -790,7 +786,8 @@
         "updateError": "Erreur lors de la mise à jour de l'image.",
         "successTitle": "Succès",
         "errorTitle": "Erreur"
-      }
+      },
+      "refresh": "Rafraîchir"
     },
     "emails": {
       "title": "Courriels",

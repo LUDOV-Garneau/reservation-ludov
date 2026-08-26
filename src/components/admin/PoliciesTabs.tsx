@@ -7,7 +7,7 @@ import PoliciesContent from "./policies/PoliciesContent";
 export default function PoliciesTab() {
   return (
     <TabsContent value="policies">
-      <Tabs defaultValue="privacy" className="mt-4">
+      <Tabs defaultValue="privacy" className="mt-2 sm:mt-4 px-2 sm:px-0">
         <TabsList>
           <TabsTrigger value="privacy">Confidentialité</TabsTrigger>
           <TabsTrigger value="usage">Utilisation</TabsTrigger>

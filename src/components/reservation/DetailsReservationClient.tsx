@@ -5,6 +5,7 @@ import DetailsReservation from "@/components/reservation/DetailsReservation";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock } from "lucide-react";
+import { PageShell } from "@/components/layout/PageShell";
 
 type Reservation = {
   id: string;
@@ -71,9 +72,9 @@ function SectionHeaderSkeleton({ width = "w-40" }: { width?: string }) {
 
 function LoadingSkeleton() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <div>
       <div className="mb-6">
-        <Skeleton className="h-5 w-48" />
+        <Skeleton className="h-5 w-32" />
       </div>
 
       <HeaderSkeleton />
@@ -147,9 +148,9 @@ export default function DetailsReservationClient({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg h-full">
+      <PageShell>
         <LoadingSkeleton />
-      </div>
+      </PageShell>
     );
   }
 

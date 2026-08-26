@@ -34,13 +34,14 @@ interface ReservationContextType {
   selectedTime: string | undefined;
   currentStep: number;
   
-  startTimer: (consoleId?: number) => Promise<void>;
+  startTimer: (consoleId?: number) => Promise<boolean>;
   stopTimer: () => void;
   resetTimer: () => void;
   
   cancelReservation: () => Promise<void>;
+  abandonReservation: () => Promise<void>;
   completeReservation: () => Promise<ReservationCompletedData | undefined>;
-  updateReservationConsole: (newConsoleId: number) => Promise<void>;
+  updateReservationConsole: (newConsoleId: number) => Promise<boolean>;
   updateReservationAccessories: (ids: number[]) => Promise<void>;
   
   setUserId: (id: number) => void;
@@ -297,9 +298,12 @@ export function ReservationProvider({
       const consoleTypeId = consoleId ?? selectedConsole?.id;
       if (!consoleTypeId) {
         setError("Aucune plateforme sélectionnée");
-        return;
+        return false;
       }
-      if (isTimerActive && timeRemaining > 0) return;
+      // Un appel explicite (l'utilisateur choisit une plateforme) doit toujours
+      // atteindre le serveur : create-hold est idempotent et rebascule le hold
+      // existant si la plateforme demandée a changé.
+      if (isTimerActive && timeRemaining > 0 && consoleId === undefined) return true;
 
       setIsLoading(true);
       setError(null);
@@ -336,9 +340,12 @@ export function ReservationProvider({
         } else {
           setTimeRemaining(computeRemaining(expiresAtIso));
         }
+
+        return true;
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erreur inconnue");
         setIsTimerActive(false);
+        return false;
       } finally {
         setIsLoading(false);
       }
@@ -387,9 +394,22 @@ export function ReservationProvider({
     }
   }, [reservationId]);
 
+  // Quitter le parcours en cours de route : le hold doit être relâché, sinon
+  // la console et les jeux restent bloqués jusqu'à l'expiration du minuteur.
+  const abandonReservation = useCallback(async () => {
+    if (reservationId) {
+      try {
+        await ReservationAPI.cancelHold(reservationId);
+      } catch (e) {
+        console.error("Erreur abandon réservation:", e);
+      }
+    }
+    resetTimer();
+  }, [reservationId, resetTimer]);
+
   const updateReservationConsole = useCallback(
     async (newConsoleId: number) => {
-      if (!reservationId) return;
+      if (!reservationId) return false;
 
       try {
         const data = await ReservationAPI.updateHold({
@@ -403,13 +423,18 @@ export function ReservationProvider({
           setSelectedConsoleId(Number(data.consoleId));
         }
 
+        // Le serveur remet à zéro jeux, accessoires, cours et créneau : la
+        // sélection précédente ne vaut plus pour la nouvelle plateforme.
         setSelectedGames([]);
         setSelectedAccessories([]);
         setSelectedCours(null);
         setSelectedDate(undefined);
         setSelectedTime(undefined);
+
+        return true;
       } catch (e) {
         setError(e instanceof Error ? e.message : "Erreur update plateforme");
+        return false;
       }
     },
     [reservationId]
@@ -524,6 +549,13 @@ export function ReservationProvider({
 
   const clearError = useCallback(() => setError(null), []);
 
+  // Changer d'étape efface le message d'erreur : sans cela, l'erreur d'une
+  // étape précédente reste affichée sur la suivante.
+  const goToStep = useCallback((step: number) => {
+    setError(null);
+    setCurrentStep(step);
+  }, []);
+
   // ============================================================================
   // EFFETS
   // ============================================================================
@@ -565,7 +597,9 @@ export function ReservationProvider({
         }
 
         setSelectedCours(data.cours || null);
-        setSelectedGames(data.games || []);
+        // Le hold renvoie des identifiants numériques ; le contexte manipule
+        // des chaînes (game1/2/3 sont reconstruits à partir de cet ordre).
+        setSelectedGames((data.games || []).map((id: number | string) => String(id)));
         setSelectedAccessories(data.accessories || []);
         setSelectedDate(
           data.selectedDate ? parseYmdLocal(String(data.selectedDate)) : undefined
@@ -650,6 +684,7 @@ export function ReservationProvider({
     stopTimer,
     resetTimer,
     cancelReservation,
+    abandonReservation,
     completeReservation,
     updateReservationConsole,
     updateReservationAccessories,
@@ -659,7 +694,7 @@ export function ReservationProvider({
     setSelectedConsole,
     setSelectedGames,
     setSelectedAccessories,
-    setCurrentStep,
+    setCurrentStep: goToStep,
     setSelectedDate,
     setSelectedTime,
     setSelectedCours,

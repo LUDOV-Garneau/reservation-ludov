@@ -13,7 +13,7 @@ export type UploadCategory = (typeof UPLOAD_CATEGORIES)[number];
 
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 Mo
 
-/** Hôtes autorisés pour l'import distant (garde anti-SSRF — ne pas élargir). */
+/** Hôtes autorisés pour l'import distant (garde anti-SSRF, ne pas élargir). */
 const REMOTE_IMPORT_ALLOWED_HOSTS = new Set([
   "images.igdb.com",
   "cdn.mobygames.com",
@@ -30,7 +30,7 @@ export function isUploadCategory(value: string): value is UploadCategory {
 }
 
 /**
- * Détection du format par nombres magiques — l'extension d'origine et le
+ * Détection du format par nombres magiques : l'extension d'origine et le
  * Content-Type déclaré ne sont jamais fiables.
  */
 export function sniffImage(buffer: Buffer): SniffedImage | null {
@@ -119,7 +119,7 @@ export async function importRemoteImage(
   }
   if (!REMOTE_IMPORT_ALLOWED_HOSTS.has(parsed.hostname)) {
     throw new UploadError(
-      "Hôte non autorisé (liens IGDB ou MobyGames uniquement).",
+      "Lien non autorisé : collez le lien direct de l'image (images.igdb.com ou cdn.mobygames.com), pas la page du jeu.",
     );
   }
 

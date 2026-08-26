@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AccessorySelectionGrid from "@/components/reservation/components/AccessoriesSelectionGrid";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -38,13 +38,15 @@ export default function AccessoriesSelection() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  // Accessoires ajoutés automatiquement pour les jeux actuellement choisis.
+  const autoAddedRef = useRef<number[]>([]);
 
   type ApiResponse<T> = { success: boolean; data: T; message?: string };
 
   useEffect(() => {
     const controller = new AbortController();
 
-    const fetchAccessories = async () => {
+    const fetchAccessories = async (): Promise<Accessory[] | null> => {
       try {
         const res = await fetch("/api/reservation/accessories", {
           method: "GET",
@@ -59,23 +61,27 @@ export default function AccessoriesSelection() {
           throw new Error(payload.message || t("reservation.accessory.error"));
         }
 
-        setAllAccessories(payload.data ?? []);
+        const list = payload.data ?? [];
+        setAllAccessories(list);
+        return list;
       } catch (err: unknown) {
-        if (err instanceof Error && err.name === "AbortError") return;
+        if (err instanceof Error && err.name === "AbortError") return null;
         setAllAccessories([]);
         setError(
           err instanceof Error ? err.message : t("reservation.accessory.error")
         );
+        return null;
       }
     };
 
-    const fetchRequiredAccessories = async () => {
+    const fetchRequiredAccessories = async (): Promise<number[] | null> => {
       try {
         const params = new URLSearchParams();
-        selectedGames.forEach((id) => params.append("gameIds", id));
+        selectedGames.forEach((id) => params.append("gameIds", String(id)));
 
         const res = await fetch(
-          `/api/reservation/required-accessories?${params.toString()}`
+          `/api/reservation/required-accessories?${params.toString()}`,
+          { signal: controller.signal }
         );
 
         const data = (await res.json()) as { required_accessories: string[] };
@@ -85,18 +91,15 @@ export default function AccessoriesSelection() {
         }
 
         const req = data.required_accessories.map(Number);
-
         setRequiredAccessories(req);
-
-        setSelectedAccessories((prev) => {
-          const merged = new Set([...prev, ...req]);
-          return Array.from(merged);
-        });
+        return req;
       } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") return null;
         setRequiredAccessories([]);
         setError(
           err instanceof Error ? err.message : t("reservation.accessory.error")
         );
+        return null;
       }
     };
 
@@ -104,9 +107,35 @@ export default function AccessoriesSelection() {
       setIsLoading(true);
       setError(null);
       try {
-        await Promise.all([fetchAccessories(), fetchRequiredAccessories()]);
+        const [catalogue, required] = await Promise.all([
+          fetchAccessories(),
+          fetchRequiredAccessories(),
+        ]);
+
+        if (controller.signal.aborted) return;
+
+        // Réconciliation de la sélection après un changement de jeux :
+        // - les accessoires ajoutés d'office pour les jeux précédents sont
+        //   retirés (ils ne sont plus obligatoires) ;
+        // - les choix faits à la main sont conservés ;
+        // - les identifiants absents du catalogue sont écartés, sinon la
+        //   confirmation finale les refuserait.
+        const previousAuto = autoAddedRef.current;
+        const nextRequired = required ?? [];
+        autoAddedRef.current = nextRequired;
+
+        setSelectedAccessories((prev) => {
+          const manual = prev.filter((id) => !previousAuto.includes(id));
+
+          let next = Array.from(new Set([...manual, ...nextRequired]));
+          if (catalogue) {
+            const known = new Set(catalogue.map((a) => a.id));
+            next = next.filter((id) => known.has(id));
+          }
+          return next;
+        });
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     };
 
@@ -284,7 +313,7 @@ export default function AccessoriesSelection() {
                 <Button
                   onClick={handleContinue}
                   disabled={isSaving || isLoading}
-                  className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white h-12 text-base font-semibold rounded-xl shadow-md transition-all"
+                  className="w-full bg-cyan-500 hover:bg-cyan-600 text-white h-12 text-base font-semibold rounded-xl shadow-md transition-all"
                 >
                   {isSaving ? (
                     <>

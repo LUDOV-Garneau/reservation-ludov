@@ -40,7 +40,7 @@ export const PATCH = withAdmin(async (req) => {
       .where(and(eq(reservation.id, id), eq(reservation.archived, 0)));
 
     // Courriel d'annulation : un échec d'envoi ne doit pas faire échouer
-    // l'annulation elle-même — on le journalise dans email_logs.
+    // l'annulation elle-même, on le journalise dans email_logs.
     let emailSent = false;
     const recipient = existing.user?.email ?? null;
     if (recipient) {

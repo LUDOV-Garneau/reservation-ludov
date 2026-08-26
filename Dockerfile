@@ -43,7 +43,7 @@ COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static    ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public          ./public
 
-# Images historiques des tutoriels admin, servies par /api/admin/images —
+# Images historiques des tutoriels admin, servies par /api/admin/images :
 # sans cette copie elles renvoient 404 en production. (Les textes des
 # tutoriels vivent désormais en base de données ; les nouvelles images vont
 # sur le volume UPLOADS_DIR.)

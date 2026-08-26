@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Table,
@@ -11,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import EmptyState from "@/components/admin/EmptyState";
 import {
   Tooltip,
   TooltipContent,
@@ -21,13 +24,8 @@ import {
   Trash2,
   Computer,
   Calendar,
-  XCircle,
   Menu,
-  CheckCircle2,
-  AlertTriangle,
-  Info,
   Pencil,
-  AlertCircle,
 } from "lucide-react";
 import {
   Dialog,
@@ -48,7 +46,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import CardStationStats from "./CardStats";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import ActionBar from "./ActionBar";
 import { usePagination } from "@/hooks/usePagination";
 import PaginationControls from "../users/Pagination";
@@ -64,12 +61,6 @@ type Station = {
   isActive: boolean;
   createdAt: string;
 };
-
-type AlertState = {
-  type: "success" | "destructive" | "info" | "warning";
-  message: string;
-  title?: string;
-} | null;
 
 type ConfirmDialogState = {
   open: boolean;
@@ -135,7 +126,7 @@ function StationTableRow({
                     variant="outline"
                     size="sm"
                     onClick={() => onUpdate(station)}
-                    className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors h-8 w-8 p-0"
+                    className="hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-500 transition-colors h-8 w-8 p-0"
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -190,7 +181,7 @@ function StationTableRow({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={() => onUpdate(station)}>
-                  <Pencil className="h-4 w-4 mr-2 text-blue-500" />
+                  <Pencil className="h-4 w-4 mr-2 text-cyan-500" />
                   {t("admin.stations.table.ActionToolTips.updateStation")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -276,76 +267,27 @@ function ConfirmDialog({
   );
 }
 
-export function ModernAlert({
-  alert,
-  onClose,
-}: {
-  alert: AlertState;
-  onClose: () => void;
-}) {
-  if (!alert) return null;
-
-  const icon =
-    alert.type === "success" ? (
-      <CheckCircle2 className="h-4 w-4 text-green-600" />
-    ) : alert.type === "destructive" ? (
-      <AlertCircle className="h-4 w-4 text-red-600" />
-    ) : alert.type === "warning" ? (
-      <AlertTriangle className="h-4 w-4 text-yellow-600" />
-    ) : (
-      <Info className="h-4 w-4 text-blue-600" />
-    );
-
-  return (
-    <Alert
-      className="mb-4"
-      variant={
-        alert.type === "success"
-          ? "success"
-          : alert.type === "destructive"
-          ? "destructive"
-          : "default"
-      }
-    >
-      <div className="flex justify-between w-full items-center gap-2">
-        <div className="flex gap-2 items-center">
-          {icon}
-          <div>
-            {alert.title && <AlertTitle>{alert.title}</AlertTitle>}
-            <AlertDescription>{alert.message}</AlertDescription>
-          </div>
-        </div>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="h-6 w-6 p-0"
-        >
-          <XCircle className="h-4 w-4" />
-        </Button>
-      </div>
-    </Alert>
-  );
-}
-
 function useAlert() {
-  const [alert, setAlert] = useState<AlertState>(null);
-
+  // Les rétroactions passent par un toast (sonner) plutôt que par une bannière
+  // dans la page : le <Toaster> est monté dans app/[locale]/layout.tsx.
   const showAlert = useCallback(
     (
       type: "success" | "destructive" | "info" | "warning",
       message: string,
       title?: string
     ) => {
-      setAlert({ type, message, title });
+      const text = title ?? message;
+      const options = title ? { description: message } : undefined;
+
+      if (type === "success") toast.success(text, options);
+      else if (type === "destructive") toast.error(text, options);
+      else if (type === "warning") toast.warning(text, options);
+      else toast.info(text, options);
     },
     []
   );
 
-  const clearAlert = useCallback(() => setAlert(null), []);
-
-  return { alert, showAlert, clearAlert };
+  return { showAlert };
 }
 
 function TableSkeleton() {
@@ -370,7 +312,7 @@ function TableSkeleton() {
 
 export default function StationsTable() {
   const t = useTranslations();
-  const { alert, showAlert, clearAlert } = useAlert();
+  const { showAlert } = useAlert();
   const [searchQuery, setSearchQuery] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>(null);
@@ -482,26 +424,14 @@ export default function StationsTable() {
   }, [pagination.page, pagination.itemsPerPage]);
 
   return (
-    <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div className="flex flex-col gap-1 sm:gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {t("admin.stations.title")}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          {t("admin.stations.subtitle")}
-        </p>
-      </div>
+    <div className="w-full mx-auto mt-2 sm:mt-4 space-y-4 sm:space-y-6 px-2 sm:px-0">
 
       <CardStationStats
         loading={metricsLoading}
         activeStationsCount={totalActiveStations ?? 0}
         inactiveStationsCount={totalInactiveStations ?? 0}
-        mostUsed={
-          stationMostReservations ?? t("admin.stations.stats.noReservations")
-        }
+        mostUsed={stationMostReservations ?? "-"}
       />
-
-      <ModernAlert alert={alert} onClose={clearAlert} />
 
       <Card className="shadow-md border-gray-200">
         <CardHeader className="pb-3 sm:pb-4 border-b p-4 sm:p-6">
@@ -568,19 +498,7 @@ export default function StationsTable() {
               )}
             </>
           ) : (
-            <div className="text-center py-12 sm:py-16 px-4 sm:px-6">
-              <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 mb-3 sm:mb-4">
-                <Computer className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
-              </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-                {t("admin.stations.searchResult.noStationsFound")}
-              </h3>
-              <p className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6 mx-auto">
-                {searchQuery
-                  ? t("admin.stations.searchResult.noMatch")
-                  : t("admin.stations.searchResult.startByAdding")}
-              </p>
-            </div>
+            <EmptyState icon={Computer} title={t("admin.stations.searchResult.noStationsFound")} />
           )}
         </CardContent>
       </Card>

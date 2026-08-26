@@ -17,8 +17,6 @@ import {
   User,
   Loader2,
   Trash2,
-  XCircle,
-  CircleQuestionMark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -86,37 +84,6 @@ export default function DeleteReservationAction({
                   <span>{targetReservation.heure}</span>
                 </div>
               </div>
-            </div>
-
-            <Separator />
-
-            <div className="rounded-lg border border-gray-200 p-4 space-y-3">
-              <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <CircleQuestionMark className="h-4 w-4 text-red-600 shrink-0" />
-                Que va-t-il se passer ?
-              </h4>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2.5">
-                  <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>
-                    La réservation sera{" "}
-                    <strong className="text-gray-900">
-                      annulée définitivement
-                    </strong>
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>
-                    Les jeux, la plateforme et les accessoires réservés seront
-                    libérés et disponibles pour d&#39;autres utilisateurs
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <XCircle className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>Cette action ne peut pas être annulée</span>
-                </li>
-              </ul>
             </div>
 
             <Separator />

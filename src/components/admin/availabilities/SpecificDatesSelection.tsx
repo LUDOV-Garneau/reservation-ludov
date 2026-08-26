@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/select";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
-import { Copy, Trash2 } from "lucide-react";
+import { ChevronDownIcon, Copy, Trash2 } from "lucide-react";
 import { DateSelection } from "@/types/availabilities";
 
 type TimeKey = "startHour" | "startMinute" | "endHour" | "endMinute";
@@ -101,6 +101,7 @@ export default function SpecificDatesSelection({
                     {item.date
                       ? format(item.date, "MM / dd / yyyy")
                       : t("admin.availabilities.specificDates.pickDate")}
+                    <ChevronDownIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">

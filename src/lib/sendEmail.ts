@@ -67,11 +67,11 @@ export async function sendResetPasswordEmail({
             
             <!-- Header -->
             <tr>
-              <td style="background: linear-gradient(135deg, #2563eb 0%, #1e3a8a 100%); padding: 40px 30px; text-align: center;">
+              <td style="background: linear-gradient(135deg, #00b8db 0%, #0092b8 100%); padding: 40px 30px; text-align: center;">
                 <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">
                   LUDOV
                 </h1>
-                <p style="margin: 10px 0 0 0; color: #dbeafe; font-size: 16px;">
+                <p style="margin: 10px 0 0 0; color: #cefafe; font-size: 16px;">
                   Réinitialisation du mot de passe
                 </p>
               </td>
@@ -154,11 +154,11 @@ export async function sendWelcomeEmail({
             
             <!-- Header -->
             <tr>
-              <td style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); padding: 40px 30px; text-align: center;">
+              <td style="background: linear-gradient(135deg, #00b8db 0%, #0092b8 100%); padding: 40px 30px; text-align: center;">
                 <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">
                   LUDOV
                 </h1>
-                <p style="margin: 10px 0 0 0; color: #e0f2fe; font-size: 16px;">
+                <p style="margin: 10px 0 0 0; color: #cefafe; font-size: 16px;">
                   Confirmation d'inscription
                 </p>
               </td>
@@ -265,11 +265,11 @@ export async function sendReminderEmail({
               
               <!-- Header -->
               <tr>
-                <td style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); padding: 40px 30px; text-align: center;">
+                <td style="background: linear-gradient(135deg, #00b8db 0%, #0092b8 100%); padding: 40px 30px; text-align: center;">
                   <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">
                     LUDOV
                   </h1>
-                  <p style="margin: 10px 0 0 0; color: #e0f2fe; font-size: 16px;">
+                  <p style="margin: 10px 0 0 0; color: #cefafe; font-size: 16px;">
                     Rappel de réservation
                   </p>
                 </td>
@@ -281,36 +281,36 @@ export async function sendReminderEmail({
                   ${introHtml}
 
                   <!-- Details Card -->
-                  <table role="presentation" style="width: 100%; background-color: #f0fdfa; border: 2px solid #06b6d4; border-radius: 12px; margin-bottom: 30px;">
+                  <table role="presentation" style="width: 100%; background-color: #ecfeff; border: 2px solid #00b8db; border-radius: 12px; margin-bottom: 30px;">
                     <tr>
                       <td style="padding: 24px;">
-                        <h2 style="margin: 0 0 20px 0; color: #0891b2; font-size: 18px;">
+                        <h2 style="margin: 0 0 20px 0; color: #0092b8; font-size: 18px;">
                           Détails de votre réservation
                         </h2>
 
                         <table role="presentation" style="width: 100%;">
                           <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #ccfbf1;">
-                              <strong style="color: #0e7490;">Numéro :</strong> 
-                              <span style="color: #164e63;">${reservationId}</span>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #cefafe;">
+                              <strong style="color: #00b8db;">Numéro :</strong> 
+                              <span style="color: #104e64;">${reservationId}</span>
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #ccfbf1;">
-                              <strong style="color: #0e7490;">Date :</strong> 
-                              <span style="color: #164e63;">${formattedDate}</span>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #cefafe;">
+                              <strong style="color: #00b8db;">Date :</strong> 
+                              <span style="color: #104e64;">${formattedDate}</span>
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #ccfbf1;">
-                              <strong style="color: #0e7490;">Heure :</strong> 
-                              <span style="color: #164e63;">${time}</span>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #cefafe;">
+                              <strong style="color: #00b8db;">Heure :</strong> 
+                              <span style="color: #104e64;">${time}</span>
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #ccfbf1;">
-                              <strong style="color: #0e7490;">Console :</strong> 
-                              <span style="color: #164e63;">${consoleName}</span>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #cefafe;">
+                              <strong style="color: #00b8db;">Console :</strong> 
+                              <span style="color: #104e64;">${consoleName}</span>
                             </td>
                           </tr>
                         </table>
@@ -440,11 +440,11 @@ export async function sendConfirmationEmail({
 
               <!-- Header -->
               <tr>
-                <td style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); padding: 40px 30px; text-align: center;">
+                <td style="background: linear-gradient(135deg, #00b8db 0%, #0092b8 100%); padding: 40px 30px; text-align: center;">
                   <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">
                     LUDOV
                   </h1>
-                  <p style="margin: 10px 0 0 0; color: #e0f2fe; font-size: 16px;">
+                  <p style="margin: 10px 0 0 0; color: #cefafe; font-size: 16px;">
                     Confirmation de réservation
                   </p>
                 </td>
@@ -456,36 +456,36 @@ export async function sendConfirmationEmail({
                   ${introHtml}
 
                   <!-- Details Card -->
-                  <table role="presentation" style="width: 100%; background-color: #f0fdfa; border: 2px solid #06b6d4; border-radius: 12px; margin-bottom: 30px;">
+                  <table role="presentation" style="width: 100%; background-color: #ecfeff; border: 2px solid #00b8db; border-radius: 12px; margin-bottom: 30px;">
                     <tr>
                       <td style="padding: 24px;">
-                        <h2 style="margin: 0 0 20px 0; color: #0891b2; font-size: 18px;">
+                        <h2 style="margin: 0 0 20px 0; color: #0092b8; font-size: 18px;">
                           Détails de votre réservation
                         </h2>
 
                         <table role="presentation" style="width: 100%;">
                           <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #ccfbf1;">
-                              <strong style="color: #0e7490;">Numéro :</strong>
-                              <span style="color: #164e63;">${reservationId}</span>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #cefafe;">
+                              <strong style="color: #00b8db;">Numéro :</strong>
+                              <span style="color: #104e64;">${reservationId}</span>
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #ccfbf1;">
-                              <strong style="color: #0e7490;">Date :</strong>
-                              <span style="color: #164e63;">${formattedDate}</span>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #cefafe;">
+                              <strong style="color: #00b8db;">Date :</strong>
+                              <span style="color: #104e64;">${formattedDate}</span>
                             </td>
                           </tr>
                           <tr>
-                            <td style="padding: 12px 0; border-bottom: 1px solid #ccfbf1;">
-                              <strong style="color: #0e7490;">Heure :</strong>
-                              <span style="color: #164e63;">${time}</span>
+                            <td style="padding: 12px 0; border-bottom: 1px solid #cefafe;">
+                              <strong style="color: #00b8db;">Heure :</strong>
+                              <span style="color: #104e64;">${time}</span>
                             </td>
                           </tr>
                           <tr>
                             <td style="padding: 12px 0;">
-                              <strong style="color: #0e7490;">Console :</strong>
-                              <span style="color: #164e63;">${consoleName}</span>
+                              <strong style="color: #00b8db;">Console :</strong>
+                              <span style="color: #104e64;">${consoleName}</span>
                             </td>
                           </tr>
                         </table>

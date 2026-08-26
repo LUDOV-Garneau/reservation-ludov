@@ -11,9 +11,6 @@ export default async function ReservationDetails({
     notFound();
   }
 
-  return (
-    <div className="md:px-[60px] px-6 py-[30px] mx-auto w-full max-w-7xl">
-      <DetailsReservationClient id={id} />
-    </div>
-  );
+  // La coquille (marges, carte blanche) vient de PageShell, côté client.
+  return <DetailsReservationClient id={id} />;
 }

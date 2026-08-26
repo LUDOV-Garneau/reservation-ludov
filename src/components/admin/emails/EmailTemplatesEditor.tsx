@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
@@ -18,8 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  AlertCircle,
-  CheckCircle2,
   Loader2,
   Mail,
   Send,
@@ -44,7 +43,6 @@ export default function EmailTemplatesEditor() {
   const t = useTranslations("admin.emails");
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
-  const [alert, setAlert] = useState<AlertState>(null);
 
   const [selectedKey, setSelectedKey] = useState<string>("confirmation");
   const [locale, setLocale] = useState<"fr" | "en">("fr");
@@ -53,10 +51,18 @@ export default function EmailTemplatesEditor() {
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
 
-  const showAlert = useCallback((next: NonNullable<AlertState>) => {
-    setAlert(next);
-    setTimeout(() => setAlert(null), 4000);
-  }, []);
+  // Rétroaction sous forme de toast (sonner) plutôt que de bannière dans la
+  // page ; le <Toaster> est monté dans app/[locale]/layout.tsx.
+  const showAlert = useCallback(
+    (next: NonNullable<AlertState>) => {
+      if (next.type === "success") {
+        toast.success(t("alerts.successTitle"), { description: next.message });
+      } else {
+        toast.error(t("alerts.errorTitle"), { description: next.message });
+      }
+    },
+    [t]
+  );
 
   const selectedTemplate = useMemo(
     () => templates.find((template) => template.key === selectedKey) ?? null,
@@ -189,44 +195,21 @@ export default function EmailTemplatesEditor() {
   }
 
   return (
-    <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div className="flex flex-col gap-1 sm:gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {t("title")}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          {t("subtitle")}
-        </p>
-      </div>
+    <div className="w-full mx-auto mt-2 sm:mt-4 space-y-4 sm:space-y-6 px-2 sm:px-0">
 
-      {alert && (
-        <Alert
-          variant={alert.type === "destructive" ? "destructive" : "default"}
-          className={
-            alert.type === "success"
-              ? "border-green-200 bg-green-50 text-green-900"
-              : ""
-          }
-        >
-          {alert.type === "success" ? (
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-          ) : (
-            <AlertCircle className="h-4 w-4" />
-          )}
-          <AlertTitle className="font-semibold">
-            {alert.type === "success" ? t("alerts.successTitle") : t("alerts.errorTitle")}
-          </AlertTitle>
-          <AlertDescription>{alert.message}</AlertDescription>
-        </Alert>
-      )}
 
       <Card className="shadow-md border-gray-200">
         <CardHeader className="pb-3 sm:pb-4 border-b p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-cyan-500" />
               <Select value={selectedKey} onValueChange={setSelectedKey}>
-                <SelectTrigger className="w-[260px]">
+                {/* L'icône vit dans le déclencheur, comme pour le filtre de
+                    l'onglet Réservations. `flex-1` sur la valeur l'ancre à
+                    l'icône et garde le chevron collé à droite ; la largeur
+                    passe à 320px pour que « Réinitialisation du mot de passe »
+                    tienne malgré la place prise par l'icône. */}
+                <SelectTrigger className="w-full sm:w-[320px] *:data-[slot=select-value]:flex-1">
+                  <Mail className="mr-2 h-4 w-4 text-cyan-500" />
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -332,7 +315,7 @@ export default function EmailTemplatesEditor() {
               <Button
                 onClick={handleSave}
                 disabled={isSaving || !hasChanges}
-                className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 gap-2"
+                className="bg-cyan-500 hover:bg-cyan-600 gap-2"
               >
                 {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
                 {t("save")}

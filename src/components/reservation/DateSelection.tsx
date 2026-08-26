@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { DatePicker } from "@/components/reservation/components/DatePicker";
 import { TimePicker } from "@/components/reservation/components/TimePicker";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -44,7 +44,13 @@ export default function DateSelection() {
   const [isLoadingDates, setIsLoadingDates] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [date, setDate] = useState<Date | undefined>(selectedDate);
-  const [time, setTime] = useState<string>(selectedTime || "");
+  const [time, setTimeState] = useState<string>(selectedTime || "");
+  // Lu par loadAvailableTimes sans le remettre dans ses dépendances : la
+  // fonction reste stable d'un rendu à l'autre.
+  const timeRef = useRef<string>(selectedTime || "");
+  // Vrai quand le créneau déjà choisi vient d'être libéré (jeux, accessoires ou
+  // plateforme modifiés entre-temps) : l'utilisateur doit en être averti.
+  const [slotNoLongerAvailable, setSlotNoLongerAvailable] = useState(false);
   const [availableTimes, setAvailableTimes] = useState<TimeSlot[]>([]);
   const [unavailableDates, setUnavailableDates] = useState<DatesBlocked | null>(
     null
@@ -87,10 +93,22 @@ export default function DateSelection() {
     loadUnavailableDates();
   }, []);
 
+  const setTime = useCallback(
+    (value: string) => {
+      timeRef.current = value;
+      setTimeState(value);
+      setSelectedTime(value || undefined);
+    },
+    [setSelectedTime]
+  );
+
+  // Retour sur l'étape avec une date déjà choisie : on recharge les créneaux
+  // pour vérifier que l'heure retenue tient toujours.
   useEffect(() => {
     if (date) {
       loadAvailableTimes(date);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadAvailableTimes = useCallback(async (selectedDate: Date) => {
@@ -133,12 +151,13 @@ export default function DateSelection() {
       const slots: TimeSlot[] = data.availability || [];
       setAvailableTimes(slots);
 
+      const previousTime = timeRef.current;
       const stillAvailable = slots.some(
-        (slot) => slot.time === time && slot.available,
+        (slot) => slot.time === previousTime && slot.available,
       );
-      if (time && !stillAvailable) {
+      if (previousTime && !stillAvailable) {
         setTime("");
-        setSelectedTime("");
+        setSlotNoLongerAvailable(true);
       }
     } catch (err) {
       setError(
@@ -150,31 +169,31 @@ export default function DateSelection() {
     } finally {
       setIsLoadingTimes(false);
     }
-  }, [selectedConsoleId, selectedGames, selectedAccessories, reservationId, t, time, setSelectedTime]);
+  }, [selectedConsoleId, selectedGames, selectedAccessories, reservationId, t, setTime]);
 
   const onSelectDate = useCallback(async (newDate: Date | undefined) => {
+    setSlotNoLongerAvailable(false);
+
     if (!newDate) {
       setDate(undefined);
       setSelectedDate(undefined);
       setTime("");
-      setSelectedTime("");
       setAvailableTimes([]);
       return;
     }
 
     setTime("");
-    setSelectedTime("");
     setDate(newDate);
     setSelectedDate(newDate);
 
     await loadAvailableTimes(newDate);
-  }, [loadAvailableTimes, setSelectedDate, setSelectedTime]);
+  }, [loadAvailableTimes, setSelectedDate, setTime]);
 
-  const onSelectTime = useCallback((selectedTime: string) => {
-    setTime(selectedTime);
-    setSelectedTime(selectedTime);
+  const onSelectTime = useCallback((selected: string) => {
+    setSlotNoLongerAvailable(false);
+    setTime(selected);
     setError(null);
-  }, [setSelectedTime]);
+  }, [setTime]);
 
   const handleContinue = async () => {
     if (!date) {
@@ -266,6 +285,17 @@ export default function DateSelection() {
           </div>
         )}
 
+        {slotNoLongerAvailable && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-amber-800">
+                {t("reservation.calendar.slotNoLongerAvailable")}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 sm:items-start sm:justify-center gap-10 mb-8">
           <div className="col-span-2 md:col-span-1 mx-auto lg:mx-0">
             <div className="mb-4 flex items-center gap-2">
@@ -338,7 +368,7 @@ export default function DateSelection() {
             <p className="text-sm font-medium text-cyan-900 mb-1">
               {t("reservation.calendar.selectionSummaryTitle")}
             </p>
-            <p className="text-cyan-700">
+            <p className="text-cyan-500">
               {t("reservation.calendar.selectionSummary", {
                 date: date.toLocaleDateString(locale, {
                   weekday: "long",
@@ -363,7 +393,7 @@ export default function DateSelection() {
           <Button
             onClick={handleContinue}
             disabled={!date || !time || isSaving}
-            className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700"
+            className="bg-cyan-500 hover:bg-cyan-600"
           >
             {isSaving ? (
               <>

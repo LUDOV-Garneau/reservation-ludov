@@ -79,7 +79,7 @@ Les images (consoles, jeux, documentation) sont stockées sur le disque du VPS
 et servies par `/api/images/...`. En production, monter un volume persistant :
 
 ```yaml
-# docker-compose.yml (sur le VPS) — service web
+# docker-compose.yml (sur le VPS) : service web
 volumes:
   - ./uploads:/app/uploads
 environment:

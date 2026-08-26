@@ -10,6 +10,7 @@ import {
   accessoires,
 } from "@/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
+import { checkSlotBookable, isLockContentionError, runWithLockRetry, SLOT_TX_CONFIG } from "@/lib/availability";
 import crypto from "crypto";
 
 type Body = {
@@ -145,7 +146,7 @@ export async function POST(req: Request) {
     );
 
   try {
-    const response = await db.transaction(async (tx) => {
+    const response = await runWithLockRetry(() => db.transaction(async (tx) => {
       const hold = await tx.query.reservationHold.findFirst({
         where: and(
           eq(reservationHold.id, reservationHoldId),
@@ -278,6 +279,32 @@ export async function POST(req: Request) {
           ),
         );
 
+      // Dernière barrière avant l'écriture ferme : heures d'ouverture, créneau
+      // encore à venir, et station/console/jeux/accessoires toujours libres.
+      // Les lectures sont verrouillantes : deux confirmations simultanées sur
+      // les mêmes ressources sont sérialisées, la seconde est refusée.
+      const slot = await checkSlotBookable(tx, {
+        date: dateStr,
+        time: timeStr,
+        userId: Number(user!.id),
+        consoleStockId: consoleId,
+        consoleTypeId,
+        gameIds: [game1Id, game2Id, game3Id].filter(
+          (id): id is number => typeof id === "number",
+        ),
+        accessoryIds,
+        excludeHoldId: reservationHoldId,
+        requiredStationId: hold.stationId ?? null,
+      });
+
+      if (!slot.ok)
+        throw new TxReturn(
+          NextResponse.json(
+            { success: false, message: slot.message },
+            { status: slot.status },
+          ),
+        );
+
       const reservationId = `RESV-${crypto.randomUUID()}`;
       await tx.insert(reservation).values({
         id: reservationId,
@@ -289,7 +316,7 @@ export async function POST(req: Request) {
         game3Id: game3Id ?? null,
         accessoryIds: accessoryIds.length ? accessoryIds : null,
         coursId,
-        station: hold.stationId ?? null,
+        station: slot.stationId,
         date: dateStr,
         time: timeStr,
       });
@@ -331,11 +358,17 @@ export async function POST(req: Request) {
         },
         { status: 200 },
       );
-    });
+    }, SLOT_TX_CONFIG));
 
     return response;
   } catch (error) {
     if (error instanceof TxReturn) return error.resp;
+    if (isLockContentionError(error)) {
+      return NextResponse.json(
+        { success: false, message: "Ce créneau vient d'être réservé par quelqu'un d'autre. Veuillez en choisir un autre." },
+        { status: 409 },
+      );
+    }
     console.error("Error confirming reservation:", error);
     return NextResponse.json(
       {

@@ -147,7 +147,7 @@ export default function AddCoursForm({ trigger, onSuccess, onAlert }: Props) {
             <Button
               type="submit"
               disabled={loading || !name.trim() || !code.trim()}
-              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 hover:bg-cyan-700 transition-colors"
+              className="w-full h-12 text-base font-semibold bg-cyan-500 hover:bg-cyan-600 hover:bg-cyan-700 transition-colors"
               size="lg"
             >
               {loading ? (

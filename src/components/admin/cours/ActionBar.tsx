@@ -84,7 +84,7 @@ export default function CardStationStats({
             )
           }
           trigger={
-            <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors flex-1">
+            <Button className="bg-cyan-500 hover:bg-cyan-600 text-white transition-colors flex-1">
               <Plus className="h-5 w-5" />
               <span className="hidden md:inline">
                 {t("admin.stations.actionBar.addStation")}

@@ -33,7 +33,13 @@ export const GET = withAdmin(async () => {
       data: {
         totalActiveStations: Number(counts?.active ?? 0),
         totalInactiveStations: Number(counts?.inactive ?? 0),
-        mostUsedStationName: mostUsed?.name ?? null,
+        // Le LEFT JOIN garde les stations sans réservation : sans ce garde-fou,
+        // la première station (COUNT = 0) serait présentée comme « la plus
+        // réservée » alors qu'aucune réservation n'existe.
+        mostUsedStationName:
+          mostUsed && Number(mostUsed.reservationsCount) > 0
+            ? mostUsed.name
+            : null,
       },
     }, { status: 200 });
   } catch (error) {

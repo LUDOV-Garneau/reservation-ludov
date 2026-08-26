@@ -70,7 +70,13 @@ export async function GET(req: Request) {
         .select({ id: games.id, titre: games.titre, picture: games.picture, author: games.author })
         .from(games)
         .where(inArray(games.id, gameIds));
-      jeux = gameRows.map((g) => ({ id: g.id, nom: g.titre, picture: g.picture ?? "", author: g.author ?? "" }));
+      // Même ordre que game1/game2/game3, c'est-à-dire l'ordre de sélection
+      // affiché à l'étape des jeux.
+      const gamesById = new Map(gameRows.map((g) => [Number(g.id), g]));
+      jeux = gameIds
+        .map((id) => gamesById.get(id))
+        .filter((g): g is (typeof gameRows)[number] => g !== undefined)
+        .map((g) => ({ id: g.id, nom: g.titre, picture: g.picture ?? "", author: g.author ?? "" }));
     }
 
     let station: { id: number; nom: string } | null = null;

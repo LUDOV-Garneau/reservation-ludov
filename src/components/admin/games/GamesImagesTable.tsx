@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
@@ -13,9 +15,17 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+
 import { Input } from "@/components/ui/input";
+import EmptyState from "@/components/admin/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   Select,
   SelectContent,
@@ -30,9 +40,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  AlertCircle,
-  CheckCircle2,
   Gamepad2,
+  RefreshCw,
   ImageIcon,
   ImagePlus,
   Search,
@@ -65,17 +74,25 @@ export default function GamesImagesTable() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [hasImage, setHasImage] = useState<HasImageFilter>("all");
   const [loading, setLoading] = useState(true);
-  const [alert, setAlert] = useState<AlertState>(null);
   const [editingGame, setEditingGame] = useState<GameRow | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const showAlert = useCallback((next: NonNullable<AlertState>) => {
-    setAlert(next);
-    setTimeout(() => setAlert(null), 3500);
-  }, []);
+  // Rétroaction sous forme de toast (sonner) plutôt que de bannière dans la
+  // page ; le <Toaster> est monté dans app/[locale]/layout.tsx.
+  const showAlert = useCallback(
+    (next: NonNullable<AlertState>) => {
+      if (next.type === "success") {
+        toast.success(t("alerts.successTitle"), { description: next.message });
+      } else {
+        toast.error(t("alerts.errorTitle"), { description: next.message });
+      }
+    },
+    [t]
+  );
 
   // Recherche débouncée (350 ms) → repart à la page 1.
   useEffect(() => {
@@ -141,37 +158,15 @@ export default function GamesImagesTable() {
     [showAlert, t],
   );
 
-  return (
-    <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div className="flex flex-col gap-1 sm:gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {t("title")}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          {t("subtitle")}
-        </p>
-      </div>
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchGames();
+    setIsRefreshing(false);
+  };
 
-      {alert && (
-        <Alert
-          variant={alert.type === "destructive" ? "destructive" : "default"}
-          className={
-            alert.type === "success"
-              ? "border-green-200 bg-green-50 text-green-900"
-              : ""
-          }
-        >
-          {alert.type === "success" ? (
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-          ) : (
-            <AlertCircle className="h-4 w-4" />
-          )}
-          <AlertTitle className="font-semibold">
-            {alert.type === "success" ? t("alerts.successTitle") : t("alerts.errorTitle")}
-          </AlertTitle>
-          <AlertDescription>{alert.message}</AlertDescription>
-        </Alert>
-      )}
+  return (
+    <div className="w-full mx-auto mt-2 sm:mt-4 space-y-4 sm:space-y-6 px-2 sm:px-0">
+
 
       <Card className="shadow-md border-gray-200">
         <CardHeader className="pb-3 sm:pb-4 border-b p-4 sm:p-6">
@@ -201,10 +196,28 @@ export default function GamesImagesTable() {
                 <SelectItem value="no">{t("filter.withoutImage")}</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground text-sm mt-3">
-            <Gamepad2 className="h-4 w-4" />
-            {t("count", { count: total })}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    className="hover:bg-gray-100 flex-shrink-0"
+                    aria-busy={isRefreshing}
+                    aria-live="polite"
+                  >
+                    <RefreshCw
+                      className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+                    />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t("refresh")}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </CardHeader>
 
@@ -216,9 +229,7 @@ export default function GamesImagesTable() {
               ))}
             </div>
           ) : gamesList.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              {t("empty")}
-            </div>
+            <EmptyState icon={Gamepad2} title={t("empty")} />
           ) : (
             <>
               <div className="px-6">
@@ -262,7 +273,7 @@ export default function GamesImagesTable() {
                           <span className="line-clamp-2">{game.titre}</span>
                         </TableCell>
                         <TableCell className="hidden md:table-cell text-muted-foreground">
-                          {game.platform || "—"}
+                          {game.platform || "-"}
                         </TableCell>
                         <TableCell className="text-center hidden sm:table-cell">
                           {game.picture ? (

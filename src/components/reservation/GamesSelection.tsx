@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useReservation } from "@/context/ReservationContext";
 import GameSelectionGrid from "@/components/reservation/components/GamesSelectionGrid";
 import { AlertCircle, Loader2, Gamepad2, MoveLeft, Trash2 } from "lucide-react";
@@ -38,44 +38,74 @@ export default function GamesSelection() {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    const restoreSelectedGames = async () => {
-      if (!reservationId || selectedGames.length === 0) {
-        setSelectedGameObjects([]);
-        return;
-      }
+  // Sélection courante déjà résolue en objets, et clé (« 12,7,3 ») de ce qui a
+  // été chargé : elles évitent de rappeler l'API à chaque clic et gardent
+  // l'ordre de sélection, qui est celui enregistré dans game1/game2/game3.
+  const loadedKeyRef = useRef<string>("");
 
+  const applySelection = useCallback(
+    (next: Game[]) => {
+      loadedKeyRef.current = next.map((g) => String(g.id)).join(",");
+      setSelectedGameObjects(next);
+      setSelectedGames(next.map((g) => String(g.id)));
+    },
+    [setSelectedGames]
+  );
+
+  useEffect(() => {
+    const wanted = selectedGames.map(String);
+    const key = wanted.join(",");
+
+    // Sélection déjà à l'écran (clic local) : rien à recharger.
+    if (loadedKeyRef.current === key) return;
+
+    if (!reservationId || wanted.length === 0) {
+      loadedKeyRef.current = key;
+      setSelectedGameObjects([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    const restoreSelectedGames = async () => {
       setIsLoadingSelected(true);
       try {
-        const gameIds = selectedGames.join(",");
         const res = await fetch(
-          `/api/reservation/games/details?ids=${gameIds}`
+          `/api/reservation/games/details?ids=${encodeURIComponent(key)}`
         );
-        if (res.ok) {
-          const games = await res.json();
-          setSelectedGameObjects(games);
-        }
+        if (!res.ok) return;
+
+        const rows: Game[] = await res.json();
+        if (cancelled) return;
+
+        const byId = new Map(rows.map((g) => [String(g.id), g]));
+        const ordered = wanted
+          .map((id) => byId.get(id))
+          .filter((g): g is Game => g !== undefined);
+
+        loadedKeyRef.current = key;
+        setSelectedGameObjects(ordered);
       } catch (err) {
         console.error(t("games.error.games_restore"), err);
       } finally {
-        setIsLoadingSelected(false);
+        if (!cancelled) setIsLoadingSelected(false);
       }
     };
 
     restoreSelectedGames();
-  }, [reservationId, selectedGames]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reservationId, selectedGames, t]);
 
   const toggleSelect = (game: Game) => {
     const isSelected = selectedGameObjects.find((g) => g.id === game.id);
 
     if (isSelected) {
-      const newSelection = selectedGameObjects.filter((g) => g.id !== game.id);
-      setSelectedGameObjects(newSelection);
-      setSelectedGames(newSelection.map((g) => String(g.id)));
+      applySelection(selectedGameObjects.filter((g) => g.id !== game.id));
     } else if (selectedGameObjects.length < 3) {
-      const newSelection = [...selectedGameObjects, game];
-      setSelectedGameObjects(newSelection);
-      setSelectedGames(newSelection.map((g) => String(g.id)));
+      applySelection([...selectedGameObjects, game]);
     } else {
       setLocalError(t("games.error.max_3_games"));
     }
@@ -83,16 +113,13 @@ export default function GamesSelection() {
   };
 
   const clearGame = (gameId: number) => {
-    const newSelection = selectedGameObjects.filter((g) => g.id !== gameId);
-    setSelectedGameObjects(newSelection);
-    setSelectedGames(newSelection.map((g) => String(g.id)));
+    applySelection(selectedGameObjects.filter((g) => g.id !== gameId));
     clearError();
     setLocalError(null);
   };
 
   const clearAllGames = () => {
-    setSelectedGameObjects([]);
-    setSelectedGames([]);
+    applySelection([]);
     clearError();
     setLocalError(null);
   };
@@ -124,14 +151,19 @@ export default function GamesSelection() {
         }),
       });
 
-      if (!res.ok) throw new Error(t("games.error.save_failed"));
+      const data = await res.json().catch(() => null);
 
-      const data = await res.json();
-      if (data.success) {
-        setCurrentStep(3);
+      if (!res.ok || !data?.success) {
+        // Le serveur explique pourquoi (jeu déjà retenu, hold expiré…) :
+        // ce message est plus utile qu'un échec générique.
+        throw new Error(data?.message || t("games.error.save_failed"));
       }
-    } catch {
-      setLocalError(t("games.error.save_failed"));
+
+      setCurrentStep(3);
+    } catch (err) {
+      setLocalError(
+        err instanceof Error ? err.message : t("games.error.save_failed")
+      );
     } finally {
       setIsSaving(false);
     }
@@ -174,7 +206,7 @@ export default function GamesSelection() {
               className={`text-sm font-medium px-2 py-1 rounded-full ${
                 selectedGameObjects.length === 3
                   ? "bg-green-50 text-green-700"
-                  : "bg-cyan-50 text-cyan-700"
+                  : "bg-cyan-50 text-cyan-500"
               }`}
             >
               {selectedGameObjects.length}/3
@@ -271,7 +303,7 @@ export default function GamesSelection() {
           <Button
             onClick={handleContinue}
             disabled={selectedGameObjects.length === 0 || isSaving}
-            className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors text-white h-11"
+            className="w-full bg-cyan-500 hover:bg-cyan-600 transition-colors text-white h-11"
           >
             {isSaving ? (
               <>

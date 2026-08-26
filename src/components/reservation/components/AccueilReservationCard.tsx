@@ -31,7 +31,7 @@ export default function AccueilReservationCard({
       className={`${
         archived
           ? "border-red-500 hover:border-red-700"
-          : "border-cyan-500 hover:border-cyan-700"
+          : "border-cyan-500 hover:border-cyan-500"
       } w-full max-w-sm bg-[white] overflow-hidden group h-full hover:scale-105 transition-all duration-500 shadow-xl relative`}
     >
       {archived && (

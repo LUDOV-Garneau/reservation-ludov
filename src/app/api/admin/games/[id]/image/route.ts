@@ -8,7 +8,7 @@ import { importRemoteImage, UploadError } from "@/lib/uploads";
 /**
  * Met à jour l'image d'un jeu (admin) :
  * - { path } : chemin renvoyé par POST /api/admin/uploads (téléversement manuel)
- * - { url }  : lien IGDB/MobyGames — téléchargé côté serveur et stocké sur le
+ * - { url }  : lien IGDB/MobyGames, téléchargé côté serveur et stocké sur le
  *   volume local (aucun hotlink ajouté).
  */
 export const PATCH = withAdmin<{ id: string }>(async (req, _admin, params) => {

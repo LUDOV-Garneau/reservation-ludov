@@ -1,7 +1,7 @@
 /**
  * Helpers de dates en fuseau LOCAL.
  * Une chaîne "YYYY-MM-DD" représente toujours le jour calendaire local,
- * jamais UTC — ne pas utiliser toISOString()/new Date("YYYY-MM-DD") pour
+ * jamais UTC : ne pas utiliser toISOString()/new Date("YYYY-MM-DD") pour
  * convertir, sous peine de décalage d'un jour en Amérique.
  */
 

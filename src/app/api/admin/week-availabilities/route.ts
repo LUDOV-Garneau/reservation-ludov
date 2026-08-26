@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
-import db from "@/db";
+import db, { insertedId } from "@/db";
 import { weeklyAvailabilities, specificDates, hourRanges } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -121,8 +121,11 @@ export async function POST(request: NextRequest) {
         const endDate = parsedAvailability.dateRange.alwaysApplies ? null : parsedAvailability.dateRange.range?.endDate?.toISOString().slice(0, 10) ?? null;
         const alwaysAvailable = parsedAvailability.dateRange.alwaysApplies ? 1 : 0;
 
-        const ids = (await tx.insert(weeklyAvailabilities).values({ startDate, endDate, dayOfWeek: day, enabled: enabled ? 1 : 0, alwaysAvailable }).$returningId()) as unknown as { weeklyId: number }[];
-        const weeklyId = Number(ids[0].weeklyId);
+        const inserted = await tx.insert(weeklyAvailabilities).values({ startDate, endDate, dayOfWeek: day, enabled: enabled ? 1 : 0, alwaysAvailable });
+        const weeklyId = insertedId(inserted);
+        if (!weeklyId) {
+          throw new Error(`Identifiant manquant après l'insertion de la disponibilité (${day}).`);
+        }
 
         if (enabled) {
           for (const hr of ranges) {
