@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import {
@@ -152,7 +152,7 @@ export default function ReservationTableRow({
                   variant="outline"
                   size="sm"
                   onClick={() => router.push(detailsUrl)}
-                  className="hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-300 transition-colors h-8 w-8 p-0"
+                  className="hover:bg-cyan-50 hover:text-cyan-600 hover:border-cyan-500 transition-colors h-8 w-8 p-0"
                   aria-label={t(
                     "admin.reservations.table.ActionToolTips.viewDetails",
                   )}

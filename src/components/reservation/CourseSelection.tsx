@@ -144,7 +144,7 @@ export default function CourseSelection() {
             >
               <SelectTrigger
                 id="cours"
-                className="w-full h-14 text-base px-4 border-2 border-gray-200 bg-[white] text-left font-normal rounded-lg transition-all focus:ring-0 focus:ring-offset-0 show-svg"
+                className="w-full h-14 text-base px-4 border-2 border-gray-200 bg-[white] text-left font-normal rounded-lg transition-all focus:ring-0 focus:ring-offset-0"
               >
                 <SelectValue
                   placeholder={
@@ -170,7 +170,7 @@ export default function CourseSelection() {
                     >
                       <div className="flex flex-row items-center gap-2">
                         <BookOpen className="h-4 w-4 text-cyan-600 flex-shrink-0" />
-                        <span className="font-semibold text-cyan-700">
+                        <span className="font-semibold text-cyan-500">
                           {cour.codeCours}
                         </span>
                         <span className="text-gray-400 font-light">|</span>
@@ -187,7 +187,7 @@ export default function CourseSelection() {
             <div className="mt-6 p-4 bg-cyan-50 border border-cyan-200 rounded-lg animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex items-start gap-3">
                 <div className="bg-cyan-100 p-2 rounded-full">
-                  <BookOpen className="h-5 w-5 text-cyan-700" />
+                  <BookOpen className="h-5 w-5 text-cyan-500" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-cyan-900 mb-1">
@@ -197,7 +197,7 @@ export default function CourseSelection() {
                     <p className="text-lg font-bold text-cyan-800">
                       {selectedCoursDetails.codeCours}
                     </p>
-                    <p className="text-cyan-700 text-base">
+                    <p className="text-cyan-500 text-base">
                       {selectedCoursDetails.nomCours}
                     </p>
                   </div>
@@ -218,7 +218,7 @@ export default function CourseSelection() {
           <Button
             onClick={handleSave}
             disabled={!selectedCours || loading || saving}
-            className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 shadow-md transition-all hover:shadow-lg"
+            className="bg-cyan-500 hover:bg-cyan-600 shadow-md transition-all hover:shadow-lg"
           >
             {saving ? (
               <>

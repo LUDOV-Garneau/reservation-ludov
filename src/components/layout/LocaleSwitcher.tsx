@@ -14,6 +14,13 @@ export default function LocaleSwitcher() {
   function switchLocale() {
     const newLocale = locale === "fr" ? "en" : "fr";
 
+    // Mémorise la langue préférée (pour les courriels) ; ignoré si non connecté.
+    fetch("/api/auth/preferred-locale", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ locale: newLocale }),
+    }).catch(() => {});
+
     const segments = pathname.split("/");
     segments[1] = newLocale;
     const newPath = segments.join("/") || "/";

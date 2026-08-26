@@ -119,7 +119,7 @@ export default function UpdateCoursForm({
       <DialogContent className="max-w-[95vw] sm:max-w-[500px] w-full p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-5 border-b">
           <DialogTitle className="text-2xl font-bold tracking-tight flex items-center gap-3">
-            <Settings className="w-5 h-5 text-cyan-700" />
+            <Settings className="w-5 h-5 text-cyan-500" />
             Modifier le cours
           </DialogTitle>
         </DialogHeader>
@@ -173,7 +173,7 @@ export default function UpdateCoursForm({
             <Button
               type="submit"
               disabled={loading || !name.trim() || !code.trim()}
-              className="w-full h-12 text-base font-semibold bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors"
+              className="w-full h-12 text-base font-semibold bg-cyan-500 hover:bg-cyan-600 transition-colors"
               size="lg"
             >
               {loading ? (

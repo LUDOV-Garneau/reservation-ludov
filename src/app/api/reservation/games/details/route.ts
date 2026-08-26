@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import db from "@/db";
 import { inArray } from "drizzle-orm";
 import { games } from "@/db/schema";
+import { withAuth } from "@/lib/withAuth";
 
-export async function GET(req: NextRequest) {
+export const GET = withAuth(async (req) => {
   try {
     const idsParam = req.nextUrl.searchParams.get("ids");
 
@@ -30,9 +31,16 @@ export async function GET(req: NextRequest) {
     .from(games)
     .where(inArray(games.id, ids));
 
-    return NextResponse.json(rows, { status: 200 });
+    // L'ordre demandé fait foi : il correspond à l'ordre de sélection du
+    // joueur, qui est enregistré tel quel dans game1/game2/game3 du hold.
+    const byId = new Map(rows.map((row) => [Number(row.id), row]));
+    const ordered = ids
+      .map((id) => byId.get(id))
+      .filter((row): row is (typeof rows)[number] => row !== undefined);
+
+    return NextResponse.json(ordered, { status: 200 });
   } catch (err) {
     console.error("Erreur API game details:", err);
     return NextResponse.json({ success: false, message: "Erreur serveur" }, { status: 500 });
   }
-}
+});

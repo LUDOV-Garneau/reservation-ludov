@@ -13,10 +13,10 @@ import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useTranslations } from "next-intl";
 import { useAlert } from "./hooks/useAlert";
+import EmptyState from "@/components/admin/EmptyState";
 import { usePagination } from "@/hooks/usePagination";
 import { useReservations } from "./hooks/useReservations";
 import type { Reservation } from "./hooks/useReservations";
-import { ModernAlert } from "./ModernAlert";
 import PaginationControls from "./Pagination";
 import ActionBar from "./ActionBar";
 import CardReservationStats from "./CardStats";
@@ -28,21 +28,12 @@ const ITEMS_PER_PAGE = 10;
 
 const EMPTY_DATE_FILTER: DateFilterValue = { mode: "specific" };
 
+// La recherche texte est faite côté serveur ; seul le filtre de date reste local.
 function filterReservations(
   reservations: Reservation[],
-  searchQuery: string,
   dateFilter: DateFilterValue,
 ): Reservation[] {
-  const search = searchQuery.toLowerCase();
-
   return reservations.filter((r) => {
-    const matchesSearch =
-      (r.userNom ?? "").toLowerCase().includes(search) ||
-      r.console.toLowerCase().includes(search) ||
-      r.date.toLowerCase().includes(search);
-
-    if (!matchesSearch) return false;
-
     if (dateFilter.mode === "specific" && dateFilter.specificDate) {
       return (
         parseDateString(r.date).getTime() ===
@@ -79,46 +70,41 @@ function TableSkeleton() {
   );
 }
 
-function EmptyState({ searchQuery }: { searchQuery: string }) {
-  const t = useTranslations();
-  return (
-    <div className="text-center py-12 sm:py-16 px-4 sm:px-6">
-      <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gray-100 mb-3 sm:mb-4">
-        <Calendar className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
-      </div>
-      <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">
-        {t("admin.reservations.searchResult.noReservationsFound")}
-      </h3>
-      <p className="text-muted-foreground text-sm sm:text-base mb-4 sm:mb-6 mx-auto">
-        {searchQuery
-          ? t("admin.reservations.searchResult.noMatch")
-          : t("admin.reservations.searchResult.empty")}
-      </p>
-    </div>
-  );
-}
-
 export default function ReservationsTable() {
   const t = useTranslations();
-  const { alert, showAlert, clearAlert } = useAlert();
+  const { showAlert } = useAlert();
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] =
     useState<DateFilterValue>(EMPTY_DATE_FILTER);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
 
+  // Recherche débouncée (350 ms), envoyée au serveur.
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const { page, goToPage, resetPage } = usePagination(total, ITEMS_PER_PAGE);
-  const { reservations, metrics, loading, metricsLoading, refresh } =
-    useReservations(page, ITEMS_PER_PAGE, showAlert, setTotal);
+  const {
+    reservations,
+    metrics,
+    loading,
+    metricsLoading,
+    refresh,
+    refreshSilent,
+    markCancelled,
+  } = useReservations(page, ITEMS_PER_PAGE, showAlert, setTotal, debouncedSearch);
 
   const filteredReservations = useMemo(
-    () => filterReservations(reservations, searchQuery, dateFilter),
-    [reservations, searchQuery, dateFilter],
+    () => filterReservations(reservations, dateFilter),
+    [reservations, dateFilter],
   );
 
   useEffect(() => {
     resetPage();
-  }, [searchQuery, dateFilter, resetPage]);
+  }, [debouncedSearch, dateFilter, resetPage]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -126,20 +112,22 @@ export default function ReservationsTable() {
     setIsRefreshing(false);
   }, [refresh]);
 
+  // Annulation : la ligne passe immédiatement à "annulée" (pas de squelette),
+  // puis les stats sont resynchronisées en arrière-plan.
+  const handleCancelSuccess = useCallback(
+    (id: string) => {
+      markCancelled(id);
+      refreshSilent();
+    },
+    [markCancelled, refreshSilent],
+  );
+
   const handleClearDateFilter = useCallback(() => {
     setDateFilter(EMPTY_DATE_FILTER);
   }, []);
 
   return (
-    <div className="w-full mx-auto mt-4 sm:mt-6 lg:mt-8 space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div className="flex flex-col gap-1 sm:gap-2">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-          {t("admin.reservations.title")}
-        </h1>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          {t("admin.reservations.subtitle")}
-        </p>
-      </div>
+    <div className="w-full mx-auto mt-2 sm:mt-4 space-y-4 sm:space-y-6 px-2 sm:px-0">
 
       <CardReservationStats
         loading={metricsLoading}
@@ -147,8 +135,6 @@ export default function ReservationsTable() {
         futureReservations={metrics.future}
         pastReservations={metrics.past}
       />
-
-      <ModernAlert alert={alert} onClose={clearAlert} />
 
       <Card className="shadow-md border-gray-200">
         <CardHeader className="pb-3 sm:pb-4 border-b p-4 sm:p-6">
@@ -204,7 +190,7 @@ export default function ReservationsTable() {
                         key={reservation.id}
                         reservation={reservation}
                         onAlert={showAlert}
-                        onSuccess={handleRefresh}
+                        onSuccess={() => handleCancelSuccess(reservation.id)}
                       />
                     ))}
                   </TableBody>
@@ -223,7 +209,10 @@ export default function ReservationsTable() {
               )}
             </>
           ) : (
-            <EmptyState searchQuery={searchQuery} />
+            <EmptyState
+              icon={Calendar}
+              title={t("admin.reservations.searchResult.noReservationsFound")}
+            />
           )}
         </CardContent>
       </Card>

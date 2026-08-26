@@ -3,77 +3,17 @@ import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
 import { reservation, reservationHold, specificDates, hourRanges, weeklyAvailabilities, games, accessoires, stations } from "@/db/schema";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
-
-type Range = { start: number; end: number };
+import { toLocalYmd, isFutureSlot } from "@/lib/dates";
+import {
+  computeValidRanges,
+  dayNameFor,
+  generateAllTimeSlots,
+} from "@/lib/availability";
 
 export interface TimeSlotAvailability {
   time: string;
   available: boolean;
   conflicts?: { console?: boolean; games?: number[]; accessories?: number[]; station?: boolean };
-}
-
-function toMinutes(h: string, m: string) { return parseInt(h) * 60 + parseInt(m); }
-function timeToMinutes(t: string): number { const [h, m] = t.split(":").map(Number); return h * 60 + m; }
-
-function subtractRange(base: Range[], toRemove: Range): Range[] {
-  const result: Range[] = [];
-  for (const r of base) {
-    if (toRemove.end <= r.start || toRemove.start >= r.end) { result.push(r); continue; }
-    if (toRemove.start > r.start) result.push({ start: r.start, end: toRemove.start });
-    if (toRemove.end < r.end) result.push({ start: toRemove.end, end: r.end });
-  }
-  return result;
-}
-
-function mergeRanges(ranges: Range[]): Range[] {
-  if (ranges.length === 0) return [];
-  const sorted = [...ranges].sort((a, b) => a.start - b.start);
-  const merged: Range[] = [sorted[0]];
-  for (let i = 1; i < sorted.length; i++) {
-    const last = merged[merged.length - 1];
-    const cur = sorted[i];
-    if (cur.start <= last.end) { last.end = Math.max(last.end, cur.end); }
-    else if (cur.start === last.end) { last.end = cur.end; }
-    else { merged.push(cur); }
-  }
-  return merged;
-}
-
-function computeValidRanges(
-  weeklyHours: { startHour: string; startMinute: string; endHour: string; endMinute: string }[],
-  specificHours: { startHour: string; startMinute: string; endHour: string; endMinute: string; isException: boolean }[],
-  userReservations: { consoleTypeId: number | null }[],
-  consoleTypeId: number | null
-) {
-  if (consoleTypeId) {
-    for (const { consoleTypeId: ctId } of userReservations) {
-      if (consoleTypeId == ctId) return [];
-    }
-  }
-  let validRanges: Range[] = weeklyHours.map((r) => ({ start: toMinutes(r.startHour, r.startMinute), end: toMinutes(r.endHour, r.endMinute) }));
-  for (const r of specificHours) {
-    const range = { start: toMinutes(r.startHour, r.startMinute), end: toMinutes(r.endHour, r.endMinute) };
-    if (r.isException) { validRanges = subtractRange(validRanges, range); }
-    else { validRanges.push(range); }
-  }
-  return mergeRanges(validRanges);
-}
-
-function generateAllTimeSlots(validRanges: Range[]): string[] {
-  const SESSION_DURATION = 2;
-  const slots: string[] = [];
-  for (const range of validRanges) {
-    const startHour = Math.ceil(range.start / 60);
-    const endHour = Math.floor(range.end / 60);
-    for (let hour = startHour; hour <= endHour - SESSION_DURATION; hour++) {
-      const slotStart = hour * 60;
-      const slotEnd = slotStart + SESSION_DURATION * 60;
-      if (slotStart >= range.start && slotEnd <= range.end) {
-        slots.push(`${hour.toString().padStart(2, "0")}:00:00`);
-      }
-    }
-  }
-  return [...new Set(slots)].sort();
 }
 
 function checkSlotAvailability(
@@ -142,11 +82,6 @@ function resolveAccessoryFallbacks(
   return { valid: true, finalAccessoryIds: finalAccessories };
 }
 
-function isSlotInFuture(time: string, currentHour: number): boolean {
-  const [slotHour] = time.split(":").map(Number);
-  return slotHour > currentHour;
-}
-
 export async function GET(request: NextRequest) {
   try {
     const token = request.cookies.get("SESSION")?.value;
@@ -166,7 +101,7 @@ export async function GET(request: NextRequest) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return NextResponse.json({ success: false, error: "Invalid date format. Expected YYYY-MM-DD" }, { status: 400 });
 
     const now = new Date();
-    const todayStr = now.toISOString().split("T")[0];
+    const todayStr = toLocalYmd(now);
     if (date < todayStr) return NextResponse.json({ success: false, error: "Cannot check availability for past dates" }, { status: 400 });
 
     const requestedConsoleId = parseInt(consoleId, 10);
@@ -179,8 +114,7 @@ export async function GET(request: NextRequest) {
     });
     const requestedConsoleTypeId = consoleTypeRow?.consoleTypeId;
 
-    const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-    const dayName = dayNames[new Date(date + "T12:00:00").getDay()];
+    const dayName = dayNameFor(date);
 
     const [reservations, holds, specificHoursRows, weeklyHoursRows, userReservations] = await Promise.all([
       db.select({
@@ -220,15 +154,23 @@ export async function GET(request: NextRequest) {
     ]);
 
     const specificHours = specificHoursRows.map((r) => ({ ...r, isException: Boolean(r.isException) }));
-    const validRanges = computeValidRanges(weeklyHoursRows, specificHours, userReservations, requestedConsoleTypeId ?? null);
+
+    // Une seule réservation par plateforme et par jour : la même règle est
+    // rejouée à l'écriture (voir checkSlotBookable).
+    const alreadyBookedSameConsoleType =
+      requestedConsoleTypeId != null &&
+      userReservations.some((r) => Number(r.consoleTypeId) === Number(requestedConsoleTypeId));
+
+    const validRanges = alreadyBookedSameConsoleType
+      ? []
+      : computeValidRanges(weeklyHoursRows, specificHours);
 
     const requiredAccessoryMap: Record<number, number[]> = {};
     if (requestedGameIds.length > 0) {
-      const requiredRows = await db.select({ requiredAccessories: games.requiredAccessories }).from(games).where(inArray(games.id, requestedGameIds));
-      requiredRows.forEach((row, index) => {
-        const gameId = requestedGameIds[index];
-        const kohaList = (row.requiredAccessories as number[] | null) || [];
-        requiredAccessoryMap[gameId] = kohaList.length > 0 ? [kohaList[0]] : [];
+      const requiredRows = await db.select({ id: games.id, requiredAccessories: games.requiredAccessories }).from(games).where(inArray(games.id, requestedGameIds));
+      requiredRows.forEach((row) => {
+        // Tous les accessoires requis comptent, pas seulement le premier.
+        requiredAccessoryMap[row.id] = (row.requiredAccessories as number[] | null) || [];
       });
     }
 
@@ -262,9 +204,8 @@ export async function GET(request: NextRequest) {
 
     let finalAvailability = availability;
     if (date === todayStr) {
-      const currentHour = now.getHours();
       finalAvailability = availability.map((slot) =>
-        !isSlotInFuture(slot.time, currentHour)
+        !isFutureSlot(date, slot.time, now)
           ? { ...slot, available: false, conflicts: { ...slot.conflicts, past: true } }
           : slot
       );

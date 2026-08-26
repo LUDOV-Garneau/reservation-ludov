@@ -8,8 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Loader2, ShieldAlert, Trash2 } from "lucide-react";
+import { Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type TargetCours = {
@@ -105,31 +104,6 @@ export default function DeleteCoursAction({
                   {targetCours.name ? <>{targetCours.name}</> : "Cours"}
                 </div>
               </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-red-600" />
-                Ce qui va se passer
-              </h4>
-              <ul className="space-y-2.5 text-sm text-gray-700">
-                <li className="flex items-start gap-2.5">
-                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>
-                    Le cours <strong className="text-gray-900">supprimé</strong>{" "}
-                    ne sera plus accessible.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>
-                    La réservation associée seront définie à{" "}
-                    <strong className="text-gray-900">nulle</strong>.
-                  </span>
-                </li>
-              </ul>
             </div>
 
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">

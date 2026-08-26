@@ -1,0 +1,81 @@
+# Pile locale de test : reproduit le déploiement (image du Dockerfile +
+# MySQL), sans toucher au docker-compose.yml du VPS.
+#
+#   docker compose -f docker-compose.local.yml up --build      # pile complète
+#   docker compose -f docker-compose.local.yml up -d db        # base seule,
+#                                                    # pour `npm run dev`
+#
+# Les valeurs viennent de `.env` (même fichier que `npm run dev`). Seules les
+# variables qui diffèrent forcément dans le conteneur sont surchargées
+# ci-dessous : l'hôte de la base (`db` au lieu de `localhost`) et NODE_ENV
+# (l'image est un build de production).
+
+services:
+  db:
+    image: mysql:8
+    environment:
+      # Reprend DATABASE_PASSWORD du .env (Compose interpole depuis ce
+      # fichier) : aucun mot de passe en dur dans le dépôt.
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:?DATABASE_PASSWORD manquant dans .env}
+      # Le dump de référence qualifie ses vues avec `ludov_dev` : garder ce nom.
+      MYSQL_DATABASE: ludov_dev
+      TZ: America/Toronto
+    ports:
+      - "3306:3306" # `npm run dev` sur l'hôte pointe ici
+    volumes:
+      - db-data:/var/lib/mysql
+      # Amorçage du schéma à la création du volume (voir le script).
+      - ./local/db-init:/docker-entrypoint-initdb.d:ro
+      - ./drizzle:/baseline:ro
+    healthcheck:
+      # L'app migre au démarrage : elle ne doit partir qu'une fois MySQL prêt.
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h 127.0.0.1 -p\"$$MYSQL_ROOT_PASSWORD\"",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      DATABASE_HOST: db # `localhost` désignerait le conteneur lui-même
+      DATABASE_PORT: "3306"
+      NODE_ENV: production # l'image est un build standalone de production
+      UPLOADS_DIR: /app/uploads
+    ports:
+      # Port hôte configurable : `WEB_PORT=3001 docker compose -f
+      # docker-compose.local.yml up -d` libère 3000 pour `npm run dev`.
+      # Rien dans l'app ne dépend de ce port (NEXT_PUBLIC_APP_URL n'est lu que
+      # par le cron, qui passe par le réseau compose).
+      - "${WEB_PORT:-3000}:3000"
+    volumes:
+      # Volume nommé : le conteneur tourne en uid 1001, un bind mount exigerait
+      # un chown côté hôte.
+      - uploads:/app/uploads
+
+  # Rappels automatiques, optionnel : `--profile cron` pour l'activer.
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    profiles: ["cron"]
+    depends_on:
+      - web
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_APP_URL: http://web:3000 # joignable depuis le réseau compose
+    command: ["node", "scripts/cron-scheduler.js"]
+
+volumes:
+  db-data:
+  uploads:

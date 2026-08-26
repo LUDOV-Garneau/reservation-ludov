@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { consoleCatalog } from "@/db/schema";
 import { gt } from "drizzle-orm";
+import { withAuth } from "@/lib/withAuth";
 
 export interface ConsoleCatalogItem {
   id: number;
@@ -11,7 +12,7 @@ export interface ConsoleCatalogItem {
   total_units: number;
 }
 
-export async function GET() {
+export const GET = withAuth(async () => {
   try {
     const consoles = await db
       .select({
@@ -30,4 +31,4 @@ export async function GET() {
     console.error(err);
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
-}
+});

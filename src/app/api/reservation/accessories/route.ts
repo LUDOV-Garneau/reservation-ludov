@@ -43,10 +43,8 @@ export async function GET() {
         sql`JSON_CONTAINS(${accessoires.consoles}, CAST(${consoleTypeId} AS JSON), '$')`,
       ));
 
-    if (data.length === 0) {
-      return NextResponse.json({ success: false, data: [], message: "No accessories found for the user's console" }, { status: 404 });
-    }
-
+    // Une liste vide est un état normal (console sans accessoire) : 200 pour
+    // que le client affiche l'étape « aucun accessoire » plutôt qu'une erreur.
     return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Error processing request:", error);

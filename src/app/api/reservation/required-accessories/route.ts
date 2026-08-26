@@ -30,7 +30,8 @@ export async function GET(request: NextRequest) {
     const kohaIds: number[] = [];
     rows.forEach((row) => {
       const required = row.requiredAccessories as number[] | null;
-      if (required && required.length > 0) kohaIds.push(required[0]);
+      // Tous les accessoires requis comptent, pas seulement le premier.
+      if (required) kohaIds.push(...required);
     });
 
     if (kohaIds.length === 0) return NextResponse.json({ required_accessories: [] });

@@ -16,7 +16,8 @@ import { useTranslations } from "next-intl";
 interface SelectedConsoleCardProps {
   console: Console | null;
   onClear: () => void;
-  onSuccess?: () => void;
+  /** Réserve la plateforme côté serveur ; rejette si la réservation échoue. */
+  onSuccess?: () => void | Promise<void>;
   buttonLabel?: string;
 }
 
@@ -52,18 +53,18 @@ export default function SelectedConsoleCard({
     setSuccess(false);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // On attend la réservation réelle : pas de délai artificiel, et l'étape
+      // ne change que si l'appel a réussi (sinon onSuccess rejette).
+      await onSuccess?.();
       setSuccess(true);
-
-      if (onSuccess) {
-        setTimeout(() => {
-          onSuccess();
-        }, 1500);
-      }
     } catch (e) {
-      setError(
-        e instanceof Error ? e.message : t("reservation.console.errorOccurred")
-      );
+      // « hold_failed » : le message détaillé vient du contexte et est déjà
+      // affiché par l'étape, inutile de le doubler ici.
+      if (!(e instanceof Error && e.message === "hold_failed")) {
+        setError(
+          e instanceof Error ? e.message : t("reservation.console.errorOccurred")
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -116,7 +117,7 @@ export default function SelectedConsoleCard({
         <Button
           onClick={handleContinue}
           disabled={isLoading || success}
-          className="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors duration-300 text-white font-medium h-11 rounded-xl disabled:opacity-50"
+          className="w-full bg-cyan-500 hover:bg-cyan-600 transition-colors duration-300 text-white font-medium h-11 rounded-xl disabled:opacity-50"
         >
           {isLoading ? (
             <>

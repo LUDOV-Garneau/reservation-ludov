@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import db from "@/db";
 import { reservation, stations, accessoires } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
+import { withAdmin } from "@/lib/withAuth";
 
 const REGEX_RESERVATION_ID =
   /^RESV-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function GET(request: NextRequest) {
+export const GET = withAdmin(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const idReservation = searchParams.get("id");
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
         date: true,
         time: true,
         archived: true,
+        cancellationReason: true,
         accessoryIds: true,
       },
       where: eq(reservation.id, idReservation),
@@ -32,7 +34,7 @@ export async function GET(request: NextRequest) {
           columns: { id: true, firstname: true, lastname: true, email: true },
         },
         consoleStock: {
-          with: { consoleType: { columns: { name: true } } },
+          with: { consoleType: { columns: { name: true, picture: true } } },
         },
         game_game1Id: {
           columns: { titre: true, picture: true, biblioId: true },
@@ -82,14 +84,22 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       id: row.id,
-      console: { nom: row.consoleStock?.consoleType?.name ?? "" },
+      console: {
+        nom: row.consoleStock?.consoleType?.name ?? "",
+        picture:
+          row.consoleStock?.consoleType?.picture ??
+          row.consoleStock?.picture ??
+          null,
+      },
       user_id: row.user?.id ?? null,
       firstname: row.user?.firstname ?? null,
       lastname: row.user?.lastname ?? null,
       email: row.user?.email ?? null,
       jeux,
       accessoires: accessoiresRows.map((a) => ({ id: a.id, nom: a.name })),
-      archived: row.archived,
+      // tinyint MySQL : converti en booléen, comme dans les autres routes.
+      archived: Boolean(row.archived),
+      cancellationReason: row.cancellationReason ?? null,
       station: stationRow?.name ?? null,
       date: row.date,
       heure: row.time?.slice(0, 5) ?? null,
@@ -101,9 +111,9 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = withAdmin(async (request) => {
   try {
     const { searchParams } = new URL(request.url);
     const idString = searchParams.get("id");
@@ -142,4 +152,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+});

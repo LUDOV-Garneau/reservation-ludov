@@ -226,9 +226,6 @@ export default function ConsoleSelectionGrid({
           <p className="text-gray-600 font-medium">
             {t("reservation.console.noneAvailable")}
           </p>
-          <p className="text-sm text-gray-500 mt-2">
-            {t("reservation.console.allReserved")}
-          </p>
         </div>
       )}
 

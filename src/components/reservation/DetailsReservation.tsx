@@ -12,18 +12,15 @@ import {
   Cable,
   Computer,
 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import CancelledBanner from "@/components/reservation/details/CancelledBanner";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+  GameCard,
+  ConsoleCard,
+  AccessoriesSection,
+  GAMES_GRID_CLASSES,
+} from "@/components/reservation/details/SharedCards";
+import { PageShell, BackLink } from "@/components/layout/PageShell";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import CancelReservationAlertDialog from "./components/CancelReservationAlertDialog";
@@ -50,10 +47,11 @@ interface ReservationDetailsProps {
   jeux: Game[];
   console: Console;
   accessoires?: Accessory[];
-  station?: number | null;
+  station?: string | null;
   date: string;
   heure: string;
   archived: boolean;
+  cancellationReason?: string | null;
 }
 
 type AlertState = {
@@ -132,125 +130,6 @@ function downloadICS({
   URL.revokeObjectURL(url);
 }
 
-function GameCard({ game }: { game: Game }) {
-  const t = useTranslations();
-
-  return (
-    <Card className="overflow-hidden transition-all hover:shadow-xl rounded-xl flex flex-col p-0 flex-1">
-      <CardContent className="p-0 flex flex-col flex-1">
-        <div className="relative w-full h-96 bg-gray-100">
-          {game.picture ? (
-            <Image
-              src={game.picture}
-              alt={game.nom}
-              fill
-              className="object-cover"
-              priority={false}
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <Gamepad2
-                className="h-16 w-16 text-gray-300"
-                aria-hidden="true"
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col flex-1 p-6">
-          <h3 className="text-xl font-semibold text-gray-900 text-center line-clamp-2 mb-4">
-            {game.nom}
-          </h3>
-
-          <div className="flex-1" />
-
-          {game.biblio && (
-            <Link
-              href={`https://ludov.inlibro.net/cgi-bin/koha/opac-detail.pl?biblionumber=${game.biblio}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Button
-                className="bg-cyan-500 hover:bg-cyan-600 transition-colors w-full"
-                size="default"
-              >
-                {t("reservation.details.detailsButton")}
-              </Button>
-            </Link>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-export function ConsoleCard({ item }: { item: Console }) {
-  return (
-    <Card className="h-full overflow-hidden group border-0 shadow-xl p-0">
-      <CardContent className="p-0 relative h-full min-h-[280px]">
-        <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-110">
-          <div className="flex h-full w-full items-center justify-center bg-cyan-500">
-            <Monitor className="h-32 w-32 text-cyan-900" aria-hidden="true" />
-          </div>
-
-          <div
-            className={
-              item.picture
-                ? `absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent`
-                : `group-hover:from-black/90 transition-all duration-500`
-            }
-          />
-        </div>
-
-        <div className="relative z-10 flex flex-col justify-end h-full p-6">
-          <div className="transform transition-transform duration-500">
-            <h4 className="text-3xl font-black text-white mb-2 drop-shadow-2xl">
-              {item.nom}
-            </h4>
-
-            <div className="h-1 bg-cyan-500 rounded-full w-full" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function AccessoriesSection({ accessories }: { accessories: Accessory[] }) {
-  const t = useTranslations();
-  if (!accessories?.length) {
-    return (
-      <Card className="w-full h-full">
-        <CardContent className="p-6 flex flex-col items-center justify-center min-h-[160px]">
-          <AlertCircle className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-          <p className="text-lg text-gray-400 italic">
-            {t("reservation.details.noAccessory")}
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="w-full h-full p-0">
-      <CardContent className="p-6">
-        <div className="flex gap-2 flex-wrap">
-          {accessories.map((accessory) => (
-            <div
-              key={accessory.id}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 border-cyan-200 hover:border-cyan-400 hover:bg-cyan-50 transition-all duration-200 shadow-sm hover:shadow-md group"
-            >
-              <div className="w-2 h-2 rounded-full bg-cyan-500 group-hover:animate-pulse" />
-              <span className="text-sm font-medium text-gray-700">
-                {accessory.nom}
-              </span>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 function ReservationHeader({
   date,
@@ -266,7 +145,7 @@ function ReservationHeader({
   heure: string;
   reservationId: string;
   consoleName: string;
-  station?: number | null;
+  station?: string | null;
   archived: boolean;
   onCancelSuccess: () => void;
   onCancelError: (error: Error) => void;
@@ -365,22 +244,22 @@ export default function DetailsReservation({
   date,
   heure,
   archived,
+  cancellationReason,
 }: ReservationDetailsProps) {
   const t = useTranslations();
-  const router = useRouter();
   const [alert, setAlert] = useState<AlertState>(null);
+  // Feedback immédiat : l'annulation bascule l'affichage sans rechargement.
+  const [isCancelled, setIsCancelled] = useState(Boolean(archived));
 
   const handleCancelSuccess = useCallback(() => {
+    setIsCancelled(true);
     setAlert({
       show: true,
       type: "success",
       title: "Réservation annulée",
       message: "Votre réservation a été annulée avec succès.",
     });
-    setTimeout(() => {
-      router.replace("/");
-    }, 1600);
-  }, [router]);
+  }, []);
 
   const handleCancelError = useCallback((error: Error) => {
     setAlert({
@@ -392,28 +271,8 @@ export default function DetailsReservation({
   }, []);
 
   return (
-    <div className="sm:bg-[white] rounded-lg mb-10">
-      <div className="sm:px-4 sm:py-8 lg:px-8">
-        <nav className="mb-6" aria-label="Breadcrumb">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink
-                  href="/"
-                  className="text-gray-600 hover:text-cyan-600"
-                >
-                  {t("reservation.layout.home")}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="text-gray-900 font-medium">
-                  {t("reservation.details.titleSection")}
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </nav>
+    <PageShell>
+      <BackLink href="/" label={t("reservation.layout.goBackHome")} />
 
         {alert?.show && (
           <Alert
@@ -460,13 +319,15 @@ export default function DetailsReservation({
           </Alert>
         )}
 
+        {isCancelled && <CancelledBanner reason={cancellationReason} />}
+
         <ReservationHeader
           date={date}
           heure={heure}
           reservationId={reservationId}
           consoleName={console.nom}
           station={station}
-          archived={archived}
+          archived={isCancelled}
           onCancelSuccess={handleCancelSuccess}
           onCancelError={handleCancelError}
         />
@@ -484,7 +345,7 @@ export default function DetailsReservation({
             </div>
             {/* LAYOUT DES CARTES */}
             {jeux.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className={GAMES_GRID_CLASSES}>
                 {jeux.map((jeu, index) => (
                   <div
                     key={jeu.biblio ?? `game-${index}`}
@@ -509,8 +370,10 @@ export default function DetailsReservation({
           </div>
           {/* CONSOLE ET ACCESSOIRS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* CONSOLES */}
-            <div>
+            {/* CONSOLES — colonne en flex : la carte occupe la hauteur restante
+                sous son titre (avec h-full elle valait 100 % de la cellule et
+                débordait de la hauteur du titre). */}
+            <div className="flex flex-col">
               {/* TEXTE DE SECTION */}
               <div className="flex items-center gap-3 mb-6">
                 <Monitor className="h-6 w-6 text-cyan-600" />
@@ -524,7 +387,7 @@ export default function DetailsReservation({
               </div>
             </div>
             {/* ACCESSOIRS */}
-            <div>
+            <div className="flex flex-col">
               {/* TEXTE DE SECTION */}
               <div className="flex items-center gap-3 mb-6">
                 <Cable className="h-6 w-6 text-cyan-600" />
@@ -539,7 +402,6 @@ export default function DetailsReservation({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </PageShell>
   );
 }

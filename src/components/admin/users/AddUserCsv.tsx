@@ -167,7 +167,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
               ? "border-cyan-300 bg-cyan-50/50 dark:bg-cyan-950/20 cursor-not-allowed p-4"
               : isDragging
               ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30 cursor-pointer p-4"
-              : "border-gray-300 dark:border-gray-700 hover:border-cyan-400 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer p-4"
+              : "border-gray-300 dark:border-gray-700 hover:border-cyan-500 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer p-4"
           }
         `}
       >
@@ -231,7 +231,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
           {status === "idle" && !isDragging && (
             <button
               type="button"
-              className="w-full px-4 py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white text-sm font-medium rounded-md transition-colors"
+              className="w-full px-4 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium rounded-md transition-colors"
             >
               Sélectionner un fichier
             </button>
@@ -287,7 +287,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
           {status === "idle" && !isDragging && (
             <button
               type="button"
-              className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white text-sm font-medium rounded-full transition-colors flex-shrink-0"
+              className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium rounded-full transition-colors flex-shrink-0"
             >
               Parcourir
             </button>
@@ -298,7 +298,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
           <div className="mt-3">
             <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-cyan-500 to-cyan-600 rounded-full"
+                className="h-full bg-cyan-500 rounded-full"
                 style={{
                   width: "70%",
                   animation: "progress 1.5s ease-in-out infinite",
@@ -414,7 +414,7 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
               <p className="text-xs font-medium text-cyan-900 dark:text-cyan-100 mb-1">
                 Format CSV requis :
               </p>
-              <ul className="space-y-1 text-[11px] text-cyan-700 dark:text-cyan-300">
+              <ul className="space-y-1 text-[11px] text-cyan-500 dark:text-cyan-300">
                 <li className="break-words">
                   • Username, Date Created, Last Login, First Name, Last Name
                 </li>

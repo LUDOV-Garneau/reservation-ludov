@@ -98,6 +98,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
+          locale,
         }),
         credentials: "include",
       });
@@ -307,7 +308,7 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
         variant="outline"
         type="button"
         onClick={onSignup}
-        className="w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:border-cyan-400 hover:text-cyan-600 hover:bg-cyan-50 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+        className="w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:border-cyan-500 hover:text-cyan-600 hover:bg-cyan-50 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
       >
         {t("auth.login.newUser")}
       </Button>

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
+import { withAuth } from "@/lib/withAuth";
 
-export async function GET() {
+export const GET = withAuth(async () => {
   try {
     return NextResponse.json(await db.query.cours.findMany(), { status: 200 });
   } catch (error) {
@@ -16,4 +17,4 @@ export async function GET() {
       { status: 500 },
     );
   }
-}
+});

@@ -1,24 +1,25 @@
-import { useState, useCallback } from "react";
+import { useCallback } from "react";
+import { toast } from "sonner";
 
 export type AlertType = "success" | "destructive" | "info" | "warning";
 
-export type AlertState = {
-  type: AlertType;
-  message: string;
-  title?: string;
-} | null;
-
+/**
+ * Rétroactions de l'admin : un toast (sonner) plutôt qu'une bannière dans la
+ * page. Le <Toaster> est monté dans app/[locale]/layout.tsx.
+ */
 export function useAlert() {
-  const [alert, setAlert] = useState<AlertState>(null);
-
   const showAlert = useCallback(
     (type: AlertType, message: string, title?: string) => {
-      setAlert({ type, message, title });
+      const text = title ?? message;
+      const options = title ? { description: message } : undefined;
+
+      if (type === "success") toast.success(text, options);
+      else if (type === "destructive") toast.error(text, options);
+      else if (type === "warning") toast.warning(text, options);
+      else toast.info(text, options);
     },
     []
   );
 
-  const clearAlert = useCallback(() => setAlert(null), []);
-
-  return { alert, showAlert, clearAlert };
+  return { showAlert };
 }

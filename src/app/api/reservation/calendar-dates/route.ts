@@ -1,14 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/jwt";
+import { NextResponse } from "next/server";
 import db from "@/db";
+import { withAuth } from "@/lib/withAuth";
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async () => {
   try {
-    const token = request.cookies.get("SESSION")?.value;
-    if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    const user = verifyToken(token);
-    if (!user?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-
     const weeklyAvailabilities = await db.query.weeklyAvailabilities.findMany();
 
     if (weeklyAvailabilities.length <= 0) {
@@ -21,9 +16,23 @@ export async function GET(request: NextRequest) {
       dayOfWeek: [],
     };
 
-    if (!weeklyAvailabilities[0].alwaysAvailable) {
-      unavailableDates.before = weeklyAvailabilities[0].startDate;
-      unavailableDates.after = weeklyAvailabilities[0].endDate;
+    // La fenêtre d'ouverture doit couvrir toutes les lignes, pas seulement la
+    // première (l'ordre de findMany n'est pas garanti).
+    const rangeRows = weeklyAvailabilities.filter((w) => !w.alwaysAvailable);
+    if (rangeRows.length > 0) {
+      const starts = rangeRows
+        .map((w) => w.startDate)
+        .filter((d): d is string => d != null);
+      const ends = rangeRows
+        .map((w) => w.endDate)
+        .filter((d): d is string => d != null);
+      // Les chaînes "YYYY-MM-DD" se comparent lexicographiquement.
+      unavailableDates.before = starts.length
+        ? starts.reduce((a, b) => (a < b ? a : b))
+        : null;
+      unavailableDates.after = ends.length
+        ? ends.reduce((a, b) => (a > b ? a : b))
+        : null;
     }
 
     const dayNameToIndex: Record<string, number> = {
@@ -43,4 +52,4 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching unavailable dates:", error);
     return NextResponse.json({ error: "Internal server error", message: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
   }
-}
+});

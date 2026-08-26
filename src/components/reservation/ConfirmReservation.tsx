@@ -50,9 +50,9 @@ export default function ConfirmReservation() {
 
   useEffect(() => {
     const fetchReservation = async () => {
-      if (!isTimerActive) return;
-
-      if (!reservationId) {
+      // Sans hold actif (minuteur expiré, réservation annulée, retour direct
+      // sur l'étape), on affiche l'erreur plutôt qu'un chargement sans fin.
+      if (!reservationId || !isTimerActive) {
         setError(t("reservation.confirm.noActiveReservation"));
         setLoading(false);
         return;
@@ -85,7 +85,7 @@ export default function ConfirmReservation() {
     };
 
     fetchReservation();
-  }, [reservationId, selectedConsole, selectedDate, selectedTime, t]);
+  }, [reservationId, isTimerActive, selectedConsole, selectedDate, selectedTime, t]);
 
   const handleConfirm = async () => {
     if (!reservationId || !data) {
@@ -244,7 +244,7 @@ export default function ConfirmReservation() {
                 {data.accessoires.map((acc) => (
                   <span
                     key={acc.id}
-                    className="px-3 py-2 bg-cyan-50 text-cyan-700 rounded-lg text-sm font-medium border border-cyan-200"
+                    className="px-3 py-2 bg-cyan-50 text-cyan-500 rounded-lg text-sm font-medium border border-cyan-200"
                   >
                     {acc.nom}
                   </span>
@@ -262,7 +262,7 @@ export default function ConfirmReservation() {
               <div className="flex flex-wrap gap-2">
                 <span
                   key={data.cours.id}
-                  className="px-3 py-2 bg-cyan-50 text-cyan-700 rounded-lg text-sm font-medium border border-cyan-200"
+                  className="px-3 py-2 bg-cyan-50 text-cyan-500 rounded-lg text-sm font-medium border border-cyan-200"
                 >
                   <p className="text-gray-700 font-medium">
                     {data.cours.code_cours} - {data.cours.nom_cours}
@@ -281,7 +281,7 @@ export default function ConfirmReservation() {
               <div className="flex flex-wrap gap-2">
                 <span
                   key={data.station.id}
-                  className="px-3 py-2 bg-cyan-50 text-cyan-700 rounded-lg text-sm font-medium border border-cyan-200"
+                  className="px-3 py-2 bg-cyan-50 text-cyan-500 rounded-lg text-sm font-medium border border-cyan-200"
                 >
                   <p className="text-gray-700 font-medium">
                     {data.station.nom}
@@ -378,7 +378,7 @@ export default function ConfirmReservation() {
               <Button
                 onClick={handleConfirm}
                 disabled={isProcessing}
-                className="w-full h-12 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-[white] font-medium transition-colors"
+                className="w-full h-12 bg-cyan-500 hover:bg-cyan-600 text-[white] font-medium transition-colors"
               >
                 {isProcessing ? (
                   <>

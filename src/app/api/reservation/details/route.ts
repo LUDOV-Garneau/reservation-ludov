@@ -1,12 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import db from "@/db";
 import { reservation, stations, accessoires } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
+import { withAuth } from "@/lib/withAuth";
 
 const REGEX_RESERVATION_ID =
   /^RESV-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export async function GET(request: NextRequest) {
+export const GET = withAuth(async (request, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const idReservation = searchParams.get("id");
@@ -20,16 +21,18 @@ export async function GET(request: NextRequest) {
     const row = await db.query.reservation.findFirst({
       columns: {
         id: true,
+        userId: true,
         station: true,
         date: true,
         time: true,
         archived: true,
+        cancellationReason: true,
         accessoryIds: true,
       },
       where: eq(reservation.id, idReservation),
       with: {
         consoleStock: {
-          with: { consoleType: { columns: { name: true } } },
+          with: { consoleType: { columns: { name: true, picture: true } } },
         },
         game_game1Id: {
           columns: { titre: true, picture: true, biblioId: true },
@@ -48,6 +51,10 @@ export async function GET(request: NextRequest) {
         { error: "Reservation not found." },
         { status: 404 },
       );
+    }
+
+    if (row.userId !== user.id && !user.isAdmin) {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     const stationRow =
@@ -79,10 +86,19 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       id: row.id,
-      console: { nom: row.consoleStock?.consoleType?.name ?? "" },
+      console: {
+        nom: row.consoleStock?.consoleType?.name ?? "",
+        picture:
+          row.consoleStock?.consoleType?.picture ??
+          row.consoleStock?.picture ??
+          null,
+      },
       jeux,
       accessoires: accessoiresRows.map((a) => ({ id: a.id, nom: a.name })),
-      archived: row.archived,
+      // tinyint MySQL : sans conversion, un 0 arrive au client et React
+      // l'affiche tel quel dans `{archived && …}`.
+      archived: Boolean(row.archived),
+      cancellationReason: row.cancellationReason ?? null,
       station: stationRow?.name ?? null,
       date: row.date,
       heure: row.time?.slice(0, 5) ?? null,
@@ -94,9 +110,9 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = withAuth(async (request, user) => {
   try {
     const { searchParams } = new URL(request.url);
     const idString = searchParams.get("id");
@@ -108,7 +124,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const existing = await db.query.reservation.findFirst({
-      columns: { id: true },
+      columns: { id: true, userId: true },
       where: eq(reservation.id, idString),
     });
 
@@ -117,6 +133,10 @@ export async function DELETE(request: NextRequest) {
         { error: "Reservation not found." },
         { status: 404 },
       );
+    }
+
+    if (existing.userId !== user.id && !user.isAdmin) {
+      return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
     await db
@@ -135,4 +155,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+});

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/db";
+import db, { executeRows } from "@/db";
 import { sql } from "drizzle-orm";
 import { sendReminderEmail } from "@/lib/sendEmail";
 
@@ -16,6 +16,7 @@ interface ReservationToRemind {
   email: string;
   firstname: string;
   lastname: string;
+  preferred_locale: string;
   console_name: string;
 }
 
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
   const errors: Array<{ id: string; error: string }> = [];
 
   try {
-    // Short transaction: SET time_zone + SELECT only — no email sending inside
+    // Short transaction: SET time_zone + SELECT only, no email sending inside
     const reservations = await db.transaction(async (tx) => {
       const offset = getOffsetFor(TZ);
       try {
@@ -92,10 +93,11 @@ export async function GET(request: NextRequest) {
 
       console.log("[CRON] Querying database for pending reminders...");
 
-      return (await tx.execute<ReservationToRemind>(
-        sql`SELECT
+      return executeRows<ReservationToRemind>(
+        await tx.execute(
+          sql`SELECT
           r.id, r.user_id, r.date, r.time, r.reminder_hours_before, r.station,
-          u.email, u.firstname, u.lastname,
+          u.email, u.firstname, u.lastname, u.preferred_locale,
           ct.name as console_name
         FROM reservation r
         INNER JOIN users u ON u.id = r.user_id
@@ -107,12 +109,13 @@ export async function GET(request: NextRequest) {
           AND CONCAT(r.date, ' ', r.time) > NOW()
         ORDER BY r.date ASC, r.time ASC
         LIMIT 50`,
-      )) as unknown as ReservationToRemind[];
+        )
+      );
     });
 
     console.log(`[CRON] Found ${reservations.length} reminders to send`);
 
-    // Process each reservation independently — no transaction held during email sending
+    // Process each reservation independently, no transaction held during email sending
     for (const r of reservations) {
       try {
         const dateFormatted = String(r.date).split("T")[0];
@@ -123,6 +126,7 @@ export async function GET(request: NextRequest) {
           date: dateFormatted,
           time: r.time,
           consoleName: r.console_name,
+          locale: r.preferred_locale,
         });
 
         // Anti-double-envoi: UPDATE conditionnel sur reminder_sent = 0

@@ -7,6 +7,16 @@ import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
+import { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { 
   Bold, 
   Italic, 
@@ -29,21 +39,57 @@ interface EditorProps {
   placeholder?: string;
 }
 
+/** Saisie d'URL pour les boutons « lien » et « image » de la barre d'outils. */
+const URL_DIALOG = {
+  link: {
+    title: 'Ajouter un lien',
+    description: 'Le texte sélectionné deviendra un lien vers cette adresse.',
+    label: 'Adresse du lien',
+    placeholder: 'https://exemple.com',
+    submit: 'Insérer le lien',
+  },
+  image: {
+    title: 'Ajouter une image',
+    description: "L'image sera insérée à l'endroit du curseur.",
+    label: "Adresse de l'image",
+    placeholder: '/api/admin/images/dossier/fichier.png',
+    submit: "Insérer l'image",
+  },
+} as const;
+
+type UrlDialogMode = keyof typeof URL_DIALOG;
+
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
+  // Dialogue applicatif plutôt que window.prompt : même présentation que le
+  // reste du site, et le focus reste dans la page.
+  const [urlDialog, setUrlDialog] = useState<UrlDialogMode | null>(null);
+  const [url, setUrl] = useState('');
+
   if (!editor) return null;
 
-  const addLink = () => {
-    const url = window.prompt('URL:');
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run();
-    }
+  const openLinkDialog = () => {
+    // Pré-remplit avec le lien existant quand le curseur est déjà dessus.
+    setUrl(editor.getAttributes('link').href ?? '');
+    setUrlDialog('link');
   };
 
-  const addImage = () => {
-    const url = window.prompt('URL de l\'image:');
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
+  const openImageDialog = () => {
+    setUrl('');
+    setUrlDialog('image');
+  };
+
+  const submitUrl = (event: React.FormEvent) => {
+    event.preventDefault();
+    const value = url.trim();
+    if (!value) return;
+
+    if (urlDialog === 'link') {
+      editor.chain().focus().setLink({ href: value }).run();
+    } else {
+      editor.chain().focus().setImage({ src: value }).run();
     }
+    setUrlDialog(null);
+    setUrl('');
   };
 
   return (
@@ -155,7 +201,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
       <button
         type="button"
-        onClick={addLink}
+        onClick={openLinkDialog}
         className={`p-2 rounded hover:bg-gray-200 ${
           editor.isActive('link') ? 'bg-gray-300' : ''
         }`}
@@ -166,7 +212,7 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
 
       <button
         type="button"
-        onClick={addImage}
+        onClick={openImageDialog}
         className="p-2 rounded hover:bg-gray-200"
         title="Ajouter une image"
       >
@@ -194,6 +240,55 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       >
         <Redo className="w-4 h-4" />
       </button>
+
+      <Dialog
+        open={urlDialog !== null}
+        onOpenChange={(open) => !open && setUrlDialog(null)}
+      >
+        <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] p-0 overflow-hidden">
+          <div className="border-b px-6 py-4 bg-gray-50">
+            <DialogTitle className="text-lg text-gray-900">
+              {URL_DIALOG[urlDialog ?? 'link'].title}
+            </DialogTitle>
+            <DialogDescription className="text-sm text-gray-600 mt-1">
+              {URL_DIALOG[urlDialog ?? 'link'].description}
+            </DialogDescription>
+          </div>
+
+          <form onSubmit={submitUrl} className="px-6 pb-5 pt-5 space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="editor-url" className="font-semibold">
+                {URL_DIALOG[urlDialog ?? 'link'].label}
+              </Label>
+              <Input
+                id="editor-url"
+                value={url}
+                onChange={(event) => setUrl(event.target.value)}
+                placeholder={URL_DIALOG[urlDialog ?? 'link'].placeholder}
+                autoFocus
+              />
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto hover:bg-gray-50"
+                onClick={() => setUrlDialog(null)}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={!url.trim()}
+                className="w-full sm:w-auto bg-cyan-500 hover:bg-cyan-600"
+              >
+                {URL_DIALOG[urlDialog ?? 'link'].submit}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

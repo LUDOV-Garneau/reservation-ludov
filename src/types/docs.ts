@@ -9,6 +9,7 @@ export enum TutorialArgs {
   CONSULT_RESERVATIONS = "consultation_reservations",
   MAKE_RESERVATION = "effectuer_reservation",
   REMINDERS = "rappels",
+  MARKDOWN_GUIDE = "markdown-guide",
 }
 
 export interface TutorialCardsProps {

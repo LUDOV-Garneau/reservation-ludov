@@ -12,7 +12,7 @@ export interface TargetReservation {
 interface UseDeleteReservationActionParams {
   targetReservation: TargetReservation;
   onAlert: (type: AlertType, message: string, title?: string) => void;
-  onSuccess: () => void;
+  onSuccess: (reason?: string) => void;
 }
 
 export function useDeleteReservationAction({
@@ -80,7 +80,7 @@ export function useDeleteReservationAction({
           "La réservation a été annulée avec succès",
           "Réservation annulée",
         );
-        onSuccess();
+        onSuccess(reason.trim());
         setOpen(false);
       } catch (error) {
         console.error("Error cancelling reservation:", error);

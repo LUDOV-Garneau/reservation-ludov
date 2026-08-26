@@ -8,8 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Mail, Loader2, ShieldAlert, Trash2 } from "lucide-react";
+import { Mail, Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
@@ -113,33 +112,6 @@ export default function DeleteUserAction({
                   <span className="truncate">{targetUser.email}</span>
                 </div>
               </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-red-600" />
-                {t("whatGonnaHappen")}
-              </h4>
-              <ul className="space-y-2.5 text-sm text-gray-700">
-                <li className="flex items-start gap-2.5">
-                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>
-                    {t("theAccount")}{" "}
-                    <strong className="text-gray-900">{t("deleted")}</strong>{" "}
-                    {t("userWontBeAbleToLogin")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>{t("reservationDeleted")}</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <Trash2 className="h-4 w-4 mt-0.5 text-red-600 shrink-0" />
-                  <span>{t("dataDeleteAccordingToPolicy")}</span>
-                </li>
-              </ul>
             </div>
 
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">

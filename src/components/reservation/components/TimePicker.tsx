@@ -89,8 +89,8 @@ export const TimePicker = memo(function TimePicker({
                       className={`
                         w-full h-14 text-base font-semibold transition-all
                         ${isSelected
-                          ? "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white shadow-md scale-105"
-                          : "hover:border-cyan-400 hover:bg-cyan-50"
+                          ? "bg-cyan-500 hover:bg-cyan-600 text-white shadow-md scale-105"
+                          : "hover:border-cyan-500 hover:bg-cyan-50"
                         }
                         ${!time.available
                           ? "opacity-50 cursor-not-allowed bg-gray-100 hover:bg-gray-100 hover:border-gray-200"

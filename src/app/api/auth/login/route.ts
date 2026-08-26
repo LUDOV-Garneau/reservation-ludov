@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, locale } = await request.json();
 
     const user = await db.query.users.findFirst({
       columns: { id: true, email: true, password: true, firstname: true, isAdmin: true },
@@ -34,7 +34,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Identifiants invalides." }, { status: 401 });
     }
 
-    await db.update(users).set({ lastLogin: sql`NOW()` }).where(eq(users.id, user.id));
+    // Mémorise la langue de l'interface au moment de la connexion : elle sert
+    // de langue pour les courriels transactionnels.
+    const preferredLocale =
+      locale === "en" || locale === "fr" ? locale : undefined;
+    await db
+      .update(users)
+      .set({ lastLogin: sql`NOW()`, ...(preferredLocale && { preferredLocale }) })
+      .where(eq(users.id, user.id));
 
     const token = signToken({
       id: user.id,

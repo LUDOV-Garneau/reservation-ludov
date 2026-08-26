@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const row = await db.query.users.findFirst({
-      columns: { password: true },
+      columns: { password: true, preferredLocale: true },
       where: (t) => eq(t.email, email),
     });
 
@@ -46,7 +46,10 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 10);
     await db.update(users).set({ password: passwordHash }).where(eq(users.email, email));
 
-    const response = await sendWelcomeEmail({ to: email });
+    const response = await sendWelcomeEmail({
+      to: email,
+      locale: row?.preferredLocale,
+    });
     if (response.rejected.length > 0) throw new Error();
 
     return NextResponse.json({ message: "Mot de passe créé avec succès!" }, { status: 201 });

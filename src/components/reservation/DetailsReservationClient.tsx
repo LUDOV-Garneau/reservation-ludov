@@ -5,16 +5,18 @@ import DetailsReservation from "@/components/reservation/DetailsReservation";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, Clock } from "lucide-react";
+import { PageShell } from "@/components/layout/PageShell";
 
 type Reservation = {
   id: string;
-  station: number;
+  station: string | null;
   date: string;
   heure: string;
   console: { nom: string; picture?: string };
   jeux: { nom: string; picture: string; biblio: number }[];
   accessoires?: { id: number; nom: string }[];
   archived: boolean;
+  cancellationReason?: string | null;
 };
 
 type ReservationState = {
@@ -70,9 +72,9 @@ function SectionHeaderSkeleton({ width = "w-40" }: { width?: string }) {
 
 function LoadingSkeleton() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <div>
       <div className="mb-6">
-        <Skeleton className="h-5 w-48" />
+        <Skeleton className="h-5 w-32" />
       </div>
 
       <HeaderSkeleton />
@@ -127,7 +129,6 @@ function useReservation(id: string) {
         }
 
         const data = await response.json();
-        console.log("Reservation fetched:", data);
         setState({ data, isLoading: false, error: false });
       } catch (error) {
         console.error("Error fetching reservation:", error);
@@ -147,9 +148,9 @@ export default function DetailsReservationClient({ id }: { id: string }) {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg h-full">
+      <PageShell>
         <LoadingSkeleton />
-      </div>
+      </PageShell>
     );
   }
 
@@ -163,6 +164,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
       jeux={reservation.jeux}
       console={{ ...reservation.console, picture: reservation.console.picture ?? "" }}
       archived={reservation.archived}
+      cancellationReason={reservation.cancellationReason}
       accessoires={reservation.accessoires ?? []}
       station={reservation.station}
       date={reservation.date}

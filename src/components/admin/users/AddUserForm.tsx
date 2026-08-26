@@ -200,7 +200,7 @@ export default function AddUserFormDialog({
 
         <div className="px-6 pb-6 pt-4">
           {success ? (
-            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/40 dark:via-green-950/40 dark:to-teal-950/40 border-2 border-emerald-200 dark:border-emerald-800 rounded-xl shadow-lg p-6">
+            <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-green-50 to-cyan-50 dark:from-emerald-950/40 dark:via-green-950/40 dark:to-cyan-950/40 border-2 border-emerald-200 dark:border-emerald-800 rounded-xl shadow-lg p-6">
               <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-200 dark:bg-emerald-800 rounded-full -mr-16 -mt-16 opacity-20"></div>
 
               <div className="relative flex items-center gap-4">
@@ -338,30 +338,27 @@ export default function AddUserFormDialog({
                 )}
               </div>
 
-              <div className="rounded-lg border border-red-200 bg-red-50/80 px-3.5 py-3 flex items-start gap-3">
+              {/* Même habillage que les autres cases à cocher de l'admin
+                  (« Station active » par exemple) : bleu de la charte. */}
+              <div className="rounded-lg border-2 border-cyan-200 dark:border-cyan-800 bg-cyan-50/50 dark:bg-cyan-950/20 px-3.5 py-3 flex items-start gap-3">
                 <Checkbox
                   id="isAdmin"
                   checked={isAdmin}
                   onCheckedChange={(checked) => setIsAdmin(Boolean(checked))}
                   disabled={loading}
-                  className="mt-0.5"
+                  className="mt-0.5 h-5 w-5 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
                 />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Shield className="w-4 h-4 text-red-600" />
+                    <Shield className="w-4 h-4 text-cyan-600" />
                     <label
                       htmlFor="isAdmin"
-                      className="text-sm font-medium text-red-900 cursor-pointer"
+                      className="text-sm font-semibold cursor-pointer"
                     >
                       {t("form.adminAccess")}
                     </label>
-                    {isAdmin && (
-                      <span className="text-xs uppercase tracking-wide px-2 py-0.5 rounded-full bg-red-500 text-[white] font-bold border-2 border-red-500">
-                        {t("form.active")}
-                      </span>
-                    )}
                   </div>
-                  <p className="text-xs text-red-800/90 mt-1.5">
+                  <p className="text-xs text-muted-foreground mt-1.5">
                     {t("form.adminAcessDescription")}
                   </p>
                 </div>
@@ -380,7 +377,7 @@ export default function AddUserFormDialog({
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full px-6 py-3 bg-cyan-500 hover:bg-cyan-600 disabled:bg-gray-400 text-white font-semibold rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? (
                     <>

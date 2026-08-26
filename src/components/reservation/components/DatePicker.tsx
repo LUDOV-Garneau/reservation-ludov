@@ -7,6 +7,7 @@ import { DatesBlocked } from "@/types/availabilities";
 import { frCA, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
 import { Matcher } from "react-day-picker";
+import { parseYmdLocal } from "@/lib/dates";
 
 type DatePickerProps = {
   selected: Date | undefined;
@@ -29,14 +30,17 @@ export const DatePicker = memo(function DatePicker({
       return true;
     }
 
-    if (unavailableDates.before && unavailableDates.before > new Date()) {
-      blocks.push({ before: unavailableDates.before });
-    } else {
-      blocks.push({ before: new Date(Date.now() + 60 * 60 * 48 * 1000) });
-    }
+    // Délai minimal de 48h, ou le début de la période d'ouverture si plus tard.
+    const leadTime = new Date(Date.now() + 60 * 60 * 48 * 1000);
+    const startDate = unavailableDates.before
+      ? parseYmdLocal(unavailableDates.before)
+      : null;
+    blocks.push({
+      before: startDate && startDate > leadTime ? startDate : leadTime,
+    });
 
     if (unavailableDates.after) {
-      blocks.push({ after: unavailableDates.after });
+      blocks.push({ after: parseYmdLocal(unavailableDates.after) });
     }
 
     if (unavailableDates.dayOfWeek.length > 0) {

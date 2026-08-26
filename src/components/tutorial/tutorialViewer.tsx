@@ -5,6 +5,7 @@ import { TutorialViewerProps } from "@/types/docs";
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useLocale } from "next-intl";
 
 export default function TutorialViewer({
   page,
@@ -12,6 +13,7 @@ export default function TutorialViewer({
   onHeadings,
   content,
 }: TutorialViewerProps & { content?: string }) {
+  const locale = useLocale();
   const [markdownContent, setMarkdownContent] = useState<string>(content || "");
   const [loading, setLoading] = useState<boolean>(!content);
   const [error, setError] = useState<string | null>(null);
@@ -31,10 +33,10 @@ export default function TutorialViewer({
         setLoading(true);
         setError(null);
 
+        // Documentation servie depuis la BD (les tutoriels admin passent par
+        // la page serveur /admin/tutorials, qui fournit `content`).
         const response = await fetch(
-          adminRessources
-            ? `/tutoriels/admin/${page}.md`
-            : `/tutoriels/${page}.md`
+          `/api/docs/${encodeURIComponent(page)}?locale=${locale}`
         );
 
         if (!response.ok) {
@@ -43,7 +45,8 @@ export default function TutorialViewer({
           );
         }
 
-        const text = await response.text();
+        const data = (await response.json()) as { content: string };
+        const text = data.content;
 
         if (isMounted) {
           setMarkdownContent(text);

@@ -1,21 +1,19 @@
-import { verifyToken } from "@/lib/jwt";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import db from "@/db";
-import { reservation, consoleType, games, users } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import {
+  reservation,
+  consoleType,
+  games,
+  users,
+  accessoires,
+} from "@/db/schema";
+import { eq, inArray, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
+import { withAdmin } from "@/lib/withAuth";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ userId: string }> }
-) {
+export const GET = withAdmin<{ userId: string }>(async (_req, _admin, params) => {
   try {
-    const token = req.cookies.get("SESSION")?.value;
-    if (!token) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    const admin = verifyToken(token);
-    if (!admin?.isAdmin) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
-
-    const { userId: userIdParam } = await params;
+    const userIdParam = params.userId;
     const userId = Number(userIdParam);
     if (!userIdParam || Number.isNaN(userId)) {
       return NextResponse.json({ success: false, error: "Bad Request: Invalid userId" }, { status: 400 });
@@ -44,6 +42,7 @@ export async function GET(
         game2Title: g2.titre,
         game3Title: g3.titre,
         archived: reservation.archived,
+        accessoryIds: reservation.accessoryIds,
       })
       .from(reservation)
       .innerJoin(consoleType, eq(reservation.consoleTypeId, consoleType.id))
@@ -53,9 +52,32 @@ export async function GET(
       .where(eq(reservation.userId, userId))
       .orderBy(sql`TIMESTAMP(${reservation.date}, ${reservation.time}) DESC`);
 
+    // Résolution des noms d'accessoires en une seule requête pour toutes les
+    // réservations.
+    const allAccessoryIds = [
+      ...new Set(
+        rows.flatMap((row) =>
+          Array.isArray(row.accessoryIds) ? (row.accessoryIds as number[]) : [],
+        ),
+      ),
+    ];
+    const accessoryRows =
+      allAccessoryIds.length > 0
+        ? await db
+            .select({ id: accessoires.id, name: accessoires.name })
+            .from(accessoires)
+            .where(inArray(accessoires.id, allAccessoryIds))
+        : [];
+    const accessoryNameById = new Map(
+      accessoryRows.map((a) => [a.id, a.name] as const),
+    );
+
     const formattedReservations = rows.map((row) => {
       const gamesArr = [row.game1Title, row.game2Title, row.game3Title].filter(Boolean) as string[];
       const dateStr = String(row.date).split("T")[0];
+      const accessoryIds = Array.isArray(row.accessoryIds)
+        ? (row.accessoryIds as number[])
+        : [];
       return {
         id: String(row.id),
         games: gamesArr,
@@ -63,6 +85,9 @@ export async function GET(
         date: dateStr,
         heure: row.time ?? "",
         archived: row.archived === 1,
+        accessories: accessoryIds
+          .map((id) => accessoryNameById.get(id))
+          .filter((name): name is string => Boolean(name)),
       };
     });
 
@@ -71,4 +96,4 @@ export async function GET(
     console.error("Error fetching user reservations:", error);
     return NextResponse.json({ success: false, error: "Internal Server Error" }, { status: 500 });
   }
-}
+});

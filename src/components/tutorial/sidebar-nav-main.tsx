@@ -51,7 +51,7 @@ export function NavMain({ items }: NavMainProps) {
                               href={`#${subItem.id}`}
                               className={`block text-sm ${
                                 section.isActive && section.id === subItem.id
-                                  ? "text-cyan-700 font-semibold"
+                                  ? "text-cyan-500 font-semibold"
                                   : "text-gray-700"
                               } hover:text-cyan-600 py-1`}
                             >
@@ -70,7 +70,7 @@ export function NavMain({ items }: NavMainProps) {
                   asChild
                   className={`w-full h-fit ${
                     section.isActive
-                      ? "text-cyan-700 font-semibold"
+                      ? "text-cyan-500 font-semibold"
                       : "text-gray-700"
                   } hover:text-cyan-600 py-1`}
                 >

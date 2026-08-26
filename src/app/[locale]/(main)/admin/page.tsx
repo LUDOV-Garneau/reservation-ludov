@@ -5,8 +5,7 @@ import dynamic from "next/dynamic";
 import AdminTabs from "@/components/admin/AdminTabs";
 import { Tabs } from "@/components/ui/tabs";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { PageShell, BackLink } from "@/components/layout/PageShell";
 import PoliciesTab from "@/components/admin/PoliciesTabs";
 
 const UsersTab = dynamic(() => import("@/components/admin/UsersTab"), {
@@ -19,6 +18,27 @@ const ReservationsTab = dynamic(
   }
 );
 const StationsTab = dynamic(() => import("@/components/admin/StationsTab"), {
+  loading: () => <TabLoader />,
+});
+const AccessoriesTab = dynamic(
+  () => import("@/components/admin/AccessoriesTab"),
+  {
+    loading: () => <TabLoader />,
+  }
+);
+const ConsolePhotosTab = dynamic(
+  () => import("@/components/admin/ConsolePhotosTab"),
+  {
+    loading: () => <TabLoader />,
+  }
+);
+const GamesImagesTab = dynamic(
+  () => import("@/components/admin/GamesImagesTab"),
+  {
+    loading: () => <TabLoader />,
+  }
+);
+const EmailsTab = dynamic(() => import("@/components/admin/EmailsTab"), {
   loading: () => <TabLoader />,
 });
 const AvailabilitiesTab = dynamic(
@@ -72,6 +92,14 @@ function AdminContent() {
         return <ReservationsTab />;
       case "stations":
         return <StationsTab />;
+      case "accessories":
+        return <AccessoriesTab />;
+      case "consolePhotos":
+        return <ConsolePhotosTab />;
+      case "games":
+        return <GamesImagesTab />;
+      case "emails":
+        return <EmailsTab />;
       case "availabilities":
         return <AvailabilitiesTab />;
       case "cours":
@@ -86,36 +114,28 @@ function AdminContent() {
   };
 
   return (
-    <div className="mx-2 my-4 sm:mx-10 sm:my-6">
-      <div className="flex flex-col bg-[white] min-h-screen px-4 py-6 sm:px-10 sm:py-8 rounded-xl border border-gray-200 w-full">
-        <Link
-          href="/"
-          className="mb-6 flex items-center gap-1 text-gray-600 hover:text-cyan-500 transition-colors w-fit group"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          <span className="text-sm font-medium">Retour à l&apos;accueil</span>
-        </Link>
+    <PageShell>
+      <BackLink href="/" label="Retour à l'accueil" />
 
-        <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <AdminTabs />
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <AdminTabs />
 
-          <div className="mt-4 relative">
-            {isPending && (
-              <div className="absolute top-0 right-0">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cyan-500"></div>
-              </div>
-            )}
-            <div
-              className={`transition-opacity duration-150 ${
-                isPending ? "opacity-50" : "opacity-100"
-              }`}
-            >
-              {renderActiveTab()}
+        <div className="mt-4 relative">
+          {isPending && (
+            <div className="absolute top-0 right-0">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-cyan-500"></div>
             </div>
+          )}
+          <div
+            className={`transition-opacity duration-150 ${
+              isPending ? "opacity-50" : "opacity-100"
+            }`}
+          >
+            {renderActiveTab()}
           </div>
-        </Tabs>
-      </div>
-    </div>
+        </div>
+      </Tabs>
+    </PageShell>
   );
 }
 

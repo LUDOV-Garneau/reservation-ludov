@@ -84,7 +84,7 @@ export default function CardUserStats({
 
           <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors text-white">
+              <Button className="flex-1 bg-cyan-500 hover:bg-cyan-600 transition-colors text-white">
                 <Plus className="h-4 w-4" />
                 <span className="ml-1 hidden md:inline">
                   {t("admin.users.actionBar.addUser")}
@@ -145,7 +145,7 @@ export default function CardUserStats({
                     </p>
                     <AddUserForm
                       trigger={
-                        <Button className="bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 transition-colors text-white">
+                        <Button className="bg-cyan-500 hover:bg-cyan-600 transition-colors text-white">
                           Ajouter un utilisateur
                         </Button>
                       }

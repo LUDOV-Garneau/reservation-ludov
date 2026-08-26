@@ -109,21 +109,19 @@ export default function UpdateStationForm({
 
   const clearError = () => setError(null);
 
-  const handleAddConsole = () => {
-    if (!selectedConsoleId) return;
-
-    const consoleToAdd = consoleList.find(
-      (c) => c.id === Number(selectedConsoleId)
-    );
+  // Ajout immédiat dès la sélection dans la liste (pas de bouton "Ajouter").
+  const handleSelectConsole = (value: string) => {
+    const consoleToAdd = consoleList.find((c) => c.id === Number(value));
     if (!consoleToAdd) return;
-
-    const isDuplicate = selectedConsoles.some((c) => c.id === consoleToAdd.id);
-    if (isDuplicate) {
-      setError("Cette unité plateforme est déjà ajoutée !");
-      return;
-    }
+    if (selectedConsoles.some((c) => c.id === consoleToAdd.id)) return;
 
     setSelectedConsoles((prev) => [...prev, consoleToAdd]);
+    setSelectedConsoleId("");
+    clearError();
+  };
+
+  const handleAddAll = () => {
+    setSelectedConsoles(consoleList);
     setSelectedConsoleId("");
     clearError();
   };
@@ -221,7 +219,7 @@ export default function UpdateStationForm({
                 <div className="flex flex-col md:flex-row gap-2">
                   <Select
                     value={selectedConsoleId}
-                    onValueChange={setSelectedConsoleId}
+                    onValueChange={handleSelectConsole}
                   >
                     <SelectTrigger className="flex-1 border-2 text-base w-full">
                       <SelectValue placeholder="Sélectionner une plateforme..." />
@@ -253,14 +251,12 @@ export default function UpdateStationForm({
 
                   <Button
                     type="button"
-                    onClick={handleAddConsole}
-                    disabled={
-                      !selectedConsoleId || availableConsoles.length === 0
-                    }
-                    className="sm:w-auto w-full gap-2 font-semibold bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
+                    onClick={handleAddAll}
+                    disabled={availableConsoles.length === 0}
+                    className="sm:w-auto w-full gap-2 font-semibold bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
                   >
                     <Plus className="w-4 h-4" />
-                    Ajouter
+                    {t("button.addAll")}
                   </Button>
                 </div>
 
@@ -277,7 +273,7 @@ export default function UpdateStationForm({
                       {selectedConsoles.map((c) => (
                         <div
                           key={c.id}
-                          className="group p-3.5 bg-gradient-to-r from-cyan-50 to-cyan-50/50 dark:from-cyan-950/30 dark:to-cyan-950/10 rounded-lg border-2 border-cyan-200 dark:border-cyan-800 hover:border-cyan-400 dark:hover:border-cyan-600 transition-all"
+                          className="group p-3.5 bg-gradient-to-r from-cyan-50 to-cyan-50/50 dark:from-cyan-950/30 dark:to-cyan-950/10 rounded-lg border-2 border-cyan-200 dark:border-cyan-800 hover:border-cyan-500 dark:hover:border-cyan-500 transition-all"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -366,7 +362,7 @@ export default function UpdateStationForm({
               disabled={
                 loading || !stationName.trim() || selectedConsoles.length === 0
               }
-              className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white transition-colors"
+              className="w-full h-11 text-base font-semibold shadow-md hover:shadow-lg transition-all bg-cyan-500 hover:bg-cyan-600 text-white transition-colors"
             >
               {loading ? (
                 <>

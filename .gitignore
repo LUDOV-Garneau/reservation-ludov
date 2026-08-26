@@ -43,6 +43,9 @@ next-env.d.ts
 
 .claude/settings.local.json
 
+# Volume local des images téléversées (consoles, jeux, documentation)
+/uploads/
+
 # Fichiers temporaires écrits par le workflow de déploiement Coolify
 /response.json
 /status.json

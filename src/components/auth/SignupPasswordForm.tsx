@@ -310,7 +310,7 @@ export default function SignupPasswordForm({
       <Button
         variant="outline"
         onClick={onBack}
-        className="mt-4 inline-block text-sm w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:border-cyan-400 hover:text-cyan-600 hover:bg-cyan-50 transition-all"
+        className="mt-4 inline-block text-sm w-full border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:border-cyan-500 hover:text-cyan-600 hover:bg-cyan-50 transition-all"
       >
         {t("back")}
       </Button>

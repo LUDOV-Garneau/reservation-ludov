@@ -72,7 +72,7 @@ export default function AccessorySelectionGrid({
             >
               <p className="font-semibold">{a.name}</p>
               {requiredIds.includes(a.id) && (
-                <span className="absolute top-1 right-1 text-[10px] bg-blue-500 text-white px-2 py-px rounded-full">
+                <span className="absolute top-1 right-1 text-[10px] bg-cyan-500 text-white px-2 py-px rounded-full">
                   {t("reservation.accessory.required")}
                 </span>
               )}

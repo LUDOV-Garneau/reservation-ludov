@@ -190,13 +190,55 @@ export const otp = mysqlTable(
 export const policies = mysqlTable(
   "policies",
   {
-    id: tinyint().default(1).notNull(),
+    id: tinyint().autoincrement().notNull(),
+    // 'privacy' = politique de confidentialité, 'usage' = politique d'utilisation
+    type: varchar({ length: 32 }).default("privacy").notNull(),
     policies: longtext(),
     lastUpdatedAt: datetime({ mode: "string" }).notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.id], name: "policies_id" }),
-    check("singleton_policies", sql`(\`id\` = 1)`),
+    unique("uq_policies_type").on(table.type),
+  ],
+);
+
+export const docs = mysqlTable(
+  "docs",
+  {
+    // Slugs des tutoriels admin (cours, disponibilites, politique, ...),
+    // publics (connexion, effectuer_reservation, ...) et 'markdown-guide'.
+    slug: varchar({ length: 50 }).notNull(),
+    locale: varchar({ length: 2 }).default("fr").notNull(),
+    title: varchar({ length: 255 }).notNull(),
+    // Contenu Markdown
+    content: longtext().notNull(),
+    // 1 = visible sans droits admin (tutoriels publics)
+    isPublic: tinyint("is_public").default(0).notNull(),
+    updatedAt: datetime("updated_at", { mode: "string" }).notNull(),
+    updatedBy: int("updated_by"),
+  },
+  (table) => [
+    primaryKey({ columns: [table.slug, table.locale], name: "docs_pk" }),
+  ],
+);
+
+export const emailTemplates = mysqlTable(
+  "email_templates",
+  {
+    // confirmation | reminder | reset_password | welcome | otp | cancellation
+    templateKey: varchar("template_key", { length: 50 }).notNull(),
+    locale: varchar({ length: 2 }).default("fr").notNull(),
+    subject: varchar({ length: 255 }).notNull(),
+    // Zones de texte nommées insérées dans le gabarit HTML fixe
+    zones: json().notNull(),
+    updatedAt: datetime("updated_at", { mode: "string" }).notNull(),
+    updatedBy: int("updated_by"),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.templateKey, table.locale],
+      name: "email_templates_pk",
+    }),
   ],
 );
 
@@ -365,6 +407,10 @@ export const users = mysqlTable(
     email: varchar({ length: 255 }).notNull(),
     password: varchar({ length: 255 }),
     isAdmin: tinyint().notNull(),
+    // Langue des courriels transactionnels ('fr' | 'en')
+    preferredLocale: varchar("preferred_locale", { length: 2 })
+      .default("fr")
+      .notNull(),
     lastUpdatedAt: datetime({ mode: "string" }).notNull(),
     createdAt: datetime({ mode: "string" }).notNull(),
     lastLogin: datetime({ mode: "string" }),

@@ -1,26 +1,18 @@
-import { NextResponse, NextRequest } from "next/server";
-import { verifyToken } from "@/lib/jwt";
+import { NextResponse } from "next/server";
 import db from "@/db";
 import { stations, reservation } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
+import { withAdmin } from "@/lib/withAuth";
 
-export async function GET(req: NextRequest) {
+export const GET = withAdmin(async () => {
   try {
-    const token = req.cookies.get("SESSION")?.value;
-    if (!token) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    const user = verifyToken(token);
-    if (!user?.id) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
-    if (!user.isAdmin) return NextResponse.json({ success: false, message: "Forbidden" }, { status: 403 });
-
-    const [activeRow] = await db
-      .select({ count: sql<number>`COUNT(*)` })
-      .from(stations)
-      .where(eq(stations.isActive, 1));
-
-    const [inactiveRow] = await db
-      .select({ count: sql<number>`COUNT(*)` })
-      .from(stations)
-      .where(eq(stations.isActive, 0));
+    // Compteurs actifs/inactifs en une seule requête.
+    const [counts] = await db
+      .select({
+        active: sql<number>`SUM(CASE WHEN ${stations.isActive} = 1 THEN 1 ELSE 0 END)`,
+        inactive: sql<number>`SUM(CASE WHEN ${stations.isActive} = 0 THEN 1 ELSE 0 END)`,
+      })
+      .from(stations);
 
     const [mostUsed] = await db
       .select({
@@ -39,13 +31,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        totalActiveStations: activeRow?.count ?? null,
-        totalInactiveStations: inactiveRow?.count ?? null,
-        mostUsedStationName: mostUsed?.name ?? null,
+        totalActiveStations: Number(counts?.active ?? 0),
+        totalInactiveStations: Number(counts?.inactive ?? 0),
+        // Le LEFT JOIN garde les stations sans réservation : sans ce garde-fou,
+        // la première station (COUNT = 0) serait présentée comme « la plus
+        // réservée » alors qu'aucune réservation n'existe.
+        mostUsedStationName:
+          mostUsed && Number(mostUsed.reservationsCount) > 0
+            ? mostUsed.name
+            : null,
       },
     }, { status: 200 });
   } catch (error) {
     console.error("Internal Server Error:", error);
     return NextResponse.json({ success: false, message: "Internal Server Error" }, { status: 500 });
   }
-}
+});

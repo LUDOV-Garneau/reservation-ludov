@@ -2,6 +2,7 @@
 
 import { Console } from "@/types/console";
 import { useState } from "react";
+import { AlertCircle } from "lucide-react";
 import { useReservation } from "@/context/ReservationContext";
 import SelectedConsoleCard from "@/components/reservation/components/SelectedConsoleCard";
 import ConsoleSelectionGrid from "@/components/reservation/components/ConsoleSelectionGrid";
@@ -16,12 +17,14 @@ export default function ConsolesSelection() {
     setSelectedConsole,
     startTimer,
     updateReservationConsole,
-    isTimerActive,
     setCurrentStep,
     selectedConsole,
+    error,
+    clearError,
   } = useReservation();
 
   const handleConsoleSelect = (console: Console) => {
+    clearError();
     setSelected(console);
   };
 
@@ -29,23 +32,26 @@ export default function ConsolesSelection() {
     const consoleToUse = selected || selectedConsole;
     if (!consoleToUse) return;
 
-    try {
-      if (!selectedConsole) {
-        setSelectedConsole(selected);
-        if (!isTimerActive) {
-          await startTimer(consoleToUse.id);
-        }
-      } else if (selectedConsole.id !== consoleToUse.id) {
-        setSelectedConsole(consoleToUse);
-        await updateReservationConsole(consoleToUse.id);
-      } else {
-        setSelectedConsole(consoleToUse);
-      }
+    clearError();
 
-      setCurrentStep(2);
-    } catch (error) {
-      console.error("Erreur lors de la continuation:", error);
+    // Le hold doit exister (ou avoir basculé sur la nouvelle plateforme) avant
+    // de passer à l'étape suivante : avancer malgré un échec laisserait le
+    // parcours sans réservation temporaire, et la confirmation échouerait.
+    const isConsoleChange =
+      selectedConsole !== null && selectedConsole.id !== consoleToUse.id;
+
+    const ok = isConsoleChange
+      ? await updateReservationConsole(consoleToUse.id)
+      : await startTimer(consoleToUse.id);
+
+    if (!ok) {
+      // Remonté à SelectedConsoleCard pour interrompre son état de chargement ;
+      // le message d'erreur vient du contexte et s'affiche ci-dessous.
+      throw new Error("hold_failed");
     }
+
+    setSelectedConsole(consoleToUse);
+    setCurrentStep(2);
   };
 
   const isModification =
@@ -60,6 +66,14 @@ export default function ConsolesSelection() {
           <h2 className="text-3xl font-bold mb-4 text-center">
             {t("reservation.console.selectedConsole")}
           </h2>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
           <SelectedConsoleCard
             console={displayedConsole}
             onClear={() => setSelected(null)}

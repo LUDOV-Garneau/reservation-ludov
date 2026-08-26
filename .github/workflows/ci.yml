@@ -31,11 +31,12 @@ jobs:
       # build Next dans l'image Docker, qui fait aussi la vérification de
       # types. Les deux jobs tournent en parallèle, on ne compile donc pas
       # l'application deux fois.
-      # `npx tsc --noEmit` n'est pas utilisable en l'état : il remonte 58
-      # erreurs préexistantes dans les fichiers .test.ts depuis la migration
-      # Drizzle, que `next build` ne voit pas.
-      - name: Tests
-        run: npm run test
+      # Les tests unitaires et vitest ont été retirés (voir d62ff44) : il n'y a
+      # plus de script `test`. La vérification de types prend leur place et
+      # passe maintenant sans erreur, les fichiers .test.ts qui la faisaient
+      # échouer ayant disparu avec eux.
+      - name: Vérification des types
+        run: npx tsc --noEmit
 
   image:
     name: Image Docker & démarrage

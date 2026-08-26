@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { games } from "@/db/schema";
 import { and, asc, eq, sql } from "drizzle-orm";
+import { withAuth } from "@/lib/withAuth";
 
-export async function GET(req: Request) {
+export const GET = withAuth(async (req) => {
   try {
     const { searchParams } = new URL(req.url);
     const page = parseInt(searchParams.get("page") || "1", 10);
@@ -109,4 +110,4 @@ export async function GET(req: Request) {
       error: err instanceof Error ? err.message : "Unknown error",
     }, { status: 500 });
   }
-}
+});

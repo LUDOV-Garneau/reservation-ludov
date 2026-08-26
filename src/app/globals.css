@@ -180,10 +180,6 @@ html {
   color: color-mix(in srgb, var(--color-black) 70%, white 30%);
 }
 
-[data-slot="select-trigger"]:not(.show-svg) svg {
-  display: none !important;
-}
-
 .dark {
   --background                : oklch(0.145 0 0);
   --foreground                : oklch(0.985 0 0);
@@ -289,7 +285,7 @@ button:hover {
 }
 
 .ProseMirror a {
-  color          : #3b82f6;
+  color          : #0092b8;
   text-decoration: underline;
   cursor         : pointer;
 }

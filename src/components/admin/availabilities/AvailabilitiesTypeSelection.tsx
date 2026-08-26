@@ -25,7 +25,7 @@ export default function AvailabilitiesTypeSelection({
           className={`w-full md:flex-1 p-4 hover:cursor-pointer group border-2 ${
             selectedCard === "weekly"
               ? "border-cyan-500"
-              : "hover:border-cyan-600 transition-colors"
+              : "hover:border-cyan-500 transition-colors"
           }`}
           onClick={() => setSelectedCard("weekly")}
         >
@@ -33,7 +33,7 @@ export default function AvailabilitiesTypeSelection({
             <CardTitle
               className={`${
                 selectedCard !== "weekly" &&
-                "group-hover:text-cyan-600 transition-colors"
+                "group-hover:text-cyan-500 transition-colors"
               }`}
             >
               {t("admin.availabilities.typeSelection.weekly.title")}
@@ -48,7 +48,7 @@ export default function AvailabilitiesTypeSelection({
           className={`w-full md:flex-1 p-4 hover:cursor-pointer group border-2 ${
             selectedCard === "specific-dates"
               ? "border-cyan-500"
-              : "hover:border-cyan-600 transition-colors"
+              : "hover:border-cyan-500 transition-colors"
           }`}
           onClick={() => setSelectedCard("specific-dates")}
         >
@@ -56,7 +56,7 @@ export default function AvailabilitiesTypeSelection({
             <CardTitle
               className={`${
                 selectedCard !== "specific-dates" &&
-                "group-hover:text-cyan-600 transition-colors"
+                "group-hover:text-cyan-500 transition-colors"
               }`}
             >
               {t("admin.availabilities.typeSelection.specificDates.title")}
