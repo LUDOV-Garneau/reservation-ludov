@@ -1,6 +1,5 @@
 -- Current sql file was generated after introspecting the database
 -- If you want to run this migration please uncomment this code before executing migrations
-/*
 CREATE TABLE `accessoires` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`name` text NOT NULL,
@@ -235,5 +234,4 @@ CREATE INDEX `ix_hold_station` ON `reservation_hold` (`station_id`);--> statemen
 CREATE INDEX `ix_hold_user` ON `reservation_hold` (`user_id`);--> statement-breakpoint
 CREATE ALGORITHM = undefined
 SQL SECURITY definer
-VIEW `console_catalog` AS (select `ct`.`id` AS `console_type_id`,`ct`.`name` AS `name`,`ct`.`picture` AS `picture`,`ct`.`description` AS `description`,count(`cs`.`id`) AS `total_units`,sum((case when ((`cs`.`is_active` = 1) and (`cs`.`holding` = 0)) then 1 else 0 end)) AS `active_units`,sum((case when (`cs`.`is_active` = 0) then 1 else 0 end)) AS `inactive_units` from (`ludov_dev`.`console_type` `ct` left join `ludov_dev`.`console_stock` `cs` on((`ct`.`id` = `cs`.`console_type_id`))) where exists(select 1 from `ludov_dev`.`stations` `s` where json_contains(`s`.`consoles`,cast(`ct`.`id` as json),'$')) group by `ct`.`id`,`ct`.`name` order by `ct`.`name`);
-*/
+VIEW `console_catalog` AS (select `ct`.`id` AS `console_type_id`,`ct`.`name` AS `name`,`ct`.`picture` AS `picture`,`ct`.`description` AS `description`,count(`cs`.`id`) AS `total_units`,sum((case when ((`cs`.`is_active` = 1) and (`cs`.`holding` = 0)) then 1 else 0 end)) AS `active_units`,sum((case when (`cs`.`is_active` = 0) then 1 else 0 end)) AS `inactive_units` from (`console_type` `ct` left join `console_stock` `cs` on((`ct`.`id` = `cs`.`console_type_id`))) where exists(select 1 from `stations` `s` where json_contains(`s`.`consoles`,cast(`ct`.`id` as json),'$')) group by `ct`.`id`,`ct`.`name` order by `ct`.`name`);
