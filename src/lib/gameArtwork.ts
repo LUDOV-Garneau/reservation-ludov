@@ -85,8 +85,12 @@ async function getIgdbToken(): Promise<string> {
     grant_type: "client_credentials",
   });
 
-  const response = await fetch(`${IGDB_TOKEN_URL}?${params.toString()}`, {
+  const response = await fetch(IGDB_TOKEN_URL, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: params.toString(),
     signal: AbortSignal.timeout(10_000),
   });
   if (!response.ok) {
