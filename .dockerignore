@@ -28,3 +28,6 @@ coverage
 \*.log
 .vscode
 .idea
+
+# Images televersees : elles vivent sur le volume, pas dans l'image
+uploads
