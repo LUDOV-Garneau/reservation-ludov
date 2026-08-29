@@ -1,12 +1,12 @@
 "use client";
 
 import { TabsContent } from "@/components/ui/tabs";
-import GamesImagesTable from "@/components/admin/games/GamesImagesTable";
+import GamesImagesManager from "@/components/admin/games/GamesImagesManager";
 
 export default function GamesImagesTab() {
   return (
     <TabsContent value="games">
-      <GamesImagesTable />
+      <GamesImagesManager />
     </TabsContent>
   );
 }

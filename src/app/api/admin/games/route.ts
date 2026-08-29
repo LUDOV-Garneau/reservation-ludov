@@ -1,25 +1,69 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
-import { games } from "@/db/schema";
-import { and, asc, isNotNull, sql } from "drizzle-orm";
+import { consoleType, games, stations } from "@/db/schema";
+import { and, asc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
+
+const MAX_PAGE_SIZE = 100;
+
+/** Identifiant positif, ou null si le paramètre est absent ou non numérique. */
+function parseId(raw: string | null): number | null {
+  if (raw === null || raw.trim() === "") return null;
+  const value = Number(raw);
+  return Number.isInteger(value) && value > 0 ? value : null;
+}
+
+/**
+ * Types de console rattachés à une station. `stations.consoles` est un JSON
+ * contenant des ids de console_type (voir /api/admin/stations). Un tableau
+ * vide est une réponse valide : la station n'a aucune console, donc aucun jeu.
+ */
+async function consoleTypeIdsForStation(stationId: number): Promise<number[]> {
+  const station = await db.query.stations.findFirst({
+    columns: { consoles: true },
+    where: eq(stations.id, stationId),
+  });
+  if (!station || !Array.isArray(station.consoles)) return [];
+  return (station.consoles as unknown[])
+    .map((value) => Number(value))
+    .filter((value) => Number.isInteger(value) && value > 0);
+}
 
 /**
  * Liste admin de TOUS les jeux (contrairement à /api/reservation/games qui est
- * limitée à une console), avec recherche par titre, filtre avec/sans image et
- * pagination serveur.
+ * limitée à une console), avec recherche par titre, filtres (image, type de
+ * console, station) et pagination serveur.
  */
 export const GET = withAdmin(async (req) => {
   try {
     const { searchParams } = new URL(req.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const pageSize = Math.min(
-      50,
+      MAX_PAGE_SIZE,
       Math.max(1, parseInt(searchParams.get("pageSize") || "12", 10)),
     );
     const search = (searchParams.get("search") || "").trim();
     const hasImage = searchParams.get("hasImage") || "all"; // all | yes | no
+    const consoleTypeId = parseId(searchParams.get("consoleTypeId"));
+    const stationId = parseId(searchParams.get("stationId"));
     const offset = (page - 1) * pageSize;
+
+    // Filtre station : résolu en ids de types de console. Une station sans
+    // console ne doit renvoyer aucun jeu — surtout pas le catalogue entier,
+    // ce que produirait un inArray sur un tableau vide.
+    let stationConsoleTypeIds: number[] | null = null;
+    if (stationId !== null) {
+      stationConsoleTypeIds = await consoleTypeIdsForStation(stationId);
+      if (stationConsoleTypeIds.length === 0) {
+        return NextResponse.json({
+          success: true,
+          games: [],
+          total: 0,
+          page,
+          pageSize,
+        });
+      }
+    }
 
     const conditions = [];
     if (search) {
@@ -32,6 +76,12 @@ export const GET = withAdmin(async (req) => {
     } else if (hasImage === "no") {
       conditions.push(sql`(${games.picture} IS NULL OR ${games.picture} = '')`);
     }
+    if (consoleTypeId !== null) {
+      conditions.push(eq(games.consoleTypeId, consoleTypeId));
+    }
+    if (stationConsoleTypeIds !== null) {
+      conditions.push(inArray(games.consoleTypeId, stationConsoleTypeIds));
+    }
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
     const [rows, [countRow]] = await Promise.all([
@@ -43,8 +93,13 @@ export const GET = withAdmin(async (req) => {
           platform: games.platform,
           picture: games.picture,
           biblioId: games.biblioId,
+          consoleTypeId: games.consoleTypeId,
+          // Nom réel du type de console ; `platform` est du texte libre hérité
+          // et sert de repli quand le jeu n'est rattaché à aucun type.
+          consoleName: consoleType.name,
         })
         .from(games)
+        .leftJoin(consoleType, eq(games.consoleTypeId, consoleType.id))
         .where(whereClause)
         .orderBy(asc(games.titre))
         .limit(pageSize)

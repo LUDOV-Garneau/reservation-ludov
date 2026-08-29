@@ -344,8 +344,8 @@
   },
   "admin": {
     "politique": {
-      "title": "Privacy Policy",
-      "subtitle": "Manage the privacy policy of the LUDOV platform"
+      "title": "Policies",
+      "subtitle": "Manage the privacy polices of the LUDOV platform"
     },
     "users": {
       "title": "Users",
@@ -488,7 +488,8 @@
         "affichageDe": "Showing",
         "a": "to",
         "sur": "of",
-        "noItem": "No items"
+        "noItem": "No items",
+        "perPage": "Per page"
       },
       "stats": {
         "totalReservations": "Total reservations",
@@ -742,7 +743,7 @@
       "refresh": "Refresh"
     },
     "consolePhotos": {
-      "title": "Console photos",
+      "title": "Plateforms",
       "subtitle": "Add and replace platform photos",
       "empty": "No platforms found",
       "alerts": {
@@ -759,7 +760,7 @@
       "removeImage": "Remove photo"
     },
     "gamesImages": {
-      "title": "Game images",
+      "title": "Games",
       "subtitle": "List games and manage their artwork",
       "searchPlaceholder": "Search a game by title...",
       "empty": "No games found",
@@ -788,7 +789,25 @@
         "successTitle": "Success",
         "errorTitle": "Error"
       },
-      "refresh": "Refresh"
+      "refresh": "Refresh",
+      "addImage": "Add",
+      "editImage": "Edit",
+      "addImageFor": "Add an image for {title}",
+      "editImageFor": "Edit the image of {title}",
+      "filters": {
+        "console": "Console",
+        "allConsoles": "All consoles",
+        "station": "Station",
+        "allStations": "All stations",
+        "clearAll": "Clear all",
+        "remove": "Remove filter {label}",
+        "resultCount": "{count, plural, =0 {no games} one {# game} other {# games}}"
+      },
+      "view": {
+        "label": "View",
+        "grid": "Grid view",
+        "table": "Table view"
+      }
     },
     "emails": {
       "title": "Emails",
