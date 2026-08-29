@@ -57,6 +57,15 @@ COPY --from=build --chown=nextjs:nodejs /app/drizzle ./drizzle
 COPY --from=build     --chown=nextjs:nodejs /app/src/scripts  ./scripts
 COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
+# Point de montage des images téléversées. Ce dossier DOIT exister dans
+# l'image, et appartenir à l'utilisateur qui fait tourner le serveur : à la
+# création d'un volume nommé vide, Docker recopie le propriétaire et les droits
+# du dossier trouvé ici. Sans cette ligne, le volume naît root:root et l'uid
+# 1001 ne peut rien y écrire — et corriger après coup ne le répare pas, un
+# volume déjà créé n'étant plus réinitialisé.
+ENV UPLOADS_DIR=/app/uploads
+RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
+
 USER nextjs
 EXPOSE 3000
 

@@ -10,7 +10,7 @@ export default function FooterInfos() {
   const t = useTranslations();
   // Les deux politiques s'ouvrent en dialogue, jamais en page.
   const [openPolicy, setOpenPolicy] = useState<"privacy" | "usage" | null>(
-    null
+    null,
   );
 
   return (
@@ -59,7 +59,9 @@ export default function FooterInfos() {
         >
           {t("footer.developedBy")}
         </a>
-        <p className="mt-6">{t("footer.copyright")}</p>
+        <p className="mt-6">
+          {t("footer.copyright", { year: new Date().getFullYear() })}
+        </p>{" "}
       </div>
 
       <PolitiquesClient

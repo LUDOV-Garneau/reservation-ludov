@@ -10,6 +10,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export interface SmartPaginationProps {
   page: number;
@@ -19,6 +26,12 @@ export interface SmartPaginationProps {
   siblingCount?: number;
   className?: string;
   ariaLabel?: string;
+  /**
+   * Tailles de page proposées. Fournir ces deux props ensemble affiche le
+   * sélecteur ; sans elles, le composant se comporte comme avant.
+   */
+  pageSizeOptions?: readonly number[];
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
 export default function PaginationControls({
@@ -29,6 +42,8 @@ export default function PaginationControls({
   siblingCount = 1,
   className,
   ariaLabel = "Pagination",
+  pageSizeOptions,
+  onPageSizeChange,
 }: SmartPaginationProps) {
   const totalPages = Math.max(1, Math.ceil(totalItems / Math.max(1, pageSize)));
   const isFirst = page <= 1;
@@ -71,6 +86,29 @@ export default function PaginationControls({
             <span>{t("admin.reservations.pagination.noItem")}</span>
           )}
         </div>
+
+        {pageSizeOptions && onPageSizeChange && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs sm:text-sm text-muted-foreground">
+              {t("admin.reservations.pagination.perPage")}
+            </span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(value) => onPageSizeChange(Number(value))}
+            >
+              <SelectTrigger className="h-8 w-[84px]" aria-label={t("admin.reservations.pagination.perPage")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {pageSizeOptions.map((option) => (
+                  <SelectItem key={option} value={String(option)}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       <nav

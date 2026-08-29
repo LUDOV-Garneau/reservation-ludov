@@ -15,8 +15,8 @@
   "footer": {
     "contact": "Contact",
     "policy": "Privacy policy",
-    "developedBy": "Developed by students from Cégep Garneau",
-    "copyright": "© Copyright 2025 LUDOV (University Laboratory for Video Game Documentation and Observation) - All rights reserved"
+    "developedBy": "Developed by Xavier Samson, Félix-Antoine Leduc, and students from Cégep Garneau",
+    "copyright": "© {year} LUDOV (Laboratoire universitaire de documentation et d'observation vidéoludiques) - All rights reserved"
   },
   "reservation": {
     "new": "New reservation",
@@ -344,8 +344,8 @@
   },
   "admin": {
     "politique": {
-      "title": "Privacy Policy",
-      "subtitle": "Manage the privacy policy of the LUDOV platform"
+      "title": "Policies",
+      "subtitle": "Manage the privacy polices of the LUDOV platform"
     },
     "users": {
       "title": "Users",
@@ -488,7 +488,8 @@
         "affichageDe": "Showing",
         "a": "to",
         "sur": "of",
-        "noItem": "No items"
+        "noItem": "No items",
+        "perPage": "Per page"
       },
       "stats": {
         "totalReservations": "Total reservations",
@@ -709,8 +710,11 @@
       "subtitle": "User guide for the LUDOV platform - Administrators"
     },
     "imageUpload": {
-      "dropzone": "Click or drop an image (PNG, JPEG, WebP, GIF, max 5 MB)",
+      "dropzone": "Click or drop an image",
       "uploading": "Uploading...",
+      "constraints": "PNG, JPEG, WebP or GIF · 5 MB maximum",
+      "urlLabel": "Or from a link",
+      "urlHint": "Direct image link, from IGDB or MobyGames only.",
       "urlPlaceholder": "Direct image link (https://cdn.mobygames.com/...)",
       "importUrl": "Import",
       "error": "An error occurred while uploading the image."
@@ -742,7 +746,7 @@
       "refresh": "Refresh"
     },
     "consolePhotos": {
-      "title": "Console photos",
+      "title": "Platforms",
       "subtitle": "Add and replace platform photos",
       "empty": "No platforms found",
       "alerts": {
@@ -759,7 +763,7 @@
       "removeImage": "Remove photo"
     },
     "gamesImages": {
-      "title": "Game images",
+      "title": "Games",
       "subtitle": "List games and manage their artwork",
       "searchPlaceholder": "Search a game by title...",
       "empty": "No games found",
@@ -785,10 +789,55 @@
         "fetchError": "An error occurred while loading games.",
         "updateSuccess": "Game image updated successfully.",
         "updateError": "An error occurred while updating the image.",
+        "removeSuccess": "Game image removed.",
+        "removeError": "An error occurred while removing the image.",
         "successTitle": "Success",
         "errorTitle": "Error"
       },
-      "refresh": "Refresh"
+      "refresh": "Refresh",
+      "addImage": "Add",
+      "editImage": "Edit",
+      "addImageFor": "Add an image for {title}",
+      "editImageFor": "Edit the image of {title}",
+      "filters": {
+        "console": "Console",
+        "allConsoles": "All consoles",
+        "station": "Station",
+        "allStations": "All stations",
+        "clearAll": "Clear all",
+        "remove": "Remove filter {label}",
+        "resultCount": "{count, plural, =0 {no games} one {# game} other {# games}}"
+      },
+      "view": {
+        "label": "View",
+        "grid": "Grid view",
+        "table": "Table view"
+      },
+      "dialog": {
+        "current": "Current image",
+        "noImageYet": "This game has no image yet.",
+        "replace": "Replace the image",
+        "add": "Add an image",
+        "remove": "Remove the image",
+        "removeConfirm": "Remove this game's image? This cannot be undone.",
+        "removeConfirmYes": "Remove",
+        "cancel": "Cancel",
+        "close": "Close",
+        "tabSearch": "Search",
+        "tabFile": "File",
+        "tabLink": "Direct link"
+      },
+      "search": {
+        "placeholder": "Search cover art by title...",
+        "hint": "Type at least two characters to start searching.",
+        "empty": "No cover art found for “{query}”.",
+        "use": "Use the cover art of {title}",
+        "useShort": "Use",
+        "error": "An error occurred while searching for cover art.",
+        "partialFailure": "One of the sources did not respond; results are incomplete.",
+        "importError": "An error occurred while importing the cover art.",
+        "noSource": "No game database is configured. Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET to enable search."
+      }
     },
     "emails": {
       "title": "Emails",
