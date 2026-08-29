@@ -10,6 +10,7 @@ import { importRemoteImage, UploadError } from "@/lib/uploads";
  * - { path } : chemin renvoyé par POST /api/admin/uploads (téléversement manuel)
  * - { url }  : lien IGDB/MobyGames, téléchargé côté serveur et stocké sur le
  *   volume local (aucun hotlink ajouté).
+ * - { path: null } : retire l'image du jeu. Le fichier reste sur le volume.
  */
 export const PATCH = withAdmin<{ id: string }>(async (req, _admin, params) => {
   try {
@@ -22,10 +23,12 @@ export const PATCH = withAdmin<{ id: string }>(async (req, _admin, params) => {
     }
 
     const body = (await req.json().catch(() => null)) as {
-      path?: string;
+      path?: string | null;
       url?: string;
     } | null;
-    if (!body || (!body.path && !body.url)) {
+    // `path: null` retire l'image ; `path` absent ET `url` absent est une
+    // requête incomplète, à distinguer du retrait explicite.
+    if (!body || (body.path === undefined && !body.url)) {
       return NextResponse.json(
         { success: false, error: "Champ path ou url requis." },
         { status: 400 },
@@ -43,15 +46,21 @@ export const PATCH = withAdmin<{ id: string }>(async (req, _admin, params) => {
       );
     }
 
-    let picture: string;
-    if (body.path) {
-      if (!body.path.startsWith("/api/images/") || body.path.includes("..")) {
+    let picture: string | null;
+    if (body.path !== undefined) {
+      if (body.path === null) {
+        picture = null;
+      } else if (
+        !body.path.startsWith("/api/images/") ||
+        body.path.includes("..")
+      ) {
         return NextResponse.json(
           { success: false, error: "Chemin d'image invalide." },
           { status: 400 },
         );
+      } else {
+        picture = body.path;
       }
-      picture = body.path;
     } else {
       const { publicPath } = await importRemoteImage(String(body.url), "games");
       picture = publicPath;

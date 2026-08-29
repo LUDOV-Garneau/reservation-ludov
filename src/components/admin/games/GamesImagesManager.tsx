@@ -161,6 +161,30 @@ export default function GamesImagesManager() {
     [showAlert, t],
   );
 
+  const handleImageRemoved = useCallback(
+    async (game: GameRow) => {
+      try {
+        const res = await fetch(`/api/admin/games/${game.id}/image`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path: null }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.success) throw new Error(data.error || "Erreur API");
+
+        setGamesList((prev) =>
+          prev.map((g) => (g.id === game.id ? { ...g, picture: null } : g)),
+        );
+        setEditingGame(null);
+        showAlert("success", t("alerts.removeSuccess"));
+      } catch (err) {
+        console.error(err);
+        showAlert("destructive", t("alerts.removeError"));
+      }
+    },
+    [showAlert, t],
+  );
+
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await fetchGames();
@@ -226,6 +250,7 @@ export default function GamesImagesManager() {
         game={editingGame}
         onClose={() => setEditingGame(null)}
         onUploaded={handleImageUploaded}
+        onRemove={handleImageRemoved}
       />
     </div>
   );

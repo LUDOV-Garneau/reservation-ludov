@@ -15,8 +15,8 @@
   "footer": {
     "contact": "Contact",
     "policy": "Politique de confidentialité",
-    "developedBy": "Développé par des étudiants du Cégep Garneau",
-    "copyright": "© Copyright 2025 LUDOV (Laboratoire universitaire de documentation et d'observation vidéoludiques) - Tous droits réservés"
+    "developedBy": "Développé par Xavier Samson, Félix-Antoine Leduc, et des étudiants du Cégep Garneau",
+    "copyright": "© {year} LUDOV (Laboratoire universitaire de documentation et d'observation vidéoludiques) - Tous droits réservés"
   },
   "reservation": {
     "new": "Nouvelle réservation",
@@ -445,7 +445,7 @@
     },
     "politique": {
       "title": "Politiques",
-      "subtitle": "Gérez la politique de confidentialité de la plateforme LUDOV"
+      "subtitle": "Gérez les politiques de la plateforme LUDOV"
     },
     "reservations": {
       "title": "Réservations",
@@ -709,8 +709,11 @@
       "subtitle": "Guide d'utilisation de la plateforme LUDOV - Administrateurs"
     },
     "imageUpload": {
-      "dropzone": "Cliquez ou déposez une image (PNG, JPEG, WebP, GIF, max 5 Mo)",
+      "dropzone": "Cliquez ou déposez une image",
       "uploading": "Téléversement en cours...",
+      "constraints": "PNG, JPEG, WebP ou GIF · 5 Mo maximum",
+      "urlLabel": "Ou depuis un lien",
+      "urlHint": "Lien direct de l'image, depuis IGDB ou MobyGames uniquement.",
       "urlPlaceholder": "Lien direct de l'image (https://cdn.mobygames.com/...)",
       "importUrl": "Importer",
       "error": "Erreur lors du téléversement de l'image."
@@ -785,6 +788,8 @@
         "fetchError": "Erreur lors du chargement des jeux.",
         "updateSuccess": "Image du jeu mise à jour avec succès.",
         "updateError": "Erreur lors de la mise à jour de l'image.",
+        "removeSuccess": "Image du jeu retirée.",
+        "removeError": "Erreur lors du retrait de l'image.",
         "successTitle": "Succès",
         "errorTitle": "Erreur"
       },
@@ -806,6 +811,31 @@
         "label": "Affichage",
         "grid": "Vue en grille",
         "table": "Vue en tableau"
+      },
+      "dialog": {
+        "current": "Image actuelle",
+        "noImageYet": "Ce jeu n'a pas encore d'image.",
+        "replace": "Remplacer l'image",
+        "add": "Ajouter une image",
+        "remove": "Retirer l'image",
+        "removeConfirm": "Retirer l'image de ce jeu ? Cette action est définitive.",
+        "removeConfirmYes": "Retirer",
+        "cancel": "Annuler",
+        "close": "Fermer",
+        "tabSearch": "Rechercher",
+        "tabFile": "Fichier",
+        "tabLink": "Lien direct"
+      },
+      "search": {
+        "placeholder": "Chercher une jaquette par titre...",
+        "hint": "Saisissez au moins deux caractères pour lancer la recherche.",
+        "empty": "Aucune jaquette trouvée pour « {query} ».",
+        "use": "Utiliser la jaquette de {title}",
+        "useShort": "Utiliser",
+        "error": "Erreur lors de la recherche de jaquettes.",
+        "partialFailure": "Une des sources n'a pas répondu ; les résultats sont incomplets.",
+        "importError": "Erreur lors de l'import de la jaquette.",
+        "noSource": "Aucune base de jeux n'est configurée. Renseignez TWITCH_CLIENT_ID et TWITCH_CLIENT_SECRET pour activer la recherche."
       }
     },
     "emails": {
