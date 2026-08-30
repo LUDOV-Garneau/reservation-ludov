@@ -1,18 +1,12 @@
 import db from "@/db";
-import { verifyToken } from "@/lib/jwt";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { sendResetPasswordEmail } from "@/lib/sendEmail";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { withAdmin } from "@/lib/withAuth";
 
-export async function POST(req: NextRequest) {
+export const POST = withAdmin(async (req, authUser) => {
   try {
-    const token = req.cookies.get("SESSION")?.value;
-    if (!token) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-    const authUser = verifyToken(token);
-    if (!authUser?.id) return NextResponse.json({ error: "Token invalide" }, { status: 401 });
-    if (!authUser.isAdmin) return NextResponse.json({ error: "Accès refusé - Privilèges administrateur requis" }, { status: 403 });
-
     const body = await req.json().catch(() => { throw new Error("Corps de requête JSON invalide"); });
     const targetUserId = Number(body.targetUserId);
 
@@ -41,4 +35,4 @@ export async function POST(req: NextRequest) {
     console.error("Erreur lors de la réinitialisation du mot de passe:", err);
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : "Erreur interne du serveur" }, { status: 500 });
   }
-}
+});

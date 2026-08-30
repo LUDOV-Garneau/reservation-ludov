@@ -1,4 +1,20 @@
 {
+  "metadata": {
+    "description": "Réservation des postes de jeu du Laboratoire universitaire de documentation et d'observation vidéoludiques.",
+    "home": "Accueil",
+    "auth": "Connexion",
+    "resetPassword": "Nouveau mot de passe",
+    "reservation": "Nouvelle réservation",
+    "reservationDetails": "Détails de la réservation",
+    "reservationSuccess": "Réservation confirmée",
+    "biblio": "Bibliothèque de documentation",
+    "docs": "Aide",
+    "policy": "Politique d'utilisation",
+    "admin": "Administration",
+    "adminTutorials": "Tutoriels",
+    "adminUser": "Fiche d'utilisateur",
+    "adminReservationDetails": "Détails de la réservation"
+  },
   "header": {
     "home": "Retour à l'accueil",
     "help": "Aide",
@@ -295,7 +311,8 @@
       "loginBtnLoading": "Connexion en cours...",
       "newUser": "Première connexion ?",
       "invalidCredentials": "Votre courriel ou votre mot de passe est invalide.",
-      "error": "Une erreur s'est produite lors de la connexion. Veuillez réessayer ultérieurement."
+      "error": "Une erreur s'est produite lors de la connexion. Veuillez réessayer ultérieurement.",
+      "forgotPassword": "Mot de passe oublié ?"
     },
     "signup": {
       "title": "Inscription",
@@ -331,7 +348,7 @@
       "subtitle": "Pour terminer, veuillez créer un mot de passe pour votre compte.",
       "password": "Définir un mot de passe",
       "confirmPassword": "Confirmation du mot de passe",
-      "invalidPassword": "Le mot de passe doit contenir au moins 6 caractères.",
+      "invalidPassword": "Le mot de passe doit contenir au moins 8 caractères.",
       "invalidPasswordConfirmation": "La confirmation de mot de passe doit être identique au mot de passe.",
       "finishBtn": "Terminer",
       "finishBtnLoading": "Enregistrement du mot de passe en cours...",
@@ -339,6 +356,40 @@
       "error": "Une erreur s'est produite lors de la création de votre mot de passe. Veuillez réessayer ultérieurement.",
       "back": "Retour",
       "emptyPassword": "Le mot de passe ne peut pas être vide."
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "subTitle1": "Entrez l'adresse courriel de votre compte",
+      "subTitle2": "et nous vous enverrons un lien de réinitialisation",
+      "email": "Courriel",
+      "invalidEmail": "Adresse courriel invalide.",
+      "sendLinkBtn": "Envoyer le lien",
+      "back": "Retour",
+      "login": "Se connecter",
+      "sentTitle": "Vérifiez votre boîte courriel",
+      "sentBody": "Si un compte existe pour cette adresse, un lien de réinitialisation vient d'y être envoyé.",
+      "sentExpiry": "Le lien expire dans 30 minutes et ne peut servir qu'une seule fois.",
+      "sentSpam": "Pensez à vérifier vos courriels indésirables.",
+      "backToLogin": "Retour à la connexion"
+    },
+    "resetPassword": {
+      "title": "Nouveau mot de passe",
+      "subtitle": "Choisissez le mot de passe qui protégera votre compte LUDOV.",
+      "password": "Nouveau mot de passe",
+      "confirmPassword": "Confirmation du mot de passe",
+      "emptyPassword": "Le mot de passe ne peut pas être vide.",
+      "invalidPassword": "Le mot de passe doit contenir au moins 8 caractères.",
+      "invalidPasswordConfirmation": "La confirmation de mot de passe doit être identique au mot de passe.",
+      "submitBtn": "Réinitialiser le mot de passe",
+      "submitBtnLoading": "Réinitialisation en cours...",
+      "error": "Une erreur s'est produite lors de la réinitialisation. Veuillez réessayer ultérieurement.",
+      "checking": "Vérification du lien...",
+      "invalidTitle": "Lien invalide ou expiré",
+      "invalidBody": "Ce lien de réinitialisation a expiré, a déjà servi, ou n'est pas valide. Vous pouvez en demander un nouveau.",
+      "requestNewLink": "Demander un nouveau lien",
+      "successTitle": "Mot de passe réinitialisé",
+      "successBody": "Votre mot de passe a été modifié et vos autres appareils ont été déconnectés. Vous pouvez maintenant vous connecter.",
+      "backToLogin": "Aller à la connexion"
     }
   },
   "admin": {
@@ -356,11 +407,18 @@
           "addSingleUser": "Ajouter un utilisateur",
           "addSingleUserDescription": "Créez un compte utilisateur manuellement",
           "addSingleUserSuccess": "Utilisateur ajouté avec succès"
+        },
+        "addUserDialog": {
+          "title": "Ajouter des utilisateurs",
+          "manualTab": "Manuel",
+          "csvTab": "Import CSV",
+          "description": "Créez un compte manuellement ou importez une liste. Dans les deux cas, le compte est créé sans mot de passe et aucun courriel n'est envoyé."
         }
       },
       "searchResult": {
         "noUsersFound": "Aucun utilisateur trouvé",
-        "startByAdding": "Commencez par ajouter votre premier utilisateur."
+        "startByAdding": "Commencez par ajouter votre premier utilisateur.",
+        "noMatch": "Aucun utilisateur ne correspond à ces filtres"
       },
       "table": {
         "header": {
@@ -368,12 +426,20 @@
           "name": "Nom",
           "role": "Rôle",
           "createdAt": "Date de création",
-          "actions": "Actions"
+          "actions": "Actions",
+          "user": "Utilisateur",
+          "status": "Statut",
+          "lastLogin": "Dernière connexion"
         },
         "ActionToolTips": {
           "resetPassword": "Réinitialiser MDP",
-          "deleteUser": "Supprimer l'utilisateur"
-        }
+          "deleteUser": "Supprimer l'utilisateur",
+          "viewProfile": "Voir la fiche"
+        },
+        "sortedAsc": "trié par ordre croissant",
+        "sortedDesc": "trié par ordre décroissant",
+        "you": "Vous",
+        "actionsFor": "Actions pour {name}"
       },
       "stats": {
         "totalUsers": "Nombre d'utilisateur(s)",
@@ -388,7 +454,8 @@
         "affichageDe": "Affichage de",
         "a": "à",
         "sur": "sur",
-        "noItem": "Aucun élément"
+        "noItem": "Aucun élément",
+        "perPage": "Par page"
       },
       "deleteUserDialog": {
         "deleteUser": "Supprimer l'utilisateur",
@@ -440,6 +507,158 @@
           "cancel": "Annuler",
           "submit": "Ajouter l'utilisateur",
           "submitting": "Ajout en cours..."
+        },
+        "noAccessYet": "Le compte n'a pas encore de mot de passe et aucun courriel n'a été envoyé. Utilisez « Réinitialiser le mot de passe » pour lui transmettre son accès."
+      },
+      "filters": {
+        "role": "Rôle",
+        "allRoles": "Tous les rôles",
+        "admins": "Administrateurs",
+        "regularUsers": "Utilisateurs",
+        "status": "Statut",
+        "allStatuses": "Tous les statuts",
+        "statusActive": "Compte actif",
+        "statusPending": "Jamais configuré",
+        "clear": "Effacer les filtres",
+        "clearAll": "Tout effacer",
+        "remove": "Retirer le filtre {label}",
+        "resultCount": "{count, plural, =0 {aucun utilisateur} one {# utilisateur} other {# utilisateurs}}"
+      },
+      "status": {
+        "active": "Actif",
+        "pending": "Jamais configuré",
+        "never": "Jamais"
+      },
+      "bulk": {
+        "selected": "{count} sélectionné(s)",
+        "resetPassword": "Réinitialiser le mot de passe",
+        "delete": "Supprimer",
+        "clearSelection": "Annuler la sélection",
+        "selectAll": "Tout sélectionner sur cette page",
+        "selectOne": "Sélectionner cet utilisateur",
+        "confirmResetTitle": "Réinitialiser {count} mot(s) de passe ?",
+        "confirmResetDescription": "Chaque personne recevra un courriel l'invitant à définir un nouveau mot de passe, et ne pourra plus se connecter d'ici là.",
+        "confirmDeleteTitle": "Supprimer {count} utilisateur(s) ?",
+        "confirmDeleteDescription": "Cette action est définitive. Les comptes et leurs réservations à venir seront supprimés.",
+        "confirm": "Confirmer",
+        "cancel": "Annuler",
+        "processing": "Traitement en cours...",
+        "successReset": "{count} mot(s) de passe réinitialisé(s)",
+        "successDelete": "{count} utilisateur(s) supprimé(s)",
+        "partial": "{succeeded} traité(s), {failed} en échec",
+        "error": "L'action groupée a échoué"
+      },
+      "error": {
+        "loadFailed": "Impossible de charger les utilisateurs",
+        "retry": "Réessayer"
+      },
+      "csvImport": {
+        "dragOrBrowse": "Glissez un fichier CSV",
+        "dropHere": "Déposez le fichier",
+        "clickToBrowse": "ou cliquez pour parcourir",
+        "browse": "Parcourir",
+        "uploading": "Import en cours...",
+        "dismiss": "Fermer",
+        "format": {
+          "title": "Format CSV requis :",
+          "encoding": "Encodage UTF-8, max {max} MB"
+        },
+        "result": {
+          "title": "Import réussi !",
+          "warningTitle": "Aucun utilisateur ajouté",
+          "added": "Ajoutés",
+          "skipped": "Ignorés",
+          "summary": "{inserted} utilisateur(s) ajouté(s), {skipped} ignoré(s)",
+          "noneAdded": "Aucun utilisateur ajouté. {skipped} ignoré(s).",
+          "noAccessYet": "Ces comptes n'ont pas de mot de passe et aucun courriel n'a été envoyé."
+        },
+        "errors": {
+          "title": "Échec de l'import",
+          "notCsv": "Le fichier doit être au format CSV.",
+          "tooLarge": "Le fichier dépasse la taille maximale de {max} MB.",
+          "failed": "Échec de l'import.",
+          "upload": "Erreur lors de l'envoi du fichier."
+        },
+        "importAnother": "Importer un autre fichier"
+      },
+      "moreActions": "Plus d'actions",
+      "resetAll": {
+        "menuItem": "Réinitialiser tous les mots de passe",
+        "title": "Réinitialiser tous les mots de passe ?",
+        "description": "Cette action touche les {count} comptes de la plateforme, sans exception.",
+        "consequences": {
+          "everyone": "Plus personne ne pourra se connecter tant qu'un nouveau mot de passe n'aura pas été défini.",
+          "includingYou": "Votre propre compte est inclus : vous ne pourrez plus vous reconnecter non plus.",
+          "emails": "Un courriel de réinitialisation est envoyé à chaque compte concerné."
+        },
+        "recovery": "Ce n'est pas irréversible : chacun peut redéfinir son mot de passe seul depuis la page de connexion, avec un code reçu par courriel. Aucune intervention d'un administrateur n'est nécessaire — il faut seulement avoir accès à sa boîte courriel.",
+        "confirmLabel": "Pour confirmer, saisissez {token}",
+        "cancel": "Annuler",
+        "confirm": "Réinitialiser tous les mots de passe",
+        "processing": "Réinitialisation en cours...",
+        "success": "{count} mot(s) de passe réinitialisé(s).",
+        "partial": "{reset} réinitialisé(s), {failed} courriel(s) non envoyé(s)",
+        "error": "La réinitialisation globale a échoué."
+      },
+      "detail": {
+        "back": "Retour",
+        "you": "Vous",
+        "identity": "Informations personnelles",
+        "never": "Jamais",
+        "errorTitle": "Erreur",
+        "errorLoad": "Impossible de charger les données de l'utilisateur",
+        "retry": "Réessayer",
+        "reservations": "{count, plural, =0 {Aucune réservation} one {# réservation} other {# réservations}}",
+        "reservationsError": "Impossible de charger les réservations",
+        "noReservations": "Aucune réservation",
+        "unknownSlot": "Date inconnue",
+        "console": "Console",
+        "games": "Jeux",
+        "accessories": "Accessoires",
+        "fields": {
+          "email": "Courriel",
+          "locale": "Langue des courriels",
+          "createdAt": "Créé le",
+          "lastLogin": "Dernière connexion",
+          "lastUpdatedAt": "Dernière modification"
+        },
+        "counts": {
+          "upcoming": "À venir",
+          "completed": "Complétées",
+          "canceled": "Annulées"
+        },
+        "status": {
+          "upcoming": "À venir",
+          "ongoing": "En cours",
+          "completed": "Terminée",
+          "canceled": "Annulée"
+        },
+        "actions": {
+          "edit": "Modifier",
+          "resetPassword": "Réinitialiser le mot de passe",
+          "delete": "Supprimer",
+          "cannotResetSelf": "Vous ne pouvez pas réinitialiser votre propre mot de passe depuis cette page. Utilisez « mot de passe oublié » sur la page de connexion.",
+          "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte."
+        },
+        "edit": {
+          "title": "Modifier l'utilisateur",
+          "description": "Identité, rôle et langue des courriels transactionnels.",
+          "firstName": "Prénom",
+          "lastName": "Nom de famille",
+          "email": "Adresse courriel",
+          "emailHint": "Changer le courriel change aussi l'identifiant de connexion et l'adresse des courriels.",
+          "locale": "Langue des courriels",
+          "localeFr": "Français",
+          "localeEn": "Anglais",
+          "localeHint": "S'applique aux courriels transactionnels (rappels, confirmations, réinitialisation).",
+          "adminAccess": "Accès administrateur",
+          "adminHint": "Donne accès au panneau d'administration et aux actions sensibles.",
+          "cannotDemoteSelf": "Vous ne pouvez pas retirer vos propres droits d'administrateur.",
+          "cancel": "Annuler",
+          "save": "Enregistrer",
+          "saving": "Enregistrement...",
+          "saved": "Utilisateur mis à jour.",
+          "error": "La mise à jour a échoué."
         }
       }
     },
@@ -853,7 +1072,8 @@
         "reset_password": "Réinitialisation du mot de passe",
         "welcome": "Bienvenue",
         "otp": "Code OTP (inscription)",
-        "cancellation": "Annulation de réservation"
+        "cancellation": "Annulation de réservation",
+        "forgot_password": "Mot de passe oublié (lien)"
       },
       "zones": {
         "intro": "Introduction",

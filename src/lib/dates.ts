@@ -1,3 +1,12 @@
+/** Durée d'une session, en heures (identique à calendar-times).
+ *
+ * Vit ici plutôt que dans `availability.ts` : ce dernier importe `@/db`, donc
+ * l'importer depuis un composant client embarque `mysql2` dans le bundle du
+ * navigateur, où `net` et `tls` n'existent pas. `dates.ts` n'a aucune
+ * dépendance et se partage sans risque entre serveur et client.
+ */
+export const SESSION_DURATION_HOURS = 2;
+
 /**
  * Helpers de dates en fuseau LOCAL.
  * Une chaîne "YYYY-MM-DD" représente toujours le jour calendaire local,

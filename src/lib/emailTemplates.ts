@@ -13,6 +13,7 @@ export const EMAIL_TEMPLATE_KEYS = [
   "confirmation",
   "reminder",
   "reset_password",
+  "forgot_password",
   "welcome",
   "otp",
   "cancellation",
@@ -32,6 +33,7 @@ export const TEMPLATE_VARIABLES: Record<EmailTemplateKey, string[]> = {
   confirmation: ["userName", "reservationId", "date", "time", "consoleName"],
   reminder: ["userName", "reservationId", "date", "time", "consoleName"],
   reset_password: [],
+  forgot_password: ["expiresInMinutes"],
   welcome: [],
   otp: ["otpCode"],
   cancellation: ["userName", "reservationId", "date", "time", "reason"],
@@ -42,6 +44,7 @@ export const TEMPLATE_ZONES: Record<EmailTemplateKey, string[]> = {
   confirmation: ["intro", "important", "outro"],
   reminder: ["intro", "outro"],
   reset_password: ["intro", "outro"],
+  forgot_password: ["intro", "outro"],
   welcome: ["intro", "outro"],
   otp: ["body"],
   cancellation: ["intro", "outro"],
@@ -115,6 +118,26 @@ export const DEFAULT_TEMPLATES: Record<
         intro:
           "Hello,\nWe received a request to reset the password of your LUDOV account.\nYour password has been reset successfully.\nOn your next login, please click “First login” to set a new password.\nIf you did not request this, please contact our support immediately.",
         outro: "If you have any questions or difficulties, feel free to contact us.",
+      },
+    },
+  },
+  forgot_password: {
+    fr: {
+      subject: "Réinitialiser votre mot de passe LUDOV",
+      zones: {
+        intro:
+          "Bonjour,\nNous avons reçu une demande de réinitialisation du mot de passe de votre compte LUDOV.\nCliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.",
+        outro:
+          "Si vous avez des questions ou éprouvez des difficultés, n'hésitez pas à nous contacter.",
+      },
+    },
+    en: {
+      subject: "Reset your LUDOV password",
+      zones: {
+        intro:
+          "Hello,\nWe received a request to reset the password of your LUDOV account.\nClick the button below to choose a new password.",
+        outro:
+          "If you have any questions or difficulties, feel free to contact us.",
       },
     },
   },
@@ -242,7 +265,8 @@ export async function getTemplate(
   return content;
 }
 
-const escapeHtml = (value: string): string =>
+/** Échappement HTML des valeurs interpolées dans les gabarits. */
+export const escapeHtml = (value: string): string =>
   value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

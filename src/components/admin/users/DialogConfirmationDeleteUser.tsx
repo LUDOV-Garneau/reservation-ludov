@@ -15,8 +15,8 @@ import { useTranslations } from "next-intl";
 type TargetUser = {
   id: number;
   email: string;
-  firstName?: string;
-  lastName?: string;
+  firstname?: string;
+  lastname?: string;
 };
 
 export interface DeleteUserActionProps {
@@ -99,9 +99,9 @@ export default function DeleteUserAction({
             <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold text-gray-900 truncate">
-                  {targetUser.firstName || targetUser.lastName ? (
+                  {targetUser.firstname || targetUser.lastname ? (
                     <>
-                      {targetUser.firstName} {targetUser.lastName}
+                      {targetUser.firstname} {targetUser.lastname}
                     </>
                   ) : (
                     "Utilisateur"

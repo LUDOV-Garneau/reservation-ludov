@@ -1,482 +1,139 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  User,
-  Shield,
-  Mail,
-  Calendar,
-  KeyRound,
-  Clock,
-  Gamepad2,
-  AlertCircle,
-  CheckCircle2,
-  Monitor,
-  CircleX,
-  Link as Link2,
-} from "lucide-react";
+import { toast } from "sonner";
+import { AlertCircle, Gamepad2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Separator } from "@/components/ui/separator";
+
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import EmptyState from "@/components/admin/EmptyState";
 import { PageShell, BackLink } from "@/components/layout/PageShell";
-import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 
-type UserDetails = {
-  id: number;
-  firstname: string;
-  lastname: string;
-  email: string;
-  isAdmin: number;
-  lastUpdatedAt: string | null;
-  createdAt: string;
-  lastLogin: string | null;
-};
+import { useUserDetail } from "@/components/admin/users/detail/useUserDetail";
+import UserDetailHeader from "@/components/admin/users/detail/UserDetailHeader";
+import UserIdentityCard from "@/components/admin/users/detail/UserIdentityCard";
+import UserReservationCard from "@/components/admin/users/detail/UserReservationCard";
+import { useCurrentUserId } from "@/components/admin/users/detail/useCurrentUserId";
 
-type Reservation = {
-  id: string;
-  games: string[];
-  console: string;
-  date: string;
-  heure: string;
-  archived: boolean;
-  accessories: string[];
-  status?: "upcoming" | "ongoing" | "completed" | "canceled";
-};
+type AlertType = "success" | "destructive" | "info" | "warning";
+
+function DetailSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="space-y-4 lg:col-span-1">
+        <Skeleton className="h-14 w-full" />
+        <Skeleton className="h-72 w-full" />
+      </div>
+      <div className="lg:col-span-2">
+        <Skeleton className="h-96 w-full" />
+      </div>
+    </div>
+  );
+}
 
 export default function UserDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const t = useTranslations();
+  const t = useTranslations("admin.users.detail");
 
   const userId = params?.id as string;
+  const { user, reservations, counts, loading, error, reservationsError, refresh } =
+    useUserDetail(userId);
+  const currentUserId = useCurrentUserId();
 
-  const [userData, setUserData] = useState<UserDetails | null>(null);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (userId) {
-      fetchUserData();
-      fetchUserReservations();
-    }
-  }, [userId]);
-
-  async function fetchUserData() {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const res = await fetch(
-        `/api/admin/users/get-user-details?userId=${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || "Erreur API utilisateurs");
-      }
-
-      const data = await res.json();
-
-      setUserData(data.user);
-    } catch (err) {
-      console.error("Error fetching user data:", err);
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function fetchUserReservations() {
-    try {
-      const res = await fetch(`/api/admin/users/${userId}/reservations`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error || "Erreur API réservations");
-      }
-
-      const reservationsData = await res.json();
-
-      const now = new Date();
-      const reservationsWithStatus = reservationsData.reservations.map(
-        (res: Reservation) => {
-          const startTime = new Date(`${res.date}T${res.heure}`);
-          const endTime = new Date(startTime.getTime() + 2 * 60 * 60 * 1000);
-
-          let status: "upcoming" | "ongoing" | "completed" | "canceled";
-          if (res.archived) status = "canceled";
-          else if (now < startTime) status = "upcoming";
-          else if (now >= startTime && now <= endTime) status = "ongoing";
-          else status = "completed";
-
-          return { ...res, status };
-        }
-      );
-
-      setReservations(reservationsWithStatus);
-    } catch (err) {
-      console.error("Error fetching user reservations:", err);
-    }
-  }
-
-  function getStatusBadge(
-    status?: "upcoming" | "ongoing" | "completed" | "canceled"
-  ) {
-    switch (status) {
-      case "upcoming":
-        return (
-          <Badge className="bg-cyan-500/10 text-cyan-900 border-cyan-500 rounded-full text-sm border-2 font-semibold">
-            <Clock className="h-3 w-3 mr-1" />À venir
-          </Badge>
-        );
-      case "ongoing":
-        return (
-          <Badge className="bg-yellow-500/10 text-yellow-900 border-yellow-500 rounded-full text-sm border-2 font-semibold">
-            <Clock className="h-3 w-3 mr-1" />
-            En cours
-          </Badge>
-        );
-      case "completed":
-        return (
-          <Badge className="bg-green-500/10 text-green-900 border-green-500 text-sm rounded-full border-2 font-semibold">
-            <CheckCircle2 className="h-3 w-3 mr-1" />
-            Terminée
-          </Badge>
-        );
-      case "canceled":
-        return (
-          <Badge className="bg-red-500/10 text-red-900 border-red-500 text-sm rounded-full border-2 font-semibold">
-            <CircleX className="h-3 w-3 mr-1" />
-            Annulée
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  }
+  const showAlert = useCallback((type: AlertType, message: string, title?: string) => {
+    const text = title ?? message;
+    const options = title ? { description: message } : undefined;
+    if (type === "success") toast.success(text, options);
+    else if (type === "destructive") toast.error(text, options);
+    else if (type === "warning") toast.warning(text, options);
+    else toast.info(text, options);
+  }, []);
 
   if (loading) {
     return (
       <PageShell>
-        <Skeleton className="h-5 w-24 mb-6" />
-        <Skeleton className="h-9 w-64 mb-6" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
-            <Card className="shadow-md border-gray-200">
-              <CardHeader>
-                <Skeleton className="h-6 w-32" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-20 w-full" />
-                <Skeleton className="h-16 w-full" />
-                <Skeleton className="h-16 w-full" />
-              </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-2">
-            <Card className="shadow-md border-gray-200">
-              <CardHeader>
-                <Skeleton className="h-6 w-40" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-32 w-full" />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+        <BackLink onClick={() => router.back()} label={t("back")} />
+        <DetailSkeleton />
       </PageShell>
     );
   }
 
-  if (error || !userData) {
+  if (error || !user) {
     return (
       <PageShell>
-        <BackLink onClick={() => router.back()} label="Retour" />
+        <BackLink onClick={() => router.back()} label={t("back")} />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Erreur</AlertTitle>
-          <AlertDescription>
-            {error || "Impossible de charger les données de l'utilisateur"}
-          </AlertDescription>
+          <AlertTitle>{t("errorTitle")}</AlertTitle>
+          <AlertDescription>{error || t("errorLoad")}</AlertDescription>
         </Alert>
+        <Button variant="outline" className="mt-4" onClick={refresh}>
+          {t("retry")}
+        </Button>
       </PageShell>
     );
   }
-
-  // Les réservations annulées sont comptées à part : elles ne font plus partie
-  // du total « Réservations ».
-  const canceledCount = reservations.filter((r) => r.status === "canceled").length;
-  const activeCount = reservations.length - canceledCount;
-  const completedCount = reservations.filter((r) => r.status === "completed").length;
 
   return (
     <PageShell>
-      <BackLink onClick={() => router.back()} label="Retour" />
+      <BackLink onClick={() => router.back()} label={t("back")} />
 
-      <div className="w-full mx-auto space-y-4 sm:space-y-6">
-        <div className="flex flex-col gap-1 sm:gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Profil de {userData.firstname} {userData.lastname}
-          </h1>
-        </div>
+      <div className="mx-auto w-full space-y-6">
+        <UserDetailHeader
+          user={user}
+          isSelf={currentUserId !== null && currentUserId === user.id}
+          onChanged={refresh}
+          onAlert={showAlert}
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Card className="sticky top-5 shadow-md border-gray-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5 text-cyan-600" />
-                Informations personnelles
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-3 pb-4 border-b">
-                <div className="flex-1">
-                  <h4 className="font-bold text-3xl">
-                    {userData.firstname} {userData.lastname}
-                  </h4>
-                  {userData.isAdmin ? (
-                    <Badge className="bg-cyan-500 text-white border-0 text-sm mt-1 rounded-full">
-                      <Shield className="h-5 w-5" />
-                      Administrateur
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-gray-700 text-white border-0 text-sm mt-1 rounded-full">
-                      <User className="h-5 w-5" />
-                      Utilisateur
-                    </Badge>
-                  )}
-                </div>
-              </div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-1">
+            <UserIdentityCard user={user} counts={counts} />
+          </div>
 
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Mail className="h-5 w-5 text-cyan-500" />
-                  <p className="text-cyan-500 font-bold">Courriel</p>
-                </div>
-                <p className="font-medium break-all text-sm">
-                  {userData.email}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-cyan-500" />
-                  <p className="text-cyan-500 font-bold">Créé le</p>
-                </div>
-
-                <p className="font-medium text-sm">
-                  {new Date(userData.createdAt).toLocaleDateString("fr-CA", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <KeyRound className="h-5 w-5 text-cyan-500" />
-                  <p className="font-bold text-cyan-500">Dernière connexion</p>
-                </div>
-                <p className="font-medium text-sm">
-                  {userData.lastLogin
-                    ? new Date(userData.lastLogin).toLocaleDateString("fr-CA", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : "Jamais"}
-                </p>
-              </div>
-
-              <div className="pt-4 border-t">
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-cyan-600">
-                      {activeCount}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Réservations
-                    </p>
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Gamepad2 className="h-4 w-4 text-cyan-600" />
+                  {t("reservations", { count: counts.total })}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {reservationsError ? (
+                  // Distingue l'échec de chargement d'un utilisateur qui n'a
+                  // simplement jamais réservé.
+                  <EmptyState
+                    icon={AlertCircle}
+                    title={t("reservationsError")}
+                    description={reservationsError}
+                    action={
+                      <Button variant="outline" onClick={refresh}>
+                        {t("retry")}
+                      </Button>
+                    }
+                  />
+                ) : reservations.length === 0 ? (
+                  <EmptyState icon={Gamepad2} title={t("noReservations")} />
+                ) : (
+                  <div className="space-y-3">
+                    {reservations.map((reservation) => (
+                      <UserReservationCard
+                        key={reservation.id}
+                        reservation={reservation}
+                      />
+                    ))}
                   </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">
-                      {completedCount}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Complétées</p>
-                  </div>
-                  <div className="text-center p-3 bg-gray-50 rounded-lg">
-                    <p className="text-2xl font-bold text-red-600">
-                      {canceledCount}
-                    </p>
-                    <p className="text-xs text-muted-foreground">Annulées</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="lg:col-span-2">
-          <Card className="h-full shadow-md border-gray-200">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Gamepad2 className="h-5 w-5 text-cyan-600" />
-                Réservation de l&apos;utilisateur ({reservations.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {reservations.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                    <Gamepad2 className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Aucune réservation
-                  </h3>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {reservations.map((reservation) => (
-                    <Link
-                      key={reservation.id}
-                      href={`/admin/reservation/details/${reservation.id}`}
-                      className="block"
-                    >
-                      <Card className="border-2 py-0 cursor-pointer hover:shadow-lg transition-all duration-300 hover:border-cyan-500 ease-in-out">
-                      <CardContent className="p-4">
-                        <div className="flex flex-col md:flex-row gap-2 items-start justify-between mb-3">
-                          <div className="flex gap-2 items-center pb-1">
-                            <Link2 className="w-8 h-8 sm:w-4 sm:h-4 text-cyan-500" />
-                            <h4 className="font-semibold text-xl text-cyan-600 line-clamp-1">
-                              {reservation.id}
-                            </h4>
-                          </div>
-                          {getStatusBadge(reservation.status)}
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                          <div className="flex items-center gap-2 text-md">
-                            <Calendar className="h-4 w-4 text-cyan-500" />
-                            <span>
-                              {new Date(
-                                `${reservation.date}T${reservation.heure}`
-                              ).toLocaleDateString("fr-CA")}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-md">
-                            <Clock className="h-4 w-4 text-cyan-500" />
-                            <span>
-                              {new Date(
-                                `${reservation.date}T${reservation.heure}`
-                              ).toLocaleTimeString("fr-CA", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}{" "}
-                              -{" "}
-                              {new Date(
-                                new Date(
-                                  `${reservation.date}T${reservation.heure}`
-                                ).getTime() +
-                                  2 * 60 * 60 * 1000
-                              ).toLocaleTimeString("fr-CA", {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </span>
-                          </div>
-                        </div>
-
-                        <Separator className="my-2" />
-
-                        <div>
-                          <div className="flex items-center gap-3 mb-3">
-                            <Monitor className="h-5 w-5 text-cyan-500" />
-                            <p className="text-cyan-500">Console</p>
-                          </div>
-                          <Badge
-                            variant={"reservationDetails"}
-                            className="text-sm"
-                          >
-                            {reservation.console}
-                          </Badge>
-                        </div>
-
-                        <Separator className="my-2" />
-
-                        {reservation.games.length > 0 && (
-                          <div>
-                            <div className="flex items-center gap-3 mb-3">
-                              <Gamepad2 className="h-5 w-5 text-cyan-500" />
-                              <p className="text-cyan-500">Jeux sélectionnés</p>
-                            </div>
-                            <div className="flex flex-wrap gap-2 overflow-clip">
-                              {reservation.games.map((game, index) => (
-                                <Badge
-                                  key={index}
-                                  variant={"reservationDetails"}
-                                  className="text-sm"
-                                >
-                                  {game}
-                                </Badge>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {reservation.accessories.length > 0 && (
-                          <>
-                            <Separator className="my-2" />
-                            <div>
-                              <div className="flex items-center gap-3 mb-3">
-                                <KeyRound className="h-5 w-5 text-cyan-500" />
-                                <p className="text-cyan-500">Accessoires</p>
-                              </div>
-                              <div className="flex flex-wrap gap-2 overflow-clip">
-                                {reservation.accessories.map((accessory, index) => (
-                                  <Badge
-                                    key={index}
-                                    variant={"reservationDetails"}
-                                    className="text-sm"
-                                  >
-                                    {accessory}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </CardContent>
-                      </Card>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </PageShell>

@@ -8,7 +8,13 @@ import { useLocale } from "next-intl";
 import { useTranslations } from "next-intl";
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from "lucide-react";
 
-export default function LoginForm({ onSignup }: { onSignup: () => void }) {
+export default function LoginForm({
+  onSignup,
+  onForgotPassword,
+}: {
+  onSignup: () => void;
+  onForgotPassword: () => void;
+}) {
   const locale = useLocale();
   const t = useTranslations();
 
@@ -192,6 +198,13 @@ export default function LoginForm({ onSignup }: { onSignup: () => void }) {
                 <AlertCircle className="w-4 h-4 text-red-500" />
               )}
             </Label>
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="text-sm font-medium text-cyan-600 hover:text-cyan-700 hover:underline transition-colors"
+            >
+              {t("auth.login.forgotPassword")}
+            </button>
           </div>
           <div className="relative group">
             <Lock

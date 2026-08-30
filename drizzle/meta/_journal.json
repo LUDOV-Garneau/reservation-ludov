@@ -43,6 +43,27 @@
       "when": 1787713000000,
       "tag": "0005_privacy_policy_row",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1788032392045,
+      "tag": "0006_wakeful_master_mold",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1788034038830,
+      "tag": "0007_users_email_unique",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1788046829133,
+      "tag": "0008_password_reset_tokens",
+      "breakpoints": true
     }
   ]
 }

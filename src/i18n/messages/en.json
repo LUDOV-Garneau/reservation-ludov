@@ -1,4 +1,20 @@
 {
+  "metadata": {
+    "description": "Book a gaming station at the Laboratoire universitaire de documentation et d'observation vidéoludiques.",
+    "home": "Home",
+    "auth": "Sign in",
+    "resetPassword": "New password",
+    "reservation": "New reservation",
+    "reservationDetails": "Reservation details",
+    "reservationSuccess": "Reservation confirmed",
+    "biblio": "Documentation library",
+    "docs": "Help",
+    "policy": "Terms of use",
+    "admin": "Administration",
+    "adminTutorials": "Tutorials",
+    "adminUser": "User profile",
+    "adminReservationDetails": "Reservation details"
+  },
   "header": {
     "home": "Back to home",
     "help": "Help",
@@ -296,7 +312,8 @@
       "loginBtnLoading": "Logging in...",
       "newUser": "First time logging in?",
       "invalidCredentials": "Your email or password is invalid.",
-      "error": "An error occurred during login. Please try again later."
+      "error": "An error occurred during login. Please try again later.",
+      "forgotPassword": "Forgot your password?"
     },
     "signup": {
       "title": "Sign Up",
@@ -332,7 +349,7 @@
       "subtitle": "To complete the process, please create a password for your account.",
       "password": "Set a password",
       "confirmPassword": "Confirm password",
-      "invalidPassword": "The password must contain at least 6 characters.",
+      "invalidPassword": "The password must be at least 8 characters long.",
       "invalidPasswordConfirmation": "Password confirmation must match the password.",
       "finishBtn": "Finish",
       "finishBtnLoading": "Saving password...",
@@ -340,6 +357,40 @@
       "error": "An error occurred while creating your password. Please try again later.",
       "back": "Back",
       "emptyPassword": "Password cannot be empty."
+    },
+    "forgotPassword": {
+      "title": "Forgot password",
+      "subTitle1": "Enter the email address of your account",
+      "subTitle2": "and we will send you a reset link",
+      "email": "Email",
+      "invalidEmail": "Invalid email address.",
+      "sendLinkBtn": "Send the link",
+      "back": "Back",
+      "login": "Sign in",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If an account exists for this address, a reset link has just been sent to it.",
+      "sentExpiry": "The link expires in 30 minutes and can only be used once.",
+      "sentSpam": "Remember to check your spam folder.",
+      "backToLogin": "Back to sign in"
+    },
+    "resetPassword": {
+      "title": "New password",
+      "subtitle": "Choose the password that will protect your LUDOV account.",
+      "password": "New password",
+      "confirmPassword": "Password confirmation",
+      "emptyPassword": "The password cannot be empty.",
+      "invalidPassword": "The password must be at least 8 characters long.",
+      "invalidPasswordConfirmation": "The password confirmation must match the password.",
+      "submitBtn": "Reset password",
+      "submitBtnLoading": "Resetting...",
+      "error": "An error occurred while resetting your password. Please try again later.",
+      "checking": "Checking the link...",
+      "invalidTitle": "Invalid or expired link",
+      "invalidBody": "This reset link has expired, has already been used, or is not valid. You can request a new one.",
+      "requestNewLink": "Request a new link",
+      "successTitle": "Password reset",
+      "successBody": "Your password has been changed and your other devices have been signed out. You can now sign in.",
+      "backToLogin": "Go to sign in"
     }
   },
   "admin": {
@@ -361,11 +412,18 @@
           "addSingleUser": "Add a user",
           "addSingleUserDescription": "Manually create a user account",
           "addSingleUserSuccess": "User added successfully"
+        },
+        "addUserDialog": {
+          "title": "Add users",
+          "manualTab": "Manual",
+          "csvTab": "CSV import",
+          "description": "Create an account manually or import a list. Either way, the account is created without a password and no email is sent."
         }
       },
       "searchResult": {
         "noUsersFound": "No user(s) found",
-        "startByAdding": "Start by adding your first user."
+        "startByAdding": "Start by adding your first user.",
+        "noMatch": "No user matches these filters"
       },
       "table": {
         "header": {
@@ -373,12 +431,20 @@
           "name": "Name",
           "role": "Role",
           "createdAt": "Creation Date",
-          "actions": "Actions"
+          "actions": "Actions",
+          "user": "User",
+          "status": "Status",
+          "lastLogin": "Last sign-in"
         },
         "ActionToolTips": {
           "resetPassword": "Reset Password",
-          "deleteUser": "Delete User"
-        }
+          "deleteUser": "Delete User",
+          "viewProfile": "View profile"
+        },
+        "sortedAsc": "sorted ascending",
+        "sortedDesc": "sorted descending",
+        "you": "You",
+        "actionsFor": "Actions for {name}"
       },
       "stats": {
         "totalUsers": "Number of user(s)",
@@ -393,7 +459,8 @@
         "affichageDe": "Displaying",
         "a": "to",
         "sur": "on",
-        "noItem": "No item"
+        "noItem": "No item",
+        "perPage": "Per page"
       },
       "deleteUserDialog": {
         "deleteUser": "Delete User",
@@ -445,6 +512,158 @@
           "cancel": "Cancel",
           "submit": "Add user",
           "submitting": "Adding..."
+        },
+        "noAccessYet": "The account has no password yet and no email was sent. Use “Reset password” to send them their access."
+      },
+      "filters": {
+        "role": "Role",
+        "allRoles": "All roles",
+        "admins": "Administrators",
+        "regularUsers": "Users",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "statusActive": "Active account",
+        "statusPending": "Never set up",
+        "clear": "Clear filters",
+        "clearAll": "Clear all",
+        "remove": "Remove filter {label}",
+        "resultCount": "{count, plural, =0 {no users} one {# user} other {# users}}"
+      },
+      "status": {
+        "active": "Active",
+        "pending": "Never set up",
+        "never": "Never"
+      },
+      "bulk": {
+        "selected": "{count} selected",
+        "resetPassword": "Reset password",
+        "delete": "Delete",
+        "clearSelection": "Clear selection",
+        "selectAll": "Select all on this page",
+        "selectOne": "Select this user",
+        "confirmResetTitle": "Reset {count} password(s)?",
+        "confirmResetDescription": "Each person will receive an email inviting them to set a new password, and will not be able to sign in until they do.",
+        "confirmDeleteTitle": "Delete {count} user(s)?",
+        "confirmDeleteDescription": "This action is permanent. The accounts and their upcoming reservations will be deleted.",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "processing": "Working...",
+        "successReset": "{count} password(s) reset",
+        "successDelete": "{count} user(s) deleted",
+        "partial": "{succeeded} processed, {failed} failed",
+        "error": "The bulk action failed"
+      },
+      "error": {
+        "loadFailed": "Could not load users",
+        "retry": "Try again"
+      },
+      "csvImport": {
+        "dragOrBrowse": "Drag a CSV file here",
+        "dropHere": "Drop the file",
+        "clickToBrowse": "or click to browse",
+        "browse": "Browse",
+        "uploading": "Importing...",
+        "dismiss": "Dismiss",
+        "format": {
+          "title": "Required CSV format:",
+          "encoding": "UTF-8 encoding, max {max} MB"
+        },
+        "result": {
+          "title": "Import successful",
+          "warningTitle": "No user added",
+          "added": "Added",
+          "skipped": "Skipped",
+          "summary": "{inserted} user(s) added, {skipped} skipped",
+          "noneAdded": "No user added. {skipped} skipped.",
+          "noAccessYet": "These accounts have no password and no email was sent."
+        },
+        "errors": {
+          "title": "Import failed",
+          "notCsv": "The file must be a CSV.",
+          "tooLarge": "The file exceeds the {max} MB limit.",
+          "failed": "Import failed.",
+          "upload": "Error while uploading the file."
+        },
+        "importAnother": "Import another file"
+      },
+      "moreActions": "More actions",
+      "resetAll": {
+        "menuItem": "Reset every password",
+        "title": "Reset every password?",
+        "description": "This affects all {count} accounts on the platform, without exception.",
+        "consequences": {
+          "everyone": "Nobody will be able to sign in until they set a new password.",
+          "includingYou": "Your own account is included: you will not be able to sign back in either.",
+          "emails": "A reset email is sent to every affected account."
+        },
+        "recovery": "This is not irreversible: anyone can set a new password themselves from the sign-in page, using a code sent by email. No administrator is needed — only access to their inbox.",
+        "confirmLabel": "To confirm, type {token}",
+        "cancel": "Cancel",
+        "confirm": "Reset every password",
+        "processing": "Resetting...",
+        "success": "{count} password(s) reset.",
+        "partial": "{reset} reset, {failed} email(s) not sent",
+        "error": "The global reset failed."
+      },
+      "detail": {
+        "back": "Back",
+        "you": "You",
+        "identity": "Personal information",
+        "never": "Never",
+        "errorTitle": "Error",
+        "errorLoad": "Could not load this user's data",
+        "retry": "Try again",
+        "reservations": "{count, plural, =0 {No reservation} one {# reservation} other {# reservations}}",
+        "reservationsError": "Could not load reservations",
+        "noReservations": "No reservation",
+        "unknownSlot": "Unknown date",
+        "console": "Console",
+        "games": "Games",
+        "accessories": "Accessories",
+        "fields": {
+          "email": "Email",
+          "locale": "Email language",
+          "createdAt": "Created on",
+          "lastLogin": "Last sign-in",
+          "lastUpdatedAt": "Last updated"
+        },
+        "counts": {
+          "upcoming": "Upcoming",
+          "completed": "Completed",
+          "canceled": "Canceled"
+        },
+        "status": {
+          "upcoming": "Upcoming",
+          "ongoing": "In progress",
+          "completed": "Completed",
+          "canceled": "Canceled"
+        },
+        "actions": {
+          "edit": "Edit",
+          "resetPassword": "Reset password",
+          "delete": "Delete",
+          "cannotResetSelf": "You cannot reset your own password from this page. Use “forgot password” on the sign-in page.",
+          "cannotDeleteSelf": "You cannot delete your own account."
+        },
+        "edit": {
+          "title": "Edit user",
+          "description": "Identity, role and transactional email language.",
+          "firstName": "First name",
+          "lastName": "Last name",
+          "email": "Email address",
+          "emailHint": "Changing the email also changes the sign-in identifier and where emails are sent.",
+          "locale": "Email language",
+          "localeFr": "French",
+          "localeEn": "English",
+          "localeHint": "Applies to transactional emails (reminders, confirmations, password resets).",
+          "adminAccess": "Administrator access",
+          "adminHint": "Grants access to the admin panel and to sensitive actions.",
+          "cannotDemoteSelf": "You cannot remove your own administrator rights.",
+          "cancel": "Cancel",
+          "save": "Save",
+          "saving": "Saving...",
+          "saved": "User updated.",
+          "error": "The update failed."
         }
       }
     },
@@ -854,7 +1073,8 @@
         "reset_password": "Password reset",
         "welcome": "Welcome",
         "otp": "OTP code (sign-up)",
-        "cancellation": "Reservation cancellation"
+        "cancellation": "Reservation cancellation",
+        "forgot_password": "Forgot password (link)"
       },
       "zones": {
         "intro": "Introduction",

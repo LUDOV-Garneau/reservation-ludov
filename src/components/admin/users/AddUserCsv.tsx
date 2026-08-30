@@ -1,106 +1,94 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
-  Upload,
-  Loader2,
-  FileSpreadsheet,
-  CheckCircle2,
-  XCircle,
   AlertCircle,
-  UserPlus,
-  UserX,
-  X,
+  CheckCircle2,
+  FileSpreadsheet,
+  Loader2,
+  Upload,
+  XCircle,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import { CSV_MAX_BYTES } from "@/lib/userValidation";
+import { ADD_USER_PANE_MIN_H } from "./types";
 
 type Props = {
   onSuccess?: () => void;
   onAlert?: (
     type: "success" | "destructive" | "info" | "warning",
-    message: string
+    message: string,
   ) => void;
 };
 
-type UploadStatus =
-  | "idle"
-  | "uploading"
-  | "success"
-  | "destructive"
-  | "destructive"
-  | "warning";
+type UploadStatus = "idle" | "uploading" | "success" | "destructive" | "warning";
 
-export default function UsersForm({ onSuccess, onAlert }: Props) {
+const MAX_MB = Math.round(CSV_MAX_BYTES / (1024 * 1024));
+
+/** Noms exacts attendus par `POST /api/admin/users/add-users`. */
+const REQUIRED_COLUMNS = [
+  "Username",
+  "Date Created",
+  "Last Login",
+  "First Name",
+  "Last Name",
+];
+
+export default function AddUserCsv({ onSuccess, onAlert }: Props) {
+  const t = useTranslations("admin.users.csvImport");
+
   const [status, setStatus] = useState<UploadStatus>("idle");
-  const [fileName, setFileName] = useState<string>("");
-  const [stats, setStats] = useState<{
-    inserted: number;
-    skipped: number;
-  } | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [fileName, setFileName] = useState("");
+  const [stats, setStats] = useState<{ inserted: number; skipped: number } | null>(null);
+  const [message, setMessage] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const isUploading = status === "uploading";
+
+  const fail = (text: string) => {
+    setStatus("destructive");
+    setMessage(text);
+    onAlert?.("destructive", text);
+  };
+
+  /** Contrôles communs au clic et au glisser-déposer. */
+  const accept = async (file: File) => {
+    setFileName(file.name);
+
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      fail(t("errors.notCsv"));
+      return;
+    }
+    // La même limite est appliquée par la route ; la vérifier ici évite
+    // d'envoyer inutilement plusieurs mégaoctets pour se faire refuser.
+    if (file.size > CSV_MAX_BYTES) {
+      fail(t("errors.tooLarge", { max: MAX_MB }));
+      return;
+    }
+    await uploadFile(file);
+  };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-
-      if (!selectedFile.name.endsWith(".csv")) {
-        setStatus("destructive");
-        setErrorMessage("Le fichier doit être au format CSV");
-        return;
-      }
-
-      setFileName(selectedFile.name);
-      await uploadFile(selectedFile);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (status !== "uploading") {
-      setIsDragging(true);
-    }
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
+    const file = e.target.files?.[0];
+    if (file) await accept(file);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-
-    if (status === "uploading") return;
-
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const droppedFile = e.dataTransfer.files[0];
-
-      if (!droppedFile.name.endsWith(".csv")) {
-        setStatus("destructive");
-        setErrorMessage("Le fichier doit être au format CSV");
-        return;
-      }
-
-      setFileName(droppedFile.name);
-      await uploadFile(droppedFile);
-    }
-  };
-
-  const handleButtonClick = () => {
-    if (status !== "uploading") {
-      fileInputRef.current?.click();
-    }
+    if (isUploading) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) await accept(file);
   };
 
   const uploadFile = async (fileToUpload: File) => {
     setStatus("uploading");
     setStats(null);
-    setErrorMessage("");
+    setMessage("");
 
     const formData = new FormData();
     formData.append("file", fileToUpload);
@@ -111,333 +99,193 @@ export default function UsersForm({ onSuccess, onAlert }: Props) {
         body: formData,
       });
 
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
 
       if (!res.ok || !data) {
-        setStatus("destructive");
-        setErrorMessage(data?.error || data?.message || "Échec de l'import");
-        onAlert?.(
-          "destructive",
-          data?.error || data?.message || "Échec de l'import"
-        );
+        fail(data?.error || data?.message || t("errors.failed"));
         return;
       }
 
       if (data.success && data.inserted > 0) {
         setStatus("success");
-        setStats({ inserted: data.inserted, skipped: data.skipped });
+        setStats({ inserted: data.inserted, skipped: data.skipped ?? 0 });
         onAlert?.(
           "success",
-          `${data.inserted} utilisateur(s) ajouté(s), ${data.skipped} ignoré(s)`
+          t("result.summary", { inserted: data.inserted, skipped: data.skipped ?? 0 }),
         );
         onSuccess?.();
       } else {
         setStatus("warning");
-        setErrorMessage(
-          data.message ||
-            `Aucun utilisateur ajouté. ${data.skipped || 0} ignoré(s)`
-        );
-        onAlert?.("warning", data.message || `Aucun utilisateur ajouté`);
+        const text = data.message || t("result.noneAdded", { skipped: data.skipped ?? 0 });
+        setMessage(text);
+        onAlert?.("warning", text);
       }
-    } catch (error) {
-      setStatus("destructive");
-      setErrorMessage("Erreur lors de l'upload du fichier");
-      onAlert?.("destructive", "Erreur lors de l'upload du fichier");
+    } catch {
+      fail(t("errors.upload"));
     }
   };
 
-  const resetStatus = () => {
+  const reset = () => {
     setStatus("idle");
     setFileName("");
     setStats(null);
-    setErrorMessage("");
+    setMessage("");
   };
 
-  return (
-    <div className="w-full space-y-3">
+  // Écran de résultat : même gabarit que la confirmation du formulaire manuel,
+  // pour que le dialogue ne change pas de taille selon ce qui s'affiche.
+  if (status === "success" && stats) {
+    return (
       <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
+        className={cn(
+          "flex flex-col items-center justify-center gap-4 text-center",
+          ADD_USER_PANE_MIN_H,
+        )}
+      >
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-950">
+          <CheckCircle2 className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+        </div>
+
+        <div>
+          <p className="font-medium">{t("result.title")}</p>
+          <p className="mt-1 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+            <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" />
+            <span className="max-w-[16rem] truncate">{fileName}</span>
+          </p>
+        </div>
+
+        <div className="flex items-center gap-6">
+          <div>
+            <p className="text-2xl font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+              {stats.inserted}
+            </p>
+            <p className="text-xs text-muted-foreground">{t("result.added")}</p>
+          </div>
+          <div className="h-8 w-px bg-border" aria-hidden />
+          <div>
+            <p
+              className={cn(
+                "text-2xl font-semibold tabular-nums",
+                stats.skipped > 0 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground",
+              )}
+            >
+              {stats.skipped}
+            </p>
+            <p className="text-xs text-muted-foreground">{t("result.skipped")}</p>
+          </div>
+        </div>
+
+        <p className="max-w-sm text-xs leading-relaxed text-muted-foreground">
+          {t("result.noAccessYet")}
+        </p>
+
+        <Button variant="outline" size="sm" onClick={reset}>
+          {t("importAnother")}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("flex w-full flex-col gap-3", ADD_USER_PANE_MIN_H)}>
+      <button
+        type="button"
+        onDragOver={(e) => {
+          e.preventDefault();
+          if (!isUploading) setIsDragging(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+        }}
         onDrop={handleDrop}
-        onClick={status !== "uploading" ? handleButtonClick : undefined}
-        className={`
-          relative border-2 border-dashed rounded-lg transition-all w-full
-          ${
-            status === "uploading"
-              ? "border-cyan-300 bg-cyan-50/50 dark:bg-cyan-950/20 cursor-not-allowed p-4"
-              : isDragging
-              ? "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30 cursor-pointer p-4"
-              : "border-gray-300 dark:border-gray-700 hover:border-cyan-500 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer p-4"
-          }
-        `}
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isUploading}
+        className={cn(
+          "flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-8 text-center transition-colors",
+          "focus-visible:ring-[3px] focus-visible:ring-cyan-500/20 focus-visible:outline-none",
+          isUploading && "cursor-wait border-cyan-300 bg-cyan-50/40 dark:bg-cyan-950/20",
+          !isUploading && isDragging && "border-cyan-500 bg-cyan-50 dark:bg-cyan-950/30",
+          !isUploading && !isDragging && "border-input hover:border-cyan-500 hover:bg-muted/40",
+        )}
       >
         <input
           type="file"
-          accept=".csv"
+          accept=".csv,text/csv"
           ref={fileInputRef}
           onChange={handleFileChange}
           className="hidden"
-          disabled={status === "uploading"}
+          disabled={isUploading}
         />
 
-        <div className="flex flex-col gap-3 sm:hidden">
-          <div className="flex items-center gap-3">
-            <div
-              className={`
-              p-2.5 rounded-lg transition-all flex-shrink-0
-              ${
-                isDragging
-                  ? "bg-cyan-100 dark:bg-cyan-900/50"
-                  : status === "uploading"
-                  ? "bg-cyan-100 dark:bg-cyan-900/50"
-                  : "bg-gray-100 dark:bg-gray-800"
-              }
-            `}
-            >
-              {status === "uploading" ? (
-                <Loader2 className="w-5 h-5 text-cyan-600 animate-spin" />
-              ) : (
-                <Upload
-                  className={`w-5 h-5 ${
-                    isDragging ? "text-cyan-600" : "text-gray-400"
-                  }`}
-                />
+        <div
+          className={cn(
+            "flex h-12 w-12 items-center justify-center rounded-full transition-colors",
+            isDragging || isUploading ? "bg-cyan-100 dark:bg-cyan-900/50" : "bg-muted",
+          )}
+        >
+          {isUploading ? (
+            <Loader2 className="h-5 w-5 animate-spin text-cyan-600" />
+          ) : (
+            <Upload
+              className={cn(
+                "h-5 w-5",
+                isDragging ? "text-cyan-600" : "text-muted-foreground",
               )}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              {status === "uploading" ? (
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    Import en cours...
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                    {fileName}
-                  </p>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {isDragging ? "Déposez le fichier" : "Fichier CSV"}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Cliquez pour parcourir
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {status === "idle" && !isDragging && (
-            <button
-              type="button"
-              className="w-full px-4 py-2.5 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium rounded-md transition-colors"
-            >
-              Sélectionner un fichier
-            </button>
+            />
           )}
         </div>
 
-        <div className="hidden sm:flex items-center gap-3">
-          <div
-            className={`
-            p-2.5 rounded-lg transition-all flex-shrink-0
-            ${
-              isDragging
-                ? "bg-cyan-100 dark:bg-cyan-900/50"
-                : status === "uploading"
-                ? "bg-cyan-100 dark:bg-cyan-900/50"
-                : "bg-gray-100 dark:bg-gray-800"
-            }
-          `}
-          >
-            {status === "uploading" ? (
-              <Loader2 className="w-5 h-5 text-cyan-600 animate-spin" />
-            ) : (
-              <Upload
-                className={`w-5 h-5 ${
-                  isDragging ? "text-cyan-600" : "text-gray-400"
-                }`}
-              />
-            )}
-          </div>
-
-          <div className="flex-1 min-w-0">
-            {status === "uploading" ? (
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  Import en cours...
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  {fileName}
-                </p>
-              </div>
-            ) : (
-              <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                  {isDragging ? "Déposez le fichier" : "Glissez un fichier CSV"}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                  ou cliquez pour parcourir
-                </p>
-              </div>
-            )}
-          </div>
-
-          {status === "idle" && !isDragging && (
-            <button
-              type="button"
-              className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium rounded-full transition-colors flex-shrink-0"
-            >
-              Parcourir
-            </button>
-          )}
+        <div>
+          <p className="text-sm font-medium" aria-live="polite">
+            {isUploading ? t("uploading") : isDragging ? t("dropHere") : t("dragOrBrowse")}
+          </p>
+          <p className="mt-1 max-w-[18rem] truncate text-xs text-muted-foreground">
+            {isUploading && fileName ? fileName : t("clickToBrowse")}
+          </p>
         </div>
+      </button>
 
-        {status === "uploading" && (
-          <div className="mt-3">
-            <div className="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-cyan-500 rounded-full"
-                style={{
-                  width: "70%",
-                  animation: "progress 1.5s ease-in-out infinite",
-                }}
-              ></div>
-            </div>
+      {(status === "destructive" || status === "warning") && (
+        <div
+          className={cn(
+            "flex items-start gap-2.5 rounded-lg border px-3 py-2.5 text-sm",
+            status === "destructive"
+              ? "border-destructive/40 bg-destructive/5 text-destructive"
+              : "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300",
+          )}
+          role="alert"
+        >
+          {status === "destructive" ? (
+            <XCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          ) : (
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          )}
+          <div className="min-w-0 flex-1">
+            {fileName && <p className="truncate text-xs opacity-80">{fileName}</p>}
+            <p className="break-words">{message}</p>
           </div>
-        )}
+        </div>
+      )}
+
+      {/* Les noms de colonnes sont donnés en monospace : ils doivent être
+          recopiés à l'identique dans le fichier, une phrase les noierait. */}
+      <div className="rounded-lg border bg-muted/40 px-3 py-2.5">
+        <p className="text-xs font-medium">{t("format.title")}</p>
+        <div className="mt-2 flex flex-wrap gap-1">
+          {REQUIRED_COLUMNS.map((column) => (
+            <code
+              key={column}
+              className="rounded border bg-background px-1.5 py-0.5 font-mono text-[11px] text-muted-foreground"
+            >
+              {column}
+            </code>
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          {t("format.encoding", { max: MAX_MB })}
+        </p>
       </div>
-
-      {status === "success" && stats && (
-        <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800 rounded-lg p-4 space-y-3 w-full">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-green-100 dark:bg-green-900/50 rounded-lg flex-shrink-0">
-              <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-green-900 dark:text-green-100">
-                Import réussi !
-              </h4>
-              <div className="flex items-center gap-2 mt-1">
-                <FileSpreadsheet className="w-3 h-3 text-green-700 dark:text-green-300 flex-shrink-0" />
-                <span className="text-xs text-green-700 dark:text-green-300 truncate">
-                  {fileName}
-                </span>
-              </div>
-            </div>
-            <button
-              onClick={resetStatus}
-              className="p-1.5 hover:bg-green-200 dark:hover:bg-green-900/50 rounded transition-colors flex-shrink-0 touch-manipulation"
-              aria-label="Fermer"
-            >
-              <X className="w-4 h-4 text-green-700 dark:text-green-300" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 w-full">
-            <div className="bg-white/60 dark:bg-gray-900/40 rounded-lg p-3 border border-green-200/50 dark:border-green-800/50">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-green-100 dark:bg-green-900/50 rounded-md flex-shrink-0">
-                  <UserPlus className="w-4 h-4 text-green-600 dark:text-green-400" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xl font-bold text-green-900 dark:text-green-100">
-                    {stats.inserted}
-                  </p>
-                  <p className="text-[10px] text-green-700 dark:text-green-300 font-medium">
-                    Ajoutés
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/60 dark:bg-gray-900/40 rounded-lg p-3 border border-green-200/50 dark:border-green-800/50">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-md flex-shrink-0">
-                  <UserX className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xl font-bold text-amber-900 dark:text-amber-100">
-                    {stats.skipped}
-                  </p>
-                  <p className="text-[10px] text-amber-700 dark:text-amber-300 font-medium">
-                    Ignorés
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {status === "destructive" && (
-        <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border border-red-200 dark:border-red-800 rounded-lg p-4 w-full">
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-red-100 dark:bg-red-900/50 rounded-lg flex-shrink-0">
-              <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-red-900 dark:text-red-100">
-                Échec de l&apos;import
-              </h4>
-              {fileName && (
-                <div className="flex items-center gap-2 mt-1">
-                  <FileSpreadsheet className="w-3 h-3 text-red-700 dark:text-red-300 flex-shrink-0" />
-                  <span className="text-xs text-red-700 dark:text-red-300 truncate">
-                    {fileName}
-                  </span>
-                </div>
-              )}
-              {errorMessage && (
-                <p className="text-xs text-red-600 dark:text-red-400 mt-2 break-words">
-                  {errorMessage}
-                </p>
-              )}
-            </div>
-            <button
-              onClick={resetStatus}
-              className="p-1.5 hover:bg-red-200 dark:hover:bg-red-900/50 rounded transition-colors flex-shrink-0 touch-manipulation"
-              aria-label="Fermer"
-            >
-              <X className="w-4 h-4 text-red-700 dark:text-red-300" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {status === "idle" && (
-        <div className="bg-cyan-50 dark:bg-cyan-950/20 border border-cyan-200 dark:border-cyan-800 rounded-lg p-3 w-full">
-          <div className="flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-cyan-600 dark:text-cyan-400 mt-0.5 flex-shrink-0" />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-cyan-900 dark:text-cyan-100 mb-1">
-                Format CSV requis :
-              </p>
-              <ul className="space-y-1 text-[11px] text-cyan-500 dark:text-cyan-300">
-                <li className="break-words">
-                  • Username, Date Created, Last Login, First Name, Last Name
-                </li>
-                <li>• Encodage UTF-8, max 5 MB</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes progress {
-          0% {
-            transform: translateX(-100%);
-          }
-          50% {
-            transform: translateX(0%);
-          }
-          100% {
-            transform: translateX(100%);
-          }
-        }
-      `}</style>
     </div>
   );
 }

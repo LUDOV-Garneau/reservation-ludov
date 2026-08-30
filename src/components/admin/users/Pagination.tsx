@@ -3,6 +3,13 @@
 import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
@@ -14,6 +21,12 @@ export interface SmartPaginationProps {
   siblingCount?: number;
   className?: string;
   ariaLabel?: string;
+  /**
+   * Optionnels : sans eux, le composant se comporte exactement comme avant
+   * (les onglets Stations et Cours l'utilisent sans sélecteur de taille).
+   */
+  pageSizeOptions?: readonly number[];
+  onPageSizeChange?: (pageSize: number) => void;
 }
 
 export default function PaginationControls({
@@ -24,6 +37,8 @@ export default function PaginationControls({
   siblingCount = 1,
   className,
   ariaLabel = "Pagination",
+  pageSizeOptions,
+  onPageSizeChange,
 }: SmartPaginationProps) {
   const totalPages = Math.max(1, Math.ceil(totalItems / Math.max(1, pageSize)));
   const isFirst = page <= 1;
@@ -55,6 +70,33 @@ export default function PaginationControls({
             <span>{t("admin.users.pagination.noItem")}</span>
           )}
         </div>
+
+        {pageSizeOptions && onPageSizeChange && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground sm:text-sm">
+              {t("admin.users.pagination.perPage")}
+            </span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(value) => onPageSizeChange(Number(value))}
+            >
+              <SelectTrigger
+                size="sm"
+                className="w-[72px]"
+                aria-label={t("admin.users.pagination.perPage")}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {pageSizeOptions.map((option) => (
+                  <SelectItem key={option} value={String(option)}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       <nav className="flex items-center justify-between gap-2" aria-label={ariaLabel}>
@@ -96,7 +138,7 @@ export default function PaginationControls({
                   "h-8 w-8 p-0",
                   page === item
                     ? "bg-cyan-500 hover:bg-cyan-600 text-white shadow-md"
-                    : "hover:bg-gray-100"
+                    : "hover:bg-muted"
                 )}
                 aria-current={page === item ? "page" : undefined}
                 aria-label={`Aller à la page ${item}`}
@@ -108,7 +150,7 @@ export default function PaginationControls({
           )}
         </div>
 
-        <div className="sm:hidden px-4 py-1 bg-[white] border-cyan-500 border rounded-xl text-sm font-medium" aria-live="polite">
+        <div className="sm:hidden px-4 py-1 bg-background border-cyan-500 border rounded-xl text-sm font-medium" aria-live="polite">
           {page}/{totalPages}
         </div>
 

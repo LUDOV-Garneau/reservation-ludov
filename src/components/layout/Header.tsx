@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { cookies } from "next/headers";
-import { verifyToken } from "@/lib/jwt";
+import { readSession } from "@/lib/session";
 import HeaderMenu from "@/components/layout/HeaderMenu";
 import Link from "next/link";
 
@@ -10,10 +10,7 @@ export default async function Header() {
 
   let user = null;
   try {
-    const token = sessionCookie?.value;
-    if (token != undefined) {
-      user = verifyToken(token);
-    }
+    user = await readSession(sessionCookie?.value);
   } catch {}
 
   return (

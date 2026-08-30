@@ -1,0 +1,1 @@
+ALTER TABLE `console_type` MODIFY COLUMN `name` varchar(191) NOT NULL;

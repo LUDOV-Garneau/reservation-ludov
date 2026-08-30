@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
+import { isSessionCurrent } from "@/lib/session";
 import type { JwtPayload } from "@/types";
 
 type SessionUser = JwtPayload & { id: number };
@@ -21,7 +22,8 @@ function extractUser(req: NextRequest): SessionUser | null {
 }
 
 /**
- * Vérifie que l'utilisateur est connecté.
+ * Vérifie que l'utilisateur est connecté et que sa session n'a pas été périmée
+ * par une réinitialisation de mot de passe.
  * Injecte `user` dans le handler.
  */
 export function withAuth<TParams = Record<string, string>>(
@@ -30,6 +32,8 @@ export function withAuth<TParams = Record<string, string>>(
   return async (req: NextRequest, ctx?: RouteContext<TParams>) => {
     const user = extractUser(req);
     if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    if (!(await isSessionCurrent(user)))
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const params = ctx?.params ? await ctx.params : ({} as TParams);
     return handler(req, user, params);
@@ -46,6 +50,8 @@ export function withAdmin<TParams = Record<string, string>>(
   return async (req: NextRequest, ctx?: RouteContext<TParams>) => {
     const user = extractUser(req);
     if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    if (!(await isSessionCurrent(user)))
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     if (!user.isAdmin) return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 
     const params = ctx?.params ? await ctx.params : ({} as TParams);

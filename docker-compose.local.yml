@@ -24,9 +24,9 @@ services:
       - "3306:3306" # `npm run dev` sur l'hôte pointe ici
     volumes:
       - db-data:/var/lib/mysql
-      # Amorçage du schéma à la création du volume (voir le script).
-      - ./local/db-init:/docker-entrypoint-initdb.d:ro
-      - ./drizzle:/baseline:ro
+      # Pas d'amorçage : la base démarre vide et c'est `scripts/migrate.js`
+      # (service `web`, ou `npm run db:migrate` depuis l'hôte) qui construit le
+      # schéma à partir des migrations Drizzle, 0000 comprise.
     healthcheck:
       # L'app migre au démarrage : elle ne doit partir qu'une fois MySQL prêt.
       test:
