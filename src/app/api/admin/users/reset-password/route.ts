@@ -2,7 +2,7 @@ import db from "@/db";
 import { NextResponse } from "next/server";
 import { sendResetPasswordEmail } from "@/lib/sendEmail";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
 
 export const POST = withAdmin(async (req, authUser) => {
@@ -22,7 +22,16 @@ export const POST = withAdmin(async (req, authUser) => {
     if (!targetUser) return NextResponse.json({ error: "Utilisateur introuvable" }, { status: 404 });
     if (targetUserId === authUser.id) return NextResponse.json({ error: "Impossible de réinitialiser votre propre mot de passe" }, { status: 400 });
 
-    await db.update(users).set({ password: null }).where(eq(users.id, targetUserId));
+    await db
+      .update(users)
+      .set({
+        password: null,
+        // Sans cet incrément, le compte resterait connecté sur ses autres
+        // appareils avec un JWT toujours valide : la réinitialisation ne
+        // protégerait rien.
+        sessionVersion: sql`${users.sessionVersion} + 1`,
+      })
+      .where(eq(users.id, targetUserId));
 
     const res = await sendResetPasswordEmail({
       to: targetUser.email,

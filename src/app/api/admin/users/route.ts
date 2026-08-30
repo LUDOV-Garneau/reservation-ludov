@@ -79,7 +79,10 @@ export const GET = withAdmin(async (req) => {
         })
         .from(users)
         .where(where)
-        .orderBy(order(SORT_COLUMNS[sort]))
+        // `users.id` en second critère : sans départage, deux lignes égales
+        // sur la colonne triée peuvent changer d'ordre d'une requête à l'autre,
+        // et donc apparaître deux fois — ou jamais — au fil de la pagination.
+        .orderBy(order(SORT_COLUMNS[sort]), asc(users.id))
         .limit(limit)
         .offset(offset),
       db

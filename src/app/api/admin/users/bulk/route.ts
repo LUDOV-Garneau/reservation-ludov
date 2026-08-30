@@ -1,7 +1,7 @@
 import db from "@/db";
 import { NextResponse } from "next/server";
 import { users, reservation } from "@/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { sendResetPasswordEmail } from "@/lib/sendEmail";
 import { withAdmin } from "@/lib/withAuth";
 
@@ -86,7 +86,15 @@ export const POST = withAdmin(async (req, authUser) => {
           await db.delete(reservation).where(eq(reservation.userId, id));
           await db.delete(users).where(eq(users.id, id));
         } else {
-          await db.update(users).set({ password: null }).where(eq(users.id, id));
+          await db
+            .update(users)
+            .set({
+              password: null,
+              // Ferme les sessions ouvertes ailleurs, comme la réinitialisation
+              // unitaire et le parcours `/api/auth/reset-password`.
+              sessionVersion: sql`${users.sessionVersion} + 1`,
+            })
+            .where(eq(users.id, id));
           const res = await sendResetPasswordEmail({
             to: target.email,
             locale: target.preferredLocale,

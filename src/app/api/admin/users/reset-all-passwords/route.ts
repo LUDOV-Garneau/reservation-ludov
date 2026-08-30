@@ -1,7 +1,7 @@
 import db from "@/db";
 import { NextResponse } from "next/server";
 import { users } from "@/db/schema";
-import { isNotNull } from "drizzle-orm";
+import { isNotNull, sql } from "drizzle-orm";
 import { sendResetPasswordEmail } from "@/lib/sendEmail";
 import { withAdmin } from "@/lib/withAuth";
 
@@ -24,9 +24,10 @@ type Failure = { email: string; error: string };
  * récupère seul via le parcours d'inscription (`/api/auth/register` puis OTP
  * par courriel). La seule dépendance est l'accès à sa boîte courriel.
  *
- * La session en cours n'est pas invalidée : le cookie `SESSION` est un JWT qui
- * ne référence pas le mot de passe. L'admin reste connecté jusqu'à expiration,
- * mais ne pourra plus se reconnecter sans repasser par le parcours.
+ * Toutes les sessions sont invalidées, y compris celle de l'admin qui déclenche
+ * l'action : `session_version` est incrémentée pour chaque compte touché, et le
+ * claim `sv` des JWT déjà émis ne concorde plus. L'admin est donc déconnecté à
+ * sa requête suivante et doit lui aussi repasser par le parcours de récupération.
  */
 export const POST = withAdmin(async (req) => {
   try {
@@ -56,8 +57,15 @@ export const POST = withAdmin(async (req) => {
     }
 
     // Un seul UPDATE : la réinitialisation est atomique, indépendamment de ce
-    // qui se passera ensuite avec les courriels.
-    await db.update(users).set({ password: null }).where(isNotNull(users.password));
+    // qui se passera ensuite avec les courriels. L'incrément de
+    // `session_version` ferme du même coup toutes les sessions ouvertes.
+    await db
+      .update(users)
+      .set({
+        password: null,
+        sessionVersion: sql`${users.sessionVersion} + 1`,
+      })
+      .where(isNotNull(users.password));
 
     // Envoi séquentiel : un envoi qui échoue ne doit ni interrompre les autres
     // ni faire croire que la réinitialisation n'a pas eu lieu — elle est déjà
