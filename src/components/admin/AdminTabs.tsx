@@ -12,8 +12,9 @@ import {
   HelpCircle,
   Book,
   Gamepad2,
-  ImageIcon,
   Mail,
+  Computer,
+  Cable,
 } from "lucide-react";
 
 const TABS = [
@@ -27,12 +28,12 @@ const TABS = [
   {
     value: "accessories",
     translationKey: "accessories.title",
-    icon: Gamepad2,
+    icon: Cable,
   },
   {
     value: "consolePhotos",
     translationKey: "consolePhotos.title",
-    icon: ImageIcon,
+    icon: Computer,
   },
   {
     value: "games",

@@ -4,10 +4,19 @@ import db from "@/db";
 import { docs } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import AdminTutorialsClient from "@/components/admin/tutorials/AdminTutorialsClient";
+import { pageMetadata } from "@/lib/metadata";
 
 interface TutorialPageProps {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  return pageMetadata(params, "adminTutorials");
 }
 
 export default async function TutorialPage({

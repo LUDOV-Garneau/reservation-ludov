@@ -7,11 +7,17 @@ import {
 import {
   sendCancellationEmail,
   sendConfirmationEmail,
+  sendForgotPasswordEmail,
   sendReminderEmail,
   sendResetPasswordEmail,
   sendWelcomeEmail,
 } from "@/lib/sendEmail";
 import { toLocalYmd } from "@/lib/dates";
+import {
+  RESET_TOKEN_TTL_MINUTES,
+  buildResetUrl,
+  generateResetToken,
+} from "@/lib/passwordReset";
 
 /**
  * Envoi d'un courriel de test (données d'exemple) à l'administrateur connecté,
@@ -61,6 +67,16 @@ export const POST = withAdmin<{ key: string }>(async (req, admin, params) => {
       case "reset_password":
         await sendResetPasswordEmail({ to: admin.email, locale });
         break;
+      case "forgot_password":
+        // Jeton bien formé mais absent de la base : le lien du test mène à
+        // l'écran « lien invalide », sans ouvrir d'accès au compte de l'admin.
+        await sendForgotPasswordEmail({
+          to: admin.email,
+          locale,
+          resetUrl: buildResetUrl(generateResetToken(), locale),
+          expiresInMinutes: RESET_TOKEN_TTL_MINUTES,
+        });
+        break;
       case "welcome":
         await sendWelcomeEmail({ to: admin.email, locale });
         break;
@@ -79,6 +95,17 @@ export const POST = withAdmin<{ key: string }>(async (req, admin, params) => {
           }),
         });
         break;
+      }
+      default: {
+        // Garde d'exhaustivité : ajouter une clé à EMAIL_TEMPLATE_KEYS sans
+        // brancher son envoi ici casse la compilation, plutôt que de faire
+        // répondre « test envoyé » sans qu'aucun courriel ne parte.
+        const unhandled: never = key;
+        console.error(`Gabarit sans envoi de test : ${unhandled}`);
+        return NextResponse.json(
+          { success: false, error: "Ce gabarit n'a pas d'envoi de test." },
+          { status: 400 },
+        );
       }
     }
 

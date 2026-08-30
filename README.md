@@ -51,6 +51,27 @@ Les migrations Drizzle vivent dans `drizzle/` et sont appliquées
   `npm run db:generate`
 - Appliquer les migrations en local : `npm run db:migrate`
 
+### Construire une base vierge
+
+`npm run db:migrate` suffit à construire le schéma complet à partir de rien :
+les migrations créent les 17 tables, la vue `console_catalog`, les clés
+étrangères et les index, puis insèrent les données de référence (gabarits de
+courriels, tutoriels, lignes `policies`). Il ne reste qu'à créer la base vide :
+
+```bash
+mysql -u root -p -e "CREATE DATABASE ludov_dev CHARACTER SET utf8mb4"
+```
+
+Le schéma cible est **InnoDB** (clés étrangères, clés uniques utf8mb4 longues).
+Les migrations ne précisant pas de moteur, `scripts/migrate.js` force
+`default_storage_engine = InnoDB` pour sa session : sur un serveur MySQL réglé
+sur MyISAM, `0000` échouerait sinon avec `ER_TOO_LONG_KEY` et les clés
+étrangères seraient ignorées en silence.
+
+⚠️ Le DDL MySQL n'est pas transactionnel : si une migration échoue en cours de
+route, la base reste à moitié construite. Sur une base de développement,
+repartir d'un `DROP DATABASE` plutôt que de relancer par-dessus.
+
 ⚠️ **Étape unique avant le premier déploiement automatisé** : sur une base de
 données existante (créée avant l'automatisation), la migration de base
 `0000_sparkling_skreet` doit être marquée comme déjà appliquée, sinon elle

@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { signToken, verifyToken } from "@/lib/jwt";
+import { signToken } from "@/lib/jwt";
+import { readSession } from "@/lib/session";
 import db from "@/db";
 import { users } from "@/db/schema";
 import { and, eq, isNotNull, sql } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("SESSION")?.value;
-    if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    const user = verifyToken(token);
+    const user = await readSession(request.cookies.get("SESSION")?.value);
+    if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     return NextResponse.json({ user });
   } catch {
     return NextResponse.json({ message: "Invalid token" }, { status: 401 });
@@ -21,7 +21,14 @@ export async function POST(request: NextRequest) {
     const { email, password, locale } = await request.json();
 
     const user = await db.query.users.findFirst({
-      columns: { id: true, email: true, password: true, firstname: true, isAdmin: true },
+      columns: {
+        id: true,
+        email: true,
+        password: true,
+        firstname: true,
+        isAdmin: true,
+        sessionVersion: true,
+      },
       where: (t) => and(eq(t.email, email), isNotNull(t.password)),
     });
 
@@ -48,6 +55,8 @@ export async function POST(request: NextRequest) {
       name: user.firstname,
       email: user.email,
       isAdmin: user.isAdmin,
+      // Périme ce jeton dès la prochaine réinitialisation de mot de passe.
+      sv: user.sessionVersion,
     });
 
     const response = NextResponse.json({ message: "Utilisateur connecté avec succès!" });

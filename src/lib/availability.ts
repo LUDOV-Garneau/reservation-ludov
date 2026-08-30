@@ -1,6 +1,8 @@
 import { sql, type SQL } from "drizzle-orm";
 import { executeRows } from "@/db";
-import { isFutureSlot } from "@/lib/dates";
+import { isFutureSlot, SESSION_DURATION_HOURS } from "@/lib/dates";
+
+export { SESSION_DURATION_HOURS };
 
 /**
  * Règles d'ouverture et conflits de créneau, côté serveur.
@@ -15,9 +17,6 @@ import { isFutureSlot } from "@/lib/dates";
  */
 
 export type Range = { start: number; end: number };
-
-/** Durée d'une session, en heures (identique à calendar-times). */
-export const SESSION_DURATION_HOURS = 2;
 
 const DAY_NAMES = [
   "sunday",

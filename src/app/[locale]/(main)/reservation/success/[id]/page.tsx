@@ -1,5 +1,14 @@
 import { notFound } from "next/navigation";
 import ConfirmedReservationClient from "@/components/reservation/ConfirmedReservationClient";
+import { pageMetadata } from "@/lib/metadata";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}) {
+  return pageMetadata(params, "reservationSuccess");
+}
 
 export default async function ReservationSuccess({
   params,

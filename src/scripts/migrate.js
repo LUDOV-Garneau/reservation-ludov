@@ -40,6 +40,13 @@ try {
     multipleStatements: true,
   });
 
+  // Les migrations ne précisent pas de moteur : les CREATE TABLE utilisent
+  // donc `default_storage_engine` du serveur. Sur un serveur réglé sur MyISAM,
+  // 0000 échoue (clé UNIQUE varchar(255) utf8mb4 = 1020 octets > la limite
+  // MyISAM de 1000) et, même en passant, les FOREIGN KEY seraient ignorées
+  // en silence. Le schéma cible est InnoDB : on le force pour la session.
+  await connection.query('SET SESSION default_storage_engine = InnoDB');
+
   const db = drizzle(connection);
   await migrate(db, { migrationsFolder: './drizzle' });
 

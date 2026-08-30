@@ -2,6 +2,15 @@ import { getTranslations } from "next-intl/server";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import PolicyContentView from "@/components/politiques/PolicyContentView";
+import { pageMetadata } from "@/lib/metadata";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  return pageMetadata(params, "policy");
+}
 
 export default async function PolitiqueUtilisationPage() {
   const t = await getTranslations("politique");

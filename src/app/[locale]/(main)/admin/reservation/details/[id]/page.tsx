@@ -1,5 +1,14 @@
 import { notFound } from "next/navigation";
 import DetailsReservationClient from "@/components/admin/reservations/details/DetailsReservationClient";
+import { pageMetadata } from "@/lib/metadata";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+}) {
+  return pageMetadata(params, "adminReservationDetails");
+}
 
 export default async function ReservationDetails({
   params,

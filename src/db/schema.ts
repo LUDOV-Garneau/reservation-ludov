@@ -187,6 +187,32 @@ export const otp = mysqlTable(
   ],
 );
 
+/**
+ * Jetons du parcours « mot de passe oublié » (lien envoyé par courriel).
+ *
+ * Seul le SHA-256 du jeton est conservé : une fuite de la base ne permet pas
+ * de reconstruire les liens en circulation. `created_at` sert aussi au
+ * comptage de la limite de débit (3 demandes par compte par heure).
+ */
+export const passwordResetTokens = mysqlTable(
+  "password_reset_tokens",
+  {
+    id: int().autoincrement().notNull(),
+    userId: int("user_id")
+      .notNull()
+      .references(() => users.id),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    createdAt: datetime("created_at", { mode: "string" }).notNull(),
+    expiresAt: datetime("expires_at", { mode: "string" }).notNull(),
+    usedAt: datetime("used_at", { mode: "string" }),
+  },
+  (table) => [
+    index("prt_user_id").on(table.userId),
+    primaryKey({ columns: [table.id], name: "password_reset_tokens_id" }),
+    unique("password_reset_tokens_token_hash").on(table.tokenHash),
+  ],
+);
+
 export const policies = mysqlTable(
   "policies",
   {
@@ -411,6 +437,10 @@ export const users = mysqlTable(
     preferredLocale: varchar("preferred_locale", { length: 2 })
       .default("fr")
       .notNull(),
+    // Incrémentée à chaque réinitialisation de mot de passe : les jetons de
+    // session (JWT) portent la valeur au moment de la connexion, ce qui permet
+    // d'invalider les sessions ouvertes sur les autres appareils.
+    sessionVersion: int("session_version").default(0).notNull(),
     lastUpdatedAt: datetime({ mode: "string" }).notNull(),
     createdAt: datetime({ mode: "string" }).notNull(),
     lastLogin: datetime({ mode: "string" }),
@@ -418,6 +448,10 @@ export const users = mysqlTable(
   (table) => [
     primaryKey({ columns: [table.id], name: "users_id" }),
     unique("id").on(table.id),
+    // Le courriel identifie le compte (connexion, import CSV, réinitialisation).
+    // Sans cette contrainte, la vérification applicative des routes d'ajout
+    // n'est qu'indicative : deux créations concurrentes passent toutes les deux.
+    unique("users_email_unique").on(table.email),
   ],
 );
 

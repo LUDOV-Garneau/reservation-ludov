@@ -1,17 +1,11 @@
 import db from "@/db";
-import { verifyToken } from "@/lib/jwt";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { users, reservation } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { withAdmin } from "@/lib/withAuth";
 
-export async function DELETE(req: NextRequest) {
+export const DELETE = withAdmin(async (req, authUser) => {
   try {
-    const token = req.cookies.get("SESSION")?.value;
-    if (!token) return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-    const authUser = verifyToken(token);
-    if (!authUser?.id) return NextResponse.json({ error: "Token invalide" }, { status: 401 });
-    if (!authUser.isAdmin) return NextResponse.json({ error: "Accès refusé - Privilèges administrateur requis" }, { status: 403 });
-
     const body = await req.json().catch(() => { throw new Error("Corps de requête JSON invalide"); });
     const targetUserId = Number(body.targetUserId);
 
@@ -35,4 +29,4 @@ export async function DELETE(req: NextRequest) {
     console.error("ERREUR SUPPRESSION UTILISATEUR:", err);
     return NextResponse.json({ success: false, error: err instanceof Error ? err.message : "Erreur interne du serveur" }, { status: 500 });
   }
-}
+});

@@ -8,8 +8,8 @@ import * as relations from "./relations";
  * En développement, le rechargement à chaud réévalue ce module à chaque
  * modification : sans ce cache, un nouveau pool (10 connexions) est créé à
  * chaque fois et l'ancien reste ouvert, jusqu'à saturer MySQL
- * (« Too many connections »). En production le module n'est instancié qu'une
- * fois, le cache est sans effet.
+ * (« Too many connections »). En production, le module est instancié une fois
+ * par bundle : voir la note sous `pool`.
  */
 const globalForDb = globalThis as unknown as { ludovPool?: mysql.Pool };
 
@@ -25,9 +25,10 @@ const pool =
     connectionLimit: 10,
   });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForDb.ludovPool = pool;
-}
+// Le cache est également nécessaire en production : Next.js bundle le
+// middleware séparément des routes, et sans lui ce second bundle ouvrirait son
+// propre pool de 10 connexions pour la vérification de session.
+globalForDb.ludovPool = pool;
 
 const db = drizzle(pool, { schema: { ...schema, ...relations }, mode: "default" });
 
