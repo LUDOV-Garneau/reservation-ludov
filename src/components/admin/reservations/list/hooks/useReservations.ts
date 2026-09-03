@@ -5,6 +5,11 @@ import type { AlertType } from "./useAlert";
 export type Reservation = {
   id: string;
   console: string;
+  station: string;
+  games: string[];
+  accessories: string[];
+  coursCode: string;
+  coursName: string;
   date: string;
   heure: string;
   userNom: string | null;
@@ -66,6 +71,11 @@ export function useReservations(
       const rows: Reservation[] = (data.rows ?? []).map((r) => ({
         id: String(r.id),
         console: r.console ?? "",
+        station: r.station ?? "",
+        games: Array.isArray(r.games) ? r.games : [],
+        accessories: Array.isArray(r.accessories) ? r.accessories : [],
+        coursCode: r.coursCode ?? "",
+        coursName: r.coursName ?? "",
         date: r.date,
         heure: r.heure ?? "",
         userNom: r.userNom ?? null,

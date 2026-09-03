@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
-import { reservation, reservationHold, specificDates, hourRanges, weeklyAvailabilities, games, accessoires, stations } from "@/db/schema";
+import {
+  reservation,
+  reservationHold,
+  specificDates,
+  hourRanges,
+  weeklyAvailabilities,
+  games,
+  accessoires,
+  stations,
+  consoleStock,
+} from "@/db/schema";
 import { and, eq, inArray, or, sql } from "drizzle-orm";
 import { toLocalYmd, isFutureSlot } from "@/lib/dates";
 import {
@@ -9,77 +19,16 @@ import {
   dayNameFor,
   generateAllTimeSlots,
 } from "@/lib/availability";
+import {
+  evaluateSlot,
+  resolveAccessoryFallbacks,
+  type SlotConflicts,
+} from "@/lib/slotConflicts";
 
 export interface TimeSlotAvailability {
   time: string;
   available: boolean;
-  conflicts?: { console?: boolean; games?: number[]; accessories?: number[]; station?: boolean };
-}
-
-function checkSlotAvailability(
-  time: string,
-  reservations: { time: string; consoleId: number; game1Id: number | null; game2Id: number | null; game3Id: number | null; accessoryIds: unknown; stationId: number | null }[],
-  holds: { time: string | null; stationId: number | null }[],
-  requestedConsoleId: number,
-  requestedGameIds: number[],
-  requestedAccessoryIds: number[],
-  requestedStationIds: number[]
-): { available: boolean; conflicts?: unknown } {
-  const conflicts: { console?: boolean; games?: number[]; accessories?: number[]; station?: boolean } = {};
-  let hasConflict = false;
-  const atTime = reservations.filter((r) => r.time === time);
-
-  if (atTime.some((r) => r.consoleId === requestedConsoleId)) { conflicts.console = true; hasConflict = true; }
-
-  const conflictingGames: number[] = [];
-  for (const res of atTime) {
-    const reserved = [res.game1Id, res.game2Id, res.game3Id].filter((id): id is number => id !== null);
-    for (const gid of requestedGameIds) { if (reserved.includes(gid)) conflictingGames.push(gid); }
-  }
-  if (conflictingGames.length > 0) { conflicts.games = [...new Set(conflictingGames)]; hasConflict = true; }
-
-  const conflictingAcc: number[] = [];
-  for (const res of atTime) {
-    let reserved: number[] = [];
-    try { reserved = Array.isArray(res.accessoryIds) ? (res.accessoryIds as number[]) : (res.accessoryIds ? JSON.parse(res.accessoryIds as string) : []); } catch { reserved = []; }
-    for (const aid of requestedAccessoryIds) { if (reserved.includes(aid)) conflictingAcc.push(aid); }
-  }
-  if (conflictingAcc.length > 0) { conflicts.accessories = [...new Set(conflictingAcc)]; hasConflict = true; }
-
-  const holdsAtTime = holds.filter((h) => h.time === time);
-  const conflictingStations: number[] = [];
-  for (const s of requestedStationIds) {
-    if (atTime.some((r) => r.stationId === s) || holdsAtTime.some((h) => h.stationId === s)) conflictingStations.push(s);
-  }
-  if (conflictingStations.length === requestedStationIds.length) { conflicts.station = true; hasConflict = true; }
-
-  return { available: !hasConflict, ...(hasConflict && { conflicts }) };
-}
-
-function resolveAccessoryFallbacks(
-  time: string,
-  atTime: { accessoryIds: unknown }[],
-  selectedAccessoryIds: number[],
-  requiredAccessoryIdMap: Record<number, number[]>
-): { valid: boolean; finalAccessoryIds: number[] } {
-  const finalAccessories = [...selectedAccessoryIds];
-  for (const gameId of Object.keys(requiredAccessoryIdMap)) {
-    const candidates = requiredAccessoryIdMap[Number(gameId)];
-    if (!candidates || candidates.length === 0) continue;
-    const mandatory = candidates[0];
-    if (finalAccessories.includes(mandatory)) continue;
-    let availableFound = false;
-    for (const candidate of candidates) {
-      const unavailable = atTime.some((res) => {
-        let reserved: number[] = [];
-        try { reserved = Array.isArray(res.accessoryIds) ? (res.accessoryIds as number[]) : (res.accessoryIds ? JSON.parse(res.accessoryIds as string) : []); } catch { reserved = []; }
-        return reserved.includes(candidate);
-      });
-      if (!unavailable) { finalAccessories.push(candidate); availableFound = true; break; }
-    }
-    if (!availableFound) return { valid: false, finalAccessoryIds: [] };
-  }
-  return { valid: true, finalAccessoryIds: finalAccessories };
+  conflicts?: SlotConflicts;
 }
 
 export async function GET(request: NextRequest) {
@@ -88,6 +37,7 @@ export async function GET(request: NextRequest) {
     if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     const user = verifyToken(token);
     if (!user?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    const userId = Number(user.id);
 
     const { searchParams } = new URL(request.url);
     const date = searchParams.get("date");
@@ -108,15 +58,33 @@ export async function GET(request: NextRequest) {
     const requestedGameIds = gameIds ? gameIds.split(",").map((id) => parseInt(id.trim(), 10)).filter((id) => !isNaN(id)) : [];
     const requestedAccessoryIds = accessoryIds ? accessoryIds.split(",").map((id) => parseInt(id.trim(), 10)).filter((id) => !isNaN(id)) : [];
 
-    const consoleTypeRow = await db.query.reservationHold.findFirst({
+    // La plateforme vient du hold de l'usager (l'unité retenue peut avoir
+    // changé depuis que le client a mémorisé consoleId), sinon de l'unité.
+    const hold = await db.query.reservationHold.findFirst({
       columns: { consoleTypeId: true },
-      where: and(eq(reservationHold.userId, Number(user.id)), eq(reservationHold.consoleId, requestedConsoleId)),
+      where: and(
+        eq(reservationHold.userId, userId),
+        reservationId
+          ? eq(reservationHold.id, reservationId)
+          : eq(reservationHold.consoleId, requestedConsoleId),
+        sql`${reservationHold.expireAt} > NOW()`,
+      ),
     });
-    const requestedConsoleTypeId = consoleTypeRow?.consoleTypeId;
+    let requestedConsoleTypeId = hold?.consoleTypeId ?? null;
+    if (requestedConsoleTypeId == null) {
+      const unit = await db.query.consoleStock.findFirst({
+        columns: { consoleTypeId: true },
+        where: eq(consoleStock.id, requestedConsoleId),
+      });
+      requestedConsoleTypeId = unit?.consoleTypeId ?? null;
+    }
+    if (requestedConsoleTypeId == null) {
+      return NextResponse.json({ success: false, error: "Unknown console" }, { status: 400 });
+    }
 
     const dayName = dayNameFor(date);
 
-    const [reservations, holds, specificHoursRows, weeklyHoursRows, userReservations] = await Promise.all([
+    const [reservations, holds, specificHoursRows, weeklyHoursRows, userReservations, unitRows, stationRows] = await Promise.all([
       db.select({
         time: reservation.time,
         consoleId: reservation.consoleId,
@@ -148,18 +116,29 @@ export async function GET(request: NextRequest) {
           or(eq(weeklyAvailabilities.alwaysAvailable, 1), and(sql`${date} >= ${weeklyAvailabilities.startDate}`, sql`${date} <= ${weeklyAvailabilities.endDate}`))
         )),
 
-      db.select({ consoleTypeId: reservation.consoleTypeId })
+      db.select({ consoleTypeId: reservation.consoleTypeId, time: reservation.time })
         .from(reservation)
-        .where(and(eq(reservation.userId, Number(user.id)), eq(reservation.date, date), eq(reservation.archived, 0))),
+        .where(and(eq(reservation.userId, userId), eq(reservation.date, date), eq(reservation.archived, 0))),
+
+      db.select({ id: consoleStock.id })
+        .from(consoleStock)
+        .where(and(eq(consoleStock.consoleTypeId, requestedConsoleTypeId), eq(consoleStock.isActive, 1))),
+
+      db.select({ stationId: stations.id })
+        .from(stations)
+        .where(and(
+          eq(stations.isActive, 1),
+          sql`JSON_CONTAINS(${stations.consoles}, JSON_ARRAY(${requestedConsoleTypeId}))`,
+        )),
     ]);
 
     const specificHours = specificHoursRows.map((r) => ({ ...r, isException: Boolean(r.isException) }));
 
     // Une seule réservation par plateforme et par jour : la même règle est
     // rejouée à l'écriture (voir checkSlotBookable).
-    const alreadyBookedSameConsoleType =
-      requestedConsoleTypeId != null &&
-      userReservations.some((r) => Number(r.consoleTypeId) === Number(requestedConsoleTypeId));
+    const alreadyBookedSameConsoleType = userReservations.some(
+      (r) => Number(r.consoleTypeId) === Number(requestedConsoleTypeId),
+    );
 
     const validRanges = alreadyBookedSameConsoleType
       ? []
@@ -185,21 +164,27 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const stationRows = await db.select({ stationId: stations.id })
-      .from(stations)
-      .where(and(
-        eq(stations.isActive, 1),
-        sql`JSON_CONTAINS(${stations.consoles}, JSON_ARRAY(${requestedConsoleTypeId}))`,
-      ));
-
     const allSlots = generateAllTimeSlots(validRanges);
+    const consoleUnitIds = unitRows.map((u) => u.id);
+    const stationIds = stationRows.map((s) => s.stationId);
+    const userReservationTimes = userReservations.map((r) => r.time);
 
     const availability: TimeSlotAvailability[] = allSlots.map((time) => {
-      const atTime = reservations.filter((r) => r.time === time);
-      const fallback = resolveAccessoryFallbacks(time, atTime, requestedAccessoryIds, requiredAccessoryIdMap);
+      const fallback = resolveAccessoryFallbacks(time, reservations, requestedAccessoryIds, requiredAccessoryIdMap);
       if (!fallback.valid) return { time, available: false, conflicts: { accessories: [-1] } };
-      const check = checkSlotAvailability(time, reservations, holds, requestedConsoleId, requestedGameIds, requestedAccessoryIds, stationRows.map((s) => s.stationId));
-      return { time, available: check.available, ...(check.conflicts ? { conflicts: check.conflicts } : {}) };
+      return {
+        time,
+        ...evaluateSlot({
+          time,
+          reservations,
+          holds,
+          userReservationTimes,
+          consoleUnitIds,
+          requestedGameIds,
+          requestedAccessoryIds,
+          stationIds,
+        }),
+      };
     });
 
     let finalAvailability = availability;

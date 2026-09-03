@@ -18,6 +18,7 @@
   "header": {
     "home": "Retour à l'accueil",
     "help": "Aide",
+    "changePassword": "Changer mon mot de passe",
     "logout": "Se déconnecter",
     "logoutLoading": "Déconnexion...",
     "language": "EN"
@@ -172,6 +173,7 @@
       "endLabel": "Fin",
       "conflicts": {
         "past": "Cette plage horaire est passée",
+        "user": "Vous avez déjà une réservation qui chevauche cette plage horaire",
         "console": "La plateforme sélectionnée est indisponible",
         "games": "Un ou plusieurs jeux sélectionnés sont indisponibles",
         "accessories": "Un ou plusieurs accessoires sélectionnés sont indisponibles",
@@ -239,6 +241,7 @@
       "selectedConsole": "Plateforme",
       "selectedAccessory": "Accessoires sélectionnés",
       "stationAssigned": "Station assignée",
+      "course": "Cours",
       "titleSection": "Détails de la réservation",
       "noGames": "Aucun jeu sélectionné",
       "noAccessory": "Aucun accessoire sélectionné",
@@ -265,6 +268,7 @@
       "time": "Heure",
       "games": "Jeux réservés",
       "station": "Station",
+      "course": "Cours",
       "console": "Plateforme",
       "cancelled": "annulée"
     },
@@ -390,6 +394,27 @@
       "successTitle": "Mot de passe réinitialisé",
       "successBody": "Votre mot de passe a été modifié et vos autres appareils ont été déconnectés. Vous pouvez maintenant vous connecter.",
       "backToLogin": "Aller à la connexion"
+    },
+    "changePassword": {
+      "title": "Changer mon mot de passe",
+      "subtitle": "Pour votre sécurité, saisissez votre mot de passe actuel puis le nouveau. Vos autres appareils seront déconnectés.",
+      "current": "Mot de passe actuel",
+      "new": "Nouveau mot de passe",
+      "confirm": "Confirmation du nouveau mot de passe",
+      "emptyCurrent": "Le mot de passe actuel est requis.",
+      "emptyNew": "Le nouveau mot de passe ne peut pas être vide.",
+      "invalidNew": "Le nouveau mot de passe doit contenir au moins {min} caractères.",
+      "sameAsCurrent": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "invalidConfirmation": "La confirmation doit être identique au nouveau mot de passe.",
+      "wrongCurrent": "Le mot de passe actuel est incorrect.",
+      "showPasswords": "Afficher les mots de passe",
+      "hidePasswords": "Masquer les mots de passe",
+      "cancel": "Annuler",
+      "submit": "Changer le mot de passe",
+      "submitLoading": "Modification en cours...",
+      "successTitle": "Mot de passe modifié",
+      "successBody": "Votre mot de passe a été changé et vos autres appareils ont été déconnectés.",
+      "error": "Une erreur s'est produite. Veuillez réessayer ultérieurement."
     }
   },
   "admin": {
@@ -684,7 +709,9 @@
           "time": "Heure",
           "actions": "Actions",
           "station": "Station",
-          "status": "Statut"
+          "status": "Statut",
+          "accessories": "Accessoires",
+          "course": "Sigle"
         },
         "ActionToolTips": {
           "deleteReservation": "Annuler la réservation",

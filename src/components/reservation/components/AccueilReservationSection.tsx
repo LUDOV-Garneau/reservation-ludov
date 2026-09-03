@@ -20,6 +20,7 @@ interface Reservation {
   console: string;
   date: string;
   heure: string;
+  cours?: { code: string; name: string } | null;
 }
 
 interface AccueilReservationSectionProps {
@@ -68,6 +69,7 @@ export default function AccueilReservationSection({
             station={reservation.station}
             date={reservation.date}
             heure={reservation.heure}
+            cours={reservation.cours ?? null}
             onDetailsClick={() => onDetailsClick?.(reservation)}
           />
         ))}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
-import { reservation, stations, accessoires } from "@/db/schema";
+import { reservation, stations, accessoires, cours } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
 
@@ -27,6 +27,7 @@ export const GET = withAdmin(async (request) => {
         archived: true,
         cancellationReason: true,
         accessoryIds: true,
+        coursId: true,
       },
       where: eq(reservation.id, idReservation),
       with: {
@@ -62,6 +63,11 @@ export const GET = withAdmin(async (request) => {
             where: eq(stations.id, row.station),
           })
         : null;
+
+    const coursRow = await db.query.cours.findFirst({
+      columns: { codeCours: true, nomCours: true },
+      where: eq(cours.id, row.coursId),
+    });
 
     const accessoryIds = Array.isArray(row.accessoryIds)
       ? (row.accessoryIds as number[])
@@ -101,6 +107,9 @@ export const GET = withAdmin(async (request) => {
       archived: Boolean(row.archived),
       cancellationReason: row.cancellationReason ?? null,
       station: stationRow?.name ?? null,
+      cours: coursRow
+        ? { code: coursRow.codeCours, name: coursRow.nomCours }
+        : null,
       date: row.date,
       heure: row.time?.slice(0, 5) ?? null,
     });

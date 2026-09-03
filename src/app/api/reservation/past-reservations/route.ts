@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/jwt";
 import db from "@/db";
-import { reservation, consoleType, stations, games } from "@/db/schema";
+import { reservation, consoleType, stations, games, cours } from "@/db/schema";
 import { and, eq, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
 
@@ -29,10 +29,13 @@ export async function GET(request: NextRequest) {
         game3Title: g3.titre,
         archived: reservation.archived,
         stationName: stations.name,
+        coursCode: cours.codeCours,
+        coursName: cours.nomCours,
       })
       .from(reservation)
       .innerJoin(consoleType, eq(reservation.consoleTypeId, consoleType.id))
       .leftJoin(stations, eq(reservation.station, stations.id))
+      .leftJoin(cours, eq(reservation.coursId, cours.id))
       .leftJoin(g1, eq(reservation.game1Id, g1.id))
       .leftJoin(g2, eq(reservation.game2Id, g2.id))
       .leftJoin(g3, eq(reservation.game3Id, g3.id))
@@ -58,6 +61,9 @@ export async function GET(request: NextRequest) {
         console: row.consoleName,
         date: dateStr,
         heure: row.time.slice(0, 5),
+        cours: row.coursCode
+          ? { code: row.coursCode, name: row.coursName ?? "" }
+          : null,
       };
     });
 

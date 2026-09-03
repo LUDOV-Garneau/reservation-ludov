@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Monitor, XCircle } from "lucide-react";
+import { BookOpen, Calendar, Clock, Monitor, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 interface AccueilReservationCardProps {
@@ -12,6 +12,8 @@ interface AccueilReservationCardProps {
   station: string;
   date: string;
   heure: string;
+  /** Cours indiqué lors de la réservation (sigle + nom). */
+  cours?: { code: string; name: string } | null;
   onDetailsClick?: () => void;
 }
 
@@ -22,6 +24,7 @@ export default function AccueilReservationCard({
   station,
   date,
   heure,
+  cours,
   onDetailsClick,
 }: AccueilReservationCardProps) {
   const t = useTranslations();
@@ -67,6 +70,24 @@ export default function AccueilReservationCard({
             </p>
           </div>
         </div>
+
+        {cours && (
+          <div className="flex items-center gap-2 mb-4 text-gray-800">
+            <BookOpen
+              className={`${
+                archived ? "text-red-500" : "text-cyan-500"
+              } h-4 w-4 flex-shrink-0`}
+            />
+            <p className="text-sm">
+              <span className="text-xs text-gray-500 mr-2">
+                {t("reservation.accueil.course")}
+              </span>
+              <span className="font-semibold" title={cours.name}>
+                {cours.code}
+              </span>
+            </p>
+          </div>
+        )}
 
         <div className="flex-grow mb-4">
           <p className="text-xs text-gray-500 tracking-wide font-medium mb-2">

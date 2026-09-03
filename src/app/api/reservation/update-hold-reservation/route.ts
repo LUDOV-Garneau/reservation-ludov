@@ -152,6 +152,17 @@ export async function POST(req: Request) {
               throw new TxReturn(NextResponse.json({ success: false, message: slot.message }, { status: slot.status }));
             }
             setData.stationId = slot.stationId;
+
+            // Plateforme en plusieurs exemplaires : l'unité retenue au départ
+            // peut être prise sur ce créneau alors qu'une autre est libre. Le
+            // hold bascule sur l'unité attribuée, et les indicateurs
+            // `holding` suivent pour que create-hold ne la propose pas à un
+            // autre usager.
+            if (slot.consoleStockId !== currentConsoleId) {
+              await tx.update(consoleStock).set({ holding: 0 }).where(eq(consoleStock.id, currentConsoleId));
+              await tx.update(consoleStock).set({ holding: 1 }).where(eq(consoleStock.id, slot.consoleStockId));
+              setData.consoleId = slot.consoleStockId;
+            }
           } else {
             // Créneau redevenu incomplet : la station est libérée, elle sera
             // réattribuée quand la date et l'heure seront connues.

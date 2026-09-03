@@ -24,7 +24,9 @@ import ReservationTableRow from "./ReservationTableRow";
 import DateFilter, { parseDateString, normalizeDate } from "./DateFilter";
 import type { DateFilterValue } from "./DateFilter";
 
-const ITEMS_PER_PAGE = 10;
+/** Tailles de page proposées ; l'API refuse toute autre valeur. */
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const;
+const DEFAULT_PAGE_SIZE = 10;
 
 const EMPTY_DATE_FILTER: DateFilterValue = { mode: "specific" };
 
@@ -78,6 +80,7 @@ export default function ReservationsTable() {
     useState<DateFilterValue>(EMPTY_DATE_FILTER);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [total, setTotal] = useState(0);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
 
   // Recherche débouncée (350 ms), envoyée au serveur.
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -86,7 +89,7 @@ export default function ReservationsTable() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { page, goToPage, resetPage } = usePagination(total, ITEMS_PER_PAGE);
+  const { page, goToPage, resetPage } = usePagination(total, pageSize);
   const {
     reservations,
     metrics,
@@ -95,7 +98,7 @@ export default function ReservationsTable() {
     refresh,
     refreshSilent,
     markCancelled,
-  } = useReservations(page, ITEMS_PER_PAGE, showAlert, setTotal, debouncedSearch);
+  } = useReservations(page, pageSize, showAlert, setTotal, debouncedSearch);
 
   const filteredReservations = useMemo(
     () => filterReservations(reservations, dateFilter),
@@ -104,7 +107,7 @@ export default function ReservationsTable() {
 
   useEffect(() => {
     resetPage();
-  }, [debouncedSearch, dateFilter, resetPage]);
+  }, [debouncedSearch, dateFilter, pageSize, resetPage]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -164,17 +167,35 @@ export default function ReservationsTable() {
             <>
               <div className="px-6">
                 <Table>
+                  {/* Ordre demandé par le LUDOV : usager, date, heure,
+                      station, plateforme, jeux, accessoires, sigle, statut,
+                      actions. Les colonnes secondaires se replient sur les
+                      petits écrans. */}
                   <TableHeader>
                     <TableRow>
                       <TableHead className="hidden lg:table-cell">
                         {t("admin.reservations.table.header.user")}
                       </TableHead>
-                      <TableHead>Plateforme</TableHead>
                       <TableHead className="hidden md:table-cell">
                         {t("admin.reservations.table.header.date")}
                       </TableHead>
                       <TableHead className="hidden lg:table-cell">
                         {t("admin.reservations.table.header.time")}
+                      </TableHead>
+                      <TableHead className="hidden xl:table-cell">
+                        {t("admin.reservations.table.header.station")}
+                      </TableHead>
+                      <TableHead>
+                        {t("admin.reservations.table.header.console")}
+                      </TableHead>
+                      <TableHead className="hidden xl:table-cell">
+                        {t("admin.reservations.table.header.games")}
+                      </TableHead>
+                      <TableHead className="hidden 2xl:table-cell">
+                        {t("admin.reservations.table.header.accessories")}
+                      </TableHead>
+                      <TableHead className="hidden lg:table-cell">
+                        {t("admin.reservations.table.header.course")}
                       </TableHead>
                       <TableHead className="text-center">
                         {t("admin.reservations.table.header.status")}
@@ -196,17 +217,19 @@ export default function ReservationsTable() {
                   </TableBody>
                 </Table>
               </div>
-              {total > ITEMS_PER_PAGE && (
-                <div className="px-4 sm:px-6 pb-3 sm:pb-4">
-                  <PaginationControls
-                    page={page}
-                    totalItems={total}
-                    pageSize={ITEMS_PER_PAGE}
-                    onPageChange={goToPage}
-                    siblingCount={1}
-                  />
-                </div>
-              )}
+              {/* Toujours affiché : le sélecteur « par page » doit rester
+                  accessible même quand tout tient sur une page. */}
+              <div className="px-4 sm:px-6 pb-3 sm:pb-4">
+                <PaginationControls
+                  page={page}
+                  totalItems={total}
+                  pageSize={pageSize}
+                  onPageChange={goToPage}
+                  siblingCount={1}
+                  pageSizeOptions={PAGE_SIZE_OPTIONS}
+                  onPageSizeChange={setPageSize}
+                />
+              </div>
             </>
           ) : (
             <EmptyState

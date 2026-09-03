@@ -12,12 +12,24 @@ type HourRange = {
   endMinute: string;
 };
 type WeekDay = { label: string; enabled: boolean; hoursRanges: HourRange[] };
-type Exception = { date: Date; timeRange: HourRange };
+/**
+ * Les dates circulent en « YYYY-MM-DD » (jour calendaire local), jamais en
+ * objets Date sérialisés : un ISO UTC relu dans le fuseau du navigateur
+ * affichait la veille (le 5 octobre devenait le 4).
+ */
+type Exception = { date: string; timeRange: HourRange };
 type AvailabilityState = {
   weekly: Record<string, WeekDay>;
-  dateRange: { alwaysApplies: boolean; range: { startDate: Date | null; endDate: Date | null } | null };
+  dateRange: { alwaysApplies: boolean; range: { startDate: string | null; endDate: string | null } | null };
   exceptions: { enabled: boolean; dates: Exception[] };
 };
+
+/** « YYYY-MM-DD » ; un ISO complet d'un ancien client est tronqué au jour. */
+function toYmd(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const ymd = value.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(ymd) ? ymd : null;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -46,7 +58,7 @@ export async function GET(request: NextRequest) {
     } else {
       fetchedAvailability.dateRange = {
         alwaysApplies: false,
-        range: { startDate: weeklyRows[0].startDate ? new Date(weeklyRows[0].startDate) : null, endDate: weeklyRows[0].endDate ? new Date(weeklyRows[0].endDate) : null },
+        range: { startDate: weeklyRows[0].startDate ?? null, endDate: weeklyRows[0].endDate ?? null },
       };
     }
 
@@ -54,7 +66,7 @@ export async function GET(request: NextRequest) {
 
     for (const sr of specificRows) {
       const entry: Exception = {
-        date: new Date(sr.date),
+        date: sr.date,
         timeRange: { id: sr.id, startHour: sr.startHour, startMinute: sr.startMinute, endHour: sr.endHour, endMinute: sr.endMinute },
       };
       if (sr.isException) {
@@ -95,30 +107,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: "availabilities object is required." }, { status: 400 });
     }
 
+    const exceptionDates: Exception[] = [];
+    for (const ex of body.exceptions.dates as { date: unknown; timeRange: HourRange }[]) {
+      const date = toYmd(ex.date);
+      if (!date) {
+        return NextResponse.json({ success: false, message: "Date d'exception invalide (format attendu : YYYY-MM-DD)." }, { status: 400 });
+      }
+      exceptionDates.push({ date, timeRange: ex.timeRange });
+    }
+
     const parsedAvailability: AvailabilityState = {
       ...body,
       dateRange: {
-        alwaysApplies: body.dateRange.alwaysApplies,
+        alwaysApplies: Boolean(body.dateRange.alwaysApplies),
         range: body.dateRange.range
           ? {
-              startDate: body.dateRange.range.startDate ? new Date(body.dateRange.range.startDate) : null,
-              endDate: body.dateRange.range.endDate ? new Date(body.dateRange.range.endDate) : null,
+              startDate: toYmd(body.dateRange.range.startDate),
+              endDate: toYmd(body.dateRange.range.endDate),
             }
           : null,
       },
-      exceptions: {
-        enabled: body.exceptions.enabled,
-        dates: body.exceptions.dates.map((ex: Exception) => ({ date: new Date(ex.date), timeRange: ex.timeRange })),
-      },
+      exceptions: { enabled: Boolean(body.exceptions.enabled), dates: exceptionDates },
     };
+
+    if (!parsedAvailability.dateRange.alwaysApplies && !parsedAvailability.dateRange.range?.startDate) {
+      return NextResponse.json({ success: false, message: "Une période de validité est requise." }, { status: 400 });
+    }
 
     await db.transaction(async (tx) => {
       await tx.delete(weeklyAvailabilities);
       await tx.delete(specificDates).where(eq(specificDates.isException, 1));
 
       for (const [day, { enabled, hoursRanges: ranges }] of Object.entries(parsedAvailability.weekly)) {
-        const startDate = parsedAvailability.dateRange.alwaysApplies ? null : parsedAvailability.dateRange.range?.startDate?.toISOString().slice(0, 10) ?? null;
-        const endDate = parsedAvailability.dateRange.alwaysApplies ? null : parsedAvailability.dateRange.range?.endDate?.toISOString().slice(0, 10) ?? null;
+        const startDate = parsedAvailability.dateRange.alwaysApplies ? null : parsedAvailability.dateRange.range?.startDate ?? null;
+        const endDate = parsedAvailability.dateRange.alwaysApplies ? null : parsedAvailability.dateRange.range?.endDate ?? null;
         const alwaysAvailable = parsedAvailability.dateRange.alwaysApplies ? 1 : 0;
 
         const inserted = await tx.insert(weeklyAvailabilities).values({ startDate, endDate, dayOfWeek: day, enabled: enabled ? 1 : 0, alwaysAvailable });
@@ -143,7 +165,7 @@ export async function POST(request: NextRequest) {
       if (parsedAvailability.exceptions.enabled) {
         for (const exception of parsedAvailability.exceptions.dates) {
           await tx.insert(specificDates).values({
-            date: exception.date.toISOString().slice(0, 10),
+            date: exception.date,
             startHour: exception.timeRange.startHour,
             startMinute: exception.timeRange.startMinute,
             endHour: exception.timeRange.endHour,

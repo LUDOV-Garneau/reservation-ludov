@@ -26,9 +26,22 @@ export type AvailabilityState = {
   exceptions: { enabled: boolean; dates: Exception[] };
 };
 
+/**
+ * Réponse de GET /api/admin/week-availabilities : mêmes structures que
+ * l'état local, mais les dates sont des jours calendaires « YYYY-MM-DD ».
+ */
 export type fetchAvailabilities = {
-  availability: AvailabilityState;
-  specificDates: Exception[];
+  availability: Omit<AvailabilityState, "dateRange" | "exceptions"> & {
+    dateRange: {
+      alwaysApplies: boolean;
+      range: { startDate: string | null; endDate: string | null } | null;
+    };
+    exceptions: {
+      enabled: boolean;
+      dates: { date: string; timeRange: HourRange }[];
+    };
+  };
+  specificDates: { date: string; timeRange: HourRange }[];
 };
 
 export type DateSelection = {

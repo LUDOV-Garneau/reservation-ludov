@@ -18,6 +18,7 @@
   "header": {
     "home": "Back to home",
     "help": "Help",
+    "changePassword": "Change my password",
     "logout": "Logout",
     "logoutLoading": "Logging out...",
     "language": "FR"
@@ -189,6 +190,7 @@
       "endLabel": "End",
       "conflicts": {
         "past": "This time slot has passed",
+        "user": "You already have a reservation overlapping this time slot",
         "console": "The selected platform is unavailable",
         "games": "One or more selected games are unavailable",
         "accessories": "One or more selected accessories are unavailable",
@@ -239,6 +241,7 @@
       "selectedConsole": "Platform",
       "accessoriesIncluded": "Included accessories",
       "stationAssigned": "Assigned station",
+      "course": "Course",
       "titleSection": "Reservation details",
       "selectedAccessory": "Selected accessories",
       "noGames": "No games selected",
@@ -266,6 +269,7 @@
       "time": "Time",
       "games": "Reserved games",
       "station": "Station",
+      "course": "Course",
       "console": "Platform",
       "cancelled": "cancelled"
     },
@@ -391,6 +395,27 @@
       "successTitle": "Password reset",
       "successBody": "Your password has been changed and your other devices have been signed out. You can now sign in.",
       "backToLogin": "Go to sign in"
+    },
+    "changePassword": {
+      "title": "Change my password",
+      "subtitle": "For your security, enter your current password and then the new one. Your other devices will be signed out.",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "Confirm new password",
+      "emptyCurrent": "The current password is required.",
+      "emptyNew": "The new password cannot be empty.",
+      "invalidNew": "The new password must contain at least {min} characters.",
+      "sameAsCurrent": "The new password must differ from the current one.",
+      "invalidConfirmation": "The confirmation must match the new password.",
+      "wrongCurrent": "The current password is incorrect.",
+      "showPasswords": "Show passwords",
+      "hidePasswords": "Hide passwords",
+      "cancel": "Cancel",
+      "submit": "Change password",
+      "submitLoading": "Updating...",
+      "successTitle": "Password changed",
+      "successBody": "Your password has been changed and your other devices have been signed out.",
+      "error": "An error occurred. Please try again later."
     }
   },
   "admin": {
@@ -685,7 +710,9 @@
           "time": "Time",
           "actions": "Actions",
           "station": "Station",
-          "status": "Status"
+          "status": "Status",
+          "accessories": "Accessories",
+          "course": "Course code"
         },
         "ActionToolTips": {
           "deleteReservation": "Delete reservation",

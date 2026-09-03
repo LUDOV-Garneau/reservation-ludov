@@ -165,13 +165,10 @@ export async function POST(req: Request) {
           ),
         );
 
-      if (hold.consoleId !== consoleId)
-        throw new TxReturn(
-          NextResponse.json(
-            { success: false, message: "Console ID does not match the hold" },
-            { status: 400 },
-          ),
-        );
+      // L'unité de console fait foi côté serveur : le hold a pu basculer sur
+      // une autre unité de la même plateforme à l'étape du créneau (voir
+      // checkSlotBookable), et le client peut encore porter l'ancienne.
+      const heldConsoleId = hold.consoleId;
       if (hold.consoleTypeId !== consoleTypeId)
         throw new TxReturn(
           NextResponse.json(
@@ -197,7 +194,7 @@ export async function POST(req: Request) {
       const consoleRow = await tx.query.consoleStock.findFirst({
         columns: { id: true },
         where: and(
-          eq(consoleStock.id, consoleId),
+          eq(consoleStock.id, heldConsoleId),
           eq(consoleStock.consoleTypeId, consoleTypeId),
           eq(consoleStock.isActive, 1),
         ),
@@ -287,7 +284,7 @@ export async function POST(req: Request) {
         date: dateStr,
         time: timeStr,
         userId: Number(user!.id),
-        consoleStockId: consoleId,
+        consoleStockId: heldConsoleId,
         consoleTypeId,
         gameIds: [game1Id, game2Id, game3Id].filter(
           (id): id is number => typeof id === "number",
@@ -309,7 +306,7 @@ export async function POST(req: Request) {
       await tx.insert(reservation).values({
         id: reservationId,
         userId: Number(user!.id),
-        consoleId,
+        consoleId: slot.consoleStockId,
         consoleTypeId,
         game1Id,
         game2Id: game2Id ?? null,
@@ -327,7 +324,7 @@ export async function POST(req: Request) {
       await tx
         .update(consoleStock)
         .set({ holding: 0 })
-        .where(eq(consoleStock.id, consoleId));
+        .where(eq(consoleStock.id, heldConsoleId));
 
       const gameIdsToRelease = [game1Id, game2Id, game3Id].filter(
         (x): x is number => Number.isFinite(x as number) && (x as number) > 0,
@@ -345,7 +342,7 @@ export async function POST(req: Request) {
           message: "Reservation confirmed",
           data: {
             reservationId,
-            consoleId,
+            consoleId: slot.consoleStockId,
             consoleTypeId,
             game1Id,
             game2Id,

@@ -17,6 +17,7 @@ interface Reservation {
   console: string;
   date: string;
   heure: string;
+  cours?: { code: string; name: string } | null;
 }
 
 export default function AccueilReservationsClient() {

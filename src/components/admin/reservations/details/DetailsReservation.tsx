@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
+  BookOpen,
   Calendar,
   Clock,
   Gamepad2,
@@ -55,6 +56,8 @@ interface ReservationDetailsProps {
   console: Console;
   accessoires?: Accessory[];
   station?: string | null;
+  /** Cours indiqué lors de la réservation (sigle + nom). */
+  cours?: { code: string; name: string } | null;
   date: string;
   heure: string;
   archived: boolean;
@@ -74,6 +77,7 @@ function ReservationHeader({
   heure,
   reservationId,
   station,
+  cours,
   archived,
   firstname,
   lastname,
@@ -88,6 +92,7 @@ function ReservationHeader({
   reservationId: string;
   consoleName: string;
   station?: string | null;
+  cours?: { code: string; name: string } | null;
   archived: boolean;
   firstname: string;
   lastname: string;
@@ -154,6 +159,18 @@ function ReservationHeader({
                 <span className="font-medium">{station}</span>
               </div>
             )}
+
+            {cours && (
+              <div className="flex items-center gap-2" title={cours.name}>
+                <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
+                  <BookOpen className="h-5 w-5 text-cyan-600" />
+                </div>
+                <span className="font-medium">
+                  <span className="sr-only">{t("reservation.details.course")} </span>
+                  {cours.code}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -199,6 +216,7 @@ export default function DetailsReservation({
   jeux = [],
   console,
   station,
+  cours,
   accessoires = [],
   date,
   heure,
@@ -306,6 +324,7 @@ export default function DetailsReservation({
           reservationId={reservationId}
           consoleName={console.nom}
           station={station}
+          cours={cours}
           archived={isCancelled}
           firstname={firstname}
           lastname={lastname}
