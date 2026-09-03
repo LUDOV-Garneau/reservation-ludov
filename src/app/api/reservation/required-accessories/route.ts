@@ -3,7 +3,7 @@ import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import db from "@/db";
 import { accessoires, games } from "@/db/schema";
-import { inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,9 +36,11 @@ export async function GET(request: NextRequest) {
 
     if (kohaIds.length === 0) return NextResponse.json({ required_accessories: [] });
 
+    // Un accessoire caché (942 $n) ou non fonctionnel (583 $9) ne doit pas
+    // être présélectionné, même s'il est requis par le jeu.
     const mapped = await db.select({ id: accessoires.id })
       .from(accessoires)
-      .where(inArray(accessoires.kohaId, kohaIds));
+      .where(and(inArray(accessoires.kohaId, kohaIds), eq(accessoires.hidden, 0)));
 
     return NextResponse.json({ required_accessories: mapped.map((r) => r.id) });
   } catch (error) {

@@ -42,7 +42,7 @@ export const GET = withAuth(async (req) => {
         .where(and(
           sql`LOWER(${games.titre}) LIKE LOWER(${searchPattern})`,
           eq(games.consoleTypeId, consoleId),
-          eq(games.holding, 0),
+          eq(games.holding, 0), eq(games.isActive, 1),
         ))
         .orderBy(
           sql`CASE WHEN LOWER(${games.titre}) LIKE LOWER(${exactPattern}) THEN 1 WHEN LOWER(${games.titre}) LIKE LOWER(${searchPattern}) THEN 2 ELSE 3 END`,
@@ -57,7 +57,7 @@ export const GET = withAuth(async (req) => {
         .where(and(
           sql`LOWER(${games.titre}) LIKE LOWER(${searchPattern})`,
           eq(games.consoleTypeId, consoleId),
-          eq(games.holding, 0)
+          eq(games.holding, 0), eq(games.isActive, 1)
         ));
       totalCount = countRow.total;
     } else {
@@ -71,7 +71,7 @@ export const GET = withAuth(async (req) => {
           biblioId: games.biblioId,
         })
         .from(games)
-        .where(and(eq(games.consoleTypeId, consoleId), eq(games.holding, 0)))
+        .where(and(eq(games.consoleTypeId, consoleId), eq(games.holding, 0), eq(games.isActive, 1)))
         .orderBy(asc(games.titre))
         .limit(limit)
         .offset(offset);
@@ -79,7 +79,7 @@ export const GET = withAuth(async (req) => {
       const [countRow] = await db
         .select({ total: sql<number>`COUNT(*)` })
         .from(games)
-        .where(and(eq(games.consoleTypeId, consoleId), eq(games.holding, 0)));
+        .where(and(eq(games.consoleTypeId, consoleId), eq(games.holding, 0), eq(games.isActive, 1)));
       totalCount = countRow.total;
     }
 

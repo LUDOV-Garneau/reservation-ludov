@@ -19,6 +19,7 @@ type TimeSlot = {
     games?: number[];
     accessories?: number[];
     station?: boolean;
+    user?: boolean;
     past?: boolean;
   };
 };
@@ -36,6 +37,7 @@ export default function DateSelection() {
     currentStep,
     reservationId,
     selectedConsoleId,
+    setSelectedConsoleId,
     selectedGames,
     selectedAccessories,
   } = useReservation();
@@ -237,6 +239,11 @@ export default function DateSelection() {
       const data = await response.json();
 
       if (data.success) {
+        // Le serveur a pu attribuer une autre unité de la même plateforme
+        // (plateforme en plusieurs exemplaires) : le contexte suit.
+        if (Number.isFinite(Number(data.consoleId)) && Number(data.consoleId) > 0) {
+          setSelectedConsoleId(Number(data.consoleId));
+        }
         setCurrentStep(currentStep + 1);
       } else {
         throw new Error(data.message || t("reservation.calendar.saveFailed"));

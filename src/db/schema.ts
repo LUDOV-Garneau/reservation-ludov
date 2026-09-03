@@ -135,6 +135,9 @@ export const games = mysqlTable(
     consoleKohaId: int("console_koha_id"),
     picture: longtext(),
     holding: tinyint().default(0).notNull(),
+    // 0 = jeu non fonctionnel / non disponible dans Koha (zone 583 $9 = 1),
+    // posé par le seeder à chaque synchronisation : jamais proposé au parcours.
+    isActive: tinyint("is_active").default(1).notNull(),
     requiredAccessories: json("required_accessories"),
     createdAt: datetime({ mode: "string" }).notNull(),
     lastUpdatedAt: datetime({ mode: "string" }).default(
@@ -142,6 +145,7 @@ export const games = mysqlTable(
     ),
   },
   (table) => [
+    index("ix_games_active").on(table.isActive),
     index("ix_games_console_type").on(table.consoleTypeId),
     primaryKey({ columns: [table.id], name: "games_id" }),
     unique("id").on(table.id),

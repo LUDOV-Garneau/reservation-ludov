@@ -172,6 +172,7 @@
       "endLabel": "Fin",
       "conflicts": {
         "past": "Cette plage horaire est passée",
+        "user": "Vous avez déjà une réservation qui chevauche cette plage horaire",
         "console": "La plateforme sélectionnée est indisponible",
         "games": "Un ou plusieurs jeux sélectionnés sont indisponibles",
         "accessories": "Un ou plusieurs accessoires sélectionnés sont indisponibles",
@@ -239,6 +240,7 @@
       "selectedConsole": "Plateforme",
       "selectedAccessory": "Accessoires sélectionnés",
       "stationAssigned": "Station assignée",
+      "course": "Cours",
       "titleSection": "Détails de la réservation",
       "noGames": "Aucun jeu sélectionné",
       "noAccessory": "Aucun accessoire sélectionné",
@@ -265,6 +267,7 @@
       "time": "Heure",
       "games": "Jeux réservés",
       "station": "Station",
+      "course": "Cours",
       "console": "Plateforme",
       "cancelled": "annulée"
     },
@@ -684,7 +687,9 @@
           "time": "Heure",
           "actions": "Actions",
           "station": "Station",
-          "status": "Statut"
+          "status": "Statut",
+          "accessories": "Accessoires",
+          "course": "Sigle"
         },
         "ActionToolTips": {
           "deleteReservation": "Annuler la réservation",

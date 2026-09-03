@@ -93,10 +93,36 @@ export async function saveUpload(
 
   const filename = `${crypto.randomUUID()}.${sniffed.ext}`;
   const dir = path.join(getUploadsDir(), category);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(dir, filename), buffer);
+  try {
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, filename), buffer);
+  } catch (error) {
+    throw toStorageError(error, dir);
+  }
 
   return { publicPath: `/api/images/${category}/${filename}`, filename };
+}
+
+/**
+ * Traduit une erreur d'écriture sur le volume en message exploitable par
+ * l'admin. « Erreur lors du téléversement » ne dit pas si le volume est
+ * plein, en lecture seule ou (cas vu en production) créé root:root avant que
+ * l'image ne fixe le propriétaire du dossier : voir le Dockerfile.
+ */
+function toStorageError(error: unknown, dir: string): Error {
+  const code = (error as { code?: string } | null)?.code;
+  console.error(`[uploads] écriture impossible dans ${dir} (${code ?? "?"})`, error);
+
+  if (code === "EACCES" || code === "EPERM" || code === "EROFS") {
+    return new UploadError(
+      "Le dossier des images n'est pas accessible en écriture sur le serveur (volume UPLOADS_DIR). Contactez l'administration technique.",
+      500,
+    );
+  }
+  if (code === "ENOSPC") {
+    return new UploadError("Espace disque insuffisant sur le serveur pour enregistrer l'image.", 507);
+  }
+  return new UploadError("Impossible d'enregistrer l'image sur le serveur.", 500);
 }
 
 /**

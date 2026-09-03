@@ -184,7 +184,7 @@ export type SlotCheckParams = {
   /** « HH:MM:SS ». */
   time: string;
   userId: number;
-  /** Unité de console (console_stock.id) retenue. */
+  /** Unité de console (console_stock.id) retenue par le hold. */
   consoleStockId: number;
   consoleTypeId: number;
   gameIds: number[];
@@ -205,8 +205,29 @@ export type SlotCheckParams = {
 export const SLOT_TX_CONFIG = { isolationLevel: "read committed" } as const;
 
 export type SlotCheckResult =
-  | { ok: true; stationId: number }
+  | {
+      ok: true;
+      stationId: number;
+      /**
+       * Unité de console à utiliser. Peut différer de celle du hold : quand
+       * l'unité retenue est déjà réservée sur ce créneau mais qu'une autre
+       * unité de la même plateforme est libre, c'est cette dernière qui est
+       * attribuée (plateforme en plusieurs exemplaires).
+       */
+      consoleStockId: number;
+    }
   | { ok: false; status: number; message: string };
+
+const SESSION_SECONDS = SESSION_DURATION_HOURS * 3600;
+
+/**
+ * Condition SQL « la session de `column` chevauche celle qui débute à `time` ».
+ * Deux sessions de SESSION_DURATION_HOURS se chevauchent quand leurs débuts
+ * sont séparés de moins d'une session : une réservation à 10 h bloque 11 h.
+ */
+function overlapsSql(column: SQL, time: string): SQL {
+  return sql`ABS(TIME_TO_SEC(${column}) - TIME_TO_SEC(${time})) < ${SESSION_SECONDS}`;
+}
 
 /**
  * Vérifie qu'un créneau est réservable et verrouille les ressources en jeu.
@@ -222,6 +243,9 @@ export type SlotCheckResult =
  * éviter les interblocages. Les lignes appartenant aux autres usagers
  * (réservations, holds) sont lues sans verrou : les verrouiller provoquait un
  * interblocage avec update-hold, qui détient déjà le verrou de son propre hold.
+ *
+ * Tous les conflits sont évalués sur la durée complète de la session (voir
+ * overlapsSql), pas seulement sur l'heure de début.
  */
 export async function checkSlotBookable(
   tx: SqlRunner,
@@ -275,7 +299,25 @@ export async function checkSlotBookable(
     };
   }
 
-  // 5. Stations : on verrouille d'abord TOUTES les stations candidates, dans
+  // 5. Une seule réservation à la fois pour un même usager, toutes plateformes
+  //    confondues : deux sessions qui se chevauchent sont refusées.
+  const userOverlap = executeRows<{ id: string }>(
+    await tx.execute(sql`
+      SELECT id FROM reservation
+      WHERE user_id = ${userId} AND date = ${date} AND archived = 0
+        AND ${overlapsSql(sql`time`, time)}
+      LIMIT 1
+    `),
+  );
+  if (userOverlap.length > 0) {
+    return {
+      ok: false,
+      status: 409,
+      message: "Vous avez déjà une réservation qui chevauche ce créneau.",
+    };
+  }
+
+  // 6. Stations : on verrouille d'abord TOUTES les stations candidates, dans
   //    l'ordre des identifiants. C'est le point de sérialisation entre deux
   //    usagers ; les conflits sont ensuite relus en lecture verrouillante, qui
   //    voit les données validées les plus récentes (une sous-requête ordinaire
@@ -309,7 +351,8 @@ export async function checkSlotBookable(
     const bookedStation = executeRows<{ id: string }>(
       await tx.execute(sql`
         SELECT id FROM reservation
-        WHERE station = ${id} AND date = ${date} AND time = ${time} AND archived = 0
+        WHERE station = ${id} AND date = ${date} AND archived = 0
+          AND ${overlapsSql(sql`time`, time)}
         LIMIT 1
       `),
     );
@@ -318,7 +361,8 @@ export async function checkSlotBookable(
     const heldStation = executeRows<{ id: string }>(
       await tx.execute(sql`
         SELECT id FROM reservation_hold
-        WHERE station_id = ${id} AND date = ${date} AND time = ${time}
+        WHERE station_id = ${id} AND date = ${date} AND time IS NOT NULL
+          AND ${overlapsSql(sql`time`, time)}
           AND expireAt > NOW() ${holdFilter}
         LIMIT 1
       `),
@@ -339,39 +383,67 @@ export async function checkSlotBookable(
     };
   }
 
-  // 6. Unité de console : verrou sur l'unité, puis relecture des réservations.
-  await tx.execute(sql`SELECT id FROM console_stock WHERE id = ${consoleStockId} FOR UPDATE`);
-  const consoleTaken = executeRows<{ id: string }>(
+  // 7. Unité de console : verrou sur les unités actives de la plateforme
+  //    (ordre des identifiants), puis relecture des réservations qui
+  //    chevauchent le créneau. L'unité du hold est préférée ; si elle est
+  //    prise (ou désactivée par la synchronisation Koha entre-temps), une
+  //    autre unité libre de la même plateforme est attribuée, de préférence
+  //    une unité qu'aucun autre parcours en cours ne retient.
+  const units = executeRows<{ id: number; holding: number }>(
     await tx.execute(sql`
-      SELECT id FROM reservation
-      WHERE console_id = ${consoleStockId} AND date = ${date} AND time = ${time} AND archived = 0
-      LIMIT 1
+      SELECT id, holding FROM console_stock
+      WHERE console_type_id = ${consoleTypeId} AND is_active = 1
+      ORDER BY id
+      FOR UPDATE
     `),
   );
-  if (consoleTaken.length > 0) {
+  if (units.length === 0) {
     return {
       ok: false,
       status: 409,
-      message: "Cette console est déjà réservée pour ce créneau.",
+      message: "Aucune unité de cette plateforme n'est disponible.",
     };
   }
 
-  // 7. Jeux : verrou sur les lignes de jeux (ordre croissant), puis relecture.
+  const takenUnits = executeRows<{ consoleId: number }>(
+    await tx.execute(sql`
+      SELECT DISTINCT console_id AS consoleId FROM reservation
+      WHERE console_type_id = ${consoleTypeId} AND date = ${date} AND archived = 0
+        AND ${overlapsSql(sql`time`, time)}
+    `),
+  );
+  const taken = new Set(takenUnits.map((r) => Number(r.consoleId)));
+  const rank = (u: { id: number; holding: number }) =>
+    Number(u.id) === consoleStockId ? 0 : Number(u.holding) === 0 ? 1 : 2;
+  const freeUnit = [...units]
+    .sort((a, b) => rank(a) - rank(b) || Number(a.id) - Number(b.id))
+    .map((u) => Number(u.id))
+    .find((id) => !taken.has(id));
+  if (freeUnit === undefined) {
+    return {
+      ok: false,
+      status: 409,
+      message: "Cette plateforme est déjà réservée pour ce créneau.",
+    };
+  }
+
+  // 8. Jeux : verrou sur les lignes de jeux (ordre croissant), puis relecture.
   if (gameIds.length > 0) {
     const ids = sql.join(
       [...gameIds].sort((a, b) => a - b).map((id) => sql`${id}`),
       sql`, `,
     );
     await tx.execute(sql`SELECT id FROM games WHERE id IN (${ids}) FOR UPDATE`);
-    const taken = executeRows<{ gameId: number }>(
+    const takenGames = executeRows<{ gameId: number }>(
       await tx.execute(sql`
         SELECT r.game1_id AS gameId FROM reservation r
-        WHERE r.date = ${date} AND r.time = ${time} AND r.archived = 0
+        WHERE r.date = ${date} AND r.archived = 0
+          AND ${overlapsSql(sql`r.time`, time)}
           AND (r.game1_id IN (${ids}) OR r.game2_id IN (${ids}) OR r.game3_id IN (${ids}))
         LIMIT 1
       `),
     );
-    if (taken.length > 0) {
+    if (takenGames.length > 0) {
       return {
         ok: false,
         status: 409,
@@ -380,23 +452,24 @@ export async function checkSlotBookable(
     }
   }
 
-  // 8. Accessoires : même principe, verrou sur les lignes d'accessoires.
+  // 9. Accessoires : même principe, verrou sur les lignes d'accessoires.
   if (accessoryIds.length > 0) {
     const ids = sql.join(
       [...accessoryIds].sort((a, b) => a - b).map((id) => sql`${id}`),
       sql`, `,
     );
     await tx.execute(sql`SELECT id FROM accessoires WHERE id IN (${ids}) FOR UPDATE`);
-    const taken = executeRows<{ id: string }>(
+    const takenAcc = executeRows<{ id: string }>(
       await tx.execute(sql`
         SELECT id FROM reservation
-        WHERE date = ${date} AND time = ${time} AND archived = 0
+        WHERE date = ${date} AND archived = 0
+          AND ${overlapsSql(sql`time`, time)}
           AND accessory_ids IS NOT NULL
           AND JSON_OVERLAPS(accessory_ids, CAST(${JSON.stringify(accessoryIds)} AS JSON))
         LIMIT 1
       `),
     );
-    if (taken.length > 0) {
+    if (takenAcc.length > 0) {
       return {
         ok: false,
         status: 409,
@@ -405,5 +478,5 @@ export async function checkSlotBookable(
     }
   }
 
-  return { ok: true, stationId };
+  return { ok: true, stationId, consoleStockId: freeUnit };
 }

@@ -17,6 +17,7 @@ type Reservation = {
   accessoires?: { id: number; nom: string }[];
   archived: boolean;
   cancellationReason?: string | null;
+  cours?: { code: string; name: string } | null;
 };
 
 type ReservationState = {
@@ -167,6 +168,7 @@ export default function DetailsReservationClient({ id }: { id: string }) {
       cancellationReason={reservation.cancellationReason}
       accessoires={reservation.accessoires ?? []}
       station={reservation.station}
+      cours={reservation.cours ?? null}
       date={reservation.date}
       heure={reservation.heure}
     />

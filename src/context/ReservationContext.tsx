@@ -46,6 +46,8 @@ interface ReservationContextType {
   
   setUserId: (id: number) => void;
   setSelectedConsole: (console: Console | null) => void;
+  /** Unité (console_stock.id) retenue par le hold ; peut changer à l'étape du créneau. */
+  setSelectedConsoleId: (id: number) => void;
   setSelectedGames: (games: string[]) => void;
   setSelectedAccessories: React.Dispatch<React.SetStateAction<number[]>>;
   setCurrentStep: (step: number) => void;
@@ -692,6 +694,7 @@ export function ReservationProvider({
     // Mutateurs
     setUserId,
     setSelectedConsole,
+    setSelectedConsoleId,
     setSelectedGames,
     setSelectedAccessories,
     setCurrentStep: goToStep,

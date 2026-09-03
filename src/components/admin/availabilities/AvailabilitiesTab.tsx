@@ -22,6 +22,38 @@ import {
   fetchAvailabilities,
   DateSelection,
 } from "@/types/availabilities";
+import { parseYmdLocal, toLocalYmd } from "@/lib/dates";
+
+/**
+ * L'API échange des jours calendaires « YYYY-MM-DD ». Ils sont convertis en
+ * Date LOCALE pour les sélecteurs, puis reconvertis à l'envoi : passer par
+ * `new Date("YYYY-MM-DD")` / `toISOString()` décalait d'un jour en Amérique.
+ */
+function toApiPayload(state: AvailabilityState) {
+  return {
+    weekly: state.weekly,
+    dateRange: {
+      alwaysApplies: state.dateRange.alwaysApplies,
+      range: state.dateRange.range
+        ? {
+            startDate: state.dateRange.range.startDate
+              ? toLocalYmd(state.dateRange.range.startDate)
+              : null,
+            endDate: state.dateRange.range.endDate
+              ? toLocalYmd(state.dateRange.range.endDate)
+              : null,
+          }
+        : null,
+    },
+    exceptions: {
+      enabled: state.exceptions.enabled,
+      dates: state.exceptions.dates.map((ex) => ({
+        date: toLocalYmd(ex.date),
+        timeRange: ex.timeRange,
+      })),
+    },
+  };
+}
 
 const defaultHR: HourRange = {
   id: 0,
@@ -111,10 +143,10 @@ export default function AvailabilitiesTab() {
             range: data.availability.dateRange.range
               ? {
                   startDate: data.availability.dateRange.range.startDate
-                    ? new Date(data.availability.dateRange.range.startDate)
+                    ? parseYmdLocal(String(data.availability.dateRange.range.startDate))
                     : null,
                   endDate: data.availability.dateRange.range.endDate
-                    ? new Date(data.availability.dateRange.range.endDate)
+                    ? parseYmdLocal(String(data.availability.dateRange.range.endDate))
                     : null,
                 }
               : null,
@@ -123,7 +155,7 @@ export default function AvailabilitiesTab() {
             ...data.availability.exceptions,
             dates: data.availability.exceptions.dates.map((ex) => ({
               ...ex,
-              date: new Date(ex.date),
+              date: parseYmdLocal(String(ex.date)),
             })),
           },
         };
@@ -160,7 +192,7 @@ export default function AvailabilitiesTab() {
         setSpecificDates(
           data.specificDates.map((d) => ({
             ...d,
-            date: new Date(d.date),
+            date: parseYmdLocal(String(d.date)),
           }))
         );
       } catch {
@@ -281,7 +313,7 @@ export default function AvailabilitiesTab() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(availabilityState),
+        body: JSON.stringify(toApiPayload(availabilityState)),
         credentials: "include",
       });
       setIsLoading(false);
@@ -310,7 +342,12 @@ export default function AvailabilitiesTab() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(specificDates),
+        body: JSON.stringify(
+          specificDates.map((sd) => ({
+            date: toLocalYmd(sd.date),
+            timeRange: sd.timeRange,
+          }))
+        ),
         credentials: "include",
       });
       setIsLoading(false);

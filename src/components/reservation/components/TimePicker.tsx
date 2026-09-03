@@ -20,6 +20,7 @@ type TimeSlot = {
     games?: number[];
     accessories?: number[];
     station?: boolean;
+    user?: boolean;
     past?: boolean;
   };
 };
@@ -44,6 +45,7 @@ export const TimePicker = memo(function TimePicker({
   const getConflictReason = (slot: TimeSlot) => {
     if (!slot.conflicts) return null;
     if (slot.conflicts.past) return t("reservation.calendar.conflicts.past");
+    if (slot.conflicts.user) return t("reservation.calendar.conflicts.user");
     if (slot.conflicts.console)
       return t("reservation.calendar.conflicts.console");
     if (slot.conflicts.games) return t("reservation.calendar.conflicts.games");

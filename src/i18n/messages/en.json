@@ -189,6 +189,7 @@
       "endLabel": "End",
       "conflicts": {
         "past": "This time slot has passed",
+        "user": "You already have a reservation overlapping this time slot",
         "console": "The selected platform is unavailable",
         "games": "One or more selected games are unavailable",
         "accessories": "One or more selected accessories are unavailable",
@@ -239,6 +240,7 @@
       "selectedConsole": "Platform",
       "accessoriesIncluded": "Included accessories",
       "stationAssigned": "Assigned station",
+      "course": "Course",
       "titleSection": "Reservation details",
       "selectedAccessory": "Selected accessories",
       "noGames": "No games selected",
@@ -266,6 +268,7 @@
       "time": "Time",
       "games": "Reserved games",
       "station": "Station",
+      "course": "Course",
       "console": "Platform",
       "cancelled": "cancelled"
     },
@@ -685,7 +688,9 @@
           "time": "Time",
           "actions": "Actions",
           "station": "Station",
-          "status": "Status"
+          "status": "Status",
+          "accessories": "Accessories",
+          "course": "Course code"
         },
         "ActionToolTips": {
           "deleteReservation": "Delete reservation",

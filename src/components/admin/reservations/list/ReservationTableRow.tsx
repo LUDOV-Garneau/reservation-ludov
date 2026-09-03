@@ -86,6 +86,22 @@ function ReservationStatusBadge({
   );
 }
 
+/** Liste compacte (jeux, accessoires) : une entrée par ligne, tronquée. */
+function ItemList({ items }: { items: string[] }) {
+  if (items.length === 0) {
+    return <span className="text-muted-foreground">—</span>;
+  }
+  return (
+    <ul className="space-y-0.5 text-sm max-w-[220px]">
+      {items.map((item, index) => (
+        <li key={`${item}-${index}`} className="truncate" title={item}>
+          {item}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 type ReservationTableRowProps = {
   reservation: Reservation;
   onAlert: (type: AlertType, message: string, title?: string) => void;
@@ -114,12 +130,6 @@ export default function ReservationTableRow({
         <span className="truncate max-w-[220px]">{reservation.userNom}</span>
       </TableCell>
 
-      <TableCell>
-        <span className="truncate max-w-[160px] text-xs sm:text-base">
-          {reservation.console}
-        </span>
-      </TableCell>
-
       <TableCell className="hidden md:table-cell">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Calendar className="h-3.5 w-3.5" />
@@ -132,6 +142,39 @@ export default function ReservationTableRow({
           <Clock className="h-3.5 w-3.5" />
           <span>{reservation.heure}</span>
         </div>
+      </TableCell>
+
+      <TableCell className="hidden xl:table-cell">
+        <span className="truncate max-w-[140px] text-sm">
+          {reservation.station || "—"}
+        </span>
+      </TableCell>
+
+      <TableCell>
+        <span className="truncate max-w-[160px] text-xs sm:text-base">
+          {reservation.console}
+        </span>
+      </TableCell>
+
+      <TableCell className="hidden xl:table-cell">
+        <ItemList items={reservation.games} />
+      </TableCell>
+
+      <TableCell className="hidden 2xl:table-cell">
+        <ItemList items={reservation.accessories} />
+      </TableCell>
+
+      <TableCell className="hidden lg:table-cell">
+        {reservation.coursCode ? (
+          <span
+            className="font-mono text-sm"
+            title={reservation.coursName || undefined}
+          >
+            {reservation.coursCode}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        )}
       </TableCell>
 
       <TableCell>
