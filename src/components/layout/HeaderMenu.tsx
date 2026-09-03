@@ -2,7 +2,7 @@
 
 import LocaleSwitcher from "./LocaleSwitcher";
 import { usePathname } from "next/navigation";
-import { HelpCircleIcon, Home, KeyRound, LogOut, ShieldCheck, UserIcon } from "lucide-react";
+import { HelpCircleIcon, Home, LogOut, ShieldCheck, UserIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,6 @@ import { Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
-import ChangePasswordDialog from "@/components/account/ChangePasswordDialog";
 interface HeaderMenuProps {
   username: string;
   isAdmin: boolean;
@@ -24,7 +23,6 @@ export default function HeaderMenu({ username, isAdmin }: HeaderMenuProps) {
   const pathname = usePathname();
   const t = useTranslations("header");
   const [isLoading, setIsLoading] = useState(false);
-  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
   const isAdminActive = pathname.includes("/admin");
 
@@ -99,16 +97,6 @@ export default function HeaderMenu({ username, isAdmin }: HeaderMenuProps) {
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          {/* Ouvert via onSelect : le menu se ferme d'abord, puis le
-              dialogue (monté hors du menu) s'affiche. */}
-          <DropdownMenuItem
-            className="px-2 py-1 hover:opacity-70 cursor-pointer flex items-center gap-2 outline-none"
-            onSelect={() => setPasswordDialogOpen(true)}
-          >
-            <KeyRound size={20} />
-            <p className="text-base">{t("changePassword")}</p>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
           <DropdownMenuItem className="px-2 py-1">
             <button
               onClick={logout}
@@ -120,10 +108,6 @@ export default function HeaderMenu({ username, isAdmin }: HeaderMenuProps) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <ChangePasswordDialog
-        open={passwordDialogOpen}
-        onOpenChange={setPasswordDialogOpen}
-      />
     </div>
   );
 }
