@@ -64,6 +64,13 @@
       "when": 1788046829133,
       "tag": "0008_password_reset_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1788400247848,
+      "tag": "0009_games_is_active",
+      "breakpoints": true
     }
   ]
 }

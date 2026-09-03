@@ -156,7 +156,9 @@ export async function GET(request: NextRequest) {
     const allRequiredKoha = Object.values(requiredAccessoryMap).flat();
     const requiredAccessoryIdMap: Record<number, number[]> = {};
     if (allRequiredKoha.length > 0) {
-      const accRows = await db.select({ id: accessoires.id, kohaId: accessoires.kohaId }).from(accessoires).where(inArray(accessoires.kohaId, allRequiredKoha));
+      // Les substituts possibles excluent les accessoires cachés ou non
+      // fonctionnels (583 $9) : ils ne doivent jamais être attribués.
+      const accRows = await db.select({ id: accessoires.id, kohaId: accessoires.kohaId }).from(accessoires).where(and(inArray(accessoires.kohaId, allRequiredKoha), eq(accessoires.hidden, 0)));
       const kohaToId: Record<number, number> = {};
       accRows.forEach((r) => (kohaToId[r.kohaId] = r.id));
       for (const gameId of Object.keys(requiredAccessoryMap)) {

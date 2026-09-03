@@ -214,7 +214,9 @@ export async function POST(req: Request) {
           }
 
           if (toAdd.length > 0) {
-            const available = await tx.select({ id: games.id }).from(games).where(and(inArray(games.id, toAdd), eq(games.holding, 0)));
+            // holding = 0 : pas retenu par un autre parcours ; is_active = 1 :
+            // pas marqué non fonctionnel dans Koha (583 $9).
+            const available = await tx.select({ id: games.id }).from(games).where(and(inArray(games.id, toAdd), eq(games.holding, 0), eq(games.isActive, 1)));
             const okIds = new Set(available.map((r) => Number(r.id)));
             const blocked = toAdd.filter((id) => !okIds.has(id));
             if (blocked.length > 0) throw new TxReturn(NextResponse.json({ success: false, message: `Jeu(x) indisponible(s): ${blocked.join(", ")}` }, { status: 400 }));
