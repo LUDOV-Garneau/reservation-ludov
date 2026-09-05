@@ -18,7 +18,7 @@ import {
 import { Eye, Menu, Trash2 } from "lucide-react";
 import DeleteReservationAction from "../DeleteReservationAction/DeleteReservationAction";
 import type { Reservation } from "./hooks/useReservations";
-import type { AlertType } from "./hooks/useAlert";
+import type { AlertType } from "@/hooks/useAlert";
 
 type Props = {
   reservation: Reservation;

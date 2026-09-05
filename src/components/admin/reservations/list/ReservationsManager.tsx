@@ -10,9 +10,9 @@ import {
   RESERVATIONS_PAGE_SIZES,
   useReservationsFilters,
 } from "@/hooks/useReservationsFilters";
-import { useAlert } from "./hooks/useAlert";
+import { useAlert } from "@/hooks/useAlert";
 import { useReservations } from "./hooks/useReservations";
-import PaginationControls from "./Pagination";
+import PaginationControls from "@/components/admin/Pagination";
 import ReservationsFilters from "./ReservationsFilters";
 import ReservationsStatsBar from "./ReservationsStatsBar";
 import ReservationsSkeleton from "./ReservationsSkeleton";

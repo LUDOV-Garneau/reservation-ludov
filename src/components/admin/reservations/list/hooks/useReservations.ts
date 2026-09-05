@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import type { AlertType } from "./useAlert";
+import type { AlertType } from "@/hooks/useAlert";
 import type { ReservationsFiltersState } from "@/hooks/useReservationsFilters";
 
 export type Reservation = {

@@ -710,14 +710,6 @@
         "confirm_title": "Confirm deletion",
         "cancel": "Cancel"
       },
-      "pagination": {
-        "affichageDe": "Showing",
-        "a": "to",
-        "sur": "of",
-        "noItem": "No items",
-        "perPage": "Per page",
-        "goToPage": "Go to page {page}"
-      },
       "stats": {
         "totalReservations": "Total reservations",
         "upcomingReservations": "Upcoming reservations",
@@ -765,14 +757,14 @@
     "stations": {
       "title": "Stations",
       "actionBar": {
-        "searchPlaceholder": "Search...",
+        "searchPlaceholder": "Search a station or a platform…",
         "addStation": "Add",
-        "toolTipRefresh": "Refresh",
-        "addStationSuccess": "Station added successfully"
+        "toolTipRefresh": "Refresh"
       },
       "searchResult": {
-        "noStationsFound": "No station(s) found",
-        "startByAdding": "Start by adding your first station."
+        "noStationsFound": "No station found",
+        "startByAdding": "Start by adding your first station.",
+        "filtersHint": "No station matches the active filters."
       },
       "table": {
         "header": {
@@ -791,92 +783,83 @@
         "inactive": "Inactive"
       },
       "stats": {
-        "activeStations": "Number of active stations",
-        "inactiveStations": "Number of inactive stations",
-        "mostUsedStation": "Most reserved station",
-        "noStations": "No stations created"
+        "activeStations": "Active stations",
+        "inactiveStations": "Inactive stations",
+        "mostUsedStation": "Most booked station",
+        "noStations": "No reservation",
+        "totalStations": "Stations"
       },
-      "pagination": {
-        "affichageDe": "Displaying",
-        "a": "to",
-        "sur": "on",
-        "noItem": "No item"
+      "filter": {
+        "allStatuses": "All statuses",
+        "remove": "Remove filter {label}",
+        "clearAll": "Clear all",
+        "resultCount": "{count, plural, =0 {no stations} one {# station} other {# stations}}"
       },
-      "updateStationForm": {
-        "button": {
-          "openDialog": "Modify",
-          "saveChanges": "Save",
-          "loading": "Loading...",
-          "addConsole": "Add platforms",
-          "submit": "Modify",
-          "addAll": "Add all"
-        },
+      "alert": {
+        "fetchError": "Could not load the stations."
+      },
+      "form": {
         "titles": {
-          "dialogTitle": "Modify Station"
+          "create": "Add a station",
+          "edit": "Edit station"
+        },
+        "descriptions": {
+          "create": "Name the station and pick the platforms it offers.",
+          "edit": "Change the name, the platforms or the status of the station."
         },
         "fields": {
-          "stationName": "Station Name",
-          "consoles": "Platforms",
-          "isActive": "Active"
+          "name": "Station name",
+          "namePlaceholder": "e.g. Station 3 — back room",
+          "isActive": "Active station",
+          "isActiveOn": "It is offered in the reservation flow.",
+          "isActiveOff": "It is no longer offered in the reservation flow.",
+          "platforms": "Platforms offered",
+          "platformsPlaceholder": "Add a platform…",
+          "noPlatformAvailable": "Every platform has been added",
+          "noPlatformSelected": "No platform selected",
+          "noPlatformSelectedHint": "A station without a platform is offered to nobody.",
+          "selectedCount": "{count, plural, one {# platform selected} other {# platforms selected}}",
+          "removePlatform": "Remove {name}"
         },
-        "select": {
-          "placeholder": "Select platforms"
-        },
-        "errors": {
-          "missingFields": "Please fill in all required fields.",
-          "consoleFetch": "Error fetching platforms."
-        },
-        "alerts": {
-          "updateSuccess": "Station updated successfully!",
-          "updateError": "Error updating station."
-        }
-      },
-      "addStationForm": {
         "button": {
-          "openDialog": "Add a station",
-          "loading": "Adding...",
-          "submit": "Add",
-          "addConsole": "Add a platform",
-          "addAll": "Add all"
-        },
-        "titles": {
-          "dialogTitle": "Add a station"
-        },
-        "fields": {
-          "name": "Name",
-          "consoles": "Available platforms",
-          "stationName": "Station name"
-        },
-        "placeholders": {
-          "selectConsole": "Select a platform",
-          "stationName": "Enter the station name"
+          "create": "Add station",
+          "save": "Save",
+          "addAll": "Add all",
+          "loading": "Saving…"
         },
         "errors": {
-          "missingFields": "Please fill in all fields",
-          "invalidConsole": "Invalid platform",
-          "consoleAlreadyAdded": "The platform has already been added",
-          "consoleFetch": "Error fetching platforms",
-          "nameConflict": "A station with this name already exists"
+          "missingFields": "A name and at least one platform are required.",
+          "nameConflict": "A station already uses this name.",
+          "consoleFetch": "Could not load the platforms."
         },
         "alerts": {
-          "addStationSuccess": "Station added successfully",
-          "addStationError": "Error adding station"
+          "created": "Station added successfully.",
+          "updated": "Station updated successfully.",
+          "createError": "Could not add the station.",
+          "updateError": "Could not update the station."
         }
       },
-      "deleteStationDialog": {
-        "deleteStation": "Delete station",
-        "definitiveAction": "This action is non-reversible. The station will not be accessible anymore.",
-        "whatGonnaHappen": "What will happen:",
-        "theStation": "The station will be",
-        "deleted": "deleted",
-        "stationWontBeAccessible": " and will not be accessible anymore.",
-        "reservationDeleted": "Upcoming reservations will also be deleted.",
-        "CancelDelete": "Cancel deletion",
-        "deletingState": "Deleting…",
-        "confirmDelete": "Confirm deletion",
+      "deleteDialog": {
+        "title": "Delete station",
+        "description": "This action is permanent.",
+        "onlyIfEmpty": "A station can only be deleted when no reservation is attached to it.",
+        "noPlatforms": "No platform assigned",
+        "blockedTitle": "Deletion refused",
+        "blockedDescription": "Reservations are attached to this station.",
+        "blockedCount": "{count, plural, one {# reservation is attached} other {# reservations are attached}}.",
+        "blockedUpcoming": "{count, plural, one {Including # upcoming} other {Including # upcoming}}.",
+        "blockedHint": "Deactivate the station instead: it leaves the reservation flow and the history stays intact.",
+        "deactivate": "Deactivate station",
+        "deactivating": "Deactivating…",
+        "alreadyInactive": "Already inactive",
+        "confirm": "Confirm deletion",
+        "deleting": "Deleting…",
+        "cancel": "Cancel",
         "alerts": {
-          "deleteSuccess": "Station deleted successfully",
-          "deleteError": "Error deleting station"
+          "deleted": "Station deleted successfully.",
+          "deleteError": "Could not delete the station.",
+          "deactivated": "Station deactivated. Reservations are kept.",
+          "deactivateError": "Could not deactivate the station."
         }
       }
     },
@@ -1254,6 +1237,14 @@
         "successTitle": "Success",
         "errorTitle": "Error"
       }
+    },
+    "pagination": {
+      "affichageDe": "Showing",
+      "a": "to",
+      "sur": "of",
+      "noItem": "No items",
+      "perPage": "Per page",
+      "goToPage": "Go to page {page}"
     }
   },
   "privacy": {

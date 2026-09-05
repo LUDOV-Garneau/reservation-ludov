@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import ReservationActions from "./ReservationActions";
 import ReservationStatusBadge from "./ReservationStatusBadge";
 import type { Reservation } from "./hooks/useReservations";
-import type { AlertType } from "./hooks/useAlert";
+import type { AlertType } from "@/hooks/useAlert";
 
 /**
  * Rendu mobile de la liste. La table repliait six colonnes sur dix sous `md`,

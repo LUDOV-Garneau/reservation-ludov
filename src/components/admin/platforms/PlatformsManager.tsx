@@ -11,7 +11,7 @@ import {
   PAGE_SIZE_OPTIONS,
   usePlatformsFilters,
 } from "@/hooks/usePlatformsFilters";
-import PaginationControls from "@/components/admin/reservations/list/Pagination";
+import PaginationControls from "@/components/admin/Pagination";
 import PlatformsFilters from "@/components/admin/platforms/PlatformsFilters";
 import PlatformsGrid from "@/components/admin/platforms/PlatformsGrid";
 import PlatformsTable from "@/components/admin/platforms/PlatformsTable";

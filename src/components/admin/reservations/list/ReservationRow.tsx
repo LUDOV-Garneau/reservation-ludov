@@ -5,7 +5,7 @@ import { Calendar, Clock } from "lucide-react";
 import ReservationActions from "./ReservationActions";
 import ReservationStatusBadge from "./ReservationStatusBadge";
 import type { Reservation } from "./hooks/useReservations";
-import type { AlertType } from "./hooks/useAlert";
+import type { AlertType } from "@/hooks/useAlert";
 
 /** Liste compacte (jeux, accessoires) : une entrée par ligne, tronquée. */
 function ItemList({ items }: { items: string[] }) {

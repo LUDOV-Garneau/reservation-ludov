@@ -21,6 +21,20 @@ export function toLocalYmd(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/**
+ * `YYYY-MM-DD HH:MM:SS` en heure LOCALE, pour les colonnes `datetime` de MySQL.
+ *
+ * `toISOString().slice(0, 19)` écrivait de l'UTC dans des colonnes que tout le
+ * reste de l'application relit en heure locale : la valeur affichée décalait de
+ * quatre à cinq heures et changeait de jour en soirée.
+ */
+export function toLocalDatetime(date: Date = new Date()): string {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${toLocalYmd(date)} ${pad(date.getHours())}:${pad(
+    date.getMinutes(),
+  )}:${pad(date.getSeconds())}`;
+}
+
 export function parseYmdLocal(ymd: string): Date {
   const [y, m, d] = ymd.split("-").map(Number);
   return new Date(y, (m ?? 1) - 1, d ?? 1);

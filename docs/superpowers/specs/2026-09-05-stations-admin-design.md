@@ -109,12 +109,23 @@ Compte d'abord les réservations rattachées. S'il y en a, répond **409** avec
 
 ### `POST` et `PATCH`
 
-Corps lu par `src/lib/stationUpdate.ts`, fonction pure testée séparément : nom
-trimé, non vide, borné à 255 caractères ; `consoles` tableau non vide d'entiers
-positifs dédoublonnés ; `isActive` booléen facultatif au `PATCH`. Le nom est
-vérifié unique dans les deux cas, en excluant la station elle-même au `PATCH`.
-Les identifiants de plateformes sont confrontés à `console_type` : un id inconnu
-donne un 400 qui le nomme, plutôt qu'une station silencieusement bancale.
+Corps lus par `src/lib/stationUpdate.ts`, fonctions pures testées séparément.
+
+`readStationPayload` (création) exige le nom — trimé, non vide, borné à 255
+caractères — et `consoles`, tableau non vide d'entiers positifs dédoublonnés et
+ordonnés. `isActive` n'y est pas accepté : une station naît active.
+
+`readStationPatch` (modification) n'exige **aucun** champ, mais valide ceux qui
+sont présents avec les mêmes règles. C'est ce qui permet de désactiver une
+station en n'envoyant que `{isActive: false}` — exiger le corps complet rendait
+indésactivable une station sans plateforme, précisément le cas où on veut la
+retirer du parcours. Un patch vide est refusé (400) plutôt que d'aboutir à une
+mise à jour qui ne toucherait que `lastUpdatedAt`.
+
+Le nom est vérifié unique dans les deux cas, en excluant la station elle-même au
+`PATCH`. Les identifiants de plateformes sont confrontés à `console_type` : un
+id inconnu donne un 400 qui le nomme, plutôt qu'une station silencieusement
+bancale.
 
 Les horodatages sont écrits en heure locale via `toLocalDatetime`, ajouté à
 `src/lib/dates.ts` à côté de `toLocalYmd`, et non plus en UTC.
@@ -168,8 +179,8 @@ trois statuts, les quatre clés de tri, repli des valeurs invalides.
 
 `src/lib/stationUpdate.test.ts` : nom vide, blanc, trop long, trimé ; `consoles`
 absent, vide, non tableau, valeurs non entières ou négatives, dédoublonnage ;
-`isActive` absent au `PATCH` et refusé au mauvais type ; rejet des champs
-inattendus.
+rejet des champs inattendus ; et pour le patch, chaque champ seul, la
+désactivation d'une station sans plateforme, et le refus du patch vide.
 
 Pas de test d'intégration base : le dépôt n'a pas de harnais pour ça.
 

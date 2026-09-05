@@ -11,7 +11,7 @@ import {
   PAGE_SIZE_OPTIONS,
   useAccessoriesFilters,
 } from "@/hooks/useAccessoriesFilters";
-import PaginationControls from "@/components/admin/reservations/list/Pagination";
+import PaginationControls from "@/components/admin/Pagination";
 import AccessoriesFilters from "@/components/admin/accessoires/AccessoriesFilters";
 import AccessoriesGrid from "@/components/admin/accessoires/AccessoriesGrid";
 import AccessoriesTable from "@/components/admin/accessoires/AccessoriesTable";

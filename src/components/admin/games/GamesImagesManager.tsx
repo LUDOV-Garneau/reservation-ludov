@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import EmptyState from "@/components/admin/EmptyState";
 import { Gamepad2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import PaginationControls from "@/components/admin/reservations/list/Pagination";
+import PaginationControls from "@/components/admin/Pagination";
 import {
   PAGE_SIZE_OPTIONS,
   useGamesImagesFilters,
@@ -95,7 +95,7 @@ export default function GamesImagesManager() {
       try {
         const [consolesRes, stationsRes] = await Promise.all([
           fetch("/api/admin/console-type"),
-          fetch("/api/admin/stations?page=1&limit=200"),
+          fetch("/api/admin/stations?all=1"),
         ]);
 
         if (consolesRes.ok) {

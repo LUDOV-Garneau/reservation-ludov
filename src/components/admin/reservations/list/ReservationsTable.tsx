@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import ReservationRow from "./ReservationRow";
 import ReservationCard from "./ReservationCard";
 import type { Reservation } from "./hooks/useReservations";
-import type { AlertType } from "./hooks/useAlert";
+import type { AlertType } from "@/hooks/useAlert";
 import type {
   ReservationsSort,
   SortDirection,
