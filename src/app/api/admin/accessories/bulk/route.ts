@@ -3,6 +3,7 @@ import db from "@/db";
 import { accessoires, consoleType } from "@/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
+import { parseIds } from "@/lib/parseIds";
 
 const ACTIONS = [
   "show",
@@ -20,18 +21,6 @@ type Failure = { id: number; error: string };
 
 function isConsoleAction(action: BulkAction): boolean {
   return action !== "show" && action !== "hide";
-}
-
-/** Nettoie un tableau d'ids venu du client : entiers positifs, sans doublon. */
-function parseIds(raw: unknown): number[] {
-  if (!Array.isArray(raw)) return [];
-  return [
-    ...new Set(
-      raw
-        .map((value) => Number(value))
-        .filter((id) => Number.isInteger(id) && id > 0),
-    ),
-  ];
 }
 
 /**
