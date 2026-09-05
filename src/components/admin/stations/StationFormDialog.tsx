@@ -349,7 +349,7 @@ export default function StationFormDialog({
             <Button
               type="submit"
               disabled={loading || !name.trim() || selected.length === 0}
-              className="h-11 w-full text-base font-semibold"
+              className="h-11 w-full text-base font-semibold bg-cyan-500 text-white transition-colors hover:bg-cyan-600"
             >
               {loading ? (
                 <>

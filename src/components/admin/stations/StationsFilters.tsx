@@ -150,7 +150,10 @@ export default function StationsFilters({
             </Tooltip>
           </TooltipProvider>
 
-          <Button onClick={onCreate} className="flex-1 gap-2 lg:flex-none">
+          <Button
+            onClick={onCreate}
+            className="flex-1 gap-2 lg:flex-none bg-cyan-500 text-white transition-colors hover:bg-cyan-600"
+          >
             <Plus className="h-5 w-5" />
             <span className="hidden md:inline">
               {t("actionBar.addStation")}

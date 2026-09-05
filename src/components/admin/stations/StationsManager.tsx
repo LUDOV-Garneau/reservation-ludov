@@ -135,7 +135,7 @@ export default function StationsManager() {
                     {t("filter.clearAll")}
                   </Button>
                 ) : (
-                  <Button onClick={openCreate}>
+                  <Button onClick={openCreate} className="bg-cyan-500 text-white transition-colors hover:bg-cyan-600">
                     {t("actionBar.addStation")}
                   </Button>
                 )

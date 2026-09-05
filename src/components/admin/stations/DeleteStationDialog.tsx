@@ -160,7 +160,7 @@ export default function DeleteStationDialog({
             {blocked ? (
               <Button
                 type="button"
-                className="w-full sm:w-auto"
+                className="w-full sm:w-auto bg-cyan-500 text-white transition-colors hover:bg-cyan-600"
                 onClick={deactivate}
                 disabled={loading || !station.isActive}
               >
