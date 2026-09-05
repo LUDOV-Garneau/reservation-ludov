@@ -672,11 +672,11 @@
     "reservations": {
       "title": "Réservations",
       "actionBar": {
-        "toolTipRefresh": "Rechercher...",
         "searchPlaceholder": "Rechercher"
       },
       "searchResult": {
-        "noReservationsFound": "Aucune réservation trouvée"
+        "noReservationsFound": "Aucune réservation trouvée",
+        "filtersHint": "Aucune réservation ne correspond aux filtres actifs."
       },
       "table": {
         "header": {
@@ -712,12 +712,14 @@
         "a": "à",
         "sur": "sur",
         "noItem": "Aucun élément",
-        "perPage": "Par page"
+        "perPage": "Par page",
+        "goToPage": "Aller à la page {page}"
       },
       "stats": {
         "totalReservations": "Nombre de réservations",
         "upcomingReservations": "Réservations à venir",
-        "pastReservations": "Réservations passées"
+        "pastReservations": "Réservations passées",
+        "cancelledReservations": "Réservations annulées"
       },
       "status": {
         "upcoming": "À venir",
@@ -729,7 +731,11 @@
         "description": "Cette action est définitive. La réservation sera annulée et ne pourra pas être récupérée.",
         "confirm": "Confirmer l'annulation",
         "cancel": "Retour",
-        "deleting": "Annulation..."
+        "deleting": "Annulation...",
+        "reasonLabel": "Raison d'annulation",
+        "reasonPlaceholder": "Décrivez la raison de l'annulation…",
+        "reasonRequired": "Ce champ est obligatoire.",
+        "unknownUser": "Utilisateur inconnu"
       },
       "alert": {
         "deleteSuccess": {
@@ -737,7 +743,20 @@
           "message": "La réservation a été annulée avec succès."
         },
         "errorTitle": "Une erreur s'est produite",
-        "deleteError": "Une erreur s'est produite lors de l'annulation de la réservation. Veuillez réessayer plus tard."
+        "deleteError": "Une erreur s'est produite lors de l'annulation de la réservation. Veuillez réessayer plus tard.",
+        "fetchError": "Erreur lors du chargement des réservations."
+      },
+      "refresh": "Rafraîchir",
+      "filter": {
+        "allStatuses": "Tous les statuts",
+        "fromLabel": "Du",
+        "toLabel": "Au",
+        "fromPlaceholder": "Date de début",
+        "toPlaceholder": "Date de fin",
+        "invertedRange": "La date de début est postérieure à la date de fin : aucun créneau ne peut correspondre.",
+        "remove": "Retirer le filtre {label}",
+        "clearAll": "Tout effacer",
+        "resultCount": "{count, plural, =0 {aucune réservation} one {# réservation} other {# réservations}}"
       }
     },
     "stations": {

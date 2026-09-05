@@ -32,18 +32,18 @@ type ReservationState = {
 
 function HeaderSkeleton() {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+    <div className="bg-card rounded-xl shadow-sm border p-6 mb-8">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="flex-1">
           <Skeleton className="h-10 w-64 mb-3" />
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-gray-300" />
+              <Calendar className="h-4 w-4 text-muted-foreground" />
               <Skeleton className="h-4 w-24" />
             </div>
-            <span className="text-gray-300">•</span>
+            <span className="text-muted-foreground">•</span>
             <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-gray-300" />
+              <Clock className="h-4 w-4 text-muted-foreground" />
               <Skeleton className="h-4 w-16" />
             </div>
           </div>
@@ -59,7 +59,7 @@ function HeaderSkeleton() {
 
 function GameCardSkeleton() {
   return (
-    <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+    <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
       <div className="flex flex-col sm:flex-row">
         <Skeleton className="h-48 w-full sm:h-56 sm:w-56" />
         <div className="p-6 flex flex-col justify-between flex-1 gap-4">

@@ -157,10 +157,10 @@ export default function PaginationControls({
                   "h-8 w-8 p-0",
                   page === item
                     ? "bg-cyan-500 hover:bg-cyan-600 text-white shadow-md"
-                    : "hover:bg-gray-100",
+                    : "hover:bg-muted",
                 )}
                 aria-current={page === item ? "page" : undefined}
-                aria-label={`Aller à la page ${item}`}
+                aria-label={t("admin.reservations.pagination.goToPage", { page: item })}
                 onClick={() => onPageChange(item)}
               >
                 {item}
@@ -170,7 +170,7 @@ export default function PaginationControls({
         </div>
 
         <div
-          className="sm:hidden px-4 py-1 bg-[white] border-cyan-500 border rounded-xl text-sm font-medium"
+          className="sm:hidden px-4 py-1 bg-card border-cyan-500 border rounded-xl text-sm font-medium"
           aria-live="polite"
         >
           {page}/{totalPages}

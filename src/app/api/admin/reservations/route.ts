@@ -9,35 +9,39 @@ import {
   cours,
   accessoires,
 } from "@/db/schema";
-import { desc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, eq, inArray, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
 import { withAdmin } from "@/lib/withAuth";
-import { toLocalYmd } from "@/lib/dates";
-
-/** Tailles de page acceptées (le sélecteur de l'interface propose les mêmes). */
-const RESERVATIONS_PAGE_SIZES = [10, 25, 50, 100] as const;
-const DEFAULT_PAGE_SIZE = 10;
+import {
+  parseReservationsQuery,
+  splitLocalNow,
+  type ReservationsQuery,
+} from "@/lib/reservationsQuery";
 
 export const GET = withAdmin(async (req) => {
   try {
     const { searchParams } = new URL(req.url);
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
-    const requestedLimit = parseInt(searchParams.get("limit") || "", 10);
-    const limit = (RESERVATIONS_PAGE_SIZES as readonly number[]).includes(requestedLimit)
-      ? requestedLimit
-      : DEFAULT_PAGE_SIZE;
-    const search = (searchParams.get("search") || "").trim();
-    const offset = (page - 1) * limit;
+    const query = parseReservationsQuery(searchParams);
 
     const g1 = alias(games, "g1");
     const g2 = alias(games, "g2");
     const g3 = alias(games, "g3");
 
+    // "Maintenant" fourni par l'application (fuseau applicatif), plutôt que
+    // CURDATE()/CURTIME() qui dépendent du fuseau du serveur MySQL.
+    const { today, nowTime } = splitLocalNow();
+
+    // Instant du créneau et frontière passé/futur, réutilisés par le filtre de
+    // statut, les tris et les statistiques.
+    const slotAt = sql`TIMESTAMP(${reservation.date}, ${reservation.time})`;
+    const nowAt = sql`TIMESTAMP(${today}, ${nowTime})`;
+    const isPast = sql`(${slotAt} < ${nowAt})`;
+
     // Recherche côté serveur (usager, plateforme, station, sigle de cours,
     // jeu, id, date) : elle couvre toutes les pages, pas seulement la page
     // affichée.
-    const searchPattern = `%${search}%`;
-    const searchClause = search
+    const searchPattern = `%${query.search}%`;
+    const searchClause = query.search
       ? or(
           sql`LOWER(CONCAT(${users.firstname}, ' ', ${users.lastname})) LIKE LOWER(${searchPattern})`,
           sql`LOWER(${consoleType.name}) LIKE LOWER(${searchPattern})`,
@@ -51,11 +55,19 @@ export const GET = withAdmin(async (req) => {
         )
       : undefined;
 
-    // "Maintenant" fourni par l'application (fuseau applicatif), plutôt que
-    // CURDATE()/CURTIME() qui dépendent du fuseau du serveur MySQL.
-    const now = new Date();
-    const today = toLocalYmd(now);
-    const nowTime = now.toTimeString().slice(0, 8);
+    const statusClause = buildStatusClause(query.status, isPast);
+
+    const whereClause = and(
+      searchClause,
+      query.from ? sql`${reservation.date} >= ${query.from}` : undefined,
+      query.to ? sql`${reservation.date} <= ${query.to}` : undefined,
+      statusClause,
+      // Intervalle inversé : aucune ligne ne peut y tomber. On le dit à SQL
+      // plutôt que de court-circuiter, pour garder un seul chemin de code.
+      query.isEmptyRange ? sql`1 = 0` : undefined,
+    );
+
+    const orderBy = buildOrderBy(query, slotAt, isPast);
 
     const [rows, [filteredCount], [stats]] = await Promise.all([
       db
@@ -84,10 +96,10 @@ export const GET = withAdmin(async (req) => {
         .leftJoin(g1, eq(reservation.game1Id, g1.id))
         .leftJoin(g2, eq(reservation.game2Id, g2.id))
         .leftJoin(g3, eq(reservation.game3Id, g3.id))
-        .where(searchClause)
-        .orderBy(desc(reservation.date), desc(reservation.time))
-        .limit(limit)
-        .offset(offset),
+        .where(whereClause)
+        .orderBy(...orderBy)
+        .limit(query.limit)
+        .offset(query.offset),
       db
         .select({ total: sql<number>`COUNT(*)` })
         .from(reservation)
@@ -98,13 +110,14 @@ export const GET = withAdmin(async (req) => {
         .leftJoin(g1, eq(reservation.game1Id, g1.id))
         .leftJoin(g2, eq(reservation.game2Id, g2.id))
         .leftJoin(g3, eq(reservation.game3Id, g3.id))
-        .where(searchClause),
-      // Statistiques globales (une requête, annulées exclues des futur/passé).
+        .where(whereClause),
+      // Statistiques globales : elles ne suivent pas les filtres, c'est un
+      // tableau de bord. Le décompte du filtre courant, lui, est `total`.
       db
         .select({
           total: sql<number>`SUM(CASE WHEN ${reservation.archived} = 0 THEN 1 ELSE 0 END)`,
-          future: sql<number>`SUM(CASE WHEN ${reservation.archived} = 0 AND (${reservation.date} > ${today} OR (${reservation.date} = ${today} AND ${reservation.time} >= ${nowTime})) THEN 1 ELSE 0 END)`,
-          past: sql<number>`SUM(CASE WHEN ${reservation.archived} = 0 AND (${reservation.date} < ${today} OR (${reservation.date} = ${today} AND ${reservation.time} < ${nowTime})) THEN 1 ELSE 0 END)`,
+          future: sql<number>`SUM(CASE WHEN ${reservation.archived} = 0 AND NOT ${isPast} THEN 1 ELSE 0 END)`,
+          past: sql<number>`SUM(CASE WHEN ${reservation.archived} = 0 AND ${isPast} THEN 1 ELSE 0 END)`,
           cancelled: sql<number>`SUM(CASE WHEN ${reservation.archived} = 1 THEN 1 ELSE 0 END)`,
         })
         .from(reservation),
@@ -153,8 +166,8 @@ export const GET = withAdmin(async (req) => {
     return NextResponse.json({
       rows: reservations,
       total: Number(filteredCount.total ?? 0),
-      page,
-      limit,
+      page: query.page,
+      limit: query.limit,
       totalReservations: Number(stats.total ?? 0),
       futureReservations: Number(stats.future ?? 0),
       pastReservations: Number(stats.past ?? 0),
@@ -165,3 +178,53 @@ export const GET = withAdmin(async (req) => {
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 });
   }
 });
+
+/** « À venir » et « passée » excluent les annulées : une annulée n'est plus un créneau. */
+function buildStatusClause(
+  status: ReservationsQuery["status"],
+  isPast: SQL,
+): SQL | undefined {
+  if (status === "cancelled") return sql`${reservation.archived} = 1`;
+  // Parenthésé : `and()` juxtapose les clauses sans les grouper, et un futur
+  // `or()` au même niveau capturerait la moitié de celle-ci.
+  if (status === "upcoming")
+    return sql`(${reservation.archived} = 0 AND NOT ${isPast})`;
+  if (status === "past")
+    return sql`(${reservation.archived} = 0 AND ${isPast})`;
+  return undefined;
+}
+
+/**
+ * Tri par défaut « schedule » : le prochain créneau en tête, puis les créneaux
+ * écoulés du plus récent au plus ancien — l'ordre dans lequel l'équipe lit la
+ * liste. Les autres clés retombent sur cet ordre comme départage.
+ */
+function buildOrderBy(
+  query: ReservationsQuery,
+  slotAt: SQL,
+  isPast: SQL,
+): SQL[] {
+  const asc = query.dir === "asc";
+  const dir = (ascending: boolean) =>
+    ascending === asc ? sql`ASC` : sql`DESC`;
+
+  const schedule: SQL[] = [
+    sql`${isPast} ${dir(true)}`,
+    sql`CASE WHEN NOT ${isPast} THEN ${slotAt} END ${dir(true)}`,
+    sql`CASE WHEN ${isPast} THEN ${slotAt} END ${dir(false)}`,
+  ];
+
+  if (query.sort === "schedule") return schedule;
+
+  const key: Record<Exclude<ReservationsQuery["sort"], "schedule">, SQL> = {
+    user: sql`CONCAT(COALESCE(${users.firstname}, ''), ' ', COALESCE(${users.lastname}, ''))`,
+    console: sql`COALESCE(${consoleType.name}, '')`,
+    // Un rang plutôt que le libellé : l'ordre utile est à venir, puis passées,
+    // puis annulées — pas l'ordre alphabétique des trois mots.
+    status: sql`CASE WHEN ${reservation.archived} = 1 THEN 2 WHEN ${isPast} THEN 1 ELSE 0 END`,
+  };
+
+  // Les valeurs égales gardent l'ordre chronologique, sinon la pagination
+  // remonterait deux fois la même ligne d'une page à l'autre.
+  return [sql`${key[query.sort]} ${dir(true)}`, ...schedule];
+}

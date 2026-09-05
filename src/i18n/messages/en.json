@@ -673,11 +673,11 @@
     "reservations": {
       "title": "Reservations",
       "actionBar": {
-        "toolTipRefresh": "Search...",
         "searchPlaceholder": "Search"
       },
       "searchResult": {
-        "noReservationsFound": "No reservations found"
+        "noReservationsFound": "No reservations found",
+        "filtersHint": "No reservation matches the active filters."
       },
       "table": {
         "header": {
@@ -713,12 +713,14 @@
         "a": "to",
         "sur": "of",
         "noItem": "No items",
-        "perPage": "Per page"
+        "perPage": "Per page",
+        "goToPage": "Go to page {page}"
       },
       "stats": {
         "totalReservations": "Total reservations",
         "upcomingReservations": "Upcoming reservations",
-        "pastReservations": "Past reservations"
+        "pastReservations": "Past reservations",
+        "cancelledReservations": "Cancelled reservations"
       },
       "status": {
         "upcoming": "Upcoming",
@@ -730,7 +732,11 @@
         "description": "This action is irreversible. The reservation will be cancelled and cannot be recovered.",
         "confirm": "Confirm cancellation",
         "cancel": "Go back",
-        "deleting": "Cancelling..."
+        "deleting": "Cancelling...",
+        "reasonLabel": "Cancellation reason",
+        "reasonPlaceholder": "Describe why this reservation is cancelled…",
+        "reasonRequired": "This field is required.",
+        "unknownUser": "Unknown user"
       },
       "alert": {
         "deleteSuccess": {
@@ -738,7 +744,20 @@
           "message": "The reservation has been successfully cancelled."
         },
         "errorTitle": "An error occurred",
-        "deleteError": "An error occurred while cancelling the reservation. Please try again later."
+        "deleteError": "An error occurred while cancelling the reservation. Please try again later.",
+        "fetchError": "Could not load the reservations."
+      },
+      "refresh": "Refresh",
+      "filter": {
+        "allStatuses": "All statuses",
+        "fromLabel": "From",
+        "toLabel": "To",
+        "fromPlaceholder": "Start date",
+        "toPlaceholder": "End date",
+        "invertedRange": "The start date is after the end date: no time slot can match.",
+        "remove": "Remove filter {label}",
+        "clearAll": "Clear all",
+        "resultCount": "{count, plural, =0 {no reservations} one {# reservation} other {# reservations}}"
       }
     },
     "stations": {
