@@ -969,22 +969,90 @@
       "searchPlaceholder": "Search for an accessory by name...",
       "refresh": "Refresh"
     },
-    "consolePhotos": {
+    "platforms": {
       "title": "Platforms",
-      "subtitle": "Add and replace platform photos",
-      "empty": "No platforms found",
+      "subtitle": "Manage platform photos and descriptions",
+      "searchPlaceholder": "Search for a platform by name or description...",
+      "refresh": "Refresh",
+      "edit": "Edit",
+      "editFor": "Edit platform {name}",
+      "empty": "No platforms",
+      "emptyFiltered": "No matching platform",
+      "emptyFilteredHint": "No platform matches the active filters.",
+      "stats": {
+        "total": "Platforms",
+        "withPhoto": "With photo",
+        "withoutPhoto": "Without photo",
+        "unbookable": "Not bookable"
+      },
+      "filter": {
+        "all": "All platforms",
+        "withPhoto": "With photo",
+        "withoutPhoto": "Without photo"
+      },
+      "status": {
+        "withPhoto": "With photo",
+        "withoutPhoto": "Without photo",
+        "bookable": "Bookable",
+        "unbookable": "Not bookable"
+      },
+      "filters": {
+        "clearAll": "Clear all",
+        "remove": "Remove filter {label}",
+        "resultCount": "{count, plural, =0 {no platforms} one {# platform} other {# platforms}}"
+      },
+      "view": {
+        "label": "Display",
+        "grid": "Grid view",
+        "table": "Table view"
+      },
+      "table": {
+        "photo": "Photo",
+        "name": "Platform",
+        "units": "Units",
+        "stations": "Stations",
+        "games": "Games",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "card": {
+        "units": "{active} / {total} units",
+        "stations": "{count, plural, =0 {no stations} one {# station} other {# stations}}",
+        "games": "{count, plural, =0 {no games} one {# game} other {# games}}",
+        "noDescription": "No description"
+      },
+      "dialog": {
+        "nameLocked": "Name managed by the Koha catalogue",
+        "units": "Available units",
+        "stations": "Active stations",
+        "games": "Linked games",
+        "unbookableWarning": "This platform is not offered for booking: it needs at least one available unit and one active station that carries it.",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Describe the platform as shown to users...",
+        "descriptionCount": "{count} / {max} characters",
+        "save": "Save",
+        "saving": "Saving...",
+        "current": "Current photo",
+        "noPhotoYet": "This platform has no photo yet.",
+        "remove": "Remove photo",
+        "removeConfirm": "Remove this platform's photo? This action is permanent.",
+        "removeConfirmYes": "Remove",
+        "cancel": "Cancel",
+        "close": "Close",
+        "tabFile": "File",
+        "tabLink": "Direct link"
+      },
       "alerts": {
         "fetchError": "An error occurred while loading platforms.",
         "updateSuccess": "Photo updated successfully.",
         "updateError": "An error occurred while updating the photo.",
-        "successTitle": "Success",
-        "errorTitle": "Error",
         "removeSuccess": "Photo removed successfully.",
-        "removeError": "Error while removing the photo."
-      },
-      "searchPlaceholder": "Search for a platform by name...",
-      "refresh": "Refresh",
-      "removeImage": "Remove photo"
+        "removeError": "Error while removing the photo.",
+        "descriptionSuccess": "Description saved.",
+        "descriptionError": "An error occurred while saving the description.",
+        "successTitle": "Success",
+        "errorTitle": "Error"
+      }
     },
     "gamesImages": {
       "title": "Games",

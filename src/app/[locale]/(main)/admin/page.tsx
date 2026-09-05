@@ -7,6 +7,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { PageShell, BackLink } from "@/components/layout/PageShell";
 import PoliciesTab from "@/components/admin/PoliciesTabs";
+import { normalizeAdminTab } from "@/lib/adminTabs";
 
 const UsersTab = dynamic(() => import("@/components/admin/UsersTab"), {
   loading: () => <TabLoader />,
@@ -26,12 +27,9 @@ const AccessoriesTab = dynamic(
     loading: () => <TabLoader />,
   }
 );
-const ConsolePhotosTab = dynamic(
-  () => import("@/components/admin/ConsolePhotosTab"),
-  {
-    loading: () => <TabLoader />,
-  }
-);
+const PlatformsTab = dynamic(() => import("@/components/admin/PlatformsTab"), {
+  loading: () => <TabLoader />,
+});
 const GamesImagesTab = dynamic(
   () => import("@/components/admin/GamesImagesTab"),
   {
@@ -66,7 +64,7 @@ function AdminContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const urlTab = searchParams.get("tab") || "users";
+  const urlTab = normalizeAdminTab(searchParams.get("tab"));
 
   const [activeTab, setActiveTab] = React.useState(urlTab);
   const [isPending, startTransition] = useTransition();
@@ -94,8 +92,8 @@ function AdminContent() {
         return <StationsTab />;
       case "accessories":
         return <AccessoriesTab />;
-      case "consolePhotos":
-        return <ConsolePhotosTab />;
+      case "platforms":
+        return <PlatformsTab />;
       case "games":
         return <GamesImagesTab />;
       case "emails":
