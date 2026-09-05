@@ -3,6 +3,7 @@ import db from "@/db";
 import { consoleType, games, stations } from "@/db/schema";
 import { and, asc, eq, inArray, isNotNull, sql } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
+import { parseIds } from "@/lib/parseIds";
 
 const MAX_PAGE_SIZE = 100;
 
@@ -23,10 +24,9 @@ async function consoleTypeIdsForStation(stationId: number): Promise<number[]> {
     columns: { consoles: true },
     where: eq(stations.id, stationId),
   });
-  if (!station || !Array.isArray(station.consoles)) return [];
-  return (station.consoles as unknown[])
-    .map((value) => Number(value))
-    .filter((value) => Number.isInteger(value) && value > 0);
+  // Même lecture que partout ailleurs. La colonne vient de notre propre
+  // écriture, désormais validée, mais rien ne garantit les lignes antérieures.
+  return parseIds(station?.consoles);
 }
 
 /**
