@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { normalizeAdminTab } from "@/lib/adminTabs";
 import {
   Users,
   Calendar,
@@ -31,8 +32,8 @@ const TABS = [
     icon: Cable,
   },
   {
-    value: "consolePhotos",
-    translationKey: "consolePhotos.title",
+    value: "platforms",
+    translationKey: "platforms.title",
     icon: Computer,
   },
   {
@@ -59,7 +60,7 @@ export default function AdminTabs() {
   const t = useTranslations("admin");
   const searchParams = useSearchParams();
 
-  const activeTab = searchParams.get("tab") || "users";
+  const activeTab = normalizeAdminTab(searchParams.get("tab"));
 
   return (
     <div className="overflow-auto pb-4">

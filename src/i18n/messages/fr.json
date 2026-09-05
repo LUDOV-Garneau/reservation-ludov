@@ -968,22 +968,90 @@
       "searchPlaceholder": "Rechercher un accessoire par nom...",
       "refresh": "Rafraîchir"
     },
-    "consolePhotos": {
+    "platforms": {
       "title": "Plateformes",
-      "subtitle": "Ajouter et remplacer les photos des plateformes",
-      "empty": "Aucune plateforme trouvée",
+      "subtitle": "Gérer les photos et les descriptions des plateformes",
+      "searchPlaceholder": "Rechercher une plateforme par nom ou description...",
+      "refresh": "Rafraîchir",
+      "edit": "Modifier",
+      "editFor": "Modifier la plateforme {name}",
+      "empty": "Aucune plateforme",
+      "emptyFiltered": "Aucune plateforme ne correspond",
+      "emptyFilteredHint": "Aucune plateforme ne correspond aux filtres actifs.",
+      "stats": {
+        "total": "Plateformes",
+        "withPhoto": "Avec photo",
+        "withoutPhoto": "Sans photo",
+        "unbookable": "Non réservables"
+      },
+      "filter": {
+        "all": "Toutes les plateformes",
+        "withPhoto": "Avec photo",
+        "withoutPhoto": "Sans photo"
+      },
+      "status": {
+        "withPhoto": "Avec photo",
+        "withoutPhoto": "Sans photo",
+        "bookable": "Réservable",
+        "unbookable": "Non réservable"
+      },
+      "filters": {
+        "clearAll": "Tout effacer",
+        "remove": "Retirer le filtre {label}",
+        "resultCount": "{count, plural, =0 {aucune plateforme} one {# plateforme} other {# plateformes}}"
+      },
+      "view": {
+        "label": "Affichage",
+        "grid": "Vue en grille",
+        "table": "Vue en tableau"
+      },
+      "table": {
+        "photo": "Photo",
+        "name": "Plateforme",
+        "units": "Exemplaires",
+        "stations": "Stations",
+        "games": "Jeux",
+        "status": "Statut",
+        "actions": "Actions"
+      },
+      "card": {
+        "units": "{active} / {total} exemplaires",
+        "stations": "{count, plural, =0 {aucune station} one {# station} other {# stations}}",
+        "games": "{count, plural, =0 {aucun jeu} one {# jeu} other {# jeux}}",
+        "noDescription": "Aucune description"
+      },
+      "dialog": {
+        "nameLocked": "Nom géré par le catalogue Koha",
+        "units": "Exemplaires libres",
+        "stations": "Stations actives",
+        "games": "Jeux rattachés",
+        "unbookableWarning": "Cette plateforme n'est pas proposée à la réservation : il lui faut au moins un exemplaire disponible et une station active qui la porte.",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Décrire la plateforme telle qu'elle est présentée aux usagers...",
+        "descriptionCount": "{count} / {max} caractères",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "current": "Photo actuelle",
+        "noPhotoYet": "Cette plateforme n'a pas encore de photo.",
+        "remove": "Retirer la photo",
+        "removeConfirm": "Retirer la photo de cette plateforme ? Cette action est définitive.",
+        "removeConfirmYes": "Retirer",
+        "cancel": "Annuler",
+        "close": "Fermer",
+        "tabFile": "Fichier",
+        "tabLink": "Lien direct"
+      },
       "alerts": {
         "fetchError": "Erreur lors du chargement des plateformes.",
         "updateSuccess": "Photo mise à jour avec succès.",
         "updateError": "Erreur lors de la mise à jour de la photo.",
-        "successTitle": "Succès",
-        "errorTitle": "Erreur",
         "removeSuccess": "Photo retirée avec succès.",
-        "removeError": "Erreur lors du retrait de la photo."
-      },
-      "searchPlaceholder": "Rechercher une plateforme par nom...",
-      "refresh": "Rafraîchir",
-      "removeImage": "Retirer la photo"
+        "removeError": "Erreur lors du retrait de la photo.",
+        "descriptionSuccess": "Description enregistrée.",
+        "descriptionError": "Erreur lors de l'enregistrement de la description.",
+        "successTitle": "Succès",
+        "errorTitle": "Erreur"
+      }
     },
     "gamesImages": {
       "title": "Jeux",

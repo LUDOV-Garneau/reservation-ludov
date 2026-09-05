@@ -3,17 +3,15 @@ import db from "@/db";
 import { consoleType } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
+import { parsePlatformPatch } from "@/lib/platformUpdate";
 
-/** Chemin local (/api/images/...) ou URL https héritée (IGDB/MobyGames). */
-function isValidPicture(value: string): boolean {
-  if (value.startsWith("/api/images/") && !value.includes("..")) return true;
-  try {
-    return new URL(value).protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
+/**
+ * Mise à jour d'une plateforme par l'admin : photo et description.
+ *
+ * Le nom n'est pas modifiable — il vient du catalogue Koha, que la synchro
+ * nocturne réapplique. Le refus est prononcé ici, pas seulement en masquant le
+ * champ dans l'interface. Voir `src/lib/platformUpdate.ts` pour la validation.
+ */
 export const PATCH = withAdmin<{ id: string }>(async (req, _admin, params) => {
   try {
     const id = Number(params.id);
@@ -24,19 +22,10 @@ export const PATCH = withAdmin<{ id: string }>(async (req, _admin, params) => {
       );
     }
 
-    const body = (await req.json().catch(() => null)) as {
-      picture?: string | null;
-    } | null;
-    if (!body || body.picture === undefined) {
+    const parsed = parsePlatformPatch(await req.json().catch(() => null));
+    if (!parsed.ok) {
       return NextResponse.json(
-        { success: false, error: "Champ picture manquant." },
-        { status: 400 },
-      );
-    }
-
-    if (body.picture !== null && !isValidPicture(body.picture)) {
-      return NextResponse.json(
-        { success: false, error: "Chemin d'image invalide." },
+        { success: false, error: parsed.error },
         { status: 400 },
       );
     }
@@ -52,14 +41,11 @@ export const PATCH = withAdmin<{ id: string }>(async (req, _admin, params) => {
       );
     }
 
-    await db
-      .update(consoleType)
-      .set({ picture: body.picture })
-      .where(eq(consoleType.id, id));
+    await db.update(consoleType).set(parsed.patch).where(eq(consoleType.id, id));
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, platform: { id, ...parsed.patch } });
   } catch (error) {
-    console.error("Erreur mise à jour photo console:", error);
+    console.error("Erreur mise à jour plateforme:", error);
     return NextResponse.json(
       { success: false, error: "Erreur lors de la mise à jour." },
       { status: 500 },
