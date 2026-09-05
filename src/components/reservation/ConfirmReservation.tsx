@@ -15,16 +15,45 @@ import { useReservation } from "@/context/ReservationContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import ReservationPhoto from "@/components/reservation/components/ReservationPhoto";
+import type { Console } from "@/types/console";
 
 interface ReservationData {
   jeux: Array<{ id: number; nom: string; picture?: string; author?: string }>;
-  console: { id: number; nom: string; image?: string } | null;
+  console: { id: number; nom: string; image: string | null } | null;
   accessoires: Array<{ id: number; nom: string }>;
   date: string | null;
   time: string | null;
   station: { id: number; nom: string };
   reservationId: string;
   cours: { id: number; code_cours: string; nom_cours: string } | null;
+}
+
+/**
+ * Ramène les deux origines possibles de la plateforme à une seule forme.
+ * `get-reservation` renvoie `{id, nom, image}` ; le contexte porte un `Console`
+ * (`{id, name, picture}`). Le `json` étant `any`, TypeScript ne signalait pas le
+ * mélange.
+ */
+function normalizeConsole(
+  fromApi: { id?: number; nom?: string; image?: string | null } | null,
+  fromContext: Console | null,
+): ReservationData["console"] {
+  if (fromApi?.id) {
+    return {
+      id: fromApi.id,
+      nom: fromApi.nom ?? "",
+      image: fromApi.image ?? null,
+    };
+  }
+  if (fromContext) {
+    return {
+      id: fromContext.id,
+      nom: fromContext.name,
+      image: fromContext.picture,
+    };
+  }
+  return null;
 }
 
 export default function ConfirmReservation() {
@@ -66,7 +95,9 @@ export default function ConfirmReservation() {
         const json = await res.json();
         setData({
           jeux: json.jeux || [],
-          console: json.console || selectedConsole || null,
+          // L'API dit `{nom, image}`, le contexte dit `{name, picture}` : sans
+          // cette normalisation, le repli affichait une carte sans nom ni photo.
+          console: normalizeConsole(json.console, selectedConsole),
           accessoires: json.accessoires || [],
           date:
             json.date ||
@@ -167,8 +198,13 @@ export default function ConfirmReservation() {
                 {t("reservation.confirm.selectedConsole")}
               </h2>
               <div className="flex items-center gap-4">
-                <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
-                  <Gamepad2 className="h-10 w-10 text-gray-300 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <div className="relative w-24 h-24 shrink-0 rounded-lg overflow-hidden bg-muted">
+                  <ReservationPhoto
+                    picture={data.console.image}
+                    name={data.console.nom}
+                    sizes="96px"
+                    iconClassName="h-10 w-10"
+                  />
                 </div>
                 <div>
                   <p className="text-xl font-medium">{data.console.nom}</p>

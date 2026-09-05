@@ -225,7 +225,9 @@
       "detailsTitle": "Détails de la réservation",
       "goHome": "Retourner à l'accueil",
       "detailsBtn": "Voir les détails de la réservation",
-      "reservationId": "Identifiant de réservation :"
+      "reservationId": "Identifiant de réservation :",
+      "platform": "Plateforme réservée",
+      "games": "Jeux réservés"
     },
     "details": {
       "cancelButton": "Annuler",

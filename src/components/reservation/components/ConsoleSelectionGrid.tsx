@@ -12,6 +12,7 @@ import {
   Monitor,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import ReservationPhoto from "./ReservationPhoto";
 
 interface ConsoleSelectionGridProps {
   selectedId: number | null;
@@ -245,11 +246,15 @@ export default function ConsoleSelectionGrid({
                 ${isSelected ? "ring-2 ring-cyan-500 scale-[1.02]" : ""}
               `}
             >
-              <div className="relative w-full h-48 bg-gray-100">
-                <div className="flex items-center justify-center h-full text-gray-400">
-                  <Monitor className="h-12 w-12" />
-                </div>
+              <div className="relative w-full h-48 bg-muted">
+                <ReservationPhoto
+                  picture={console.picture}
+                  name={console.name}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, (max-width: 1536px) 33vw, 25vw"
+                />
 
+                {/* Le dégradé porte le nom et la disponibilité écrits par-dessus :
+                    il doit rester lisible avec comme sans photo. */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
 
                 {console.id === reservedId && (

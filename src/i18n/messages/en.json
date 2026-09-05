@@ -225,7 +225,9 @@
       "detailsTitle": "Reservation Details",
       "goHome": "Return to Home",
       "detailsBtn": "View Reservation Details",
-      "reservationId": "Reservation ID :"
+      "reservationId": "Reservation ID :",
+      "platform": "Reserved platform",
+      "games": "Reserved games"
     },
     "details": {
       "cancelButton": "Cancel",
