@@ -68,6 +68,24 @@ describe("readStationPayload — plateformes", () => {
     }
   });
 
+  it("refuse les coercitions que Number() laissait passer", () => {
+    // `true` valait la plateforme 1, `[5]` la 5, `"0x10"` la 16 : une station
+    // se retrouvait rattachée à des plateformes que personne n'avait choisies.
+    for (const consoles of [
+      [true],
+      [1, true],
+      [[5]],
+      ["1e3"],
+      ["0x10"],
+      [" 4 "],
+    ]) {
+      expect(readStationPayload({ name: "Poste 1", consoles })).toEqual({
+        ok: false,
+        error: "consoles_invalid",
+      });
+    }
+  });
+
   it("accepte des identifiants transmis en chaînes", () => {
     const result = readStationPayload({
       name: "Poste 1",

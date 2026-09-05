@@ -16,13 +16,18 @@ export function parseIds(raw: unknown): number[] {
 
   const ids: number[] = [];
   for (const value of raw) {
-    const id = toId(value);
+    const id = toPositiveId(value);
     if (id !== null && !ids.includes(id)) ids.push(id);
   }
   return ids;
 }
 
-function toId(value: unknown): number | null {
+/**
+ * Un identifiant, ou `null` si la valeur n'en est pas un. Exposé pour que les
+ * lecteurs qui doivent *rejeter* le corps entier (plutôt que filtrer) appliquent
+ * exactement la même règle — voir `readConsoles` dans `stationUpdate.ts`.
+ */
+export function toPositiveId(value: unknown): number | null {
   if (typeof value === "number") {
     return Number.isSafeInteger(value) && value > 0 ? value : null;
   }

@@ -7,6 +7,8 @@
  * du nom, existence des plateformes — restent dans la route.
  */
 
+import { toPositiveId } from "@/lib/parseIds";
+
 export const STATION_NAME_MAX_LENGTH = 255;
 
 export type StationPayload = {
@@ -60,9 +62,10 @@ function readConsoles(
 
   const ids: number[] = [];
   for (const entry of raw) {
-    const id = typeof entry === "number" ? entry : Number(entry);
-    if (!Number.isInteger(id) || id <= 0)
-      return { ok: false, error: "consoles_invalid" };
+    // `toPositiveId` et non `Number(entry)` : ce dernier acceptait `true`
+    // comme la plateforme 1, `[5]` comme la 5, et `"0x10"` comme la 16.
+    const id = toPositiveId(entry);
+    if (id === null) return { ok: false, error: "consoles_invalid" };
     if (!ids.includes(id)) ids.push(id);
   }
 
