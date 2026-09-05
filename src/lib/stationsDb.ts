@@ -1,6 +1,10 @@
 import db from "@/db";
 import { consoleType, stations } from "@/db/schema";
 import { and, inArray, sql } from "drizzle-orm";
+import {
+  projectStationConsoles,
+  readConsolesColumn,
+} from "@/lib/stationProjection";
 
 /**
  * Accès base partagés par `POST /api/admin/stations` et
@@ -39,16 +43,16 @@ export async function findUnknownConsoleIds(ids: number[]): Promise<number[]> {
   return ids.filter((id) => !known.has(id));
 }
 
-/** Résout les identifiants de plateformes en noms, en une requête pour toute la page. */
+/**
+ * Résout les identifiants de plateformes en noms, en une requête pour toute la
+ * page. L'alignement `consoles` / `consolesId` est garanti par
+ * `projectStationConsoles`, qui est testé.
+ */
 export async function withConsoleNames(
   rows: (typeof stations.$inferSelect)[],
 ) {
   const allIds = [
-    ...new Set(
-      rows.flatMap((station) =>
-        Array.isArray(station.consoles) ? (station.consoles as number[]) : [],
-      ),
-    ),
+    ...new Set(rows.flatMap((station) => readConsolesColumn(station.consoles))),
   ];
 
   const nameById = new Map<number, string>();
@@ -60,17 +64,11 @@ export async function withConsoleNames(
     consoleRows.forEach((row) => nameById.set(row.id, row.name));
   }
 
-  return rows.map((station) => {
-    const consolesId = Array.isArray(station.consoles)
-      ? (station.consoles as number[])
-      : [];
-    return {
-      ...station,
-      consoles: consolesId.map((id) => nameById.get(id) ?? "").filter(Boolean),
-      consolesId,
-      isActive: Boolean(station.isActive),
-    };
-  });
+  return rows.map((station) => ({
+    ...station,
+    ...projectStationConsoles(station.consoles, nameById),
+    isActive: Boolean(station.isActive),
+  }));
 }
 
 /** Identifiants des plateformes dont le nom contient `search`. */
