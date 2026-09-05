@@ -57,3 +57,13 @@ export function slotsOverlap(a: string, b: string): boolean {
     SESSION_DURATION_HOURS * 60
   );
 }
+
+/**
+ * Les `datetime` MySQL arrivent en `"2026-08-29 15:18:00"`. Passé tel quel à
+ * `new Date()`, ce format n'est pas garanti par la spec ; on le normalise.
+ */
+export function parseDbDate(value: string | null): Date | null {
+  if (!value) return null;
+  const date = new Date(value.includes("T") ? value : value.replace(" ", "T"));
+  return Number.isNaN(date.getTime()) ? null : date;
+}

@@ -946,12 +946,45 @@
     "accessories": {
       "title": "Accessories",
       "subtitle": "Manage accessory visibility and compatible platforms",
-      "empty": "No accessories in the catalog",
-      "noConsole": "No platform",
+      "searchPlaceholder": "Search by name, Koha ID or platform...",
+      "refresh": "Refresh",
       "editConsoles": "Platforms",
-      "editDialogTitle": "Compatible platforms: {name}",
+      "editFor": "Edit accessory {name}",
+      "toggleVisibility": "Visibility of {name}",
+      "noConsole": "No platform",
       "cancel": "Cancel",
       "save": "Save",
+      "empty": "No accessories in the catalog",
+      "emptyFiltered": "No matching accessories",
+      "emptyFilteredHint": "No accessory matches the active filters.",
+      "stats": {
+        "total": "Accessories",
+        "visible": "Visible",
+        "hidden": "Hidden",
+        "withoutConsole": "Without platform"
+      },
+      "status": {
+        "visible": "Visible",
+        "hidden": "Hidden"
+      },
+      "filter": {
+        "allPlatforms": "All platforms",
+        "withoutPlatform": "Without platform",
+        "unknownPlatform": "Unknown platform",
+        "allVisibility": "All states",
+        "visibleOnly": "Visible only",
+        "hiddenOnly": "Hidden only"
+      },
+      "filters": {
+        "clearAll": "Clear all",
+        "remove": "Remove filter {label}",
+        "resultCount": "{count, plural, =0 {no accessories} one {# accessory} other {# accessories}}"
+      },
+      "view": {
+        "label": "Display",
+        "grid": "Grid view",
+        "table": "Table view"
+      },
       "table": {
         "name": "Name",
         "kohaId": "Koha ID",
@@ -959,15 +992,51 @@
         "visible": "Visible",
         "actions": "Actions"
       },
+      "card": {
+        "kohaId": "Koha #{id}"
+      },
+      "dialog": {
+        "nameLocked": "Name and identifier managed by the Koha catalog",
+        "lastUpdated": "Last updated",
+        "neverUpdated": "Never updated",
+        "noConsoleWarning": "Without a compatible platform, this accessory will never be offered during a booking."
+      },
+      "bulk": {
+        "selected": "{count, plural, one {# accessory selected} other {# accessories selected}}",
+        "selectAll": "Select all on this page",
+        "selectOne": "Select {name}",
+        "clearSelection": "Clear selection",
+        "show": "Show",
+        "hide": "Hide",
+        "consoles": "Platforms",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "apply": "Apply",
+        "processing": "Processing...",
+        "confirmShowTitle": "Show {count, plural, one {# accessory} other {# accessories}}?",
+        "confirmShowDescription": "These accessories will be offered during bookings again.",
+        "confirmHideTitle": "Hide {count, plural, one {# accessory} other {# accessories}}?",
+        "confirmHideDescription": "These accessories will no longer be offered during bookings. Existing bookings are unaffected.",
+        "consolesTitle": "Platforms for {count, plural, one {# accessory} other {# accessories}}",
+        "consolesDescription": "Checked platforms will be added or removed; the others stay untouched.",
+        "consolesSetWarning": "Careful: the checked platforms will entirely replace those of the selected accessories.",
+        "mode": {
+          "add": "Add",
+          "remove": "Remove",
+          "set": "Replace"
+        },
+        "success": "{count, plural, one {# accessory updated} other {# accessories updated}}.",
+        "partial": "{succeeded} succeeded, {failed} failed. The list has been reloaded.",
+        "error": "An error occurred during the bulk action."
+      },
       "alerts": {
         "fetchError": "An error occurred while loading accessories.",
         "updateSuccess": "Accessory updated successfully.",
         "updateError": "An error occurred while updating the accessory.",
         "successTitle": "Success",
+        "partialTitle": "Finished with errors",
         "errorTitle": "Error"
-      },
-      "searchPlaceholder": "Search for an accessory by name...",
-      "refresh": "Refresh"
+      }
     },
     "platforms": {
       "title": "Platforms",

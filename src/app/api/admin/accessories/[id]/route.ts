@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 import { accessoires, consoleType } from "@/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, sql, type SQL } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
 
 /**
@@ -40,12 +40,14 @@ export const PATCH = withAdmin<{ id: string }>(async (req, _admin, params) => {
       );
     }
 
-    const updates: Partial<{
-      hidden: number;
-      consoles: number[];
-      lastUpdatedAt: string;
-    }> = {
-      lastUpdatedAt: new Date().toISOString().slice(0, 19).replace("T", " "),
+    // `NOW()` et non une date construite dans Node : la colonne est lue telle
+    // quelle à l'affichage, et une heure UTC s'y afficherait décalée du fuseau.
+    const updates: {
+      hidden?: number;
+      consoles?: number[];
+      lastUpdatedAt: SQL;
+    } = {
+      lastUpdatedAt: sql`NOW()`,
     };
 
     if (body.hidden !== undefined) {

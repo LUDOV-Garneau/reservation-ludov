@@ -1,12 +1,12 @@
 "use client";
 
 import { TabsContent } from "@/components/ui/tabs";
-import AccessoriesTable from "@/components/admin/accessoires/AccessoriesTable";
+import AccessoriesManager from "@/components/admin/accessoires/AccessoriesManager";
 
 export default function AccessoriesTab() {
   return (
     <TabsContent value="accessories">
-      <AccessoriesTable />
+      <AccessoriesManager />
     </TabsContent>
   );
 }

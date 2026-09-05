@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Clock, Globe, Mail, PenLine, User } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { parseDbDate } from "../types";
+import { parseDbDate } from "@/lib/dates";
 import type { UserDetails } from "./useUserDetail";
 
 function Field({

@@ -945,12 +945,45 @@
     "accessories": {
       "title": "Accessoires",
       "subtitle": "Gérer la visibilité et les plateformes compatibles des accessoires",
-      "empty": "Aucun accessoire dans le catalogue",
-      "noConsole": "Aucune plateforme",
+      "searchPlaceholder": "Rechercher par nom, ID Koha ou plateforme...",
+      "refresh": "Rafraîchir",
       "editConsoles": "Plateformes",
-      "editDialogTitle": "Plateformes compatibles : {name}",
+      "editFor": "Modifier l'accessoire {name}",
+      "toggleVisibility": "Visibilité de {name}",
+      "noConsole": "Aucune plateforme",
       "cancel": "Annuler",
       "save": "Enregistrer",
+      "empty": "Aucun accessoire dans le catalogue",
+      "emptyFiltered": "Aucun accessoire ne correspond",
+      "emptyFilteredHint": "Aucun accessoire ne correspond aux filtres actifs.",
+      "stats": {
+        "total": "Accessoires",
+        "visible": "Visibles",
+        "hidden": "Masqués",
+        "withoutConsole": "Sans plateforme"
+      },
+      "status": {
+        "visible": "Visible",
+        "hidden": "Masqué"
+      },
+      "filter": {
+        "allPlatforms": "Toutes les plateformes",
+        "withoutPlatform": "Sans plateforme",
+        "unknownPlatform": "Plateforme inconnue",
+        "allVisibility": "Tous les états",
+        "visibleOnly": "Visibles seulement",
+        "hiddenOnly": "Masqués seulement"
+      },
+      "filters": {
+        "clearAll": "Tout effacer",
+        "remove": "Retirer le filtre {label}",
+        "resultCount": "{count, plural, =0 {aucun accessoire} one {# accessoire} other {# accessoires}}"
+      },
+      "view": {
+        "label": "Affichage",
+        "grid": "Vue en grille",
+        "table": "Vue en tableau"
+      },
       "table": {
         "name": "Nom",
         "kohaId": "ID Koha",
@@ -958,15 +991,51 @@
         "visible": "Visible",
         "actions": "Actions"
       },
+      "card": {
+        "kohaId": "Koha #{id}"
+      },
+      "dialog": {
+        "nameLocked": "Nom et identifiant gérés par le catalogue Koha",
+        "lastUpdated": "Dernière modification",
+        "neverUpdated": "Jamais modifié",
+        "noConsoleWarning": "Sans plateforme compatible, cet accessoire ne sera jamais proposé lors d'une réservation."
+      },
+      "bulk": {
+        "selected": "{count, plural, one {# accessoire sélectionné} other {# accessoires sélectionnés}}",
+        "selectAll": "Tout sélectionner sur cette page",
+        "selectOne": "Sélectionner {name}",
+        "clearSelection": "Effacer la sélection",
+        "show": "Afficher",
+        "hide": "Masquer",
+        "consoles": "Plateformes",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "apply": "Appliquer",
+        "processing": "Traitement...",
+        "confirmShowTitle": "Afficher {count, plural, one {# accessoire} other {# accessoires}} ?",
+        "confirmShowDescription": "Ces accessoires redeviendront proposables lors d'une réservation.",
+        "confirmHideTitle": "Masquer {count, plural, one {# accessoire} other {# accessoires}} ?",
+        "confirmHideDescription": "Ces accessoires ne seront plus proposés lors d'une réservation. Les réservations déjà enregistrées ne changent pas.",
+        "consolesTitle": "Plateformes de {count, plural, one {# accessoire} other {# accessoires}}",
+        "consolesDescription": "Les plateformes cochées seront ajoutées ou retirées ; les autres restent inchangées.",
+        "consolesSetWarning": "Attention : les plateformes cochées remplaceront entièrement celles des accessoires sélectionnés.",
+        "mode": {
+          "add": "Ajouter",
+          "remove": "Retirer",
+          "set": "Remplacer"
+        },
+        "success": "{count, plural, one {# accessoire mis à jour} other {# accessoires mis à jour}}.",
+        "partial": "{succeeded} réussite(s), {failed} échec(s). La liste a été rechargée.",
+        "error": "Erreur lors de l'action groupée."
+      },
       "alerts": {
         "fetchError": "Erreur lors du chargement des accessoires.",
         "updateSuccess": "Accessoire mis à jour avec succès.",
         "updateError": "Erreur lors de la mise à jour de l'accessoire.",
         "successTitle": "Succès",
+        "partialTitle": "Terminé avec des erreurs",
         "errorTitle": "Erreur"
-      },
-      "searchPlaceholder": "Rechercher un accessoire par nom...",
-      "refresh": "Rafraîchir"
+      }
     },
     "platforms": {
       "title": "Plateformes",
