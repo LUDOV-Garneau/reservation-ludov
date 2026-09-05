@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 
 export type AlertType = "success" | "destructive" | "info" | "warning";
 
@@ -20,6 +21,7 @@ export function useDeleteReservationAction({
   onAlert,
   onSuccess,
 }: UseDeleteReservationActionParams) {
+  const t = useTranslations("admin.reservations");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [reason, setReason] = useState("");
@@ -70,15 +72,14 @@ export function useDeleteReservationAction({
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(
-            (data as { error?: string }).error ||
-              "Erreur lors de l'annulation de la réservation",
+            (data as { error?: string }).error || t("alert.deleteError"),
           );
         }
 
         onAlert(
           "success",
-          "La réservation a été annulée avec succès",
-          "Réservation annulée",
+          t("alert.deleteSuccess.message"),
+          t("alert.deleteSuccess.title"),
         );
         onSuccess(reason.trim());
         setOpen(false);
@@ -86,20 +87,18 @@ export function useDeleteReservationAction({
         console.error("Error cancelling reservation:", error);
         onAlert(
           "destructive",
-          error instanceof Error
-            ? error.message
-            : "Erreur lors de l'annulation de la réservation",
-          "Erreur",
+          error instanceof Error ? error.message : t("alert.deleteError"),
+          t("alert.errorTitle"),
         );
       } finally {
         setLoading(false);
       }
     },
-    [targetReservation.id, onAlert, onSuccess, loading, reason],
+    [targetReservation.id, onAlert, onSuccess, loading, reason, t],
   );
 
   const emailOrPlaceholder =
-    targetReservation.userEmail || "Utilisateur inconnu";
+    targetReservation.userEmail || t("deleteDialog.unknownUser");
 
   return {
     open,

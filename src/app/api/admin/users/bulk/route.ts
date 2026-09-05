@@ -4,6 +4,7 @@ import { users, reservation } from "@/db/schema";
 import { eq, inArray, sql } from "drizzle-orm";
 import { sendResetPasswordEmail } from "@/lib/sendEmail";
 import { withAdmin } from "@/lib/withAuth";
+import { parseIds } from "@/lib/parseIds";
 
 const ACTIONS = ["reset-password", "delete"] as const;
 type BulkAction = (typeof ACTIONS)[number];
@@ -41,13 +42,10 @@ export const POST = withAdmin(async (req, authUser) => {
 
     // L'id de l'appelant est retiré silencieusement : les endpoints unitaires
     // refusent déjà l'auto-action, ce n'est pas un échec à rapporter.
-    const userIds = [
-      ...new Set(
-        body.userIds
-          .map((value: unknown) => Number(value))
-          .filter((id: number) => Number.isFinite(id) && id > 0 && id !== authUser.id),
-      ),
-    ] as number[];
+    // `parseIds` et non `Number(value)` : ce dernier acceptait `true` comme
+    // l'utilisateur 1 et `[5]` comme le 5. Il laissait aussi passer les
+    // décimaux, `Number.isFinite(1.5)` étant vrai.
+    const userIds = parseIds(body.userIds).filter((id) => id !== authUser.id);
 
     if (userIds.length === 0) {
       return NextResponse.json({ error: "Aucun utilisateur valide" }, { status: 400 });

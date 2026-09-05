@@ -110,10 +110,10 @@ function ReservationHeader({
   const t = useTranslations();
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-gray-200 bg-[white] shadow-md p-6 sm:p-8 mb-8 lg:text-left">
+    <div className="relative overflow-hidden rounded-xl border bg-card shadow-md p-6 sm:p-8 mb-8 lg:text-left">
       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
         <div className="flex-1 space-y-4">
-          <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
+          <h1 className="text-4xl lg:text-5xl font-bold tracking-tight">
             Détails de la réservation
           </h1>
 
@@ -132,7 +132,7 @@ function ReservationHeader({
             <ExternalLink className="h-5 w-5 group-hover:text-cyan-500 transition-colors" />
           </Link>
 
-          <div className="flex flex-col sm:flex-row md:justify-start gap-6 text-lg text-gray-600">
+          <div className="flex flex-col sm:flex-row md:justify-start gap-6 text-lg text-muted-foreground">
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-cyan-100 flex items-center justify-center">
                 <Calendar className="h-5 w-5 text-cyan-600" />
@@ -276,7 +276,7 @@ export default function DetailsReservation({
             variant={alert.type === "destructive" ? "destructive" : "default"}
             className={`mb-6 ${
               alert.type === "success"
-                ? "border-green-200 bg-green-50 text-green-900"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-100"
                 : ""
             }`}
             role="status"
@@ -285,7 +285,7 @@ export default function DetailsReservation({
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 flex-1">
                 {alert.type === "success" ? (
-                  <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 mt-0.5 flex-shrink-0" />
                 ) : (
                   <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
                 )}
@@ -340,7 +340,7 @@ export default function DetailsReservation({
           <div>
             <div className="flex items-center gap-3 mb-6">
               <Gamepad2 className="h-6 w-6 text-cyan-600" />
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl font-bold">
                 {t("reservation.details.selectedGames")}
               </h2>
             </div>
@@ -358,8 +358,8 @@ export default function DetailsReservation({
             ) : (
               <Card>
                 <CardContent className="p-12 text-center">
-                  <Gamepad2 className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                  <p className="text-gray-500 font-medium">
+                  <Gamepad2 className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                  <p className="text-muted-foreground font-medium">
                     {t("reservation.details.noGames")}
                   </p>
                 </CardContent>
@@ -374,7 +374,7 @@ export default function DetailsReservation({
             <div className="flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <Monitor className="h-6 w-6 text-cyan-600" />
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold">
                   {t("reservation.details.selectedConsole")}
                 </h2>
               </div>
@@ -383,7 +383,7 @@ export default function DetailsReservation({
             <div className="flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <Cable className="h-6 w-6 text-cyan-600" />
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold">
                   {t("reservation.details.selectedAccessory")}
                 </h2>
               </div>

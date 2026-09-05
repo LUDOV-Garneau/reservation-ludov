@@ -12,6 +12,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import ReservationPhoto from "./ReservationPhoto";
 
 interface SelectedConsoleCardProps {
   console: Console | null;
@@ -72,10 +73,13 @@ export default function SelectedConsoleCard({
 
   return (
     <div className="w-full space-y-4">
-      <div className="relative w-full h-48 rounded-2xl overflow-hidden group bg-gray-100">
-        <div className="flex items-center justify-center h-full text-gray-400">
-          <Monitor className="h-16 w-16" />
-        </div>
+      <div className="relative w-full h-48 rounded-2xl overflow-hidden group bg-muted">
+        <ReservationPhoto
+          picture={console.picture}
+          name={console.name}
+          sizes="(max-width: 1024px) 100vw, 33vw"
+          iconClassName="h-16 w-16"
+        />
 
         <button
           onClick={onClear}

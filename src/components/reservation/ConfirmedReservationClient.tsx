@@ -10,8 +10,10 @@ type Reservation = {
   station: string;
   date: string;
   heure: string;
-  console: { nom: string; picture?: string };
-  jeux: { nom: string; picture: string; biblio: number }[];
+  // `picture` est nullable côté API (plateforme ou jeu sans photo) : le
+  // déclarer non-null masquait le cas au lieu de le traiter.
+  console: { nom: string; picture: string | null } | null;
+  jeux: { nom: string; picture: string | null; biblio?: number }[];
   accessoires?: { id: number; nom: string }[];
   archived: boolean;
 };
@@ -120,6 +122,8 @@ export default function ConfirmedReservationClient({
       reservationId={reservationId}
       date={reservation.date}
       heure={reservation.heure}
+      console={reservation.console ?? null}
+      jeux={reservation.jeux ?? []}
     />
   );
 }

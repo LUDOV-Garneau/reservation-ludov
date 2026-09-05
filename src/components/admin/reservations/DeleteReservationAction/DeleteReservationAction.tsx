@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -11,13 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Calendar,
-  Clock,
-  User,
-  Loader2,
-  Trash2,
-} from "lucide-react";
+import { Calendar, Clock, User, Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   useDeleteReservationAction,
@@ -38,6 +33,7 @@ export default function DeleteReservationAction({
   onSuccess,
   children,
 }: DeleteReservationActionProps) {
+  const t = useTranslations("admin.reservations.deleteDialog");
   const {
     open,
     loading,
@@ -56,25 +52,27 @@ export default function DeleteReservationAction({
       {children({ open: handleOpen, loading })}
 
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-[480px] max-w-[calc(100vw-2rem)] p-0 overflow-hidden">
-          <div className="border-b px-6 py-4 bg-red-50">
+        <DialogContent className="max-w-[calc(100vw-2rem)] overflow-hidden p-0 sm:max-w-[480px]">
+          {/* Bandeau d'avertissement en paire claire/sombre : le bg-red-50 /
+              text-red-900 d'origine devenait illisible en thème sombre. */}
+          <div className="border-b bg-rose-50 px-6 py-4 dark:bg-rose-950">
             <div className="flex-1 pt-0.5">
-              <DialogTitle className="text-lg text-red-900">
-                Annuler la réservation
+              <DialogTitle className="text-lg text-rose-900 dark:text-rose-100">
+                {t("title")}
               </DialogTitle>
-              <DialogDescription className="text-sm text-red-700 mt-1">
-                Cette action est définitive et ne peut pas être annulée.
+              <DialogDescription className="mt-1 text-sm text-rose-700 dark:text-rose-300">
+                {t("description")}
               </DialogDescription>
             </div>
           </div>
 
-          <form onSubmit={handleConfirm} className="px-6 pb-5 pt-5 space-y-5">
-            <div className="flex flex-col gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200">
-              <div className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                <User className="h-4 w-4 text-gray-600 shrink-0" />
+          <form onSubmit={handleConfirm} className="space-y-5 px-6 pb-5 pt-5">
+            <div className="flex flex-col gap-2 rounded-lg border bg-muted/50 p-3">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <User className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <span className="truncate">{emailOrPlaceholder}</span>
               </div>
-              <div className="flex flex-wrap gap-3 text-xs text-gray-600">
+              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5 shrink-0" />
                   <span>{targetReservation.date}</span>
@@ -91,61 +89,58 @@ export default function DeleteReservationAction({
             <div className="space-y-2">
               <Label
                 htmlFor="cancellation-reason"
-                className="text-sm font-medium text-gray-900"
+                className="text-sm font-medium"
               >
-                Raison d&apos;annulation{" "}
-                <span className="text-red-600" aria-hidden>
+                {t("reasonLabel")}{" "}
+                <span className="text-destructive" aria-hidden>
                   *
                 </span>
               </Label>
               <Textarea
                 id="cancellation-reason"
-                placeholder="Décrivez la raison de l'annulation..."
+                placeholder={t("reasonPlaceholder")}
                 value={reason}
                 onChange={(e) => handleReasonChange(e.target.value)}
                 disabled={loading}
                 aria-invalid={reasonError}
                 className={cn(
-                  "resize-none min-h-[80px]",
+                  "min-h-[80px] resize-none",
                   reasonError &&
-                    "border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/20",
+                    "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20",
                 )}
               />
               {reasonError && (
-                <p className="text-xs text-red-600">
-                  Ce champ est obligatoire.
+                <p className="text-xs text-destructive">
+                  {t("reasonRequired")}
                 </p>
               )}
             </div>
 
-            <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2.5 pt-2">
+            <div className="flex flex-col-reverse gap-2.5 pt-2 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
-                className="w-full sm:w-auto hover:bg-gray-50"
+                className="w-full sm:w-auto"
                 onClick={handleClose}
                 disabled={loading}
               >
-                Annuler
+                {t("cancel")}
               </Button>
               <Button
                 type="submit"
-                className={cn(
-                  "w-full sm:w-auto",
-                  "bg-red-600 hover:bg-red-700",
-                  "text-white shadow-md hover:shadow-lg transition-all",
-                )}
+                variant="destructive"
+                className="w-full shadow-md transition-all hover:shadow-lg sm:w-auto"
                 disabled={loading}
               >
                 {loading ? (
                   <span className="inline-flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Suppression en cours...
+                    {t("deleting")}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-2">
                     <Trash2 className="h-4 w-4" />
-                    Confirmer l&#39;annulation
+                    {t("confirm")}
                   </span>
                 )}
               </Button>

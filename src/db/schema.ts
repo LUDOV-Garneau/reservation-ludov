@@ -331,6 +331,8 @@ export const reservation = mysqlTable(
     ),
     index("ix_res_console").on(table.consoleId),
     index("ix_res_console_type").on(table.consoleTypeId),
+    // Filtre de date et tri chronologique de la liste admin (voir 0010).
+    index("ix_res_date_time").on(table.date, table.time),
     index("ix_res_cours").on(table.coursId),
     index("ix_res_game1").on(table.game1Id),
     index("ix_res_game2").on(table.game2Id),

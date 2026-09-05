@@ -68,35 +68,35 @@ export default function PaginationControls({
           {totalItems > 0 ? (
             <>
               <span className="hidden sm:inline">
-                {t("admin.reservations.pagination.affichageDe")}{" "}
+                {t("admin.pagination.affichageDe")}{" "}
                 <span className="font-medium text-foreground">{startItem}</span>{" "}
-                {t("admin.reservations.pagination.a")}{" "}
+                {t("admin.pagination.a")}{" "}
                 <span className="font-medium text-foreground">{endItem}</span>{" "}
-                {t("admin.reservations.pagination.sur")}{" "}
+                {t("admin.pagination.sur")}{" "}
                 <span className="font-medium text-foreground">
                   {totalItems}
                 </span>
               </span>
               <span className="sm:hidden">
-                {startItem}-{endItem} {t("admin.reservations.pagination.sur")}{" "}
+                {startItem}-{endItem} {t("admin.pagination.sur")}{" "}
                 {totalItems}
               </span>
             </>
           ) : (
-            <span>{t("admin.reservations.pagination.noItem")}</span>
+            <span>{t("admin.pagination.noItem")}</span>
           )}
         </div>
 
         {pageSizeOptions && onPageSizeChange && (
           <div className="flex items-center gap-2">
             <span className="text-xs sm:text-sm text-muted-foreground">
-              {t("admin.reservations.pagination.perPage")}
+              {t("admin.pagination.perPage")}
             </span>
             <Select
               value={String(pageSize)}
               onValueChange={(value) => onPageSizeChange(Number(value))}
             >
-              <SelectTrigger className="h-8 w-[84px]" aria-label={t("admin.reservations.pagination.perPage")}>
+              <SelectTrigger className="h-8 w-[84px]" aria-label={t("admin.pagination.perPage")}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -157,10 +157,10 @@ export default function PaginationControls({
                   "h-8 w-8 p-0",
                   page === item
                     ? "bg-cyan-500 hover:bg-cyan-600 text-white shadow-md"
-                    : "hover:bg-gray-100",
+                    : "hover:bg-muted",
                 )}
                 aria-current={page === item ? "page" : undefined}
-                aria-label={`Aller à la page ${item}`}
+                aria-label={t("admin.pagination.goToPage", { page: item })}
                 onClick={() => onPageChange(item)}
               >
                 {item}
@@ -170,7 +170,7 @@ export default function PaginationControls({
         </div>
 
         <div
-          className="sm:hidden px-4 py-1 bg-[white] border-cyan-500 border rounded-xl text-sm font-medium"
+          className="sm:hidden px-4 py-1 bg-card border-cyan-500 border rounded-xl text-sm font-medium"
           aria-live="polite"
         >
           {page}/{totalPages}

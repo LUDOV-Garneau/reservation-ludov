@@ -71,6 +71,13 @@
       "when": 1788400247848,
       "tag": "0009_games_is_active",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1788600000000,
+      "tag": "0010_reservation_date_time_index",
+      "breakpoints": true
     }
   ]
 }

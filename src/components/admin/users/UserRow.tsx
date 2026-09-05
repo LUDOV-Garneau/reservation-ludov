@@ -8,7 +8,8 @@ import UserAvatar from "./UserAvatar";
 import RoleBadge from "./RoleBadge";
 import StatusBadge from "./StatusBadge";
 import UserRowActions from "./UserRowActions";
-import { parseDbDate, type AdminUser } from "./types";
+import { type AdminUser } from "./types";
+import { parseDbDate } from "@/lib/dates";
 
 type AlertType = "success" | "destructive" | "info" | "warning";
 

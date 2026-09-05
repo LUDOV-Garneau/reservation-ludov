@@ -225,7 +225,9 @@
       "detailsTitle": "Détails de la réservation",
       "goHome": "Retourner à l'accueil",
       "detailsBtn": "Voir les détails de la réservation",
-      "reservationId": "Identifiant de réservation :"
+      "reservationId": "Identifiant de réservation :",
+      "platform": "Plateforme réservée",
+      "games": "Jeux réservés"
     },
     "details": {
       "cancelButton": "Annuler",
@@ -672,11 +674,11 @@
     "reservations": {
       "title": "Réservations",
       "actionBar": {
-        "toolTipRefresh": "Rechercher...",
         "searchPlaceholder": "Rechercher"
       },
       "searchResult": {
-        "noReservationsFound": "Aucune réservation trouvée"
+        "noReservationsFound": "Aucune réservation trouvée",
+        "filtersHint": "Aucune réservation ne correspond aux filtres actifs."
       },
       "table": {
         "header": {
@@ -707,17 +709,11 @@
         "confirm_title": "Confirmer la suppression",
         "cancel": "Annuler"
       },
-      "pagination": {
-        "affichageDe": "Affichage de",
-        "a": "à",
-        "sur": "sur",
-        "noItem": "Aucun élément",
-        "perPage": "Par page"
-      },
       "stats": {
         "totalReservations": "Nombre de réservations",
         "upcomingReservations": "Réservations à venir",
-        "pastReservations": "Réservations passées"
+        "pastReservations": "Réservations passées",
+        "cancelledReservations": "Réservations annulées"
       },
       "status": {
         "upcoming": "À venir",
@@ -729,7 +725,11 @@
         "description": "Cette action est définitive. La réservation sera annulée et ne pourra pas être récupérée.",
         "confirm": "Confirmer l'annulation",
         "cancel": "Retour",
-        "deleting": "Annulation..."
+        "deleting": "Annulation...",
+        "reasonLabel": "Raison d'annulation",
+        "reasonPlaceholder": "Décrivez la raison de l'annulation…",
+        "reasonRequired": "Ce champ est obligatoire.",
+        "unknownUser": "Utilisateur inconnu"
       },
       "alert": {
         "deleteSuccess": {
@@ -737,20 +737,33 @@
           "message": "La réservation a été annulée avec succès."
         },
         "errorTitle": "Une erreur s'est produite",
-        "deleteError": "Une erreur s'est produite lors de l'annulation de la réservation. Veuillez réessayer plus tard."
+        "deleteError": "Une erreur s'est produite lors de l'annulation de la réservation. Veuillez réessayer plus tard.",
+        "fetchError": "Erreur lors du chargement des réservations."
+      },
+      "refresh": "Rafraîchir",
+      "filter": {
+        "allStatuses": "Tous les statuts",
+        "fromLabel": "Du",
+        "toLabel": "Au",
+        "fromPlaceholder": "Date de début",
+        "toPlaceholder": "Date de fin",
+        "invertedRange": "La date de début est postérieure à la date de fin : aucun créneau ne peut correspondre.",
+        "remove": "Retirer le filtre {label}",
+        "clearAll": "Tout effacer",
+        "resultCount": "{count, plural, =0 {aucune réservation} one {# réservation} other {# réservations}}"
       }
     },
     "stations": {
       "title": "Stations",
       "actionBar": {
-        "searchPlaceholder": "Recherche...",
+        "searchPlaceholder": "Rechercher une station ou une plateforme…",
         "addStation": "Ajouter",
-        "toolTipRefresh": "Rafraîchir",
-        "addStationSuccess": "Station ajoutée avec succès"
+        "toolTipRefresh": "Rafraîchir"
       },
       "searchResult": {
         "noStationsFound": "Aucune station trouvée",
-        "startByAdding": "Commencez par ajouter votre première station."
+        "startByAdding": "Commencez par ajouter votre première station.",
+        "filtersHint": "Aucune station ne correspond aux filtres actifs."
       },
       "table": {
         "header": {
@@ -769,92 +782,83 @@
         "inactive": "Inactive"
       },
       "stats": {
-        "activeStations": "Nombre de stations actives",
-        "inactiveStations": "Nombre de stations inactives",
+        "activeStations": "Stations actives",
+        "inactiveStations": "Stations inactives",
         "mostUsedStation": "Station la plus réservée",
-        "noStations": "Aucune station créée"
+        "noStations": "Aucune réservation",
+        "totalStations": "Stations"
       },
-      "pagination": {
-        "affichageDe": "Affichage de",
-        "a": "à",
-        "sur": "sur",
-        "noItem": "Aucun élément"
+      "filter": {
+        "allStatuses": "Tous les statuts",
+        "remove": "Retirer le filtre {label}",
+        "clearAll": "Tout effacer",
+        "resultCount": "{count, plural, =0 {aucune station} one {# station} other {# stations}}"
       },
-      "updateStationForm": {
-        "button": {
-          "openDialog": "Modifier",
-          "saveChanges": "Enregistrer",
-          "loading": "Chargement...",
-          "addConsole": "Ajouter des plateformes",
-          "submit": "Modifier",
-          "addAll": "Ajouter tout"
-        },
+      "alert": {
+        "fetchError": "Erreur lors du chargement des stations."
+      },
+      "form": {
         "titles": {
-          "dialogTitle": "Modifier la station"
+          "create": "Ajouter une station",
+          "edit": "Modifier la station"
+        },
+        "descriptions": {
+          "create": "Nommez la station et choisissez les plateformes qu'elle propose.",
+          "edit": "Modifiez le nom, les plateformes ou le statut de la station."
         },
         "fields": {
-          "stationName": "Nom de la station",
-          "consoles": "Plateformes",
-          "isActive": "Active"
+          "name": "Nom de la station",
+          "namePlaceholder": "Ex. : Poste 3 — salle du fond",
+          "isActive": "Station active",
+          "isActiveOn": "Elle est proposée dans le parcours de réservation.",
+          "isActiveOff": "Elle n'est plus proposée dans le parcours de réservation.",
+          "platforms": "Plateformes proposées",
+          "platformsPlaceholder": "Ajouter une plateforme…",
+          "noPlatformAvailable": "Toutes les plateformes sont déjà ajoutées",
+          "noPlatformSelected": "Aucune plateforme sélectionnée",
+          "noPlatformSelectedHint": "Une station sans plateforme n'est proposée à personne.",
+          "selectedCount": "{count, plural, one {# plateforme sélectionnée} other {# plateformes sélectionnées}}",
+          "removePlatform": "Retirer {name}"
         },
-        "select": {
-          "placeholder": "Sélectionnez les plateformes"
+        "button": {
+          "create": "Ajouter la station",
+          "save": "Enregistrer",
+          "addAll": "Tout ajouter",
+          "loading": "Enregistrement…"
         },
         "errors": {
-          "missingFields": "Veuillez remplir tous les champs requis.",
+          "missingFields": "Le nom et au moins une plateforme sont requis.",
+          "nameConflict": "Une station porte déjà ce nom.",
           "consoleFetch": "Erreur lors de la récupération des plateformes."
         },
         "alerts": {
-          "updateSuccess": "Station mise à jour avec succès !",
-          "updateError": "Erreur lors de la mise à jour de la station."
+          "created": "Station ajoutée avec succès.",
+          "updated": "Station modifiée avec succès.",
+          "createError": "Erreur lors de l'ajout de la station.",
+          "updateError": "Erreur lors de la modification de la station."
         }
       },
-      "addStationForm": {
-        "button": {
-          "openDialog": "Ajouter une station",
-          "loading": "Ajout...",
-          "submit": "Ajouter",
-          "addConsole": "Ajouter une plateforme",
-          "addAll": "Ajouter tout"
-        },
-        "titles": {
-          "dialogTitle": "Ajouter une station"
-        },
-        "fields": {
-          "name": "Nom",
-          "consoles": "Plateformes disponibles",
-          "stationName": "Nom de la station"
-        },
-        "placeholders": {
-          "selectConsole": "Sélectionner une plateforme",
-          "stationName": "Entrez le nom de la station"
-        },
-        "errors": {
-          "missingFields": "Veuillez remplir tous les champs",
-          "invalidConsole": "Plateforme invalide",
-          "consoleAlreadyAdded": "La plateforme a déjà été ajoutée",
-          "consoleFetch": "Erreur lors de la récupération des plateformes",
-          "nameConflict": "Une station avec ce nom existe déjà"
-        },
+      "deleteDialog": {
+        "title": "Supprimer la station",
+        "description": "Cette action est définitive.",
+        "onlyIfEmpty": "Une station ne peut être supprimée que si aucune réservation ne s'y rattache.",
+        "noPlatforms": "Aucune plateforme assignée",
+        "blockedTitle": "Suppression impossible",
+        "blockedDescription": "Des réservations sont rattachées à cette station.",
+        "blockedCount": "{count, plural, one {# réservation y est rattachée} other {# réservations y sont rattachées}}.",
+        "blockedUpcoming": "{count, plural, one {Dont # à venir} other {Dont # à venir}}.",
+        "blockedHint": "Désactivez la station : elle disparaît du parcours de réservation et l'historique reste intact.",
+        "deactivate": "Désactiver la station",
+        "deactivating": "Désactivation…",
+        "alreadyInactive": "Déjà inactive",
+        "confirm": "Confirmer la suppression",
+        "deleting": "Suppression…",
+        "cancel": "Annuler",
         "alerts": {
-          "addStationSuccess": "Station ajoutée avec succès",
-          "addStationError": "Erreur lors de l'ajout"
-        }
-      },
-      "deleteStationDialog": {
-        "deleteStation": "Supprimer la station",
-        "definitiveAction": "Cette action est définitive. La station ne sera plus accessible.",
-        "whatGonnaHappen": "Ce qui va se passer :",
-        "theStation": "La station sera",
-        "deleted": "supprimée",
-        "stationWontBeAccessible": " et ne sera plus accessible.",
-        "reservationDeleted": "Les réservations à venir seront également supprimées.",
-        "CancelDelete": "Annuler la suppression",
-        "deletingState": "Suppression...",
-        "confirmDelete": "Confirmer la suppression",
-        "alerts": {
-          "deleteSuccess": "Station supprimée avec succès",
-          "deleteError": "Erreur lors de la suppression"
+          "deleted": "Station supprimée avec succès.",
+          "deleteError": "Erreur lors de la suppression de la station.",
+          "deactivated": "Station désactivée. Les réservations sont conservées.",
+          "deactivateError": "Erreur lors de la désactivation de la station."
         }
       }
     },
@@ -945,12 +949,45 @@
     "accessories": {
       "title": "Accessoires",
       "subtitle": "Gérer la visibilité et les plateformes compatibles des accessoires",
-      "empty": "Aucun accessoire dans le catalogue",
-      "noConsole": "Aucune plateforme",
+      "searchPlaceholder": "Rechercher par nom, ID Koha ou plateforme...",
+      "refresh": "Rafraîchir",
       "editConsoles": "Plateformes",
-      "editDialogTitle": "Plateformes compatibles : {name}",
+      "editFor": "Modifier l'accessoire {name}",
+      "toggleVisibility": "Visibilité de {name}",
+      "noConsole": "Aucune plateforme",
       "cancel": "Annuler",
       "save": "Enregistrer",
+      "empty": "Aucun accessoire dans le catalogue",
+      "emptyFiltered": "Aucun accessoire ne correspond",
+      "emptyFilteredHint": "Aucun accessoire ne correspond aux filtres actifs.",
+      "stats": {
+        "total": "Accessoires",
+        "visible": "Visibles",
+        "hidden": "Masqués",
+        "withoutConsole": "Sans plateforme"
+      },
+      "status": {
+        "visible": "Visible",
+        "hidden": "Masqué"
+      },
+      "filter": {
+        "allPlatforms": "Toutes les plateformes",
+        "withoutPlatform": "Sans plateforme",
+        "unknownPlatform": "Plateforme inconnue",
+        "allVisibility": "Tous les états",
+        "visibleOnly": "Visibles seulement",
+        "hiddenOnly": "Masqués seulement"
+      },
+      "filters": {
+        "clearAll": "Tout effacer",
+        "remove": "Retirer le filtre {label}",
+        "resultCount": "{count, plural, =0 {aucun accessoire} one {# accessoire} other {# accessoires}}"
+      },
+      "view": {
+        "label": "Affichage",
+        "grid": "Vue en grille",
+        "table": "Vue en tableau"
+      },
       "table": {
         "name": "Nom",
         "kohaId": "ID Koha",
@@ -958,15 +995,51 @@
         "visible": "Visible",
         "actions": "Actions"
       },
+      "card": {
+        "kohaId": "Koha #{id}"
+      },
+      "dialog": {
+        "nameLocked": "Nom et identifiant gérés par le catalogue Koha",
+        "lastUpdated": "Dernière modification",
+        "neverUpdated": "Jamais modifié",
+        "noConsoleWarning": "Sans plateforme compatible, cet accessoire ne sera jamais proposé lors d'une réservation."
+      },
+      "bulk": {
+        "selected": "{count, plural, one {# accessoire sélectionné} other {# accessoires sélectionnés}}",
+        "selectAll": "Tout sélectionner sur cette page",
+        "selectOne": "Sélectionner {name}",
+        "clearSelection": "Effacer la sélection",
+        "show": "Afficher",
+        "hide": "Masquer",
+        "consoles": "Plateformes",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "apply": "Appliquer",
+        "processing": "Traitement...",
+        "confirmShowTitle": "Afficher {count, plural, one {# accessoire} other {# accessoires}} ?",
+        "confirmShowDescription": "Ces accessoires redeviendront proposables lors d'une réservation.",
+        "confirmHideTitle": "Masquer {count, plural, one {# accessoire} other {# accessoires}} ?",
+        "confirmHideDescription": "Ces accessoires ne seront plus proposés lors d'une réservation. Les réservations déjà enregistrées ne changent pas.",
+        "consolesTitle": "Plateformes de {count, plural, one {# accessoire} other {# accessoires}}",
+        "consolesDescription": "Les plateformes cochées seront ajoutées ou retirées ; les autres restent inchangées.",
+        "consolesSetWarning": "Attention : les plateformes cochées remplaceront entièrement celles des accessoires sélectionnés.",
+        "mode": {
+          "add": "Ajouter",
+          "remove": "Retirer",
+          "set": "Remplacer"
+        },
+        "success": "{count, plural, one {# accessoire mis à jour} other {# accessoires mis à jour}}.",
+        "partial": "{succeeded} réussite(s), {failed} échec(s). La liste a été rechargée.",
+        "error": "Erreur lors de l'action groupée."
+      },
       "alerts": {
         "fetchError": "Erreur lors du chargement des accessoires.",
         "updateSuccess": "Accessoire mis à jour avec succès.",
         "updateError": "Erreur lors de la mise à jour de l'accessoire.",
         "successTitle": "Succès",
+        "partialTitle": "Terminé avec des erreurs",
         "errorTitle": "Erreur"
-      },
-      "searchPlaceholder": "Rechercher un accessoire par nom...",
-      "refresh": "Rafraîchir"
+      }
     },
     "platforms": {
       "title": "Plateformes",
@@ -1163,6 +1236,14 @@
         "successTitle": "Succès",
         "errorTitle": "Erreur"
       }
+    },
+    "pagination": {
+      "affichageDe": "Affichage de",
+      "a": "à",
+      "sur": "sur",
+      "noItem": "Aucun élément",
+      "perPage": "Par page",
+      "goToPage": "Aller à la page {page}"
     }
   },
   "privacy": {

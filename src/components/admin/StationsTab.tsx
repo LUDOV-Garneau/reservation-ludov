@@ -1,16 +1,12 @@
 "use client";
 
+import StationsManager from "@/components/admin/stations/StationsManager";
 import { TabsContent } from "@/components/ui/tabs";
-import { useTranslations } from "next-intl";
-import StationsTable from "@/components/admin/stations/StationsTable";
-
 
 export default function StationsTab() {
-  const t = useTranslations();
-
   return (
     <TabsContent value="stations">
-      <StationsTable />
+      <StationsManager />
     </TabsContent>
   );
 }

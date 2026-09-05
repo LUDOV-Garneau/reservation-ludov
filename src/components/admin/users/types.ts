@@ -32,13 +32,3 @@ export type UserStats = {
  * raison de dépendre de l'autre.
  */
 export const ADD_USER_PANE_MIN_H = "min-h-[19rem]";
-
-/**
- * Les `datetime` MySQL arrivent en `"2026-08-29 15:18:00"`. Passé tel quel à
- * `new Date()`, ce format n'est pas garanti par la spec ; on le normalise.
- */
-export function parseDbDate(value: string | null): Date | null {
-  if (!value) return null;
-  const date = new Date(value.includes("T") ? value : value.replace(" ", "T"));
-  return Number.isNaN(date.getTime()) ? null : date;
-}
