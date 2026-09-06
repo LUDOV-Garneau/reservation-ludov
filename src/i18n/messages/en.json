@@ -1235,7 +1235,29 @@
         "testSuccess": "Test email sent to {email}.",
         "testError": "An error occurred while sending the test email.",
         "successTitle": "Success",
-        "errorTitle": "Error"
+        "errorTitle": "Error",
+        "unknownVariables": "Unknown variable(s): {variables}. Fix them before saving."
+      },
+      "unsaved": "Unsaved changes",
+      "reset": "Discard my changes",
+      "insertVariable": "Insert {variable} at the cursor",
+      "usingDefault": "This template has never been edited: the default text is what gets sent.",
+      "customized": "This template has been customised.",
+      "updatedAtBy": "Edited on {date} by {author}.",
+      "unknownAuthor": "an administrator",
+      "preview": {
+        "title": "Preview",
+        "sampleHint": "Sample values.",
+        "noSubject": "(empty subject)",
+        "emptyZone": "(empty zone)",
+        "unknown": "Unknown variable(s) for this template: {variables}. Saving will be refused.",
+        "unused": "Available but unused variable(s): {variables}."
+      },
+      "discard": {
+        "title": "Discard changes?",
+        "description": "This template has unsaved changes. Switching template or language will lose them.",
+        "cancel": "Stay here",
+        "confirm": "Discard"
       }
     },
     "pagination": {
