@@ -5,17 +5,20 @@ import { Label } from "@/components/ui/label";
 import SpecificDatesSelection from "./SpecificDatesSelection";
 import { useTranslations } from "next-intl";
 import { Exception, DateSelection } from "@/types/availabilities";
+import type { RangeErrorCode } from "@/lib/availabilityValidation";
 
 type Props = {
   blockEnabled: boolean;
   exceptions: Exception[];
+  /** Erreurs par jour « YYYY-MM-DD », transmises au selecteur de dates. */
+  errors?: Record<string, RangeErrorCode>;
   onChange: (exceptions: Exception[]) => void;
   onToggleBlock: (enabled: boolean) => void;
 };
 
-export function flattenExceptionsToDateSelections(
-  exceptions: Exception[]
-): DateSelection[] {
+/** Projection 1:1, pas un aplatissement : les noms d'origine
+ *  (« flatten » / « group ») decrivaient une operation qui n'a jamais eu lieu. */
+function versSelections(exceptions: Exception[]): DateSelection[] {
   return exceptions.map(({ date, timeRange }) => ({
     date,
     startHour: timeRange.startHour,
@@ -25,9 +28,7 @@ export function flattenExceptionsToDateSelections(
   }));
 }
 
-export function groupDateSelectionsToExceptions(
-  selections: DateSelection[]
-): Exception[] {
+function versExceptions(selections: DateSelection[]): Exception[] {
   return selections.map((sel, idx) => ({
     date: sel.date,
     timeRange: {
@@ -43,15 +44,16 @@ export function groupDateSelectionsToExceptions(
 export default function BlockSpecificDatesSelection({
   blockEnabled,
   exceptions,
+  errors,
   onChange,
   onToggleBlock,
 }: Props) {
   const t = useTranslations();
 
-  const dateSelections = flattenExceptionsToDateSelections(exceptions);
+  const dateSelections = versSelections(exceptions);
 
   function handleDateSelectionsChange(newSelections: DateSelection[]) {
-    const newExceptions = groupDateSelectionsToExceptions(newSelections);
+    const newExceptions = versExceptions(newSelections);
     onChange(newExceptions);
   }
 
@@ -80,6 +82,7 @@ export default function BlockSpecificDatesSelection({
       {blockEnabled && (
         <SpecificDatesSelection
           exceptions={dateSelections}
+          errors={errors}
           onChange={handleDateSelectionsChange}
         />
       )}

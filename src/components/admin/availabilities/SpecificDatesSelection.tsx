@@ -15,25 +15,31 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { format } from "date-fns";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ChevronDownIcon, Copy, Trash2 } from "lucide-react";
 import { DateSelection } from "@/types/availabilities";
+import type { RangeErrorCode } from "@/lib/availabilityValidation";
+import RangeErrorMessage from "./RangeErrorMessage";
+import { toLocalYmd } from "@/lib/dates";
 
 type TimeKey = "startHour" | "startMinute" | "endHour" | "endMinute";
 
 type Props = {
   exceptions?: DateSelection[];
+  /** Erreurs par jour « YYYY-MM-DD » : la ligne fautive porte son message. */
+  errors?: Record<string, RangeErrorCode>;
   onChange?: (dates: DateSelection[]) => void;
   label?: string;
 };
 
 export default function SpecificDatesSelection({
   exceptions = [],
+  errors = {},
   onChange = () => {},
   label,
 }: Props) {
   const t = useTranslations();
+  const locale = useLocale();
 
   const [localDates, setLocalDates] = useState<DateSelection[]>(exceptions);
 
@@ -89,8 +95,9 @@ export default function SpecificDatesSelection({
         {localDates.map((item, idx) => (
           <div
             key={idx}
-            className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center p-3 border-b last:border-none"
+            className="flex flex-col gap-1 p-3 border-b last:border-none"
           >
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
             <div className="flex flex-col min-[450px]:flex-row min-[450px]:items-center gap-3 flex-wrap">
               <Popover>
                 <PopoverTrigger asChild>
@@ -99,7 +106,9 @@ export default function SpecificDatesSelection({
                     className="w-fit justify-start whitespace-nowrap px-3"
                   >
                     {item.date
-                      ? format(item.date, "MM / dd / yyyy")
+                      ? item.date.toLocaleDateString(
+                          locale === "en" ? "en-CA" : "fr-CA",
+                        )
                       : t("admin.availabilities.specificDates.pickDate")}
                     <ChevronDownIcon className="ml-auto h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -214,6 +223,8 @@ export default function SpecificDatesSelection({
                 </span>
               </button>
             </div>
+          </div>
+          <RangeErrorMessage code={errors[toLocalYmd(item.date)]} />
           </div>
         ))}
         <button

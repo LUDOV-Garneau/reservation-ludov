@@ -889,9 +889,11 @@
         "invalidRange": "End time must be after start time.",
         "overlap": "Overlapping time ranges.",
         "exception": "Exception on {date}: {error}",
-        "fixErrors": "Please correct the following errors before continuing:\n{errors}",
         "fetchAvailabilities": "An error occurred while fetching availabilities :(",
-        "savingAvailabilities": "An error occurred while saving availabilities :("
+        "savingAvailabilities": "An error occurred while saving availabilities :(",
+        "invalidTime": "Invalid time.",
+        "fixBeforeSaving": "Fix the highlighted time ranges before saving.",
+        "periodRequired": "Pick a validity period, or tick “always applies”."
       },
       "messages": {
         "savedWeekly": "Weekly availabilities saved.",
@@ -928,6 +930,12 @@
       "weekAvailabilities": {
         "title": "Define your weekly availability below",
         "unavailableOn": "Unavailable on {day}s"
+      },
+      "status": {
+        "configured": "Weekly schedule configured",
+        "notConfigured": "No weekly schedule configured",
+        "datesCount": "{count, plural, =0 {no one-off dates} one {# one-off date} other {# one-off dates}}",
+        "unsaved": "unsaved"
       }
     },
     "cours": {

@@ -5,14 +5,19 @@ import { Switch } from "../../ui/switch";
 import { Label } from "../../ui/label";
 import HourRangeSelection from "./HourRangeSelection";
 import { HourRange, WeekDay } from "@/types/availabilities";
+import type { RangeErrorCode } from "@/lib/availabilityValidation";
+import RangeErrorMessage from "./RangeErrorMessage";
 
 type Props = {
   weekly: Record<string, WeekDay>;
+  /** Erreur eventuelle par jour, affichee sous les plages de ce jour. */
+  errors?: Record<string, RangeErrorCode>;
   onChange: (updatedWeekly: Record<string, WeekDay>) => void;
 };
 
 export default function WeekAvailabilitiesSelection({
   weekly,
+  errors = {},
   onChange,
 }: Props) {
   const t = useTranslations();
@@ -80,8 +85,11 @@ export default function WeekAvailabilitiesSelection({
       </strong>
 
       {Object.entries(weekly).map(([id, { label, enabled, hoursRanges }]) => {
-        const minId = Math.min(...hoursRanges.map((r) => r.id));
-        const maxId = Math.max(...hoursRanges.map((r) => r.id));
+        // `Math.max` sur un tableau vide vaut -Infinity : sans ce repli, un
+        // jour sans plage n'offrirait plus de bouton d'ajout.
+        const maxId = hoursRanges.length
+          ? Math.max(...hoursRanges.map((r) => r.id))
+          : 0;
         return (
           <div
             key={id}
@@ -107,9 +115,7 @@ export default function WeekAvailabilitiesSelection({
                     startM={timeRange.startMinute}
                     endH={timeRange.endHour}
                     endM={timeRange.endMinute}
-                    showRemoveButton={
-                      hoursRanges.length > 1 && timeRange.id !== minId
-                    }
+                    showRemoveButton={hoursRanges.length > 1}
                     showAddButton={timeRange.id === maxId}
                     addRow={() => addHoursRange(id, maxId + 1)}
                     onModify={(range) =>
@@ -118,6 +124,7 @@ export default function WeekAvailabilitiesSelection({
                     removeRow={() => removeHoursRange(id, timeRange.id)}
                   />
                 ))}
+                <RangeErrorMessage code={errors[id]} />
               </div>
             ) : (
               <span className="italic text-muted-foreground col-span-1 md:col-span-2">
