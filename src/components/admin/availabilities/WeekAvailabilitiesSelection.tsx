@@ -5,14 +5,20 @@ import { Switch } from "../../ui/switch";
 import { Label } from "../../ui/label";
 import HourRangeSelection from "./HourRangeSelection";
 import { HourRange, WeekDay } from "@/types/availabilities";
+import type { RangeErrorCode } from "@/lib/availabilityValidation";
+import RangeErrorMessage from "./RangeErrorMessage";
+import { cn } from "@/lib/utils";
 
 type Props = {
   weekly: Record<string, WeekDay>;
+  /** Erreur eventuelle par jour, affichee sous les plages de ce jour. */
+  errors?: Record<string, RangeErrorCode>;
   onChange: (updatedWeekly: Record<string, WeekDay>) => void;
 };
 
 export default function WeekAvailabilitiesSelection({
   weekly,
+  errors = {},
   onChange,
 }: Props) {
   const t = useTranslations();
@@ -74,18 +80,23 @@ export default function WeekAvailabilitiesSelection({
   }
 
   return (
-    <>
-      <strong className="block text-lg mb-2">
-        {t("admin.availabilities.weekAvailabilities.title")}
-      </strong>
-
+    <div className="divide-y rounded-lg border">
       {Object.entries(weekly).map(([id, { label, enabled, hoursRanges }]) => {
-        const minId = Math.min(...hoursRanges.map((r) => r.id));
-        const maxId = Math.max(...hoursRanges.map((r) => r.id));
+        // `Math.max` sur un tableau vide vaut -Infinity : sans ce repli, un
+        // jour sans plage n'offrirait plus de bouton d'ajout.
+        const maxId = hoursRanges.length
+          ? Math.max(...hoursRanges.map((r) => r.id))
+          : 0;
         return (
           <div
             key={id}
-            className="grid grid-cols-1 md:grid-cols-3 py-4 px-2 border-b last:border-0 items-start gap-3"
+            className={cn(
+              "grid grid-cols-1 items-start gap-3 px-4 py-3 md:grid-cols-[11rem_1fr] transition-colors",
+              // Un jour fermé recule visuellement : la semaine se lit d'abord
+              // par ses jours ouverts.
+              enabled ? "bg-background" : "bg-muted/30",
+              errors[id] && "bg-destructive/5",
+            )}
           >
             <div className="flex items-center gap-3">
               <Switch
@@ -93,13 +104,19 @@ export default function WeekAvailabilitiesSelection({
                 checked={enabled}
                 onCheckedChange={(checked) => setEnabled(id, checked)}
               />
-              <Label htmlFor={id} className="font-medium">
+              <Label
+                htmlFor={id}
+                className={cn(
+                  "font-medium capitalize",
+                  !enabled && "text-muted-foreground",
+                )}
+              >
                 {t(`admin.availabilities.days.${label}`)}
               </Label>
             </div>
 
             {enabled ? (
-              <div className="col-span-1 md:col-span-2 flex flex-col gap-2 w-full">
+              <div className="flex w-full flex-col gap-2">
                 {hoursRanges.map((timeRange) => (
                   <HourRangeSelection
                     key={timeRange.id}
@@ -107,9 +124,8 @@ export default function WeekAvailabilitiesSelection({
                     startM={timeRange.startMinute}
                     endH={timeRange.endHour}
                     endM={timeRange.endMinute}
-                    showRemoveButton={
-                      hoursRanges.length > 1 && timeRange.id !== minId
-                    }
+                    showRemoveButton={hoursRanges.length > 1}
+                    invalid={Boolean(errors[id])}
                     showAddButton={timeRange.id === maxId}
                     addRow={() => addHoursRange(id, maxId + 1)}
                     onModify={(range) =>
@@ -118,9 +134,10 @@ export default function WeekAvailabilitiesSelection({
                     removeRow={() => removeHoursRange(id, timeRange.id)}
                   />
                 ))}
+                <RangeErrorMessage code={errors[id]} />
               </div>
             ) : (
-              <span className="italic text-muted-foreground col-span-1 md:col-span-2">
+              <span className="self-center text-sm italic text-muted-foreground">
                 {t("admin.availabilities.weekAvailabilities.unavailableOn", {
                   day: t(
                     `admin.availabilities.days.${label}`
@@ -131,6 +148,6 @@ export default function WeekAvailabilitiesSelection({
           </div>
         );
       })}
-    </>
+    </div>
   );
 }

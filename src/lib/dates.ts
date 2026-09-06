@@ -35,6 +35,19 @@ export function toLocalDatetime(date: Date = new Date()): string {
   )}:${pad(date.getSeconds())}`;
 }
 
+/**
+ * Jour calendaire « YYYY-MM-DD » lu depuis un corps de requête, ou `null`.
+ *
+ * Un ancien client peut encore envoyer un ISO complet
+ * (« 2026-10-05T04:00:00.000Z ») : on garde le jour tel quel, sans conversion
+ * de fuseau — sinon le 5 octobre devenait le 4.
+ */
+export function readYmd(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const ymd = value.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(ymd) ? ymd : null;
+}
+
 export function parseYmdLocal(ymd: string): Date {
   const [y, m, d] = ymd.split("-").map(Number);
   return new Date(y, (m ?? 1) - 1, d ?? 1);

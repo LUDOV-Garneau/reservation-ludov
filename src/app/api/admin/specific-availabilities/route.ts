@@ -1,8 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/jwt";
+import { NextResponse } from "next/server";
 import db from "@/db";
 import { specificDates } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { withAdmin } from "@/lib/withAuth";
+import { readYmd } from "@/lib/dates";
+import { findDateErrors } from "@/lib/availabilityValidation";
 
 type HourRange = {
   id: number;
@@ -13,37 +15,43 @@ type HourRange = {
 };
 type Exception = { date: string; timeRange: HourRange };
 
-/**
- * Jour calendaire « YYYY-MM-DD » envoyé par le client. Un ancien client peut
- * encore envoyer un ISO complet (« 2026-10-05T04:00:00.000Z ») : on garde le
- * jour tel quel, sans conversion de fuseau, sinon le 5 octobre devenait le 4.
- */
-function toYmd(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const ymd = value.slice(0, 10);
-  return /^\d{4}-\d{2}-\d{2}$/.test(ymd) ? ymd : null;
-}
-
-export async function POST(request: NextRequest) {
+export const POST = withAdmin(async (req) => {
   try {
-    const token = request.cookies.get("SESSION")?.value;
-    if (!token) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    const user = verifyToken(token);
-    if (!user?.id) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    if (!user.isAdmin) return NextResponse.json({ message: "Forbidden" }, { status: 403 });
-
-    const body = (await request.json()) as Exception[];
-    if (!body) {
-      return NextResponse.json({ success: false, message: "specificDates object is required." }, { status: 400 });
+    const body = (await req.json().catch(() => null)) as Exception[] | null;
+    if (!Array.isArray(body)) {
+      return NextResponse.json(
+        { success: false, message: "specificDates object is required." },
+        { status: 400 },
+      );
     }
 
     const parsedSpecificDates: Exception[] = [];
     for (const sd of body) {
-      const date = toYmd(sd.date);
+      const date = readYmd(sd?.date);
       if (!date) {
-        return NextResponse.json({ success: false, message: "Date invalide (format attendu : YYYY-MM-DD)." }, { status: 400 });
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Date invalide (format attendu : YYYY-MM-DD).",
+          },
+          { status: 400 },
+        );
       }
       parsedSpecificDates.push({ date, timeRange: sd.timeRange });
+    }
+
+    // Même validation que le formulaire, appliquee ici pour qu'un appel direct
+    // ne puisse pas ecrire des plages qui se chevauchent.
+    const erreurs = findDateErrors(parsedSpecificDates);
+    if (Object.keys(erreurs).length > 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Plages horaires invalides.",
+          errors: erreurs,
+        },
+        { status: 400 },
+      );
     }
 
     await db.transaction(async (tx) => {
@@ -60,13 +68,16 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    return NextResponse.json({ success: true, message: "Specific dates saved successfully." });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown Error";
-    console.error("Erreur:", err);
     return NextResponse.json({
-      success: false,
-      message: message || "An unknown error occured while saving specific dates.",
-    }, { status: 500 });
+      success: true,
+      message: "Specific dates saved successfully.",
+    });
+  } catch (err) {
+    // Le message d'exception reste dans les journaux du serveur.
+    console.error("Erreur lors de l'enregistrement des dates :", err);
+    return NextResponse.json(
+      { success: false, message: "Erreur serveur." },
+      { status: 500 },
+    );
   }
-}
+});

@@ -879,7 +879,11 @@
         "savingDates": "Enregistrement des dates en cours...",
         "saveDates": "Enregistrer les dates valides",
         "remove": "Supprimer",
-        "add": "Ajouter"
+        "add": "Ajouter",
+        "startHour": "Heure de début",
+        "startMinute": "Minute de début",
+        "endHour": "Heure de fin",
+        "endMinute": "Minute de fin"
       },
       "text": {
         "selectLabel": "Sélectionnez les dates valides et les plages horaires"
@@ -888,9 +892,11 @@
         "invalidRange": "L'heure de fin doit être après l'heure de début.",
         "overlap": "Plages horaires qui se chevauchent.",
         "exception": "Exception le {date} : {error}",
-        "fixErrors": "Veuillez corriger les erreurs suivantes avant de continuer :\n{errors}",
         "fetchAvailabilities": "Une erreur s'est produite lors de la récupération des disponibilités :(",
-        "savingAvailabilities": "Une erreur s'est produite lors de l'enregistrement des disponibilités :("
+        "savingAvailabilities": "Une erreur s'est produite lors de l'enregistrement des disponibilités :(",
+        "invalidTime": "Heure invalide.",
+        "fixBeforeSaving": "Corrigez les plages signalées avant d'enregistrer.",
+        "periodRequired": "Choisissez une période de validité, ou cochez « s'applique toujours »."
       },
       "messages": {
         "savedWeekly": "Disponibilités hebdomadaires enregistrées.",
@@ -927,6 +933,23 @@
       "weekAvailabilities": {
         "title": "Définissez votre disponibilité hebdomadaire ci-dessous",
         "unavailableOn": "Indisponible les {day}s"
+      },
+      "status": {
+        "configured": "Horaire hebdomadaire configuré",
+        "notConfigured": "Aucun horaire hebdomadaire configuré",
+        "datesCount": "{count, plural, =0 {aucune date ponctuelle} one {# date ponctuelle} other {# dates ponctuelles}}",
+        "unsaved": "non enregistré"
+      },
+      "overview": {
+        "title": "Aperçu de la semaine",
+        "hint": "Chaque bloc est une plage d'ouverture.",
+        "empty": "Aucun jour ouvert pour l'instant."
+      },
+      "sections": {
+        "weeklyHint": "Activez les jours d'ouverture et réglez leurs plages horaires.",
+        "periodTitle": "Période de validité",
+        "periodHint": "Les dates entre lesquelles cet horaire s'applique.",
+        "blockedHint": "Des journées où le laboratoire reste fermé malgré l'horaire."
       }
     },
     "cours": {
