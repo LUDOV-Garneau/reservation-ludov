@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CalendarCheck, CalendarX, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import WeekAvailabilitiesSelection from "./WeekAvailabilitiesSelection";
+import WeekOverview from "./WeekOverview";
 import DateRangeSelection from "./DateRangeSelection";
 import BlockSpecificDatesSelection from "./BlockSpecificDatesSelection";
 import SpecificDatesSelection from "./SpecificDatesSelection";
@@ -115,14 +116,26 @@ export default function AvailabilitiesManager() {
             ))}
           </Card>
         ) : vue === "weekly" ? (
-          <Card className="mt-4 p-6" role="tabpanel">
-            <WeekAvailabilitiesSelection
-              weekly={c.state.weekly}
-              errors={c.weeklyErrors}
-              onChange={(weekly: Record<string, WeekDay>) =>
-                c.setState((prev) => ({ ...prev, weekly }))
-              }
-            />
+          <Card className="mt-4 space-y-8 p-6" role="tabpanel">
+            <WeekOverview weekly={c.state.weekly} errors={c.weeklyErrors} />
+
+            <Section
+              title={t("weekAvailabilities.title")}
+              description={t("sections.weeklyHint")}
+            >
+              <WeekAvailabilitiesSelection
+                weekly={c.state.weekly}
+                errors={c.weeklyErrors}
+                onChange={(weekly: Record<string, WeekDay>) =>
+                  c.setState((prev) => ({ ...prev, weekly }))
+                }
+              />
+            </Section>
+
+            <Section
+              title={t("sections.periodTitle")}
+              description={t("sections.periodHint")}
+            >
             <DateRangeSelection
               dateRange={c.state.dateRange.range}
               alwaysApplies={c.state.dateRange.alwaysApplies}
@@ -143,6 +156,12 @@ export default function AvailabilitiesManager() {
                 }))
               }
             />
+            </Section>
+
+            <Section
+              title={t("blockSpecificDates.title")}
+              description={t("sections.blockedHint")}
+            >
             <BlockSpecificDatesSelection
               blockEnabled={c.state.exceptions.enabled}
               onToggleBlock={(enabled) =>
@@ -160,6 +179,7 @@ export default function AvailabilitiesManager() {
                 }))
               }
             />
+            </Section>
 
             <SaveButton
               onClick={enregistrerSemaine}
@@ -233,6 +253,28 @@ function StatusBanner({
         {t("datesCount", { count: datesCount })}
       </span>
     </div>
+  );
+}
+
+/** Un titre, une phrase d'explication, puis le contenu. La carte enchainait
+ *  trois sujets sans separation : horaire, periode de validite, dates bloquees. */
+function Section({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="space-y-3">
+      <div>
+        <h3 className="text-base font-semibold">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      {children}
+    </section>
   );
 }
 

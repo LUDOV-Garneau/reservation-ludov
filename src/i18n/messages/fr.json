@@ -879,7 +879,11 @@
         "savingDates": "Enregistrement des dates en cours...",
         "saveDates": "Enregistrer les dates valides",
         "remove": "Supprimer",
-        "add": "Ajouter"
+        "add": "Ajouter",
+        "startHour": "Heure de début",
+        "startMinute": "Minute de début",
+        "endHour": "Heure de fin",
+        "endMinute": "Minute de fin"
       },
       "text": {
         "selectLabel": "Sélectionnez les dates valides et les plages horaires"
@@ -935,6 +939,17 @@
         "notConfigured": "Aucun horaire hebdomadaire configuré",
         "datesCount": "{count, plural, =0 {aucune date ponctuelle} one {# date ponctuelle} other {# dates ponctuelles}}",
         "unsaved": "non enregistré"
+      },
+      "overview": {
+        "title": "Aperçu de la semaine",
+        "hint": "Chaque bloc est une plage d'ouverture.",
+        "empty": "Aucun jour ouvert pour l'instant."
+      },
+      "sections": {
+        "weeklyHint": "Activez les jours d'ouverture et réglez leurs plages horaires.",
+        "periodTitle": "Période de validité",
+        "periodHint": "Les dates entre lesquelles cet horaire s'applique.",
+        "blockedHint": "Des journées où le laboratoire reste fermé malgré l'horaire."
       }
     },
     "cours": {

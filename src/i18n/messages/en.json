@@ -880,7 +880,11 @@
         "savingDates": "Saving dates...",
         "saveDates": "Save valid dates",
         "remove": "Remove",
-        "add": "Add"
+        "add": "Add",
+        "startHour": "Start hour",
+        "startMinute": "Start minute",
+        "endHour": "End hour",
+        "endMinute": "End minute"
       },
       "text": {
         "selectLabel": "Select valid dates and time ranges"
@@ -936,6 +940,17 @@
         "notConfigured": "No weekly schedule configured",
         "datesCount": "{count, plural, =0 {no one-off dates} one {# one-off date} other {# one-off dates}}",
         "unsaved": "unsaved"
+      },
+      "overview": {
+        "title": "Week at a glance",
+        "hint": "Each block is an opening range.",
+        "empty": "No open day yet."
+      },
+      "sections": {
+        "weeklyHint": "Turn on the opening days and set their time ranges.",
+        "periodTitle": "Validity period",
+        "periodHint": "The dates between which this schedule applies.",
+        "blockedHint": "Days when the lab stays closed despite the schedule."
       }
     },
     "cours": {
