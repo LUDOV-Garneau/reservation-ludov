@@ -5,6 +5,7 @@ import db, { executeRows } from "@/db";
 import { reservationHold, consoleStock, games } from "@/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { checkSlotBookable, isLockContentionError, runWithLockRetry, SLOT_TX_CONFIG } from "@/lib/availability";
+import { createLogger } from "@/lib/logger";
 
 type Body = {
   reservationId: string;
@@ -54,6 +55,7 @@ class TxReturn extends Error {
 }
 
 export async function POST(req: Request) {
+  const log = createLogger("RESERVATION:update-hold");
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
@@ -62,18 +64,28 @@ export async function POST(req: Request) {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
     } catch {
+      log.warn("auth.rejected", { reason: "invalid_token" });
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }
-    if (!user?.id || !Number.isFinite(Number(user.id))) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    if (!user?.id || !Number.isFinite(Number(user.id))) {
+      log.warn("auth.rejected", { reason: "no_session" });
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
     const userId = Number(user.id);
+    log.bind({ userId });
 
     let body: Partial<Body> = {};
     try { body = await req.json(); } catch {
+      log.warn("request.rejected", { reason: "invalid_json" });
       return NextResponse.json({ success: false, message: "Body JSON invalide" }, { status: 400 });
     }
 
     const reservationId = String(body.reservationId || "");
-    if (!reservationId) return NextResponse.json({ success: false, message: "reservationId manquant" }, { status: 400 });
+    if (!reservationId) {
+      log.warn("request.rejected", { reason: "missing_reservation_id" });
+      return NextResponse.json({ success: false, message: "reservationId manquant" }, { status: 400 });
+    }
+    log.bind({ holdId: reservationId });
 
     const game1Id = body.game1Id === undefined ? undefined : body.game1Id === null ? null : Number(body.game1Id);
     const game2Id = body.game2Id === undefined ? undefined : body.game2Id === null ? null : Number(body.game2Id);
@@ -84,6 +96,15 @@ export async function POST(req: Request) {
     const date = body.date === undefined ? undefined : body.date ?? null;
     const time = body.time === undefined ? undefined : body.time ?? null;
 
+    // Le client ne renvoie que l'étape qu'il vient de modifier : la liste des
+    // champs présents dit à quelle étape du parcours la requête correspond.
+    log.info("request.received", {
+      fields: Object.keys(body).filter((key) => key !== "reservationId"),
+      newConsoleTypeId,
+      date,
+      time,
+    });
+
     try {
       const response = await runWithLockRetry(() => db.transaction(async (tx) => {
         // FOR UPDATE n'est pas supporté par Drizzle MySQL, raw SQL requis ici
@@ -93,7 +114,11 @@ export async function POST(req: Request) {
           )
         );
 
-        if (!rows || rows.length === 0) throw new TxReturn(NextResponse.json({ success: false, message: "Réservation expirée", status: "expired" }, { status: 410 }));
+        if (!rows || rows.length === 0) {
+          // Hold expiré, déjà confirmé, ou appartenant à un autre usager.
+          log.warn("hold.not_found", { reason: "expired_or_foreign" });
+          throw new TxReturn(NextResponse.json({ success: false, message: "Réservation expirée", status: "expired" }, { status: 410 }));
+        }
 
         const hold = rows[0];
         const currentConsoleId = hold.console_id;
@@ -106,6 +131,7 @@ export async function POST(req: Request) {
           } else if (Array.isArray(accessories)) {
             setData.accessoirs = accessories;
           } else {
+            log.warn("request.rejected", { reason: "invalid_accessories" });
             throw new TxReturn(NextResponse.json({ success: false, message: "accessories doit être un tableau ou null" }, { status: 400 }));
           }
         }
@@ -149,9 +175,27 @@ export async function POST(req: Request) {
             });
 
             if (!slot.ok) {
+              // Créneau fermé, passé, ou ressource prise entre-temps : le
+              // message rendu à l'usager est journalisé tel quel, c'est lui
+              // qu'il rapportera au support.
+              log.warn("slot.rejected", {
+                date: effectiveDate,
+                time: effectiveTime,
+                status: slot.status,
+                reason: slot.message,
+              });
               throw new TxReturn(NextResponse.json({ success: false, message: slot.message }, { status: slot.status }));
             }
             setData.stationId = slot.stationId;
+
+            log.info("slot.assigned", {
+              date: effectiveDate,
+              time: effectiveTime,
+              stationId: slot.stationId,
+              consoleStockId: slot.consoleStockId,
+              games: effectiveGames,
+              accessories: effectiveAccessories,
+            });
 
             // Plateforme en plusieurs exemplaires : l'unité retenue au départ
             // peut être prise sur ce créneau alors qu'une autre est libre. Le
@@ -159,6 +203,10 @@ export async function POST(req: Request) {
             // `holding` suivent pour que create-hold ne la propose pas à un
             // autre usager.
             if (slot.consoleStockId !== currentConsoleId) {
+              log.info("hold.unit_reassigned", {
+                fromConsoleStockId: currentConsoleId,
+                toConsoleStockId: slot.consoleStockId,
+              });
               await tx.update(consoleStock).set({ holding: 0 }).where(eq(consoleStock.id, currentConsoleId));
               await tx.update(consoleStock).set({ holding: 1 }).where(eq(consoleStock.id, slot.consoleStockId));
               setData.consoleId = slot.consoleStockId;
@@ -167,6 +215,7 @@ export async function POST(req: Request) {
             // Créneau redevenu incomplet : la station est libérée, elle sera
             // réattribuée quand la date et l'heure seront connues.
             setData.stationId = null;
+            log.info("slot.cleared", { date: effectiveDate, time: effectiveTime });
           }
         }
 
@@ -184,7 +233,13 @@ export async function POST(req: Request) {
             .where(and(eq(consoleStock.consoleTypeId, newConsoleTypeId), eq(consoleStock.isActive, 1), eq(consoleStock.holding, 0)))
             .limit(1);
 
-          if (!unitRows || unitRows.length === 0) throw new TxReturn(NextResponse.json({ success: false, message: "Nouvelle console indisponible" }, { status: 400 }));
+          if (!unitRows || unitRows.length === 0) {
+            log.warn("console.switch_rejected", {
+              reason: "no_unit_available",
+              toConsoleTypeId: newConsoleTypeId,
+            });
+            throw new TxReturn(NextResponse.json({ success: false, message: "Nouvelle console indisponible" }, { status: 400 }));
+          }
           const stockId = Number(unitRows[0].consoleStockId);
 
           await tx.update(consoleStock).set({ holding: 0 }).where(eq(consoleStock.id, currentConsoleId));
@@ -192,6 +247,17 @@ export async function POST(req: Request) {
 
           Object.assign(setData, { consoleId: stockId, consoleTypeId: newConsoleTypeId, game1Id: null, game2Id: null, game3Id: null, accessoirs: null, cours: null, date: null, time: null, stationId: null });
           consoleChanged = true;
+
+          // Changer de plateforme remet le parcours à zéro : jeux, accessoires,
+          // cours et créneau sont effacés. Journalisé pour expliquer les
+          // sélections qui « disparaissent » côté client.
+          log.info("console.switched", {
+            fromConsoleTypeId: currentConsoleTypeId,
+            toConsoleTypeId: newConsoleTypeId,
+            fromConsoleStockId: currentConsoleId,
+            toConsoleStockId: stockId,
+            releasedGames: toFree,
+          });
         }
 
         if (!consoleChanged) {
@@ -200,7 +266,10 @@ export async function POST(req: Request) {
           const desiredGame3 = game3Id === undefined ? hold.game3_id : game3Id;
 
           const desiredList = [desiredGame1, desiredGame2, desiredGame3].filter((x): x is number => x !== null);
-          if (new Set(desiredList).size !== desiredList.length) throw new TxReturn(NextResponse.json({ success: false, message: "Le même jeu ne peut pas être choisi deux fois." }, { status: 400 }));
+          if (new Set(desiredList).size !== desiredList.length) {
+            log.warn("games.rejected", { reason: "duplicate", games: desiredList });
+            throw new TxReturn(NextResponse.json({ success: false, message: "Le même jeu ne peut pas être choisi deux fois." }, { status: 400 }));
+          }
 
           const currentSet = new Set<number>([hold.game1_id, hold.game2_id, hold.game3_id].filter((x): x is number => x !== null));
           const finalSet = new Set<number>(desiredList);
@@ -219,11 +288,17 @@ export async function POST(req: Request) {
             const available = await tx.select({ id: games.id }).from(games).where(and(inArray(games.id, toAdd), eq(games.holding, 0), eq(games.isActive, 1)));
             const okIds = new Set(available.map((r) => Number(r.id)));
             const blocked = toAdd.filter((id) => !okIds.has(id));
-            if (blocked.length > 0) throw new TxReturn(NextResponse.json({ success: false, message: `Jeu(x) indisponible(s): ${blocked.join(", ")}` }, { status: 400 }));
+            if (blocked.length > 0) {
+              log.warn("games.rejected", { reason: "held_or_inactive", games: blocked });
+              throw new TxReturn(NextResponse.json({ success: false, message: `Jeu(x) indisponible(s): ${blocked.join(", ")}` }, { status: 400 }));
+            }
           }
 
           if (toRemove.length > 0) await tx.update(games).set({ holding: 0 }).where(inArray(games.id, toRemove));
           if (toAdd.length > 0) await tx.update(games).set({ holding: 1 }).where(inArray(games.id, toAdd));
+          if (toAdd.length > 0 || toRemove.length > 0) {
+            log.info("games.updated", { added: toAdd, removed: toRemove });
+          }
 
           if (game1Id !== undefined) setData.game1Id = desiredGame1;
           if (game2Id !== undefined) setData.game2Id = desiredGame2;
@@ -249,16 +324,28 @@ export async function POST(req: Request) {
         }).from(reservationHold)
           .where(and(eq(reservationHold.id, reservationId), eq(reservationHold.userId, userId)));
 
-        if (!updated) throw new TxReturn(NextResponse.json({ success: false, message: "Réservation introuvable après mise à jour" }, { status: 500 }));
+        if (!updated) {
+          log.error("hold.missing_after_update");
+          throw new TxReturn(NextResponse.json({ success: false, message: "Réservation introuvable après mise à jour" }, { status: 500 }));
+        }
 
         let accessoriesArray: number[] = [];
         if (updated.accessoirs) {
           try {
             accessoriesArray = Array.isArray(updated.accessoirs) ? (updated.accessoirs as number[]) : JSON.parse(updated.accessoirs as string);
-          } catch {
+          } catch (e) {
+            log.error("hold.accessories_unreadable", e);
             throw new TxReturn(NextResponse.json({ success: false, message: "Erreur lors de la récupération des accessoires" }, { status: 500 }));
           }
         }
+
+        log.info("hold.updated", {
+          changed: Object.keys(setData),
+          consoleStockId: Number(updated.consoleId),
+          consoleTypeId: Number(updated.consoleTypeId),
+          expiresIn: Number(updated.expiresIn),
+          ms: log.elapsedMs(),
+        });
 
         return NextResponse.json({
           success: true,
@@ -282,9 +369,12 @@ export async function POST(req: Request) {
     }
   } catch (err) {
     if (isLockContentionError(err)) {
+      // Les tentatives de `runWithLockRetry` sont épuisées : deux usagers se
+      // disputent réellement le même créneau.
+      log.warn("lock.contention", { ms: log.elapsedMs() });
       return NextResponse.json({ success: false, message: "Ce créneau vient d'être demandé par quelqu'un d'autre. Veuillez réessayer." }, { status: 409 });
     }
-    console.error("update-hold-reservation error:", err);
+    log.error("request.failed", err, { ms: log.elapsedMs() });
     return NextResponse.json({ success: false, message: err instanceof Error ? err.message : "Erreur lors de la mise à jour du hold" }, { status: 500 });
   }
 }
