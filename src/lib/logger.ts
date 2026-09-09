@@ -45,14 +45,33 @@ export function maskEmail(value: unknown): string {
 }
 
 /**
- * Une valeur en `clé=valeur`. Les chaînes contenant un espace ou un `=` sont
- * mises entre guillemets, sinon la ligne ne se relit plus champ par champ.
+ * Une valeur en `clé=valeur`, sans jamais lever.
+ *
+ * Un log décrit une requête, il ne doit pas la faire échouer : `JSON.stringify`
+ * lève sur un BigInt ou une référence circulaire, et `String()` sur un objet
+ * dont `toString` lève. Une valeur informattable devient un marqueur plutôt
+ * qu'une erreur 500, et les autres champs de la ligne restent lisibles.
  */
 function formatValue(value: unknown): string {
+  try {
+    const formatted = formatKnownValue(value);
+    return formatted === undefined ? UNSERIALIZABLE : formatted;
+  } catch {
+    return UNSERIALIZABLE;
+  }
+}
+
+/** Déjà entre guillemets : reste un seul champ dans la ligne. */
+const UNSERIALIZABLE = '"<non sérialisable>"';
+
+/** Le formatage proprement dit, appelé sous la protection de `formatValue`. */
+function formatKnownValue(value: unknown): string | undefined {
   if (value === null) return "null";
   if (typeof value === "number" || typeof value === "boolean") return String(value);
   if (Array.isArray(value)) return `[${value.map((v) => formatValue(v)).join(",")}]`;
   if (value instanceof Error) return JSON.stringify(value.message);
+  // `JSON.stringify` rend `undefined` pour une fonction ou un symbole :
+  // `formatValue` le convertit alors en marqueur.
   if (typeof value === "object") return JSON.stringify(value);
   const str = String(value);
   return /[\s="]/.test(str) || str === "" ? JSON.stringify(str) : str;

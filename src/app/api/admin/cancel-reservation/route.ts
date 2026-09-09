@@ -53,11 +53,17 @@ export const PATCH = withAdmin(async (req, admin) => {
       .where(and(eq(reservation.id, id), eq(reservation.archived, 0)));
 
     // Une annulation vient d'un humain et prive un usager de son créneau :
-    // qui, quand et pourquoi doit rester lisible dans les logs.
+    // qui et quand doit rester lisible dans les logs.
+    //
+    // La raison, elle, est une saisie libre pouvant nommer des personnes ou
+    // décrire un cas : elle reste en base (`reservation.cancellation_reason`),
+    // consultable à partir du `reservationId` ci-dessous, plutôt que déversée
+    // dans les logs du conteneur. Seule sa longueur est journalisée, pour
+    // distinguer une explication d'un texte bâclé.
     log.info("reservation.cancelled", {
       date: String(existing.date),
       time: String(existing.time).slice(0, 5),
-      reason: trimmedReason,
+      reasonLength: trimmedReason.length,
     });
 
     // Courriel d'annulation : un échec d'envoi ne doit pas faire échouer

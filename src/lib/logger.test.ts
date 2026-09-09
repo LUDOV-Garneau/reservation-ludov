@@ -154,6 +154,37 @@ describe("createLogger — les erreurs", () => {
   });
 });
 
+describe("createLogger — une valeur informattable ne casse pas la requête", () => {
+  // Un log ne doit jamais faire échouer ce qu'il décrit : ces valeurs faisaient
+  // lever `JSON.stringify` ou `String()`, donc remonter une 500 depuis un
+  // simple appel au logger.
+  it("survit à une référence circulaire", () => {
+    const circulaire: Record<string, unknown> = { id: 1 };
+    circulaire.self = circulaire;
+    expect(() => createLogger("s").info("event", { circulaire })).not.toThrow();
+    expect(String(spies.log.mock.calls[0][0])).toContain('circulaire="<non sérialisable>"');
+  });
+
+  it("survit à un BigInt imbriqué", () => {
+    expect(() => createLogger("s").info("event", { row: { total: BigInt(10) } })).not.toThrow();
+    expect(String(spies.log.mock.calls[0][0])).toContain('row="<non sérialisable>"');
+  });
+
+  it("survit à un objet dont toString lève", () => {
+    const piege = { toString() { throw new Error("boom"); } };
+    expect(() => createLogger("s").info("event", { piege })).not.toThrow();
+  });
+
+  it("garde lisibles les autres champs de la même ligne", () => {
+    const circulaire: Record<string, unknown> = {};
+    circulaire.self = circulaire;
+    createLogger("s").info("hold.created", { holdId: "HOLD-1", circulaire, ms: 12 });
+    const ligne = String(spies.log.mock.calls[0][0]);
+    expect(ligne).toContain("holdId=HOLD-1");
+    expect(ligne).toContain("ms=12");
+  });
+});
+
 describe("maskEmail", () => {
   it("garde l'initiale et le domaine, cache le reste", () => {
     expect(maskEmail("prenom.nom@cegepgarneau.ca")).toBe("p***@cegepgarneau.ca");
