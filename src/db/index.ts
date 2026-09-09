@@ -48,6 +48,19 @@ export function executeRows<T>(result: unknown): T[] {
 }
 
 /**
+ * Nombre de lignes touchées par un `UPDATE`/`DELETE`.
+ *
+ * Même piège que `executeRows` : la réponse du pilote est
+ * `[ResultSetHeader, champs]`, le compteur vit dans l'en-tête. Utile pour
+ * journaliser ce qu'une requête a réellement modifié.
+ */
+export function affectedRows(result: unknown): number {
+  if (!Array.isArray(result)) return 0;
+  const [header] = result as [{ affectedRows?: number }, unknown];
+  return Number(header?.affectedRows ?? 0);
+}
+
+/**
  * Identifiant auto-incrémenté d'un `INSERT`.
  *
  * `$returningId()` renvoie un tableau vide quand la clé primaire est déclarée

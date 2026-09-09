@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/jwt";
-import db, { executeRows } from "@/db";
+import db, { affectedRows, executeRows } from "@/db";
 import { reservationHold, consoleStock, games } from "@/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import crypto from "crypto";
+import { createLogger } from "@/lib/logger";
 
 type Body = { consoleTypeId: number; minutes?: number };
 
@@ -13,6 +14,7 @@ class TxReturn extends Error {
 }
 
 export async function POST(req: Request) {
+  const log = createLogger("RESERVATION:create-hold");
   try {
     const cookieStore = await cookies();
     const sessionCookie = cookieStore.get("SESSION");
@@ -21,23 +23,35 @@ export async function POST(req: Request) {
       const token = sessionCookie?.value;
       if (token) user = verifyToken(token);
     } catch {
+      log.warn("auth.rejected", { reason: "invalid_token" });
       return NextResponse.json({ success: false, message: "Invalid or expired token" }, { status: 401 });
     }
-    if (!user?.id) return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    if (!user?.id) {
+      log.warn("auth.rejected", { reason: "no_session" });
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
 
     let body: Partial<Body> = {};
     try { body = await req.json(); } catch {
+      log.warn("request.rejected", { reason: "invalid_json" });
       return NextResponse.json({ success: false, message: "Body JSON invalide" }, { status: 400 });
     }
 
     const userId = Number(user.id);
-    if (!Number.isFinite(userId)) return NextResponse.json({ success: false, message: "Invalid user ID" }, { status: 400 });
+    if (!Number.isFinite(userId)) {
+      log.warn("request.rejected", { reason: "invalid_user_id" });
+      return NextResponse.json({ success: false, message: "Invalid user ID" }, { status: 400 });
+    }
+    log.bind({ userId });
 
     const consoleTypeId = Number(body.consoleTypeId);
     const minutes = Math.max(1, Number(body.minutes ?? 15));
     if (!Number.isFinite(consoleTypeId) || consoleTypeId <= 0) {
+      log.warn("request.rejected", { reason: "invalid_console_type_id" });
       return NextResponse.json({ success: false, message: "consoleTypeId requis" }, { status: 400 });
     }
+
+    log.info("request.received", { consoleTypeId, minutes });
 
     try {
       const response = await db.transaction(async (tx) => {
@@ -50,7 +64,10 @@ export async function POST(req: Request) {
         await tx.execute(
           sql`UPDATE games g JOIN reservation_hold h ON g.id IN (h.game1_id, h.game2_id, h.game3_id) SET g.holding = 0 WHERE h.expireAt <= NOW()`
         );
-        await tx.delete(reservationHold).where(sql`${reservationHold.expireAt} <= NOW()`);
+        const purged = affectedRows(
+          await tx.delete(reservationHold).where(sql`${reservationHold.expireAt} <= NOW()`)
+        );
+        if (purged > 0) log.info("holds.purged", { count: purged });
 
         const existing = await tx.select({
           holdId: reservationHold.id,
@@ -69,6 +86,12 @@ export async function POST(req: Request) {
           const hold = existing[0];
 
           if (Number(hold.consoleTypeId) === consoleTypeId) {
+            log.info("hold.reused", {
+              holdId: hold.holdId,
+              consoleStockId: hold.consoleStockId,
+              consoleTypeId,
+              expiresIn: Number(hold.expiresIn),
+            });
             return NextResponse.json({
               success: true,
               reservationId: hold.holdId,
@@ -99,6 +122,11 @@ export async function POST(req: Request) {
           );
 
           if (switchUnits.length === 0) {
+            log.warn("hold.switch_rejected", {
+              reason: "no_unit_available",
+              holdId: hold.holdId,
+              consoleTypeId,
+            });
             throw new TxReturn(NextResponse.json({ success: false, message: "Aucune unité disponible pour ce type." }, { status: 409 }));
           }
 
@@ -120,6 +148,16 @@ export async function POST(req: Request) {
             stationId: null,
           }).where(eq(reservationHold.id, hold.holdId));
 
+          log.info("hold.switched", {
+            holdId: hold.holdId,
+            fromConsoleTypeId: Number(hold.consoleTypeId),
+            toConsoleTypeId: consoleTypeId,
+            fromConsoleStockId: hold.consoleStockId,
+            toConsoleStockId: switchedStockId,
+            releasedGames: heldGames,
+            ms: log.elapsedMs(),
+          });
+
           return NextResponse.json({
             success: true,
             reservationId: hold.holdId,
@@ -139,6 +177,7 @@ export async function POST(req: Request) {
         );
 
         if (units.length === 0) {
+          log.warn("hold.rejected", { reason: "no_unit_available", consoleTypeId });
           throw new TxReturn(NextResponse.json({ success: false, message: "Aucune unité disponible pour ce type." }, { status: 409 }));
         }
 
@@ -163,6 +202,14 @@ export async function POST(req: Request) {
 
         await tx.update(consoleStock).set({ holding: 1 }).where(eq(consoleStock.id, consoleStockId));
 
+        log.info("hold.created", {
+          holdId: reservationId,
+          consoleStockId,
+          consoleTypeId,
+          minutes,
+          ms: log.elapsedMs(),
+        });
+
         return NextResponse.json({
           success: true,
           reservationId,
@@ -180,7 +227,7 @@ export async function POST(req: Request) {
       throw e;
     }
   } catch (err) {
-    console.error("create-hold-reservation error:", err);
+    log.error("request.failed", err, { ms: log.elapsedMs() });
     return NextResponse.json({ success: false, message: err instanceof Error ? err.message : "Erreur lors de la création du hold" }, { status: 500 });
   }
 }
