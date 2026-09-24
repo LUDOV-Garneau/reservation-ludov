@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { isFutureSlot } from "@/lib/dates";
+import { toLocalYmd } from "@/lib/dates";
 
 export type ReservationStatus = "upcoming" | "past" | "cancelled";
 
@@ -14,7 +14,9 @@ export function reservationStatusOf(
 ): ReservationStatus {
   if (archived) return "cancelled";
   if (!date || !heure) return "past";
-  return isFutureSlot(date, heure) ? "upcoming" : "past";
+  // Même frontière que l'API (le jour, pas la minute) : le badge doit
+  // concorder avec le filtre « À venir ».
+  return date >= toLocalYmd(new Date()) ? "upcoming" : "past";
 }
 
 /**
