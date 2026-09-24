@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import type { AlertType } from "@/hooks/useAlert";
 import type { ReservationsFiltersState } from "@/hooks/useReservationsFilters";
+import type { ReservationStatus } from "@/lib/reservationsQuery";
 
 export type Reservation = {
   id: string;
@@ -15,6 +16,7 @@ export type Reservation = {
   heure: string;
   userNom: string | null;
   archived: boolean;
+  status: ReservationStatus;
 };
 
 export type ReservationMetrics = {
@@ -94,6 +96,7 @@ export function useReservations(
             heure: r.heure ?? "",
             userNom: r.userNom ?? null,
             archived: Boolean(r.archived),
+            status: r.status,
           })),
         );
 
@@ -123,7 +126,7 @@ export function useReservations(
 
   const markCancelled = useCallback((id: string) => {
     setReservations((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, archived: true } : r)),
+      prev.map((r) => (r.id === id ? { ...r, archived: true, status: "cancelled" } : r)),
     );
   }, []);
 

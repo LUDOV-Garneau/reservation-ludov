@@ -16,6 +16,7 @@ import {
   parseReservationsQuery,
   splitLocalNow,
   type ReservationsQuery,
+  type ReservationStatus,
 } from "@/lib/reservationsQuery";
 
 export const GET = withAdmin(async (req) => {
@@ -29,13 +30,16 @@ export const GET = withAdmin(async (req) => {
 
     // "Maintenant" fourni par l'application (fuseau applicatif), plutôt que
     // CURDATE()/CURTIME() qui dépendent du fuseau du serveur MySQL.
-    const { today, nowTime } = splitLocalNow();
+    const { today } = splitLocalNow();
 
     // Instant du créneau et frontière passé/futur, réutilisés par le filtre de
-    // statut, les tris et les statistiques.
+    // statut, les tris et les statistiques. La frontière est le JOUR et non la
+    // minute : une réservation du jour reste « à venir » jusqu'à minuit. À la
+    // minute près, les créneaux du matin basculaient dans les passées en cours
+    // de journée — ils disparaissaient du filtre « À venir » et la journée se
+    // retrouvait coupée en deux, moitié en tête de liste, moitié à la fin.
     const slotAt = sql`TIMESTAMP(${reservation.date}, ${reservation.time})`;
-    const nowAt = sql`TIMESTAMP(${today}, ${nowTime})`;
-    const isPast = sql`(${slotAt} < ${nowAt})`;
+    const isPast = sql`(${reservation.date} < ${today})`;
 
     // Recherche côté serveur (usager, plateforme, station, sigle de cours,
     // jeu, id, date) : elle couvre toutes les pages, pas seulement la page
@@ -85,6 +89,10 @@ export const GET = withAdmin(async (req) => {
           time: sql<string>`TIME_FORMAT(${reservation.time}, '%H:%i')`,
           userId: reservation.userId,
           archived: reservation.archived,
+          // Statut classé ici, avec la même frontière que le filtre : recalculé
+          // dans le navigateur, il suivrait le fuseau de l'admin et pourrait
+          // contredire le filtre autour de minuit.
+          status: sql<ReservationStatus>`CASE WHEN ${reservation.archived} = 1 THEN 'cancelled' WHEN ${isPast} THEN 'past' ELSE 'upcoming' END`,
           prenom: users.firstname,
           nom: users.lastname,
         })
@@ -160,6 +168,7 @@ export const GET = withAdmin(async (req) => {
         heure: row.time ?? "",
         userNom: `${row.prenom ?? ""} ${row.nom ?? ""}`.trim(),
         archived: Boolean(row.archived),
+        status: row.status,
       };
     });
 
@@ -195,8 +204,9 @@ function buildStatusClause(
 }
 
 /**
- * Tri par défaut « schedule » : le prochain créneau en tête, puis les créneaux
- * écoulés du plus récent au plus ancien — l'ordre dans lequel l'équipe lit la
+ * Tri par défaut « schedule » : les créneaux du jour et à venir en tête, dans
+ * l'ordre chronologique, puis les jours écoulés du plus récent au plus ancien
+ * (heures croissantes dans chaque jour) — l'ordre dans lequel l'équipe lit la
  * liste. Les autres clés retombent sur cet ordre comme départage.
  */
 function buildOrderBy(
@@ -211,7 +221,10 @@ function buildOrderBy(
   const schedule: SQL[] = [
     sql`${isPast} ${dir(true)}`,
     sql`CASE WHEN NOT ${isPast} THEN ${slotAt} END ${dir(true)}`,
-    sql`CASE WHEN ${isPast} THEN ${slotAt} END ${dir(false)}`,
+    // Jours passés du plus récent au plus ancien, mais chaque journée se lit
+    // dans l'ordre des heures, comme les journées à venir.
+    sql`CASE WHEN ${isPast} THEN ${reservation.date} END ${dir(false)}`,
+    sql`CASE WHEN ${isPast} THEN ${reservation.time} END ${dir(true)}`,
   ];
 
   if (query.sort === "schedule") return schedule;
