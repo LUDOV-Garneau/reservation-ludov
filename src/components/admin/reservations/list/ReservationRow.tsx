@@ -89,9 +89,7 @@ export default function ReservationRow({
 
       <TableCell className="text-center">
         <ReservationStatusBadge
-          date={reservation.date}
-          heure={reservation.heure}
-          archived={reservation.archived}
+          status={reservation.status}
           showLabelOnMobile
         />
       </TableCell>

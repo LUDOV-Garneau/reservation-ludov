@@ -18,6 +18,8 @@ export type ReservationStatusFilter =
   | "upcoming"
   | "past"
   | "cancelled";
+/** Statut d'une réservation, classé par l'API (voir le filtre de statut). */
+export type ReservationStatus = Exclude<ReservationStatusFilter, "all">;
 export type ReservationsSort = "schedule" | "user" | "console" | "status";
 export type SortDirection = "asc" | "desc";
 

@@ -16,6 +16,7 @@ import {
   parseReservationsQuery,
   splitLocalNow,
   type ReservationsQuery,
+  type ReservationStatus,
 } from "@/lib/reservationsQuery";
 
 export const GET = withAdmin(async (req) => {
@@ -88,6 +89,10 @@ export const GET = withAdmin(async (req) => {
           time: sql<string>`TIME_FORMAT(${reservation.time}, '%H:%i')`,
           userId: reservation.userId,
           archived: reservation.archived,
+          // Statut classé ici, avec la même frontière que le filtre : recalculé
+          // dans le navigateur, il suivrait le fuseau de l'admin et pourrait
+          // contredire le filtre autour de minuit.
+          status: sql<ReservationStatus>`CASE WHEN ${reservation.archived} = 1 THEN 'cancelled' WHEN ${isPast} THEN 'past' ELSE 'upcoming' END`,
           prenom: users.firstname,
           nom: users.lastname,
         })
@@ -163,6 +168,7 @@ export const GET = withAdmin(async (req) => {
         heure: row.time ?? "",
         userNom: `${row.prenom ?? ""} ${row.nom ?? ""}`.trim(),
         archived: Boolean(row.archived),
+        status: row.status,
       };
     });
 

@@ -39,9 +39,7 @@ export default function ReservationCard({
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <ReservationStatusBadge
-              date={reservation.date}
-              heure={reservation.heure}
-              archived={reservation.archived}
+              status={reservation.status}
               showLabelOnMobile
             />
             <ReservationActions

@@ -3,21 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { toLocalYmd } from "@/lib/dates";
-
-export type ReservationStatus = "upcoming" | "past" | "cancelled";
-
-export function reservationStatusOf(
-  date: string,
-  heure: string,
-  archived: boolean,
-): ReservationStatus {
-  if (archived) return "cancelled";
-  if (!date || !heure) return "past";
-  // Même frontière que l'API (le jour, pas la minute) : le badge doit
-  // concorder avec le filtre « À venir ».
-  return date >= toLocalYmd(new Date()) ? "upcoming" : "past";
-}
+import type { ReservationStatus } from "@/lib/reservationsQuery";
 
 /**
  * Les trois statuts, en paires teinte-claire / teinte-sombre : le fond plein
@@ -38,19 +24,18 @@ const ICONS = {
   cancelled: XCircle,
 } as const;
 
+/**
+ * Le statut vient de l'API, qui le classe avec la même frontière que le
+ * filtre : le recalculer ici suivrait le fuseau du navigateur de l'admin.
+ */
 export default function ReservationStatusBadge({
-  date,
-  heure,
-  archived,
+  status,
   showLabelOnMobile = false,
 }: {
-  date: string;
-  heure: string;
-  archived: boolean;
+  status: ReservationStatus;
   showLabelOnMobile?: boolean;
 }) {
   const t = useTranslations("admin.reservations.status");
-  const status = reservationStatusOf(date, heure, archived);
   const Icon = ICONS[status];
 
   return (
