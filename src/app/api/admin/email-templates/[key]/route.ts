@@ -3,6 +3,7 @@ import db from "@/db";
 import { emailTemplates } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
+import { toLocalDatetime } from "@/lib/dates";
 import {
   clearTemplateCache,
   findUnknownVariables,
@@ -74,7 +75,10 @@ export const PUT = withAdmin<{ key: string }>(async (req, admin, params) => {
       );
     }
 
-    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    // Heure locale : `toISOString()` ecrivait de l'UTC dans une colonne
+    // `datetime` relue en heure locale partout ailleurs — quatre a cinq heures
+    // d'ecart sur la date de derniere modification.
+    const now = toLocalDatetime();
     const existing = await db.query.emailTemplates.findFirst({
       columns: { templateKey: true },
       where: and(
@@ -106,7 +110,13 @@ export const PUT = withAdmin<{ key: string }>(async (req, admin, params) => {
 
     clearTemplateCache();
 
-    return NextResponse.json({ success: true });
+    // Renvoyes pour que l'interface affiche « modifie le … par … » sans
+    // avoir a recharger toute la liste des gabarits.
+    return NextResponse.json({
+      success: true,
+      updatedAt: now,
+      updatedBy: admin.name || null,
+    });
   } catch (error) {
     console.error("Erreur sauvegarde gabarit courriel:", error);
     return NextResponse.json(

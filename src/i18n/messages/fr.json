@@ -1257,7 +1257,29 @@
         "testSuccess": "Courriel de test envoyé à {email}.",
         "testError": "Erreur lors de l'envoi du courriel de test.",
         "successTitle": "Succès",
-        "errorTitle": "Erreur"
+        "errorTitle": "Erreur",
+        "unknownVariables": "Variable(s) inconnue(s) : {variables}. Corrigez avant d'enregistrer."
+      },
+      "unsaved": "Modifications non enregistrées",
+      "reset": "Annuler mes modifications",
+      "insertVariable": "Insérer {variable} à la position du curseur",
+      "usingDefault": "Ce gabarit n'a jamais été modifié : c'est le texte par défaut qui est envoyé.",
+      "customized": "Ce gabarit a été personnalisé.",
+      "updatedAtBy": "Modifié le {date} par {author}.",
+      "unknownAuthor": "un administrateur",
+      "preview": {
+        "title": "Aperçu",
+        "sampleHint": "Valeurs d'exemple.",
+        "noSubject": "(objet vide)",
+        "emptyZone": "(zone vide)",
+        "unknown": "Variable(s) inconnue(s) pour ce gabarit : {variables}. L'enregistrement sera refusé.",
+        "unused": "Variable(s) disponible(s) mais jamais utilisée(s) : {variables}."
+      },
+      "discard": {
+        "title": "Abandonner les modifications ?",
+        "description": "Ce gabarit porte des modifications non enregistrées. Changer de gabarit ou de langue les perdra.",
+        "cancel": "Rester ici",
+        "confirm": "Abandonner"
       }
     },
     "pagination": {
