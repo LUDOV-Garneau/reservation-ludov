@@ -33,6 +33,8 @@ describe("isSessionCurrent", () => {
   });
 
   afterEach(() => {
+    // Vitest 4 : restoreAllMocks ne remet plus à zéro les vi.fn(), seulement les spyOn.
+    vi.resetAllMocks();
     vi.restoreAllMocks();
   });
 
@@ -82,6 +84,8 @@ describe("readSession", () => {
   });
 
   afterEach(() => {
+    // Vitest 4 : restoreAllMocks ne remet plus à zéro les vi.fn(), seulement les spyOn.
+    vi.resetAllMocks();
     vi.restoreAllMocks();
   });
 

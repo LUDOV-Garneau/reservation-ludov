@@ -83,6 +83,8 @@ describe("API POST /auth/forgot-password", () => {
   });
 
   afterEach(() => {
+    // Vitest 4 : restoreAllMocks ne remet plus à zéro les vi.fn(), seulement les spyOn.
+    vi.resetAllMocks();
     vi.restoreAllMocks();
   });
 
