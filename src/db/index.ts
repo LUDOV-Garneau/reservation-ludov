@@ -26,7 +26,7 @@ const pool =
   });
 
 // Le cache est également nécessaire en production : Next.js bundle le
-// middleware séparément des routes, et sans lui ce second bundle ouvrirait son
+// proxy séparément des routes, et sans lui ce second bundle ouvrirait son
 // propre pool de 10 connexions pour la vérification de session.
 globalForDb.ludovPool = pool;
 

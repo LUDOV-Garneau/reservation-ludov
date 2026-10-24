@@ -5,7 +5,7 @@ import { readSession } from "./lib/session";
 
 const i18nMiddleware = createMiddleware(routing);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const pathWithoutLocale = pathname.replace(/^\/(fr|en)(?=\/|$)/, "");
@@ -16,8 +16,8 @@ export async function middleware(request: NextRequest) {
 
   // `readSession` relit `users.session_version` : une signature valide ne
   // suffit pas, un mot de passe réinitialisé doit fermer les sessions ouvertes
-  // ailleurs. Le middleware tourne en runtime Node (voir `config`) et partage
-  // le pool de connexions du reste de l'application.
+  // ailleurs. Le proxy tourne toujours en runtime Node et partage le pool de
+  // connexions du reste de l'application.
   const token = request.cookies.get("SESSION")?.value;
   const session = await readSession(token);
 
@@ -43,5 +43,4 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: ["/((?!api|_next|.*\\..*|favicon.ico|robots.txt|images).*)"],
-  runtime: "nodejs",
 };
