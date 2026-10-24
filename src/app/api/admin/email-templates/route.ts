@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
+import { emailTemplates, users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { withAdmin } from "@/lib/withAuth";
 import {
   DEFAULT_TEMPLATES,
@@ -15,7 +17,21 @@ import {
  */
 export const GET = withAdmin(async () => {
   try {
-    const rows = await db.query.emailTemplates.findMany();
+    // Jointure sur `users` : `updated_by` ne stocke qu'un identifiant, et
+    // « modifie par 7 » ne dit rien a personne.
+    const rows = await db
+      .select({
+        templateKey: emailTemplates.templateKey,
+        locale: emailTemplates.locale,
+        subject: emailTemplates.subject,
+        zones: emailTemplates.zones,
+        updatedAt: emailTemplates.updatedAt,
+        updatedByFirstname: users.firstname,
+        updatedByLastname: users.lastname,
+      })
+      .from(emailTemplates)
+      .leftJoin(users, eq(emailTemplates.updatedBy, users.id));
+
     const byKey = new Map(
       rows.map((r) => [`${r.templateKey}:${r.locale}`, r] as const),
     );
@@ -27,11 +43,22 @@ export const GET = withAdmin(async () => {
       content: Object.fromEntries(
         EMAIL_LOCALES.map((locale) => {
           const row = byKey.get(`${key}:${locale}`);
+          if (!row) {
+            // Aucune ligne en base : c'est le texte embarque qui part, et
+            // l'interface doit pouvoir le dire.
+            return [locale, { ...DEFAULT_TEMPLATES[key][locale], customized: false }];
+          }
           return [
             locale,
-            row
-              ? { subject: row.subject, zones: row.zones }
-              : DEFAULT_TEMPLATES[key][locale],
+            {
+              subject: row.subject,
+              zones: row.zones,
+              customized: true,
+              updatedAt: row.updatedAt ?? null,
+              updatedBy:
+                `${row.updatedByFirstname ?? ""} ${row.updatedByLastname ?? ""}`.trim() ||
+                null,
+            },
           ];
         }),
       ),
